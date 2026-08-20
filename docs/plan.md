@@ -46,7 +46,6 @@ Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘li
    ├── Bot: "Pasportingiz rasmini yuboring" ➡️ O'quvchi rasm tashlaydi (Encrypted)
    ├── Bot: "3x4 rasmingizni yuboring" ➡️ O'quvchi rasm tashlaydi
    └── Bot: "Tug'ilgan sana va manzilingizni kiriting" ➡️ O'quvchi yozadi.
-   (Ixtiyoriy: Sinov/Ochiq darsga qatnashganlar 'trial_lesson' bosqichiga o'tadi)
 
 2. RECEPTION GA BILDIRISHNOMA & 1-KLIK BILAN SHARTNOMA
    └── Reception panelida barcha rasmlar va ma'lumotlar avtomat tayyor bo'ladi. 
@@ -228,8 +227,8 @@ graph TD
     subgraph STEP2 ["2️⃣ 2-BOSQICH: Bot Chatida Ketma-ket Qabul Anketasi (Chat Wizard & CRM)"]
         direction TB
         S2["O'quvchi bot chatida: Ism, Tel, Toifa, Filial, Vaqt, Pasport rasmi (Encrypted) va 3x4 rasm yuboradi"]
-        S2 --> S2_1["Sinov darsiga qatnashganlar 'trial_lesson' bosqichida belgilanadi"]
-        S2_1 --> S2_2["Reception 1-klik bilan Student va Contract ochadi va guruhga biriktiradi"]
+        S2 --> S2_1["Reception bot arizasini ko'rib, 1-klik bilan Student va Contract ochadi"]
+        S2_1 --> S2_2["O'quvchi o'quv guruhiga biriktiriladi (Groups)"]
     end
 
     subgraph STEP3 ["3️⃣ 3-BOSQICH: To'lovlarni Qabul Qilish (Kassir & Shartnomaga To'lov)"]
@@ -311,7 +310,7 @@ graph TD
    - `activity_log` (Spatie Activitylog migratsiyasi).
 2. **`leads` (Bot Chatida Ketma-ket Anketa va Hujjatlar yuklash):**
    - `passport_series`, `passport_number`, `pinfl`, `passport_photo_url`, `medical_certificate_photo_url` — modelda `encrypted` cast.
-   - `stage`: `trial_lesson` (ochiq/sinov darslari uchun).
+   - `stage`: `new_lead`, `form_sent`, `form_completed`, `contract_signed`, `rejected`.
 3. **`students`, `contracts` va `certificates`:**
    - `students`: `pinfl` unique, `(passport_series, passport_number)` unique composite index, `encrypted` cast.
    - `contracts`: `overpaid_amount`, `debt_amount` (CHECK `debt_amount >= 0`).
@@ -336,7 +335,7 @@ graph TD
 - `TelegramService.php`: Bot chat wizard va QR davomat tekshiruvi.
 
 #### 1.3. Frontend (Inertia + React + Tailwind)
-- `Leads/Index.tsx`: CRM Kanban (sinov darslari `trial_lesson` bosqichi bilan).
+- `Leads/Index.tsx`: CRM Kanban doskasi va Bot arizalarini 1-klikda talabaga aylantirish.
 - `Students/Index.tsx`, `Contracts/Index.tsx`, `Certificates/Index.tsx`.
 - `Payments/Index.tsx`, `Expenses/Index.tsx`, `Salaries/Index.tsx`, `Payments/CashRegisterShow.tsx`.
 - `Attendance/LiveSession.tsx` & `Attendance/Index.tsx`.

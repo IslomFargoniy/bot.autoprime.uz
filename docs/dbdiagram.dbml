@@ -80,7 +80,6 @@ Enum lead_stage_enum {
   new_lead
   form_sent
   form_completed
-  trial_lesson
   contract_signed
   rejected
 }
@@ -655,7 +654,7 @@ Table leads {
   passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi — Model darajasida encrypted cast bilan shifrlanishi shart']
   medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
   source lead_source_enum [default: 'telegram_bot']
-  stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, trial_lesson (Sinov darsi / Bepul ochiq darsga qatnashgan potensial o\'quvchilar bosqichi — marketing konversiyasini oshirish uchun), contract_signed, rejected']
+  stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, contract_signed, rejected']
   notes text [null]
   lost_reason text [null]
   created_at timestamp
