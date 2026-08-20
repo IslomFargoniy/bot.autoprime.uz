@@ -159,58 +159,84 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bu
 
 ```mermaid
 graph TD
-    %% --- 1-QAVAT: ROLLAR VA QABUL ---
-    subgraph sub1 ["🔐 1. Spatie RBAC va Foydalanuvchilar"]
-        U["Users (Barcha xodimlar)"] --> R["7 ta Asosiy Rol (Multi-Role)"]
-        R --> P["Permissions Matritsasi (Sidebar & Actions)"]
+    subgraph STEP1 ["1️⃣ 1-BOSQICH: Rollar va Foydalanuvchilar (Spatie RBAC)"]
+        direction TB
+        S1["Xodimlar: Superadmin, Admin, Accountant, Kassir, Reception, Teacher, Instructor"]
+        S1 --> S1_1["Multi-Role: Bitta xodim bir vaqtda Teacher + Instructor bo'la oladi"]
+        S1_1 --> S1_2["Sidebar va Action ruxsatlari (Permissions Matrix) taqsimlanadi"]
     end
 
-    subgraph sub2 ["🎓 2. Qabul va Shartnomalar (Reception)"]
-        R1_REC["Reception: O'quvchi kiritish"] --> R2_CON["Shartnoma tuzish (Narx, Chegirma)"]
-        R2_CON --> R3_GRP["Guruhga biriktirish"]
+    subgraph STEP2 ["2️⃣ 2-BOSQICH: O'quvchini Ro'yxatga Olish va Shartnoma (Reception)"]
+        direction TB
+        S2["Reception o'quvchi anketasini kiritadi (Students)"]
+        S2 --> S2_1["Shartnoma ochiladi: Narx, Chegirma, Qoldiq qarz belgilanadi (Contracts)"]
+        S2_1 --> S2_2["O'quvchi o'quv guruhiga biriktiriladi (Groups)"]
     end
 
-    %% --- 2-QAVAT: MOLIYA VA DAVOMAT ---
-    subgraph sub3 ["💳 3. Kassalar, Xarajatlar va Oyliklar (ERP)"]
-        KT["Kassa Turlari: Naqd, Karta"] --> K1["Filial Kassalari"]
-        K1 --> K2["Kirim: To'lovlar"]
-        K1 --> K3["Chiqim: Xarajatlar (Ijara, Reklama)"]
-        K1 --> K4["Chiqim: Xodimlar Oyligi"]
-        K2 & K3 & K4 -->|"Non-negative check"| K5["kassa.balance >= 0"]
-        K2 -.->|"UNION"| ST["Talaba Tarixi: Qoldiq Qarz"]
-        K1 -.->|"UNION"| KTAR["Kassa Tarixi: Kassa Qoldig'i"]
-        K4 -.->|"UNION"| XT["Xodim Tarixi: Qoldiq Oylik"]
-        K5 --> K6["Kassa Smenasini Yopish"]
-        K6 --> K7["Type bo'yicha Transfer: Admin Kassaga"]
+    subgraph STEP3 ["3️⃣ 3-BOSQICH: To'lovlarni Qabul Qilish (Kassir)"]
+        direction TB
+        S3["O'quvchi to'lov qiladi (Naqd yoki Karta orqali)"]
+        S3 --> S3_1["Kassir to'lovni qabul qiladi (Payments)"]
+        S3_1 --> S3_2["Shartnoma qarzi kamayadi va Kassa balansi oshadi (balance >= 0)"]
     end
 
-    subgraph sub4 ["📱 4. Darslar, QR Davomat va Haydash"]
-        T1["Teacher: Nazariy dars ochish"] --> T2["Ekranda Dinamik QR Token"]
-        T2 --> T3["O'quvchi Telegram orqali Skanerlaydi"]
-        T1 -->|"attendance.mark_manual"| T4["Telefoni yo'qni qo'lda belgilash"]
-        T3 & T4 --> T5["Davomat Jurnali (Attendances)"]
-        T5 -.-> D1["Amaliy Haydash Slotlari (Drivings)"]
+    subgraph STEP4 ["4️⃣ 4-BOSQICH: Xarajatlar va Oyliklarni To'lash (Kassadan Chiqim)"]
+        direction TB
+        S4["Kassadan xarajat chiqimi (Ijara, Banner, Reklama) — Expenses"]
+        S4 --> S4_1["Xodimga oylik hisoblanadi (Salaries) va Kassadan to'lanadi (SalaryPayments)"]
+        S4_1 --> S4_2["Kassa balansi kamayadi (Hech qachon minusga ketmaydi)"]
     end
 
-    %% --- 3-QAVAT: LMS VA TELEGRAM MINI APP ---
-    subgraph sub5 ["📚 5. LMS va Prava24 Test Dvigateli"]
-        L1["1190+ Savollar va Biletlar"] --> L2["Prava24 ExamInterface"]
-        L2 --> L3["Urinishlar va Natijalar Tahlili (Attempts)"]
+    subgraph STEP5 ["5️⃣ 5-BOSQICH: Kassa Smenasini Yopish va Transfer (Kassir -> Admin)"]
+        direction TB
+        S5["Kun yoki hafta oxirida Kassa smenasi yopiladi (CashShifts)"]
+        S5 --> S5_1["Hisob-kitob: closing = opening + income - expenses - salaries"]
+        S5_1 --> S5_2["Pullar turi bo'yicha mos Markaziy Admin Kassaga transfer qilinadi (CashTransfers)"]
     end
 
-    subgraph sub6 ["📲 6. O'quvchi Telegram Mini App"]
-        M1["Mini App Asosiy Menyu"] --> M2["Prava24 Test va Mock"]
-        M1 --> M3["Mening Davomatim"]
-        M1 --> M4["Mening Shartnomam va To'lovlarim"]
-        M1 --> M5["Haydashga Yozilish"]
+    subgraph STEP6 ["6️⃣ 6-BOSQICH: Nazariy Dars va Davomat (Teacher & QR)"]
+        direction TB
+        S6["Teacher dars sessiyasini ochadi (LessonSessions)"]
+        S6 --> S6_1["Ekranga har 15-20 soniyada yangilanuvchi Dinamik QR token chiqadi"]
+        S6_1 --> S6_2["O'quvchi Bot orqali skanerlaydi (Telefoni yo'qlar qo'lda belgilanadi)"]
     end
 
-    %% --- MODULLAR O'RTASIDAGI VERTIKAL OQIM (Katta va qulay ko'rinish uchun) ---
-    sub1 --> sub2
-    sub2 --> sub3
-    sub2 --> sub4
-    sub4 --> sub5
-    sub3 & sub4 & sub5 --> sub6
+    subgraph STEP7 ["7️⃣ 7-BOSQICH: Amaliy Haydash Mashg'ulotlari (Instructor)"]
+        direction TB
+        S7["Instruktor va avtomobil bo'yicha amaliy dars slotlari belgilanadi (Drivings)"]
+        S7 --> S7_1["Dars yakunlangach, o'quvchi instruktorga baho qo'yadi (Reviews)"]
+    end
+
+    subgraph STEP8 ["8️⃣ 8-BOSQICH: LMS Testlar va Imtihonlar (Prava24 Dvigateli)"]
+        direction TB
+        S8["1190+ rasmli savollar va biletlar bazasi"]
+        S8 --> S8_1["Prava24 ExamInterface: 25 daqiqa taymer, swipe va klaviatura boshqaruvi"]
+        S8_1 --> S8_2["Natijalar tahlili va imtihonga tayyorgarlik ko'rsatkichi (Attempts)"]
+    end
+
+    subgraph STEP9 ["9️⃣ 9-BOSQICH: O'quvchi Telegram Mini App (O'quvchi Kabineti)"]
+        direction TB
+        S9["O'quvchi o'z profiliga kiradi (Mini App)"]
+        S9 --> S9_1["Imkoniyatlar: Test ishlash, Davomat, Shartnoma/To'lovlar, Haydashga yozilish"]
+    end
+
+    subgraph STEP10 ["🔟 10-BOSQICH: UNION orqali Moliyaviy Tarixlar (Statements)"]
+        direction TB
+        S10["Talaba Tarixi: Har bir to'lovdan keyingi Qoldiq Qarz"]
+        S10 --> S10_1["Kassa Tarixi: Kirim, Chiqim va Transferdan keyingi Kassa Qoldig'i"]
+        S10_1 --> S10_2["Xodim Tarixi: Oylik va To'lovlardan keyingi Qoldiq Oylik"]
+    end
+
+    %% --- KETMA-KET TO'G'RI CHIZIQLI ZANJIR ---
+    STEP1 ==> STEP2
+    STEP2 ==> STEP3
+    STEP3 ==> STEP4
+    STEP4 ==> STEP5
+    STEP5 ==> STEP6
+    STEP6 ==> STEP7
+    STEP7 ==> STEP8
+    STEP8 ==> STEP9
+    STEP9 ==> STEP10
 ```
 
 ---
