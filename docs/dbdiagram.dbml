@@ -1,0 +1,680 @@
+// ==========================================
+// 🚗 AUTOPRIME — ALL-IN-ONE AVTOMAKTAB PLATFORMASI
+// (CRM + ERP + LMS + PRAVA24 TEST ENGINE)
+// DBML fayli: https://dbdiagram.io uchun
+// ==========================================
+
+// --- ENUMS ---
+Enum contract_status_enum {
+  draft
+  active
+  completed
+  cancelled
+}
+
+Enum payment_status_enum {
+  unpaid
+  partial
+  paid
+}
+
+Enum payment_type_enum {
+  contract_tuition
+  extra_driving
+  mock_exam
+  certificate
+  other
+}
+
+Enum salary_type_enum {
+  base_salary
+  driving_hourly_rate
+  bonus_kpi
+  penalty
+  advance
+}
+
+Enum cash_transfer_status_enum {
+  pending
+  approved
+  rejected
+}
+
+Enum shift_status_enum {
+  open
+  closed
+}
+
+Enum driving_status_enum {
+  scheduled
+  completed
+  cancelled
+  absent
+}
+
+Enum session_status_enum {
+  active
+  finished
+  cancelled
+}
+
+Enum attendance_status_enum {
+  present
+  late
+  absent
+}
+
+Enum attempt_type_enum {
+  ticket
+  random_mock
+  topic
+  exam
+}
+
+Enum lead_stage_enum {
+  new_lead
+  contacted
+  trial_lesson
+  contract_signed
+  rejected
+}
+
+Enum lead_source_enum {
+  telegram_bot
+  instagram
+  website
+  referral
+  walk_in
+  other
+}
+
+Enum vehicle_fuel_enum {
+  petrol
+  methane
+  propane
+  diesel
+  electric
+}
+
+Enum vehicle_status_enum {
+  active
+  maintenance
+  inactive
+}
+
+
+// ==========================================
+// 🔐 1. SPATIE ROLES & PERMISSIONS (MULTI-ROLE QO'LLAB-QUVVATLASH)
+// ==========================================
+
+Table roles {
+  id bigint [pk, increment]
+  name varchar(255) [not null, note: 'super_admin, admin, accountant, kassir, reception, teacher, instructor']
+  guard_name varchar(255) [default: 'web']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table permissions {
+  id bigint [pk, increment]
+  name varchar(255) [not null, note: 'Masalan: attendance.mark_manual, finance.view, contracts.create, etc.']
+  guard_name varchar(255) [default: 'web']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table model_has_roles {
+  role_id bigint [ref: > roles.id]
+  model_type varchar(255) [not null]
+  model_id bigint [not null, note: 'Bitta userga bir vaqtning o\'zida bir nechta rol berilishi mumkin (masalan: teacher + instructor)']
+
+  indexes {
+    (role_id, model_id, model_type) [pk]
+  }
+}
+
+Table role_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  role_id bigint [ref: > roles.id]
+
+  indexes {
+    (permission_id, role_id) [pk]
+  }
+}
+
+
+// ==========================================
+// 🏢 2. ASOSIY XODIMLAR & FILIALLAR (CORE & USERS)
+// ==========================================
+
+Table branches {
+  id bigint [pk, increment]
+  name varchar(255) [not null]
+  address varchar(500)
+  phone varchar(50)
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table users {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, null, note: 'null bo\'lsa super_admin yoki bosh accountant']
+  name varchar(255) [not null]
+  phone varchar(50) [unique, not null]
+  email varchar(255) [unique, null]
+  password varchar(255)
+  telegram_id bigint [unique, null]
+  telegram_username varchar(255) [null]
+  salary_balance decimal(12,2) [default: 0, note: 'Xodimga to\'lanishi kerak bo\'lgan qoldiq oylik (Minusga ketmaydi >= 0)']
+  car_name varchar(255) [null, note: 'Agar xodim instructor rolida ham ishlasa to\'ldiriladi']
+  car_number varchar(50) [null, note: 'Agar xodim instructor rolida ham ishlasa to\'ldiriladi']
+  car_photo varchar(500) [null]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table groups {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  name varchar(255) [not null]
+  category varchar(20) [default: 'B']
+  start_date date
+  end_date date
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table autodromes {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  name varchar(255) [not null]
+  location_url varchar(500) [null]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 🎓 3. O'QUVCHILAR & SHARTNOMALAR (STUDENTS & CONTRACTS)
+// ==========================================
+
+Table students {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  group_id bigint [ref: > groups.id, null]
+  registered_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan reception/admin']
+  full_name varchar(255) [not null]
+  phone varchar(50) [not null]
+  passport_series varchar(10)
+  passport_number varchar(20)
+  birth_date date [null]
+  address varchar(500) [null]
+  medical_certificate_date date [null, note: '083-forma tibbiy ma\'lumotnoma sanasi']
+  telegram_chat_id bigint [null, note: 'Telefoni/Telegrami yo\'q bo\'lsa null bo\'ladi']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table contracts {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  student_id bigint [ref: > students.id]
+  group_id bigint [ref: > groups.id, null]
+  created_by_user_id bigint [ref: > users.id, note: 'Shartnoma rasmiylashtirgan xodim (reception/admin)']
+  contract_number varchar(50) [unique, not null, note: 'Masalan: AP-2026-0012']
+  contract_date date [not null]
+  total_amount decimal(12,2) [not null, note: 'Kursning to\'liq narxi']
+  discount_amount decimal(12,2) [default: 0, note: 'Chegirma miqdori']
+  final_amount decimal(12,2) [not null, note: 'To\'lanishi kerak bo\'lgan yakuniy summa (total - discount)']
+  paid_amount decimal(12,2) [default: 0, note: 'Haqiqatda to\'langan summa']
+  debt_amount decimal(12,2) [default: 0, note: 'Qoldiq qarzdorlik (Minusga ketmaydi >= 0)']
+  status contract_status_enum [default: 'active']
+  payment_status payment_status_enum [default: 'unpaid']
+  terms text [null, note: 'Maxsus shartlar yoki izoh']
+  file_url varchar(500) [null, note: 'Generatsiya qilingan PDF shartnoma havolasi']
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 💳 4. ERP: KASSALAR, XARAJATLAR & KASSA YOPISH
+// ==========================================
+
+Table cash_register_types {
+  id bigint [pk, increment]
+  name varchar(100) [not null, note: 'Naqd pul, Plastik karta / Terminal, Bank hisob raqami']
+  code varchar(50) [unique, not null, note: 'cash, card, bank_transfer']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cash_registers {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, null, note: 'NULL bo\'lsa — Markaziy Admin Kassa (Faqat Superadmin boshqaradi)']
+  cash_register_type_id bigint [ref: > cash_register_types.id, not null]
+  name varchar(100) [not null, note: 'Masalan: Chilonzor Naqd Kassa, Bosh Admin Naqd Kassa']
+  balance decimal(14,2) [default: 0, note: 'Qat\'iy qoida: Minusga ketishi mumkin emas (balance >= 0)']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table payments {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  contract_id bigint [ref: > contracts.id, null]
+  student_id bigint [ref: > students.id]
+  cash_register_id bigint [ref: > cash_registers.id]
+  received_by_user_id bigint [ref: > users.id, note: 'To\'lovni qabul qilgan kassir/accountant/admin']
+  amount decimal(12,2) [not null]
+  payment_type payment_type_enum [default: 'contract_tuition']
+  receipt_number varchar(100) [unique]
+  comment text [null]
+  paid_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table expense_categories {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, null, note: 'null bo\'lsa umumiy kategoriya']
+  name varchar(255) [not null, note: 'Masalan: Bino ijarasi, Banner, Reklama/SMM, Xodimlar oyligi, Kommunal']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table expenses {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  cash_register_id bigint [ref: > cash_registers.id]
+  expense_category_id bigint [ref: > expense_categories.id]
+  user_id bigint [ref: > users.id, note: 'Chiqim qilgan kassir/accountant/admin']
+  amount decimal(12,2) [not null, note: 'Kassa balansidan katta bo\'lishi mumkin emas']
+  recipient varchar(255) [null, note: 'Pulni oluvchi shaxs yoki kompaniya']
+  description text [null, note: 'Xarajat sababi va izoh']
+  receipt_photo_url varchar(500) [null, note: 'Xarajat cheki rasmi']
+  spent_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cash_shifts {
+  id bigint [pk, increment]
+  cash_register_id bigint [ref: > cash_registers.id]
+  user_id bigint [ref: > users.id, note: 'Kassa smenasini yopgan kassir']
+  opened_at timestamp [not null]
+  closed_at timestamp [null]
+  opening_balance decimal(14,2) [not null, default: 0]
+  total_income decimal(14,2) [default: 0, note: 'Smena davomidagi jami tushum']
+  total_expense decimal(14,2) [default: 0, note: 'Smena davomidagi jami chiqim (expenses + salary_payments)']
+  closing_balance decimal(14,2) [default: 0, note: 'Hisobiy yopilish qoldig\'i (opening + income - expense)']
+  transferred_to_admin decimal(14,2) [default: 0, note: 'Admin kassaga o\'tkazilgan summa']
+  status shift_status_enum [default: 'open']
+  note text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cash_transfers {
+  id bigint [pk, increment]
+  from_cash_register_id bigint [ref: > cash_registers.id, note: 'Filial kassasi (masalan, Chilonzor Naqd)']
+  to_cash_register_id bigint [ref: > cash_registers.id, note: 'Mos turdagi Admin Kassa (masalan, Admin Naqd)']
+  cash_shift_id bigint [ref: > cash_shifts.id, null]
+  amount decimal(14,2) [not null, note: 'Filial kassa balansidan katta bo\'lishi mumkin emas']
+  sent_by_user_id bigint [ref: > users.id, note: 'O\'tkazgan kassir/admin']
+  approved_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan Superadmin']
+  status cash_transfer_status_enum [default: 'pending']
+  notes text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 💼 5. ERP: XODIMLAR OYLIGI & ISH HAQI (PAYROLL)
+// ==========================================
+
+Table salaries {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, null]
+  user_id bigint [ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki bir vaqtda ikkalasi bo\'lgan xodim)']
+  created_by_user_id bigint [ref: > users.id, note: 'Oylikni hisoblagan accountant/admin/superadmin']
+  period varchar(20) [not null, note: 'Masalan: 2026-08']
+  salary_type salary_type_enum [default: 'base_salary', note: 'base_salary (nazariya darslari), driving_hourly_rate (amaliy haydash), bonus_kpi']
+  amount decimal(12,2) [not null, note: 'Hisoblangan summa (+)']
+  lessons_or_hours_count int [default: 0, note: 'O\'tgan dars/haydash soatlari soni']
+  notes text [null]
+  accrued_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table salary_payments {
+  id bigint [pk, increment]
+  salary_id bigint [ref: > salaries.id, null]
+  user_id bigint [ref: > users.id, note: 'Pulni olgan xodim']
+  cash_register_id bigint [ref: > cash_registers.id, note: 'Qaysi kassadan berildi (Kassa balansi yetarli bo\'lishi shart)']
+  paid_by_user_id bigint [ref: > users.id, note: 'To\'lagan kassir/accountant/superadmin']
+  amount decimal(12,2) [not null, note: 'Berilgan summa (-)']
+  payment_method varchar(50) [default: 'cash', note: 'cash, card_transfer']
+  comment text [null]
+  paid_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 📱 6. ERP & LMS: ONE-TIME QR & MANUAL DAVOMAT
+// ==========================================
+
+Table lesson_sessions {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  group_id bigint [ref: > groups.id]
+  teacher_id bigint [ref: > users.id, note: 'Dars o\'tuvchi xodim (teacher rolidagi user)']
+  topic varchar(255) [not null]
+  room_number varchar(50) [null]
+  started_at timestamp [not null]
+  ended_at timestamp [null]
+  status session_status_enum [default: 'active']
+  qr_secret_salt varchar(255) [not null, note: 'HMAC dinamik token uchun maxfiy kalit']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table attendances {
+  id bigint [pk, increment]
+  lesson_session_id bigint [ref: > lesson_sessions.id]
+  student_id bigint [ref: > students.id]
+  scanned_at timestamp [not null]
+  status attendance_status_enum [default: 'present']
+  is_manual boolean [default: false, note: 'Telefoni yo\'q talaba uchun qo\'lda belgilanganmi?']
+  marked_by_user_id bigint [ref: > users.id, null, note: 'Qo\'lda belgilagan xodim (permissionli admin/reception/teacher)']
+  manual_reason varchar(255) [null, note: 'Masalan: Telefoni yo\'q, quvvati tugagan']
+  ip_address varchar(45) [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (lesson_session_id, student_id) [unique]
+  }
+}
+
+
+// ==========================================
+// 🚗 7. ERP: AMALIY HAYDASH (DRIVINGS & INSTRUCTORS)
+// ==========================================
+
+Table drivings {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  instructor_id bigint [ref: > users.id, note: 'Haydash o\'rgatuvchi xodim (instructor rolidagi user)']
+  student_id bigint [ref: > students.id]
+  autodrome_id bigint [ref: > autodromes.id, null]
+  date date [not null]
+  start_time time [not null]
+  end_time time [not null]
+  status driving_status_enum [default: 'scheduled']
+  instructor_comment text [null]
+  student_reminder_sent_at timestamp [null]
+  instructor_reminder_sent_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table reviews {
+  id bigint [pk, increment]
+  driving_id bigint [ref: > drivings.id, unique]
+  student_id bigint [ref: > students.id]
+  instructor_id bigint [ref: > users.id]
+  rating int [not null, note: '1 dan 5 gacha baho']
+  comment text [null]
+  tags json [null]
+  is_approved boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 📚 8. LMS: PRAVA24 TEST & IMTIHON DVIGATELI
+// ==========================================
+
+Table tickets {
+  id bigint [pk, increment]
+  ticket_number int [unique, not null]
+  title_uz varchar(255)
+  title_ru varchar(255)
+  description text [null]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table questions {
+  id bigint [pk, increment]
+  ticket_id bigint [ref: > tickets.id]
+  question_number int [not null]
+  question_uz text [not null]
+  question_ru text [not null]
+  description_uz text [null]
+  description_ru text [null]
+  image_url varchar(500) [null]
+  audio_url_uz varchar(500) [null]
+  audio_url_ru varchar(500) [null]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table answers {
+  id bigint [pk, increment]
+  question_id bigint [ref: > questions.id]
+  answer_uz text [not null]
+  answer_ru text [not null]
+  is_correct boolean [default: false]
+  order int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table sign_categories {
+  id bigint [pk, increment]
+  name_uz varchar(255) [not null]
+  name_ru varchar(255) [not null]
+  slug varchar(255) [unique]
+  order int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table signs {
+  id bigint [pk, increment]
+  category_id bigint [ref: > sign_categories.id]
+  sign_number varchar(50) [not null]
+  name_uz varchar(255) [not null]
+  name_ru varchar(255) [not null]
+  description_uz text [null]
+  description_ru text [null]
+  image_url varchar(500) [null]
+  order int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table road_lines {
+  id bigint [pk, increment]
+  line_number varchar(50) [not null]
+  name_uz varchar(255) [not null]
+  name_ru varchar(255) [not null]
+  description_uz text [null]
+  description_ru text [null]
+  image_url varchar(500) [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table attempts {
+  id bigint [pk, increment]
+  student_id bigint [ref: > students.id, null]
+  user_id bigint [ref: > users.id, null]
+  ticket_id bigint [ref: > tickets.id, null]
+  attempt_type attempt_type_enum [default: 'random_mock']
+  total_questions int [default: 20]
+  correct_answers int [default: 0]
+  wrong_answers int [default: 0]
+  score_percentage decimal(5,2) [default: 0]
+  is_passed boolean [default: false]
+  started_at timestamp [not null]
+  finished_at timestamp [null]
+  duration_seconds int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table attempt_answers {
+  id bigint [pk, increment]
+  attempt_id bigint [ref: > attempts.id]
+  question_id bigint [ref: > questions.id]
+  answer_id bigint [ref: > answers.id, null]
+  is_correct boolean [default: false]
+  answered_at timestamp [not null]
+  duration_seconds int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 👥 9. CRM: LIDLAR & VORONKA (SALES FUNNEL)
+// ==========================================
+
+Table leads {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  assigned_user_id bigint [ref: > users.id, null, note: 'Biriktirilgan reception/sotuvchi']
+  student_id bigint [ref: > students.id, null]
+  contract_id bigint [ref: > contracts.id, null]
+  full_name varchar(255) [not null]
+  phone varchar(50) [not null]
+  source lead_source_enum [default: 'telegram_bot']
+  stage lead_stage_enum [default: 'new_lead']
+  notes text [null]
+  lost_reason text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 🚙 10. ERP: AVTOPARK & XARAJATLAR (FLEET)
+// ==========================================
+
+Table vehicles {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  instructor_id bigint [ref: > users.id, null]
+  make_model varchar(255) [not null, note: 'Masalan: Chevrolet Cobalt, Nexia 3']
+  plate_number varchar(50) [unique, not null]
+  fuel_type vehicle_fuel_enum [default: 'petrol']
+  current_mileage int [default: 0]
+  last_oil_change_mileage int [default: 0]
+  next_oil_change_mileage int [default: 0]
+  insurance_expiry_date date [null]
+  gas_inspection_expiry_date date [null]
+  mot_expiry_date date [null]
+  status vehicle_status_enum [default: 'active']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table vehicle_maintenances {
+  id bigint [pk, increment]
+  vehicle_id bigint [ref: > vehicles.id]
+  maintenance_type varchar(100) [not null, note: 'oil_change, tire_repair, gas_check, inspection']
+  cost decimal(12,2) [not null]
+  mileage int [not null]
+  performed_at date [not null]
+  description text [null]
+  invoice_photo_url varchar(500) [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 📑 VIZUAL GURUHLAR (TABLE GROUPS)
+// ==========================================
+
+TableGroup RBAC_Spatie_Permissions {
+  roles
+  permissions
+  model_has_roles
+  role_has_permissions
+}
+
+TableGroup Core_MultiBranch {
+  branches
+  users
+  groups
+  autodromes
+}
+
+TableGroup Students_and_Contracts {
+  students
+  contracts
+}
+
+TableGroup ERP_Finance_and_CashShift {
+  cash_register_types
+  cash_registers
+  payments
+  expense_categories
+  expenses
+  cash_shifts
+  cash_transfers
+}
+
+TableGroup ERP_Payroll_and_Salaries {
+  salaries
+  salary_payments
+}
+
+TableGroup Attendance_OneTimeQR {
+  lesson_sessions
+  attendances
+}
+
+TableGroup ERP_Drivings_Scheduling {
+  drivings
+  reviews
+}
+
+TableGroup LMS_Prava24_Quiz_Engine {
+  tickets
+  questions
+  answers
+  attempts
+  attempt_answers
+  sign_categories
+  signs
+  road_lines
+}
+
+TableGroup CRM_Sales_Funnel {
+  leads
+}
+
+TableGroup ERP_Fleet_Management {
+  vehicles
+  vehicle_maintenances
+}
