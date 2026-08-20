@@ -1,54 +1,67 @@
-# Avtomaktab uchun All-in-One (CRM + ERP + LMS + Guvohnomalar + Bot Qabul) Tizimini Joriy Qilish Rejasi
+# Avtomaktab uchun All-in-One (CRM + ERP + LMS + Guvohnomalar + Bot Chat Qabul) Tizimini Joriy Qilish Rejasi
 
-Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘liq moslashtirilgan, **Reception kiritgan nomerdan tortib o‘quvchining botda pasport/3x4 rasm va anketani o‘zi to‘ldirishi, 1-klik shartnoma, Kassa, Darslar, Testlar va Bitiruv Guvohnomasigacha bo‘lgan 100% to‘liq platforma**ga aylantirish uchun ishlab chiqildi:
-* **Reception ➡️ Bot Anketa To‘ldirish Zanjiri**: Reception faqat Ism va Telefon kiritadi ➡️ O‘quvchi botga kirib (yoki SMS havola orqali) o‘zining pasport nusxasini, 3x4 rasmini, PINFL, tug‘ilgan sana va tibbiy ma'lumotnomasini telefonidan o‘zi yuklaydi.
-* **1-Klik bilan O‘quvchi & Shartnoma yaratish**: O‘quvchi anketani to‘ldirishi bilan Reception panelida "Anketa to‘ldirildi (Tayyor)" bo‘ladi. Reception bitta tugma bilan talaba (`students`) va shartnoma (`contracts`)ga aylantiradi.
-* **Spatie RBAC & Permissions Matrix** (7 ta rol va Multi-role qo‘llab-quvvatlash)
-* **Shartnomalar & Non-negative Kassalar** (Naqd/Karta to‘lovlar, `balance >= 0`)
-* **Xarajatlar & Xodimlar Oyligi** (Expenses & Payroll Payout)
-* **Darslar & Davomat** (One-Time Dynamic QR & Telefonsizlar uchun Manual Davomat)
-* **Amaliy Haydash** (Drivings slotlari, instruktor avtomobili, baholar)
-* **LMS Testlar & Imtihon** (Prava24 1190+ savolli 25 min taymerli simulyator)
-* **Bitirish & Sertifikat/Guvohnoma** (QR-kodli rasmiy bitiruv guvohnomasi PDF)
-* **Gibrid Balans & UNION Moliyaviy Tarixlar** (Student, Kassa, Xodim ko‘chirmalari)
-* **Telegram Mini App** (O‘quvchining to‘liq shaxsiy kabineti)
+Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘liq moslashtirilgan, **O‘quvchi hech qanday veb-sahifasiz to‘g‘ridan-to‘g‘ri Telegram Bot Chatida ketma-ket savol-javob orqali anketani to‘ldirishi, rasmlarni yuklashi, 1-klik shartnoma, Kassa, Darslar, Testlar va Bitiruv Guvohnomasigacha bo‘lgan 100% to‘liq platforma**ga aylantirish uchun ishlab chiqildi:
+
+* 🤖 **Telegram Bot Chatida Ketma-ket Anketa To‘ldirish (Conversational Chat Wizard)**: 
+  Bo‘lajak o‘quvchi hech qanday tashqi sayt ochmasdan, to‘g‘ridan-to‘g‘ri bot chatida ketma-ket savollarga javob beradi:
+  1. 👤 **F.I.O** (Ism, familiya, sharif)
+  2. 📱 **Telefon raqami** (*"Kontaktni ulashish"* bitta tugma orqali)
+  3. 🚗 **Toifa tanlash** (*B, A, C* tugmalari orqali)
+  4. 🏢 **Filial tanlash** (*Chilonzor, Yunusobod va h.k.* tugmalari)
+  5. ⏰ **Qulay o‘qish vaqti** (*Ertalabki, Kunduzgi, Kechki* tugmalari)
+  6. 📸 **Pasport / ID karta rasmi** (Telefon kamerasidan yoki galereyadan to‘g‘ridan-to‘g‘ri rasm qilib tashlaydi)
+  7. 👤 **3x4 rasm / Selfi** (Bot chatiga rasm qilib yuboradi)
+  8. 📅 **Tug‘ilgan sana va Yashash manzili**
+  9. 🔢 **JSHSHIR (PINFL)** (Ixtiyoriy/majburiy)
+* ⚡ **Receptionga Xabar va 1-Klikda Shartnoma**: Bot anketani qabul qilishi bilan Reception xodimiga bildirishnoma boradi. Reception barcha yuklangan rasmlar va ma'lumotlarni ko‘rib, 1-klik bilan talaba (`students`) va shartnoma (`contracts`)ga aylantiradi.
+* 🔐 **Spatie RBAC & Permissions Matrix** (7 ta rol va Multi-role: `teacher + instructor`)
+* 💳 **Shartnomalar & Non-negative Kassalar** (Naqd/Karta to‘lovlar, `balance >= 0`)
+* 💸 **Xarajatlar & Xodimlar Oyligi** (Expenses & Payroll Payout)
+* 📱 **Darslar & Davomat** (One-Time Dynamic QR & Telefonsizlar uchun Manual Davomat)
+* 🚗 **Amaliy Haydash** (Drivings slotlari, instruktor avtomobili, baholar)
+* 📚 **LMS Testlar & Imtihon** (Prava24 1190+ savolli 25 min taymerli simulyator)
+* 🎓 **Bitirish & Sertifikat/Guvohnoma** (QR-kodli rasmiy bitiruv guvohnomasi PDF)
+* 📜 **Gibrid Balans & UNION Moliyaviy Tarixlar** (Student, Kassa, Xodim ko‘chirmalari)
+* 📲 **Telegram Mini App** (O‘quvchining to‘liq shaxsiy kabineti)
 
 ---
 
 ## O‘quvchining To‘liq Hayotiy Sikli (Bot Qabulidan ➡️ Sertifikatgacha)
 
 ```
-1. RECEPTION LID KIRITADI / O'QUVCHI BOTGA KIRADI (CRM Leads)
-   └── Reception ism va telefon kiritadi (yoki mijoz botga to'g'ridan-to'g'ri yozadi).
-       Mijozga Telegram bot orqali anketa to'ldirish taklifi boradi.
+1. TELEGRAM BOT CHATIDA KETMA-KET QABUL ANKETASI (Bot Chat Wizard)
+   ├── Bot: "F.I.O ingizni kiriting" ➡️ O'quvchi yozadi
+   ├── Bot: [📱 Kontaktni yuborish] ➡️ O'quvchi bosadi
+   ├── Bot: Toifani tanlang: [🚗 B toifa] [🏍️ A toifa] [🚛 C toifa]
+   ├── Bot: Filialni tanlang: [🏢 Chilonzor] [🏢 Yunusobod]
+   ├── Bot: Qulay vaqt: [🌅 Ertalabki] [☀️ Kunduzgi] [🌙 Kechki]
+   ├── Bot: "Pasportingiz rasmini yuboring" ➡️ O'quvchi rasm tashlaydi
+   ├── Bot: "3x4 rasmingizni yuboring" ➡️ O'quvchi rasm tashlaydi
+   └── Bot: "Tug'ilgan sana va manzilingizni kiriting" ➡️ O'quvchi yozadi.
 
-2. O'QUVCHI BOTDA ANKETA VA RASMLARNI YUKLAYDI (Self-Fill Wizard)
-   └── Bo'lajak o'quvchi telefonidan bot orqali o'zi to'ldiradi: 
-       Pasport rasmi, 3x4 rasm, PINFL (JSHSHIR), Tug'ilgan sana, Manzil, 083-tibbiy ma'lumotnoma rasmi.
-
-3. RECEPTION GA XABAR & 1-KLIK BILAN SHARTNOMA (Convert to Student & Contract)
+2. RECEPTION GA BILDIRISHNOMA & 1-KLIK BILAN SHARTNOMA
    └── Reception panelida barcha rasmlar va ma'lumotlar avtomat tayyor bo'ladi. 
        Reception tekshirib, 1-klik bilan Student va Contract ochadi va guruhga biriktiradi.
 
-4. TO'LOV QABUL QILISH (Payments & Cash Registers)
+3. TO'LOV QABUL QILISH (Payments & Cash Registers)
    └── Kassir to'lovni (Naqd / Karta) qabul qiladi. Qoldiq qarz kamayadi, Kassa balansi oshadi (hech qachon minusga ketmaydi).
 
-5. NAZARIY TA'LIM VA DAVOMAT (Lesson Sessions & Attendance)
+4. NAZARIY TA'LIM VA DAVOMAT (Lesson Sessions & Attendance)
    └── O'qituvchi dars ochadi. Ekranda har 15s yangilanuvchi Dynamic QR token. O'quvchi bot orqali skanerlaydi (telefoni yo'qlarni xodim qo'lda belgilaydi).
 
-6. AMALIY HAYDASH (Drivings & Instructors)
+5. AMALIY HAYDASH (Drivings & Instructors)
    └── Instruktor va avtomobil bo'yicha amaliy dars slotlari. Dars yakunlangach, o'quvchi instruktorga baho (Review) qo'yadi.
 
-7. TEST VA ICHKI IMTIHON (LMS & Mock Exam)
+6. TEST VA ICHKI IMTIHON (LMS & Mock Exam)
    └── Prava24 ning 1190+ savollar bazasida mashq qiladi. Ichki imtihondan o'tadi (20 savoldan kamida 18 ta to'g'ri javob).
 
-8. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
+7. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
    └── Barcha shartlar bajarilgach (To'lov to'liq to'langan, davomat yetarli, haydash soatlari o'tilgan, imtihondan o'tgan) o'quvchiga rasmiy QR-kodli Bitiruv Guvohnomasi chiqariladi va PDF chop etiladi.
 
-9. BUXGALTERIYA & KASSA TRANSFERI (Finance & Payroll)
+8. BUXGALTERIYA & KASSA TRANSFERI (Finance & Payroll)
    └── Xarajatlar (Ijara, reklama), Xodimlar oyligi (Salaries & Salary Payments) beriladi. Kassa smenasi yopilib Admin kassaga transfer qilinadi.
 
-10. XRONOLOGIK TARIX (UNION Statements)
+9. XRONOLOGIK TARIX (UNION Statements)
    └── Talabaning to'liq qarz tarixi, Kassaning barcha kirim/chiqim qoldiqlari, Xodimning oylik ko'chirmasi.
 ```
 
@@ -201,11 +214,11 @@ graph TD
         S1_1 --> S1_2["Sidebar va Action ruxsatlari (Permissions Matrix) taqsimlanadi"]
     end
 
-    subgraph STEP2 ["2️⃣ 2-BOSQICH: Reception Raqam Kiritadi ➡️ O'quvchi Botda Anketani To'ldiradi"]
+    subgraph STEP2 ["2️⃣ 2-BOSQICH: Bot Chatida Ketma-ket Qabul Anketasi (Chat Wizard)"]
         direction TB
-        S2["Reception o'quvchi telefonini kiritadi (yoki mijoz botga to'g'ridan-to'g'ri yozadi)"]
-        S2 --> S2_1["O'quvchi bot orqali pasport rasmi, 3x4 rasm, PINFL, manzil va tibbiy ma'lumotnomasini yuklaydi"]
-        S2_1 --> S2_2["Reception 1-klik bilan tekshirib, Student va Contract ochadi va guruhga biriktiradi"]
+        S2["O'quvchi bot chatida ketma-ket: Ism, Tel, Toifa, Filial, Vaqt, Pasport rasmi va 3x4 rasm yuboradi"]
+        S2 --> S2_1["Reception bot arizasini ko'rib, 1-klik bilan Student va Contract ochadi"]
+        S2_1 --> S2_2["O'quvchi o'quv guruhiga biriktiriladi (Groups)"]
     end
 
     subgraph STEP3 ["3️⃣ 3-BOSQICH: To'lovlarni Qabul Qilish (Kassir)"]
@@ -279,14 +292,14 @@ graph TD
 
 ## Bosqichma-bosqich Ishlab Chiqish Rejasi
 
-### 🟢 1-Bosqich: Spatie RBAC (Permissions Matrix), Bot Anketa & CRM Leads, Reception (Students, Contracts & Certificates), Kassir & Buxgalter (Non-negative Kassalar, Chiqimlar, Oylik, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
+### 🟢 1-Bosqich: Spatie RBAC (Permissions Matrix), Bot Chat Anketa & CRM Leads, Reception (Students, Contracts & Certificates), Kassir & Buxgalter (Non-negative Kassalar, Chiqimlar, Oylik, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
 
 #### 1.1. Ma’lumotlar bazasi (Migrations & Models)
 1. **Spatie Roles & Permissions:**
    - `RolePermissionSeeder`: 7 ta rol va to‘liq Permissions ro‘yxati.
    - Multi-role: `$user->assignRole(['teacher', 'instructor'])`.
-2. **`leads` (Bot orqali Onlayn Anketa va Hujjatlar yuklash):**
-   - `form_token`, `is_form_completed`, `passport_photo_url`, `photo_url`, `medical_certificate_photo_url`, `pinfl`, `birth_date`, `address`.
+2. **`leads` (Bot Chatida Ketma-ket Anketa va Hujjatlar yuklash):**
+   - `telegram_id`, `category`, `preferred_time`, `passport_photo_url`, `photo_url`, `medical_certificate_photo_url`, `pinfl`, `birth_date`, `address`, `is_form_completed`.
 3. **`students`, `contracts` va `certificates`:**
    - `students`: O‘quvchi shaxsiy ma'lumotlari (`pinfl`, `passport_series`, `passport_number`, `photo_url`, `passport_photo_url`, `telegram_chat_id`).
    - `contracts`: Shartnoma raqami, narx, chegirma, to‘langan summa, qoldiq qarz (`debt_amount >= 0`).
@@ -303,7 +316,7 @@ graph TD
    - Dinamik QR token + `is_manual`, `marked_by_user_id`, `manual_reason` ustunlari.
 
 #### 1.2. Backend & Controllers
-- `LeadController.php`: Bot orqali tushgan arizalar, SMS/Telegram link generatsiya qilish va **"Convert to Student & Contract" (1-klik bilan o‘quvchiga aylantirish)**.
+- `LeadController.php`: Bot orqali tushgan arizalar va **"Convert to Student & Contract" (1-klik bilan o‘quvchiga aylantirish)**.
 - `ContractController.php`: Reception uchun shartnoma ochish, chegirma belgilash, PDF yuklash.
 - `CertificateController.php`: Bitiruvchiga guvohnoma chiqarish, QR kodli PDF yaratish.
 - `PaymentController.php`: Kassir/Accountant uchun to‘lov qabul qilish, to‘lovni tahrirlash (Diff orqali), qarzdorlar tahlili.
@@ -312,10 +325,10 @@ graph TD
 - `AttendanceController.php`: Teacher/Admin uchun jonli QR-kodli dars ochish va `attendance.mark_manual` orqali qo‘lda davomat qilish.
 - `StudentStatementService.php`, `CashRegisterStatementService.php`, `EmployeeStatementService.php`: `UNION` orqali xronologik tarixlar.
 - `CashShiftController.php` & `CashTransferController.php`.
-- `TelegramService.php`: Bot orqali anketa to‘ldirish, rasmlarni qabul qilish, `/start att_<TOKEN>` davomat va bildirishnomalar.
+- `TelegramService.php`: Bot chatida interaktiv qabul anketasi (`State Machine`), rasmlarni saqlash, `/start att_<TOKEN>` davomat va bildirishnomalar.
 
 #### 1.3. Frontend (Inertia + React + Tailwind)
-- `Leads/Index.tsx`: CRM Kanban doskasi va Botda to‘ldirilgan anketalarni (rasmlari bilan) 1-klikda talabaga aylantirish modali.
+- `Leads/Index.tsx`: CRM Kanban doskasi va Bot chatida to‘ldirilgan anketalarni (rasmlari bilan) 1-klikda talabaga aylantirish modali.
 - `Students/Index.tsx` & `Students/Show.tsx`: O‘quvchi profili va **UNION Moliyaviy Tarix jadvali**.
 - `Contracts/Index.tsx`: Shartnomalar va qoldiq qarzlar nazorati.
 - `Certificates/Index.tsx` & `Certificates/Show.tsx`: Bitiruv guvohnomalari ro‘yxati va Guvohnoma chop etish oynasi.
