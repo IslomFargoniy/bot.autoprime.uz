@@ -1,9 +1,10 @@
-# Avtomaktab uchun All-in-One (CRM + ERP + LMS + Guvohnomalar) Tizimini Joriy Qilish Rejasi
+# Avtomaktab uchun All-in-One (CRM + ERP + LMS + Guvohnomalar + Bot Qabul) Tizimini Joriy Qilish Rejasi
 
-Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘liq moslashtirilgan, **O‘quvchining qabul qilinishidan tortib bitirib guvohnoma/sertifikat olgunga qadar bo‘lgan 100% to‘liq hayotiy sikli**ni o‘z ichiga oladi:
-* **Spatie RBAC & Permissions Matrix** (Multi-role qo‘llab-quvvatlash)
-* **Qabul & Hujjatlar** (PINFL/JSHSHIR, 083-tibbiy ma'lumotnoma, 3x4 rasm)
-* **Shartnomalar & To‘lovlar** (Contracts, Kassa turlari, non-negative balans)
+Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘liq moslashtirilgan, **Bot orqali o‘quvchi arizasini to‘ldirish (Qabul & Lid), CRM, Shartnoma, Kassa, Darslar, Testlar va Bitiruv Guvohnomasigacha bo‘lgan 100% to‘liq platforma**ga aylantirish uchun ishlab chiqildi:
+* **Bot orqali Onlayn Qabul (Lead Onboarding Wizard)**: Bo‘lajak o‘quvchi bot orqali o‘z ma'lumotlarini (F.I.O, telefon, toifa, qulay vaqt, pasport/PINFL) to‘ldiradi.
+* **1-Klik bilan O‘quvchi & Shartnoma yaratish**: Reception botdan tushgan lidni ko‘rib, bitta tugma bilan talaba (`students`) va shartnoma (`contracts`)ga aylantiradi.
+* **Spatie RBAC & Permissions Matrix** (7 ta rol va Multi-role qo‘llab-quvvatlash)
+* **Shartnomalar & Non-negative Kassalar** (Naqd/Karta to‘lovlar, `balance >= 0`)
 * **Xarajatlar & Xodimlar Oyligi** (Expenses & Payroll Payout)
 * **Darslar & Davomat** (One-Time Dynamic QR & Telefonsizlar uchun Manual Davomat)
 * **Amaliy Haydash** (Drivings slotlari, instruktor avtomobili, baholar)
@@ -14,37 +15,36 @@ Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘li
 
 ---
 
-## O‘quvchining To‘liq Hayotiy Sikli (Qabuldan ➡️ Sertifikatgacha)
+## O‘quvchining To‘liq Hayotiy Sikli (Bot Qabulidan ➡️ Sertifikatgacha)
 
 ```
-1. LID (CRM) 
-   └── Instagram / Telegram / Reklama orqali qiziqish bildirgan mijoz (leads).
+1. BOT ORQALI ONLAYN QABUL (CRM & Leads)
+   └── Bo'lajak o'quvchi Telegram botga kirib anketa to'ldiradi: 
+       Ism-familiya, Telefon (Share Contact), Qiziqqan toifasi (B, A, C), Filial tanlash, Qulay ta'lim vaqti (Ertalabki, Kechki).
 
-2. QABUL & ANKETA (Students)
-   └── Reception o'quvchi ma'lumotlarini kiritadi: F.I.O, Tel, Pasport, PINFL (JSHSHIR), 3x4 Rasm, 083-Tibbiy ma'lumotnoma sanasi.
+2. RECEPTION GA BILDIRISHOVA & 1-KLIK CONVERT
+   └── Tanlangan filial reception xodimiga darhol xabar tushadi ("🔔 Yangi ariza"). 
+       Reception lidni tekshirib, 1-klik bilan Students va Contracts ga aylantiradi va guruhga biriktiradi.
 
-3. SHARTNOMA TUZISH (Contracts)
-   └── Kurs narxi (total_amount), Chegirma (discount_amount), Yakuniy summa (final_amount) va Qoldiq qarz (debt_amount) belgilanadi. Guruhga biriktiriladi.
-
-4. TO'LOV QABUL QILISH (Payments & Cash Registers)
+3. TO'LOV QABUL QILISH (Payments & Cash Registers)
    └── Kassir to'lovni (Naqd / Karta) qabul qiladi. Qoldiq qarz kamayadi, Kassa balansi oshadi (hech qachon minusga ketmaydi).
 
-5. NAZARIY TA'LIM VA DAVOMAT (Lesson Sessions & Attendance)
+4. NAZARIY TA'LIM VA DAVOMAT (Lesson Sessions & Attendance)
    └── O'qituvchi dars ochadi. Ekranda har 15s yangilanuvchi Dynamic QR token. O'quvchi bot orqali skanerlaydi (telefoni yo'qlarni xodim qo'lda belgilaydi).
 
-6. AMALIY HAYDASH (Drivings & Instructors)
+5. AMALIY HAYDASH (Drivings & Instructors)
    └── Instruktor va avtomobil bo'yicha amaliy dars slotlari. Dars yakunlangach, o'quvchi instruktorga baho (Review) qo'yadi.
 
-7. TEST VA ICHKI IMTIHON (LMS & Mock Exam)
+6. TEST VA ICHKI IMTIHON (LMS & Mock Exam)
    └── Prava24 ning 1190+ savollar bazasida mashq qiladi. Ichki imtihondan o'tadi (20 savoldan kamida 18 ta to'g'ri javob).
 
-8. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
+7. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
    └── Barcha shartlar bajarilgach (To'lov to'liq to'langan, davomat yetarli, haydash soatlari o'tilgan, imtihondan o'tgan) o'quvchiga rasmiy QR-kodli Bitiruv Guvohnomasi chiqariladi va PDF chop etiladi.
 
-9. BUXGALTERIYA & KASSA TRANSFERI (Finance & Payroll)
+8. BUXGALTERIYA & KASSA TRANSFERI (Finance & Payroll)
    └── Xarajatlar (Ijara, reklama), Xodimlar oyligi (Salaries & Salary Payments) beriladi. Kassa smenasi yopilib Admin kassaga transfer qilinadi.
 
-10. XRONOLOGIK TARIX (UNION Statements)
+9. XRONOLOGIK TARIX (UNION Statements)
    └── Talabaning to'liq qarz tarixi, Kassaning barcha kirim/chiqim qoldiqlari, Xodimning oylik ko'chirmasi.
 ```
 
@@ -152,7 +152,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 | Permission | Turi | Vazifasi |
 |---|---|---|
 | `crm.view` | *Sidebar* | CRM Lidlar Kanban doskasini ko‘rish |
-| `leads.manage` | *Action* | Yangi lid qo‘shish, bosqichlarini surish |
+| `leads.manage` | *Action* | Yangi lid qo‘shish, bot arizalarini ko‘rish va talabaga aylantirish |
 | `fleet.view` | *Sidebar* | Avtoparkdagi mashinalar ro‘yxatini ko‘rish |
 | `fleet.manage` | *Action* | Mashina qo‘shish, moy/gaz/sug‘urta eslatmalarini kiritish |
 
@@ -166,7 +166,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 | 🏢 **`admin`** | O‘z filialidagi barcha modullar: O‘quvchilar, Guruhlar, Shartnomalar, Guvohnomalar, Moliya, Oyliklar, Haydash, `attendance.mark_manual`, CRM, Avtopark |
 | 🧮 **`accountant`** | Moliya (`finance.view`, `cash_registers.view`), Xarajatlar (`expenses.create`), Oyliklar (`salaries.accrue`, `salaries.pay`), Shartnomalar tahlili, Kassa smenalari va transferlar nazorati |
 | 💵 **`kassir`** | To‘lov qabul qilish (`payments.create`), Xarajat chiqimi (`expenses.create`), Kassa smenasini yopish (`cash_shifts.close`), Transfer jo‘natish (`cash_transfers.create`), Oylik berish (`salaries.pay`) |
-| 📋 **`reception`** | O‘quvchi qabul qilish (`students.create`), Shartnoma tuzish (`contracts.create`, `print`), Guvohnoma chiqarish (`certificates.create`, `print`), Guruhlarga biriktirish, CRM Lidlar, Qo‘lda davomat (`attendance.mark_manual`) |
+| 📋 **`reception`** | O‘quvchi qabul qilish (`students.create`), Bot liddan talaba ochish, Shartnoma tuzish (`contracts.create`), Guvohnoma chiqarish (`certificates.create`), Guruhlarga biriktirish, Qo‘lda davomat |
 | 👨‍🏫 **`teacher`** | Nazariy dars sessiyasini ochish (`attendance.start_session`), Proyektorga QR chiqarish, Telefoni yo‘qni qo‘lda belgilash (`attendance.mark_manual`), LMS testlarini ko‘rish |
 | 🏎️ **`instructor`** | O‘zining amaliy haydash jadvallari (`drivings.manage`), Mashinasi holati, O‘z oylik ko‘chirmasini ko‘rish |
 
@@ -197,10 +197,10 @@ graph TD
         S1_1 --> S1_2["Sidebar va Action ruxsatlari (Permissions Matrix) taqsimlanadi"]
     end
 
-    subgraph STEP2 ["2️⃣ 2-BOSQICH: O'quvchini Ro'yxatga Olish va Shartnoma (Reception)"]
+    subgraph STEP2 ["2️⃣ 2-BOSQICH: Bot orqali Qabul / Lid va Shartnoma (Reception)"]
         direction TB
-        S2["Reception o'quvchi anketasini kiritadi: Pasport, PINFL (JSHSHIR), 3x4 Rasm, 083-Tibbiy"]
-        S2 --> S2_1["Shartnoma ochiladi: Narx, Chegirma, Qoldiq qarz belgilanadi (Contracts)"]
+        S2["Bo'lajak o'quvchi Telegram bot orqali ariza qoldiradi: Ism, Tel, Toifa, Filial, Vaqt"]
+        S2 --> S2_1["Reception bot arizasini ko'rib, 1-klik bilan Student va Contract ochadi"]
         S2_1 --> S2_2["O'quvchi o'quv guruhiga biriktiriladi (Groups)"]
     end
 
@@ -275,28 +275,31 @@ graph TD
 
 ## Bosqichma-bosqich Ishlab Chiqish Rejasi
 
-### 🟢 1-Bosqich: Spatie RBAC (Permissions Matrix), Reception (Students, Contracts & Certificates), Kassir & Buxgalter (Non-negative Kassalar, Chiqimlar, Oylik, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
+### 🟢 1-Bosqich: Spatie RBAC (Permissions Matrix), Bot Qabul & CRM Leads, Reception (Students, Contracts & Certificates), Kassir & Buxgalter (Non-negative Kassalar, Chiqimlar, Oylik, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
 
 #### 1.1. Ma’lumotlar bazasi (Migrations & Models)
 1. **Spatie Roles & Permissions:**
-   - `RolePermissionSeeder`: 7 ta rol va yuqoridagi to‘liq Permissions ro‘yxatini generatsiya qilish.
+   - `RolePermissionSeeder`: 7 ta rol va to‘liq Permissions ro‘yxati.
    - Multi-role: `$user->assignRole(['teacher', 'instructor'])`.
-2. **`students`, `contracts` va `certificates`:**
+2. **`leads` (Bot orqali Onlayn Qabul):**
+   - `telegram_id`, `category`, `preferred_time`, `passport_series`, `passport_number`, `pinfl`.
+3. **`students`, `contracts` va `certificates`:**
    - `students`: O‘quvchi shaxsiy ma'lumotlari (`pinfl`, `passport_series`, `passport_number`, `photo_url`, `telegram_chat_id`).
    - `contracts`: Shartnoma raqami, narx, chegirma, to‘langan summa, qoldiq qarz (`debt_amount >= 0`).
    - `certificates`: Bitiruv guvohnomasi raqami, seriyasi, QR tekshirish tokeni, PDF havolasi.
-3. **`cash_register_types`, `cash_registers`, `expense_categories`, `expenses`, `cash_shifts` va `cash_transfers`:**
+4. **`cash_register_types`, `cash_registers`, `expense_categories`, `expenses`, `cash_shifts` va `cash_transfers`:**
    - `cash_registers`: `balance >= 0` tekshiruvi.
    - `expenses`: Chiqim kassa balansidan oshmasligi sharti.
    - `cash_shifts` va `cash_transfers`.
-4. **`salaries` va `salary_payments` (Xodimlar Oyligi):**
+5. **`salaries` va `salary_payments` (Xodimlar Oyligi):**
    - `salaries`: Oylik belgilash.
    - `salary_payments`: Kassadan to‘lash.
    - `users.salary_balance`: Non-negative qoldiq.
-5. **`lesson_sessions` va `attendances`:**
+6. **`lesson_sessions` va `attendances`:**
    - Dinamik QR token + `is_manual`, `marked_by_user_id`, `manual_reason` ustunlari.
 
 #### 1.2. Backend & Controllers
+- `LeadController.php`: Bot orqali tushgan arizalarni qabul qilish va **"Convert to Student & Contract" (1-klik bilan o‘quvchiga aylantirish)**.
 - `ContractController.php`: Reception uchun shartnoma ochish, chegirma belgilash, PDF yuklash.
 - `CertificateController.php`: Bitiruvchiga guvohnoma chiqarish, QR kodli PDF yaratish.
 - `PaymentController.php`: Kassir/Accountant uchun to‘lov qabul qilish, to‘lovni tahrirlash (Diff orqali), qarzdorlar tahlili.
@@ -305,9 +308,10 @@ graph TD
 - `AttendanceController.php`: Teacher/Admin uchun jonli QR-kodli dars ochish va `attendance.mark_manual` orqali qo‘lda davomat qilish.
 - `StudentStatementService.php`, `CashRegisterStatementService.php`, `EmployeeStatementService.php`: `UNION` orqali xronologik tarixlar.
 - `CashShiftController.php` & `CashTransferController.php`.
-- `TelegramService.php`: `/start att_<TOKEN>` orqali davomatni tasdiqlash.
+- `TelegramService.php`: Bot orqali anketa to‘ldirish, `/start att_<TOKEN>` davomat va bildirishnomalar.
 
 #### 1.3. Frontend (Inertia + React + Tailwind)
+- `Leads/Index.tsx`: CRM Kanban doskasi va Bot arizalarini 1-klikda talabaga aylantirish modali.
 - `Students/Index.tsx` & `Students/Show.tsx`: O‘quvchi profili va **UNION Moliyaviy Tarix jadvali**.
 - `Contracts/Index.tsx`: Shartnomalar va qoldiq qarzlar nazorati.
 - `Certificates/Index.tsx` & `Certificates/Show.tsx`: Bitiruv guvohnomalari ro‘yxati va Guvohnoma chop etish oynasi.

@@ -1,6 +1,6 @@
 // ==========================================
 // 🚗 AUTOPRIME — ALL-IN-ONE AVTOMAKTAB PLATFORMASI
-// (CRM + ERP + LMS + PRAVA24 TEST ENGINE + CERTIFICATES)
+// (CRM + ERP + LMS + PRAVA24 TEST ENGINE + CERTIFICATES + BOT QABUL)
 // DBML fayli: https://dbdiagram.io uchun
 // ==========================================
 
@@ -584,17 +584,23 @@ Table attempt_answers {
 
 
 // ==========================================
-// 👥 9. CRM: LIDLAR & VORONKA (SALES FUNNEL)
+// 👥 9. CRM: LIDLAR & BOT ORQALI ONLAYN QABUL (LEADS & FUNNEL)
 // ==========================================
 
 Table leads {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
+  branch_id bigint [ref: > branches.id, null, note: 'O\'quvchi tanlagan filial']
   assigned_user_id bigint [ref: > users.id, null, note: 'Biriktirilgan reception/sotuvchi']
-  student_id bigint [ref: > students.id, null]
-  contract_id bigint [ref: > contracts.id, null]
+  student_id bigint [ref: > students.id, null, note: 'Lid o\'quvchiga aylanganda to\'ldiriladi']
+  contract_id bigint [ref: > contracts.id, null, note: 'Lid shartnoma tuzganda to\'ldiriladi']
+  telegram_id bigint [null, note: 'Bot orqali ariza qoldirgan Telegram ID']
   full_name varchar(255) [not null]
   phone varchar(50) [not null]
+  category varchar(20) [default: 'B', note: 'Qiziqqan toifasi: B, A, C, BC']
+  preferred_time varchar(50) [null, note: 'Ertalabki, Kunduzgi, Kechki']
+  passport_series varchar(10) [null]
+  passport_number varchar(20) [null]
+  pinfl varchar(14) [null, note: 'JSHSHIR']
   source lead_source_enum [default: 'telegram_bot']
   stage lead_stage_enum [default: 'new_lead']
   notes text [null]
@@ -700,7 +706,7 @@ TableGroup LMS_Prava24_Quiz_Engine {
   road_lines
 }
 
-TableGroup CRM_Sales_Funnel {
+TableGroup CRM_Sales_Funnel_and_Bot_Leads {
   leads
 }
 
