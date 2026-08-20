@@ -78,7 +78,8 @@ Enum attempt_type_enum {
 
 Enum lead_stage_enum {
   new_lead
-  contacted
+  form_sent
+  form_completed
   trial_lesson
   contract_signed
   rejected
@@ -86,6 +87,7 @@ Enum lead_stage_enum {
 
 Enum lead_source_enum {
   telegram_bot
+  reception_manual
   instagram
   website
   referral
@@ -221,6 +223,8 @@ Table students {
   birth_date date [null]
   address varchar(500) [null]
   photo_url varchar(500) [null, note: '3x4 rasmi']
+  passport_photo_url varchar(500) [null, note: 'Pasport rasmi']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi']
   medical_certificate_date date [null, note: '083-forma tibbiy ma\'lumotnoma sanasi']
   telegram_chat_id bigint [null, note: 'Telefoni/Telegrami yo\'q bo\'lsa null bo\'ladi']
   is_active boolean [default: true]
@@ -584,16 +588,18 @@ Table attempt_answers {
 
 
 // ==========================================
-// 👥 9. CRM: LIDLAR & BOT ORQALI ONLAYN QABUL (LEADS & FUNNEL)
+// 👥 9. CRM: LIDLAR & BOT ORQALI ONLAYN ANKETA (LEADS & SELF-FILL WIZARD)
 // ==========================================
 
 Table leads {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null, note: 'O\'quvchi tanlagan filial']
+  branch_id bigint [ref: > branches.id, null, note: 'Tanlangan filial']
   assigned_user_id bigint [ref: > users.id, null, note: 'Biriktirilgan reception/sotuvchi']
   student_id bigint [ref: > students.id, null, note: 'Lid o\'quvchiga aylanganda to\'ldiriladi']
   contract_id bigint [ref: > contracts.id, null, note: 'Lid shartnoma tuzganda to\'ldiriladi']
-  telegram_id bigint [null, note: 'Bot orqali ariza qoldirgan Telegram ID']
+  telegram_id bigint [null, note: 'Bot orqali bog\'langan Telegram ID']
+  form_token varchar(64) [unique, null, note: 'O\'quvchi bot/webda o\'zi anketani to\'ldirishi uchun unikal token']
+  is_form_completed boolean [default: false, note: 'O\'quvchi anketani va rasmlarni to\'liq yukladimi?']
   full_name varchar(255) [not null]
   phone varchar(50) [not null]
   category varchar(20) [default: 'B', note: 'Qiziqqan toifasi: B, A, C, BC']
@@ -601,8 +607,13 @@ Table leads {
   passport_series varchar(10) [null]
   passport_number varchar(20) [null]
   pinfl varchar(14) [null, note: 'JSHSHIR']
+  birth_date date [null]
+  address varchar(500) [null]
+  photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan 3x4 rasm']
+  passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi']
   source lead_source_enum [default: 'telegram_bot']
-  stage lead_stage_enum [default: 'new_lead']
+  stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, trial_lesson, contract_signed, rejected']
   notes text [null]
   lost_reason text [null]
   created_at timestamp
