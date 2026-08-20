@@ -1,6 +1,6 @@
 // ==========================================
 // 🚗 AUTOPRIME — ALL-IN-ONE AVTOMAKTAB PLATFORMASI
-// (CRM + ERP + LMS + PRAVA24 TEST ENGINE)
+// (CRM + ERP + LMS + PRAVA24 TEST ENGINE + CERTIFICATES)
 // DBML fayli: https://dbdiagram.io uchun
 // ==========================================
 
@@ -24,6 +24,11 @@ Enum payment_type_enum {
   mock_exam
   certificate
   other
+}
+
+Enum certificate_status_enum {
+  issued
+  cancelled
 }
 
 Enum salary_type_enum {
@@ -104,7 +109,7 @@ Enum vehicle_status_enum {
 
 
 // ==========================================
-// 🔐 1. SPATIE ROLES & PERMISSIONS (MULTI-ROLE QO'LLAB-QUVVATLASH)
+// 🔐 1. SPATIE ROLES & PERMISSIONS (MULTI-ROLE)
 // ==========================================
 
 Table roles {
@@ -117,7 +122,7 @@ Table roles {
 
 Table permissions {
   id bigint [pk, increment]
-  name varchar(255) [not null, note: 'Masalan: attendance.mark_manual, finance.view, contracts.create, etc.']
+  name varchar(255) [not null, note: 'Masalan: attendance.mark_manual, certificates.create, finance.view, etc.']
   guard_name varchar(255) [default: 'web']
   created_at timestamp
   updated_at timestamp
@@ -178,6 +183,7 @@ Table users {
 Table groups {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
+  teacher_id bigint [ref: > users.id, null, note: 'Guruhning asosiy nazariyotchi o\'qituvchisi']
   name varchar(255) [not null]
   category varchar(20) [default: 'B']
   start_date date
@@ -199,7 +205,7 @@ Table autodromes {
 
 
 // ==========================================
-// 🎓 3. O'QUVCHILAR & SHARTNOMALAR (STUDENTS & CONTRACTS)
+// 🎓 3. O'QUVCHILAR, SHARTNOMALAR & SERTIFIKATLAR (QABULDAN BITIRISHGACHA)
 // ==========================================
 
 Table students {
@@ -211,8 +217,10 @@ Table students {
   phone varchar(50) [not null]
   passport_series varchar(10)
   passport_number varchar(20)
+  pinfl varchar(14) [null, note: 'JSHSHIR (14 xonali) — YHXHB va E-avtomaktab uchun']
   birth_date date [null]
   address varchar(500) [null]
+  photo_url varchar(500) [null, note: '3x4 rasmi']
   medical_certificate_date date [null, note: '083-forma tibbiy ma\'lumotnoma sanasi']
   telegram_chat_id bigint [null, note: 'Telefoni/Telegrami yo\'q bo\'lsa null bo\'ladi']
   is_active boolean [default: true]
@@ -237,6 +245,27 @@ Table contracts {
   payment_status payment_status_enum [default: 'unpaid']
   terms text [null, note: 'Maxsus shartlar yoki izoh']
   file_url varchar(500) [null, note: 'Generatsiya qilingan PDF shartnoma havolasi']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table certificates {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  student_id bigint [ref: > students.id]
+  contract_id bigint [ref: > contracts.id]
+  group_id bigint [ref: > groups.id]
+  issued_by_user_id bigint [ref: > users.id, note: 'Guvohnomani rasmiylashtirgan admin/reception']
+  certificate_number varchar(50) [unique, not null, note: 'Masalan: G-2026-00452']
+  series varchar(10) [default: 'AF']
+  category varchar(10) [default: 'B']
+  theory_score int [default: 0, note: 'Ichki nazariya imtihoni bali (masalan: 19/20)']
+  practical_status varchar(50) [default: 'passed', note: 'Amaliy imtihon natijasi']
+  attendance_rate decimal(5,2) [default: 0, note: 'Darslardagi umumiy davomat foizi']
+  issued_date date [not null]
+  qr_verify_hash varchar(255) [unique, note: 'Guvohnomani haqiqiyligini tekshirish uchun maxsus QR token']
+  status certificate_status_enum [default: 'issued']
+  file_url varchar(500) [null, note: 'Chop etish uchun tayyor PDF Guvohnoma']
   created_at timestamp
   updated_at timestamp
 }
@@ -629,9 +658,10 @@ TableGroup Core_MultiBranch {
   autodromes
 }
 
-TableGroup Students_and_Contracts {
+TableGroup Students_Contracts_and_Certificates {
   students
   contracts
+  certificates
 }
 
 TableGroup ERP_Finance_and_CashShift {
