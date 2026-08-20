@@ -111,7 +111,7 @@ Enum vehicle_status_enum {
 
 
 // ==========================================
-// 🔐 1. SPATIE ROLES & PERMISSIONS (MULTI-ROLE)
+// 🔐 1. SPATIE ROLES & PERMISSIONS (MULTI-ROLE & DIRECT PERMISSIONS)
 // ==========================================
 
 Table roles {
@@ -120,6 +120,10 @@ Table roles {
   guard_name varchar(255) [default: 'web']
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    (name, guard_name) [unique]
+  }
 }
 
 Table permissions {
@@ -128,6 +132,10 @@ Table permissions {
   guard_name varchar(255) [default: 'web']
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    (name, guard_name) [unique]
+  }
 }
 
 Table model_has_roles {
@@ -137,6 +145,16 @@ Table model_has_roles {
 
   indexes {
     (role_id, model_id, model_type) [pk]
+  }
+}
+
+Table model_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  model_type varchar(255) [not null]
+  model_id bigint [not null, note: 'Foydalanuvchiga rolisiz, to\'g\'ridan-to\'g\'ri alohida ruxsat berish imkoni uchun']
+
+  indexes {
+    (permission_id, model_id, model_type) [pk]
   }
 }
 
@@ -173,10 +191,7 @@ Table users {
   password varchar(255)
   telegram_id bigint [unique, null]
   telegram_username varchar(255) [null]
-  salary_balance decimal(12,2) [default: 0, note: 'Xodimga to\'lanishi kerak bo\'lgan qoldiq oylik (Minusga ketmaydi >= 0)']
-  car_name varchar(255) [null, note: 'Agar xodim instructor rolida ham ishlasa to\'ldiriladi']
-  car_number varchar(50) [null, note: 'Agar xodim instructor rolida ham ishlasa to\'ldiriladi']
-  car_photo varchar(500) [null]
+  salary_balance decimal(12,2) [default: 0, note: 'Xodimga to\'lanishi kerak bo\'lgan qoldiq oylik (Minusga ketmaydi >= 0). DB CHECK constraint + application-level row lock bilan ta\'minlanishi shart']
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -217,19 +232,23 @@ Table students {
   registered_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan reception/admin']
   full_name varchar(255) [not null]
   phone varchar(50) [not null]
-  passport_series varchar(10)
-  passport_number varchar(20)
-  pinfl varchar(14) [null, note: 'JSHSHIR (14 xonali) — YHXHB va E-avtomaktab uchun']
+  passport_series varchar(10) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
+  passport_number varchar(20) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
+  pinfl varchar(14) [unique, null, note: 'JSHSHIR (14 xonali) — Model darajasida encrypted cast bilan shifrlanishi shart']
   birth_date date [null]
   address varchar(500) [null]
   photo_url varchar(500) [null, note: '3x4 rasmi']
-  passport_photo_url varchar(500) [null, note: 'Pasport rasmi']
-  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi']
+  passport_photo_url varchar(500) [null, note: 'Pasport rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
   medical_certificate_date date [null, note: '083-forma tibbiy ma\'lumotnoma sanasi']
   telegram_chat_id bigint [null, note: 'Telefoni/Telegrami yo\'q bo\'lsa null bo\'ladi']
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    (passport_series, passport_number) [unique]
+  }
 }
 
 Table contracts {
@@ -244,7 +263,8 @@ Table contracts {
   discount_amount decimal(12,2) [default: 0, note: 'Chegirma miqdori']
   final_amount decimal(12,2) [not null, note: 'To\'lanishi kerak bo\'lgan yakuniy summa (total - discount)']
   paid_amount decimal(12,2) [default: 0, note: 'Haqiqatda to\'langan summa']
-  debt_amount decimal(12,2) [default: 0, note: 'Qoldiq qarzdorlik (Minusga ketmaydi >= 0)']
+  debt_amount decimal(12,2) [default: 0, note: 'Qoldiq qarzdorlik (Minusga ketmaydi >= 0). DB CHECK constraint + application-level row lock bilan ta\'minlanishi shart']
+  overpaid_amount decimal(12,2) [default: 0, note: 'Ortiqcha to\'lov miqdori (ortiqcha to\'lovlarni kuzatish uchun)']
   status contract_status_enum [default: 'active']
   payment_status payment_status_enum [default: 'unpaid']
   terms text [null, note: 'Maxsus shartlar yoki izoh']
@@ -293,7 +313,7 @@ Table cash_registers {
   branch_id bigint [ref: > branches.id, null, note: 'NULL bo\'lsa — Markaziy Admin Kassa (Faqat Superadmin boshqaradi)']
   cash_register_type_id bigint [ref: > cash_register_types.id, not null]
   name varchar(100) [not null, note: 'Masalan: Chilonzor Naqd Kassa, Bosh Admin Naqd Kassa']
-  balance decimal(14,2) [default: 0, note: 'Qat\'iy qoida: Minusga ketishi mumkin emas (balance >= 0)']
+  balance decimal(14,2) [default: 0, note: 'Qat\'iy qoida: Minusga ketishi mumkin emas (balance >= 0). DB CHECK constraint + application-level row lock (lockForUpdate) bilan ta\'minlanishi shart']
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -302,7 +322,7 @@ Table cash_registers {
 Table payments {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
-  contract_id bigint [ref: > contracts.id, null]
+  contract_id bigint [ref: > contracts.id, null, note: 'To\'lov to\'g\'ridan-to\'g\'ri shartnomaga yopiladi']
   student_id bigint [ref: > students.id]
   cash_register_id bigint [ref: > cash_registers.id]
   received_by_user_id bigint [ref: > users.id, note: 'To\'lovni qabul qilgan kassir/accountant/admin']
@@ -381,8 +401,9 @@ Table salaries {
   user_id bigint [ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki bir vaqtda ikkalasi bo\'lgan xodim)']
   created_by_user_id bigint [ref: > users.id, note: 'Oylikni hisoblagan accountant/admin/superadmin']
   period varchar(20) [not null, note: 'Masalan: 2026-08']
-  salary_type salary_type_enum [default: 'base_salary', note: 'base_salary (nazariya darslari), driving_hourly_rate (amaliy haydash), bonus_kpi']
-  amount decimal(12,2) [not null, note: 'Hisoblangan summa (+)']
+  salary_type salary_type_enum [default: 'base_salary', note: 'base_salary (nazariya darslari), driving_hourly_rate (amaliy haydash), bonus_kpi, penalty, advance']
+  amount decimal(12,2) [not null, note: 'Hisoblangan summa (doim musbat)']
+  is_deduction boolean [default: false, note: 'penalty va advance turlari uchun true — shunda amount doim musbat qoladi, ishora aniq bo\'ladi']
   lessons_or_hours_count int [default: 0, note: 'O\'tgan dars/haydash soatlari soni']
   notes text [null]
   accrued_at timestamp [not null]
@@ -453,6 +474,7 @@ Table drivings {
   instructor_id bigint [ref: > users.id, note: 'Haydash o\'rgatuvchi xodim (instructor rolidagi user)']
   student_id bigint [ref: > students.id]
   autodrome_id bigint [ref: > autodromes.id, null]
+  vehicle_id bigint [ref: > vehicles.id, null, note: 'Har bir amaliy dars qaysi mashinada o\'tilgani']
   date date [not null]
   start_time time [not null]
   end_time time [not null]
@@ -479,7 +501,7 @@ Table reviews {
 
 
 // ==========================================
-// 📚 8. LMS: PRAVA24 TEST & IMTIHON DVIGATELI
+// 📚 8. LMS: PRAVA24 TEST & IMTIHON DVIGATELI (4 TILDA)
 // ==========================================
 
 Table tickets {
@@ -487,6 +509,8 @@ Table tickets {
   ticket_number int [unique, not null]
   title_uz varchar(255)
   title_ru varchar(255)
+  title_krill varchar(255) [null]
+  title_en varchar(255) [null]
   description text [null]
   is_active boolean [default: true]
   created_at timestamp
@@ -499,11 +523,17 @@ Table questions {
   question_number int [not null]
   question_uz text [not null]
   question_ru text [not null]
+  question_krill text [null]
+  question_en text [null]
   description_uz text [null]
   description_ru text [null]
+  description_krill text [null]
+  description_en text [null]
   image_url varchar(500) [null]
   audio_url_uz varchar(500) [null]
   audio_url_ru varchar(500) [null]
+  audio_url_krill varchar(500) [null]
+  audio_url_en varchar(500) [null]
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -514,6 +544,8 @@ Table answers {
   question_id bigint [ref: > questions.id]
   answer_uz text [not null]
   answer_ru text [not null]
+  answer_krill text [null]
+  answer_en text [null]
   is_correct boolean [default: false]
   order int [default: 0]
   created_at timestamp
@@ -524,6 +556,8 @@ Table sign_categories {
   id bigint [pk, increment]
   name_uz varchar(255) [not null]
   name_ru varchar(255) [not null]
+  name_krill varchar(255) [null]
+  name_en varchar(255) [null]
   slug varchar(255) [unique]
   order int [default: 0]
   created_at timestamp
@@ -536,8 +570,12 @@ Table signs {
   sign_number varchar(50) [not null]
   name_uz varchar(255) [not null]
   name_ru varchar(255) [not null]
+  name_krill varchar(255) [null]
+  name_en varchar(255) [null]
   description_uz text [null]
   description_ru text [null]
+  description_krill text [null]
+  description_en text [null]
   image_url varchar(500) [null]
   order int [default: 0]
   created_at timestamp
@@ -549,8 +587,12 @@ Table road_lines {
   line_number varchar(50) [not null]
   name_uz varchar(255) [not null]
   name_ru varchar(255) [not null]
+  name_krill varchar(255) [null]
+  name_en varchar(255) [null]
   description_uz text [null]
   description_ru text [null]
+  description_krill text [null]
+  description_en text [null]
   image_url varchar(500) [null]
   created_at timestamp
   updated_at timestamp
@@ -604,16 +646,16 @@ Table leads {
   phone varchar(50) [not null]
   category varchar(20) [default: 'B', note: 'Qiziqqan toifasi: B, A, C, BC']
   preferred_time varchar(50) [null, note: 'Ertalabki, Kunduzgi, Kechki']
-  passport_series varchar(10) [null]
-  passport_number varchar(20) [null]
-  pinfl varchar(14) [null, note: 'JSHSHIR']
+  passport_series varchar(10) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
+  passport_number varchar(20) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
+  pinfl varchar(14) [null, note: 'JSHSHIR — Model darajasida encrypted cast bilan shifrlanishi shart']
   birth_date date [null]
   address varchar(500) [null]
   photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan 3x4 rasm']
-  passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi']
-  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi']
+  passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi — Model darajasida encrypted cast bilan shifrlanishi shart']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
   source lead_source_enum [default: 'telegram_bot']
-  stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, trial_lesson, contract_signed, rejected']
+  stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, trial_lesson (Sinov darsi / Bepul ochiq darsga qatnashgan potensial o\'quvchilar bosqichi — marketing konversiyasini oshirish uchun), contract_signed, rejected']
   notes text [null]
   lost_reason text [null]
   created_at timestamp
@@ -658,6 +700,26 @@ Table vehicle_maintenances {
 
 
 // ==========================================
+// 🛡️ 11. AUDIT & LOGGING (SPATIE ACTIVITYLOG)
+// ==========================================
+
+Table activity_log {
+  id bigint [pk, increment]
+  log_name varchar(255) [null, note: 'Masalan: contracts, payments, cash_transfers, salaries']
+  description text [not null]
+  subject_type varchar(255) [null]
+  subject_id bigint [null]
+  causer_type varchar(255) [null]
+  causer_id bigint [null, ref: > users.id]
+  properties json [null, note: 'Eski va yangi qiymatlar (old/new diff)']
+  batch_uuid varchar(36) [null]
+  event varchar(255) [null, note: 'created, updated, deleted, approved']
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
 // 📑 VIZUAL GURUHLAR (TABLE GROUPS)
 // ==========================================
 
@@ -665,6 +727,7 @@ TableGroup RBAC_Spatie_Permissions {
   roles
   permissions
   model_has_roles
+  model_has_permissions
   role_has_permissions
 }
 
@@ -724,4 +787,8 @@ TableGroup CRM_Sales_Funnel_and_Bot_Leads {
 TableGroup ERP_Fleet_Management {
   vehicles
   vehicle_maintenances
+}
+
+TableGroup System_Audit_and_Logs {
+  activity_log
 }

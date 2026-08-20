@@ -9,17 +9,25 @@ Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘li
   3. 🚗 **Toifa tanlash** (*B, A, C* tugmalari orqali)
   4. 🏢 **Filial tanlash** (*Chilonzor, Yunusobod va h.k.* tugmalari)
   5. ⏰ **Qulay o‘qish vaqti** (*Ertalabki, Kunduzgi, Kechki* tugmalari)
-  6. 📸 **Pasport / ID karta rasmi** (Telefon kamerasidan yoki galereyadan to‘g‘ridan-to‘g‘ri rasm qilib tashlaydi)
+  6. 📸 **Pasport / ID karta rasmi** (Telefon kamerasidan yoki galereyadan to‘g‘ridan-to‘g‘ri rasm qilib tashlaydi — *shifrlangan saqlanadi*)
   7. 👤 **3x4 rasm / Selfi** (Bot chatiga rasm qilib yuboradi)
   8. 📅 **Tug‘ilgan sana va Yashash manzili**
-  9. 🔢 **JSHSHIR (PINFL)** (Ixtiyoriy/majburiy)
+  9. 🔢 **JSHSHIR (PINFL)** (14 xonali — *shifrlangan saqlanadi*)
 * ⚡ **Receptionga Xabar va 1-Klikda Shartnoma**: Bot anketani qabul qilishi bilan Reception xodimiga bildirishnoma boradi. Reception barcha yuklangan rasmlar va ma'lumotlarni ko‘rib, 1-klik bilan talaba (`students`) va shartnoma (`contracts`)ga aylantiradi.
-* 🔐 **Spatie RBAC & Permissions Matrix** (7 ta rol va Multi-role: `teacher + instructor`)
-* 💳 **Shartnomalar & Non-negative Kassalar** (Naqd/Karta to‘lovlar, `balance >= 0`)
-* 💸 **Xarajatlar & Xodimlar Oyligi** (Expenses & Payroll Payout)
+* 🔐 **Spatie RBAC & Permissions Matrix** (7 ta rol, `model_has_roles` va `model_has_permissions` orqali to‘g‘ridan-to‘g‘ri ruxsatlar)
+* 💳 **Moliyaviy Yaxlitlik & Non-negative Kassalar**: 
+  - DB CHECK constraint (`balance >= 0`, `debt_amount >= 0`, `salary_balance >= 0`) + `DB::transaction()` + `lockForUpdate()`;
+  - Keshlangan summalarning drift xavfini oldini olish uchun kunlik yarim kechasi avtomatik `ReconcileFinancialBalancesJob` hisob-kitob tekshiruvi;
+  - `contracts.overpaid_amount` (ortiqcha to‘lovlar monitoringi) va `salaries.is_deduction` (jarima va avanslar aniq belgisi).
+* 🛡️ **Xavfsizlik va Shaxsiy Ma'lumotlarni Himoyalash (PII Encryption)**:
+  - `pinfl`, `passport_series`, `passport_number`, `passport_photo_url`, `medical_certificate_photo_url` maydonlari model darajasida Laravel `encrypted` cast bilan saqlanadi.
+* 📋 **Audit va Xatti-harakatlar Tarixi (`spatie/laravel-activitylog`)**:
+  - Shartnomalarni tahrirlash, ochiq smenadagi to‘lovlarni tuzatish, kassa transferlarini tasdiqlash va oylik hisoblash amallari to‘liq kim tomonidan qachon va qanday o‘zgartirilgani (old/new diff) qayd etiladi.
+* 🚗 **Avtopark Normalizatsiyasi**:
+  - Xodimlar jadvalidan mashina maydonlari chiqarilib, `vehicles` jadvali orqali boshqariladi va `drivings.vehicle_id` orqali har bir dars o‘tilgan avtomobil aniq bog‘lanadi.
 * 📱 **Darslar & Davomat** (One-Time Dynamic QR & Telefonsizlar uchun Manual Davomat)
-* 🚗 **Amaliy Haydash** (Drivings slotlari, instruktor avtomobili, baholar)
-* 📚 **LMS Testlar & Imtihon** (Prava24 1190+ savolli 25 min taymerli simulyator)
+* 📚 **LMS Testlar & Imtihon (4 Tilda: uz, ru, krill, en)**:
+  - Prava24 1190+ savolli 25 min taymerli simulyator, biletlar, savollar, javoblar va yo‘l belgilari 4 ta tilda to‘liq ishlaydi.
 * 🎓 **Bitirish & Sertifikat/Guvohnoma** (QR-kodli rasmiy bitiruv guvohnomasi PDF)
 * 📜 **Gibrid Balans & UNION Moliyaviy Tarixlar** (Student, Kassa, Xodim ko‘chirmalari)
 * 📲 **Telegram Mini App** (O‘quvchining to‘liq shaxsiy kabineti)
@@ -29,40 +37,49 @@ Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘li
 ## O‘quvchining To‘liq Hayotiy Sikli (Bot Qabulidan ➡️ Sertifikatgacha)
 
 ```
-1. TELEGRAM BOT CHATIDA KETMA-KET QABUL ANKETASI (Bot Chat Wizard)
+1. TELEGRAM BOT CHATIDA KETMA-KET QABUL ANKETASI (Bot Chat Wizard & CRM Leads)
    ├── Bot: "F.I.O ingizni kiriting" ➡️ O'quvchi yozadi
    ├── Bot: [📱 Kontaktni yuborish] ➡️ O'quvchi bosadi
    ├── Bot: Toifani tanlang: [🚗 B toifa] [🏍️ A toifa] [🚛 C toifa]
    ├── Bot: Filialni tanlang: [🏢 Chilonzor] [🏢 Yunusobod]
    ├── Bot: Qulay vaqt: [🌅 Ertalabki] [☀️ Kunduzgi] [🌙 Kechki]
-   ├── Bot: "Pasportingiz rasmini yuboring" ➡️ O'quvchi rasm tashlaydi
+   ├── Bot: "Pasportingiz rasmini yuboring" ➡️ O'quvchi rasm tashlaydi (Encrypted)
    ├── Bot: "3x4 rasmingizni yuboring" ➡️ O'quvchi rasm tashlaydi
    └── Bot: "Tug'ilgan sana va manzilingizni kiriting" ➡️ O'quvchi yozadi.
+   (Ixtiyoriy: Sinov/Ochiq darsga qatnashganlar 'trial_lesson' bosqichiga o'tadi)
 
 2. RECEPTION GA BILDIRISHNOMA & 1-KLIK BILAN SHARTNOMA
    └── Reception panelida barcha rasmlar va ma'lumotlar avtomat tayyor bo'ladi. 
        Reception tekshirib, 1-klik bilan Student va Contract ochadi va guruhga biriktiradi.
 
 3. TO'LOV QABUL QILISH (Payments & Cash Registers)
-   └── Kassir to'lovni (Naqd / Karta) qabul qiladi. Qoldiq qarz kamayadi, Kassa balansi oshadi (hech qachon minusga ketmaydi).
+   └── Kassir to'lovni shartnomaga qabul qiladi (Naqd / Karta). 
+       Qoldiq qarz kamayadi, Kassa balansi oshadi (DB CHECK balance >= 0, lockForUpdate).
 
 4. NAZARIY TA'LIM VA DAVOMAT (Lesson Sessions & Attendance)
-   └── O'qituvchi dars ochadi. Ekranda har 15s yangilanuvchi Dynamic QR token. O'quvchi bot orqali skanerlaydi (telefoni yo'qlarni xodim qo'lda belgilaydi).
+   └── O'qituvchi dars ochadi. Ekranda har 15s yangilanuvchi Dynamic QR token. 
+       O'quvchi bot orqali skanerlaydi (telefoni yo'qlarni xodim qo'lda belgilaydi).
 
-5. AMALIY HAYDASH (Drivings & Instructors)
-   └── Instruktor va avtomobil bo'yicha amaliy dars slotlari. Dars yakunlangach, o'quvchi instruktorga baho (Review) qo'yadi.
+5. AMALIY HAYDASH (Drivings & Instructors & Vehicles)
+   └── Instruktor va aniq mashina (vehicle_id) bo'yicha amaliy dars slotlari. 
+       Dars yakunlangach, o'quvchi instruktorga baho (Review) qo'yadi.
 
-6. TEST VA ICHKI IMTIHON (LMS & Mock Exam)
-   └── Prava24 ning 1190+ savollar bazasida mashq qiladi. Ichki imtihondan o'tadi (20 savoldan kamida 18 ta to'g'ri javob).
+6. TEST VA ICHKI IMTIHON (LMS & Mock Exam — 4 Tilda)
+   └── Prava24 ning 1190+ savollar bazasida 4 tilda (uz, ru, krill, en) mashq qiladi. 
+       Ichki imtihondan o'tadi (20 savoldan kamida 18 ta to'g'ri javob).
 
 7. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
-   └── Barcha shartlar bajarilgach (To'lov to'liq to'langan, davomat yetarli, haydash soatlari o'tilgan, imtihondan o'tgan) o'quvchiga rasmiy QR-kodli Bitiruv Guvohnomasi chiqariladi va PDF chop etiladi.
+   └── Barcha shartlar bajarilgach (Talabaning BARCHA faol shartnomalari bo'yicha umumiy qarzi 0, 
+       davomat >= 70%, haydash soatlari o'tilgan, imtihondan o'tgan) 
+       o'quvchiga rasmiy QR-kodli Bitiruv Guvohnomasi chiqariladi va PDF chop etiladi.
 
 8. BUXGALTERIYA & KASSA TRANSFERI (Finance & Payroll)
-   └── Xarajatlar (Ijara, reklama), Xodimlar oyligi (Salaries & Salary Payments) beriladi. Kassa smenasi yopilib Admin kassaga transfer qilinadi.
+   └── Xarajatlar (Ijara, reklama), Xodimlar oyligi (Salaries: is_deduction & Salary Payments) beriladi. 
+       Kassa smenasi yopilib Admin kassaga transfer qilinadi. Barcha operatsiyalar ActivityLog'da saqlanadi.
 
-9. XRONOLOGIK TARIX (UNION Statements)
-   └── Talabaning to'liq qarz tarixi, Kassaning barcha kirim/chiqim qoldiqlari, Xodimning oylik ko'chirmasi.
+9. XRONOLOGIK TARIX & AUDIT (UNION Statements & Drift Reconciliation)
+   └── Talabaning to'liq qarz tarixi, Kassaning barcha kirim/chiqim qoldiqlari, 
+       Xodimning oylik ko'chirmasi va har kecha avtomatik moliyaviy muvofiqlik (Reconciliation) tekshiruvi.
 ```
 
 ---
@@ -70,10 +87,10 @@ Mazkur reja **AutoPrimeBot** tizimini O‘zbekiston avtomaktablari uchun to‘li
 ## Foydalanuvchi Tasdiqlagan Asosiy Qoidalar
 
 ### 🔐 1. Rollar va Ruxsatlar Matritsasi (`spatie/laravel-permission`):
-Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bitta xodim bir vaqtning o‘zida bir nechta rolga ega bo‘lishi mumkin (masalan: `teacher + instructor`).
+Tizimda **Spatie Multi-Role (`model_has_roles`)** va **To‘g‘ridan-to‘g‘ri Ruxsatlar (`model_has_permissions`)** qo‘llaniladi. Bitta xodim bir vaqtning o‘zida bir nechta rolga ega bo‘lishi mumkin (masalan: `teacher + instructor`).
 
 #### 7 ta Asosiy Rol:
-1. **`super_admin`**: Barcha filiallar, tizim sozlamalari va **Markaziy Admin Kassalar (`branch_id = null`)**ning yagona boshqaruvchisi.
+1. **`super_admin`**: Barcha filiallar, tizim sozlamalari, audit loglar va **Markaziy Admin Kassalar (`branch_id = null`)**ning yagona boshqaruvchisi.
 2. **`admin`**: O‘z filialidagi barcha jarayonlarni nazorat qiluvchi filial rahbari.
 3. **`accountant` (Buxgalter)**: Moliyaviy hisobotlar, xodimlar oyligini belgilash, kassa transferlarini audit qilish va tahlil.
 4. **`reception`**: Yangi o‘quvchilarni qabul qiladi, shaxsiy anketasini kiritadi, **shartnoma tuzadi (narx, chegirma belgilaydi)**, guruhga biriktiradi va **sertifikat/guvohnoma** chiqaradi.
@@ -90,6 +107,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 |---|---|---|
 | `dashboard.view` | *Sidebar* | Boshqaruv panelini ko‘rish |
 | `kpi.view` | *Sidebar/Action* | Xodimlar va filiallar KPI reytingi va tahlilini ko‘rish |
+| `audit.view` | *Sidebar/Action* | Tizim audit jurnali va xatti-harakatlar tarixini ko‘rish (*Superadmin*) |
 
 #### 2. 🏢 Filiallar va Xodimlar (Core & Users)
 | Permission | Turi | Vazifasi |
@@ -115,7 +133,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 |---|---|---|
 | `contracts.view` | *Sidebar* | Shartnomalar va qoldiq qarzdorlar ro‘yxatini ko‘rish |
 | `contracts.create` | *Action* | Yangi shartnoma tuzish (narx, chegirma belgilash) |
-| `contracts.edit` | *Action* | Shartnoma summasi va shartlarini tahrirlash |
+| `contracts.edit` | *Action* | Shartnoma summasi va shartlarini tahrirlash (*Audit loglanadi*) |
 | `contracts.print` | *Action* | PDF shartnomani yuklab olish va chop etish |
 | `certificates.view` | *Sidebar* | Bitiruvchilar va berilgan guvohnomalar ro‘yxatini ko‘rish |
 | `certificates.create` | *Action* | Imtihondan o‘tgan talabaga Bitiruv Guvohnomasi chiqarish |
@@ -126,20 +144,20 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 |---|---|---|
 | `finance.view` | *Sidebar* | Moliya va kassalar bo‘limini ko‘rish |
 | `cash_registers.view` | *Action* | Kassa balanslari va ko‘chirmasini (Statement) ko‘rish |
-| `payments.create` | *Action* | O‘quvchidan to‘lov qabul qilish va chek chiqarish (*Kassir*) |
-| `payments.edit` | *Action* | Ochiq smenadagi to‘lovni tahrirlash |
+| `payments.create` | *Action* | O‘quvchi shartnomasiga to‘lov qabul qilish va chek chiqarish (*Kassir*) |
+| `payments.edit` | *Action* | Ochiq smenadagi to‘lovni tahrirlash (*Audit loglanadi*) |
 | `expenses.create` | *Action* | Kassadan xarajat chiqimini qilish (*Ijara, reklama, banner va h.k.*) |
 | `expense_categories.manage`| *Action* | Xarajat toifalarini yaratish va boshqarish |
 | `cash_shifts.close` | *Action* | Kassa smenasini yopish |
 | `cash_transfers.create` | *Action* | Admin kassaga transfer jo‘natish |
-| `cash_transfers.approve`| *Action* | Admin kassada transferni qabul qilish (*Superadmin*) |
+| `cash_transfers.approve`| *Action* | Admin kassada transferni qabul qilish (*Superadmin, Audit loglanadi*) |
 | `admin_treasury.manage` | *Sidebar/Action*| Markaziy Admin Kassani boshqarish (*Superadmin*) |
 
 #### 6. 💼 Xodimlar Oyligi (Payroll & Salaries)
 | Permission | Turi | Vazifasi |
 |---|---|---|
 | `salaries.view` | *Sidebar* | Oyliklar ro‘yxati va xodim oylik tarixini ko‘rish |
-| `salaries.accrue` | *Action* | Xodimlarga oylik belgilash / hisoblash (*Accountant/Admin*) |
+| `salaries.accrue` | *Action* | Xodimlarga oylik/jarima/avans belgilash (*Accountant/Admin, Audit loglanadi*) |
 | `salaries.pay` | *Action* | Kassadan oylik to‘lash (payout) |
 
 #### 7. 📱 Davomat (Attendance & Sessions)
@@ -154,7 +172,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 | Permission | Turi | Vazifasi |
 |---|---|---|
 | `drivings.view` | *Sidebar* | Haydash jadvallari va slotlarni ko‘rish |
-| `drivings.manage` | *Action* | Haydash darslarini rejalashtirish, o‘tildi deb belgilash |
+| `drivings.manage` | *Action* | Haydash darslarini rejalashtirish (mashina tanlash bilan), o‘tildi deb belgilash |
 | `autodromes.manage` | *Action* | Avtodromlarni kiritish va tahrirlash |
 | `reviews.view` | *Action* | Instruktorlarga qo‘yilgan baho va sharhlarni ko‘rish |
 
@@ -162,7 +180,7 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 | Permission | Turi | Vazifasi |
 |---|---|---|
 | `lms.view` | *Sidebar* | Testlar va imtihonlar bo‘limini ko‘rish |
-| `tickets.manage` | *Action* | Biletlar va 1190 ta savollar bazasini boshqarish |
+| `tickets.manage` | *Action* | Biletlar va 1190 ta savollar bazasini boshqarish (4 tilda) |
 | `attempts.view` | *Action* | O‘quvchilarning imtihon natijalari statistikasini ko‘rish |
 
 #### 10. 👥 CRM & 🚙 Avtopark (CRM & Fleet)
@@ -175,28 +193,21 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bi
 
 ---
 
-### 🎭 Rollar bo‘yicha Ruxsatlar Taqsimoti (Default Permissions Matrix)
-
-| Rol | Ruxsat etilgan asosiy modullar va harakatlar |
-|---|---|
-| 👑 **`super_admin`** | **Barcha ruxsatlar (100% full access)** + Admin Kassa boshqaruvi + Rollar sozlamalari |
-| 🏢 **`admin`** | O‘z filialidagi barcha modullar: O‘quvchilar, Guruhlar, Shartnomalar, Guvohnomalar, Moliya, Oyliklar, Haydash, `attendance.mark_manual`, CRM, Avtopark |
-| 🧮 **`accountant`** | Moliya (`finance.view`, `cash_registers.view`), Xarajatlar (`expenses.create`), Oyliklar (`salaries.accrue`, `salaries.pay`), Shartnomalar tahlili, Kassa smenalari va transferlar nazorati |
-| 💵 **`kassir`** | To‘lov qabul qilish (`payments.create`), Xarajat chiqimi (`expenses.create`), Kassa smenasini yopish (`cash_shifts.close`), Transfer jo‘natish (`cash_transfers.create`), Oylik berish (`salaries.pay`) |
-| 📋 **`reception`** | O‘quvchi qabul qilish (`students.create`), Bot liddan talaba ochish, Shartnoma tuzish (`contracts.create`), Guvohnoma chiqarish (`certificates.create`), Guruhlarga biriktirish, Qo‘lda davomat |
-| 👨‍🏫 **`teacher`** | Nazariy dars sessiyasini ochish (`attendance.start_session`), Proyektorga QR chiqarish, Telefoni yo‘qni qo‘lda belgilash (`attendance.mark_manual`), LMS testlarini ko‘rish |
-| 🏎️ **`instructor`** | O‘zining amaliy haydash jadvallari (`drivings.manage`), Mashinasi holati, O‘z oylik ko‘chirmasini ko‘rish |
-
----
-
-### 🚫 2. Qat'iy Musbat Balans Qoidasi (No Negative Balance Constraint):
-- **Kassalar:** Kassa balansi hech qachon minusga keta olmaydi (`balance >= 0`). Chiqim (`expenses`, `salary_payments`, `cash_transfers`) kiritilayotganda kassa qoldig‘i tekshiriladi: agar mablag‘ yetarli bo‘lmasa, tizim tranzaksiyani rad etadi.
-- **Talabalar Qarzdorligi:** `debt_amount >= 0` (Ortiqcha to‘lov holatida maxsus overpaid balansi sifatida nazorat qilinadi).
-- **Xodimlar Oylik Balansi:** `salary_balance >= 0` (Hisoblangan oylikdan ortiqcha pul to‘lab yuborishning oldi olinadi).
+### 🚫 2. Qat'iy Musbat Balans Qoidasi va Moliyaviy Yaxlitlik (Financial Integrity & No-Drift):
+- **DB CHECK Constraint & Row Lock:** 
+  - `cash_registers.balance >= 0`
+  - `contracts.debt_amount >= 0`
+  - `users.salary_balance >= 0`
+  - Barcha balans yangilanishlari (to‘lov, chiqim, transfer, oylik to‘lovi) `DB::transaction()` va `lockForUpdate()` bilan o‘raladi.
+- **Keshlangan Summalar Driftini Oldini Olish (Reconciliation):**
+  - `contracts.paid_amount`, `contracts.debt_amount`, `cash_registers.balance`, `cash_shifts.total_income/closing_balance`, `users.salary_balance` ustunlari har tranzaksiyada atomar yangilanadi.
+  - Har kecha (00:00 da) avtomatik ravishda `ReconcileFinancialBalancesJob` ishga tushadi: u barcha tranzaksiya jadvallaridan (`payments`, `expenses`, `salary_payments`, `cash_transfers`) xom summalarni qayta hisoblab, keshlangan qiymatlar bilan solishtiradi va tafovut bo‘lsa Superadminga xabar beradi.
+- **Talabalar Ortiqcha To‘lovi:** `contracts.overpaid_amount >= 0` orqali alohida kuzatiladi.
+- **Oylik Hisoblash Belgisi:** `salaries.is_deduction` (jarima va avanslar uchun `true`, asosiy oylik va dars bay oyliklar uchun `false`) — shunda summa (`amount`) doim musbat saqlanadi.
 
 ### 🎓 3. Bitirish Shartlari va Guvohnoma Berish Qoidalari:
-O‘quvchiga Bitiruv Guvohnomasi (`certificates`) rasmiylashtirilishi uchun quyidagi shartlar tizim tomonidan tekshiriladi:
-1. **Shartnoma to‘lovi:** Qoldiq qarz bo‘lmasligi (`contracts.debt_amount == 0`).
+O‘quvchiga Bitiruv Guvohnomasi (`certificates`) rasmiylashtirilishi uchun quyidagi 4 ta shart tizim tomonidan qat'iy tekshiriladi:
+1. **Shartnomalar to‘lovi:** Talabaning avtomaktabdagi **BARCHA faol shartnomalari bo‘yicha umumiy qarzdorligi 0 bo‘lishi shart** (`Student->contracts()->where('status', 'active')->sum('debt_amount') == 0`). Talabaning hech qanday kurs yoki qo‘shimcha xizmatdan qarzi qolmagan bo‘lishi lozim.
 2. **Davomat:** Nazariy darslarda qatnashish foizi kamida 70% bo‘lishi.
 3. **Amaliy haydash:** Belgilangan barcha haydash mashg‘ulotlari o‘tilgan bo‘lishi.
 4. **Ichki imtihon:** LMS test sinovidan muvaffaqiyatli o‘tgan bo‘lishi (`is_passed = true`).
@@ -207,32 +218,32 @@ O‘quvchiga Bitiruv Guvohnomasi (`certificates`) rasmiylashtirilishi uchun quyi
 
 ```mermaid
 graph TD
-    subgraph STEP1 ["1️⃣ 1-BOSQICH: Rollar va Foydalanuvchilar (Spatie RBAC)"]
+    subgraph STEP1 ["1️⃣ 1-BOSQICH: Rollar va Foydalanuvchilar (Spatie RBAC & Permissions)"]
         direction TB
         S1["Xodimlar: Superadmin, Admin, Accountant, Kassir, Reception, Teacher, Instructor"]
         S1 --> S1_1["Multi-Role: Bitta xodim bir vaqtda Teacher + Instructor bo'la oladi"]
-        S1_1 --> S1_2["Sidebar va Action ruxsatlari (Permissions Matrix) taqsimlanadi"]
+        S1_1 --> S1_2["Direct Permissions: model_has_permissions orqali alohida ruxsatlar berish"]
     end
 
-    subgraph STEP2 ["2️⃣ 2-BOSQICH: Bot Chatida Ketma-ket Qabul Anketasi (Chat Wizard)"]
+    subgraph STEP2 ["2️⃣ 2-BOSQICH: Bot Chatida Ketma-ket Qabul Anketasi (Chat Wizard & CRM)"]
         direction TB
-        S2["O'quvchi bot chatida ketma-ket: Ism, Tel, Toifa, Filial, Vaqt, Pasport rasmi va 3x4 rasm yuboradi"]
-        S2 --> S2_1["Reception bot arizasini ko'rib, 1-klik bilan Student va Contract ochadi"]
-        S2_1 --> S2_2["O'quvchi o'quv guruhiga biriktiriladi (Groups)"]
+        S2["O'quvchi bot chatida: Ism, Tel, Toifa, Filial, Vaqt, Pasport rasmi (Encrypted) va 3x4 rasm yuboradi"]
+        S2 --> S2_1["Sinov darsiga qatnashganlar 'trial_lesson' bosqichida belgilanadi"]
+        S2_1 --> S2_2["Reception 1-klik bilan Student va Contract ochadi va guruhga biriktiradi"]
     end
 
-    subgraph STEP3 ["3️⃣ 3-BOSQICH: To'lovlarni Qabul Qilish (Kassir)"]
+    subgraph STEP3 ["3️⃣ 3-BOSQICH: To'lovlarni Qabul Qilish (Kassir & Shartnomaga To'lov)"]
         direction TB
-        S3["O'quvchi to'lov qiladi (Naqd yoki Karta orqali)"]
-        S3 --> S3_1["Kassir to'lovni qabul qiladi (Payments)"]
-        S3_1 --> S3_2["Shartnoma qarzi kamayadi va Kassa balansi oshadi (balance >= 0)"]
+        S3["O'quvchi to'lov qiladi (Naqd yoki Karta orqali shartnomaga yopiladi)"]
+        S3 --> S3_1["Kassir to'lovni qabul qiladi (Payments: DB transaction + lockForUpdate)"]
+        S3_1 --> S3_2["Shartnoma qarzi kamayadi, Kassa balansi oshadi (CHECK balance >= 0)"]
     end
 
-    subgraph STEP4 ["4️⃣ 4-BOSQICH: Xarajatlar va Oyliklarni To'lash (Kassadan Chiqim)"]
+    subgraph STEP4 ["4️⃣ 4-BOSQICH: Xarajatlar va Oyliklarni To'lash (Kassadan Chiqim & Audit)"]
         direction TB
         S4["Kassadan xarajat chiqimi (Ijara, Banner, Reklama) — Expenses"]
-        S4 --> S4_1["Xodimga oylik hisoblanadi (Salaries) va Kassadan to'lanadi (SalaryPayments)"]
-        S4_1 --> S4_2["Kassa balansi kamayadi (Hech qachon minusga ketmaydi)"]
+        S4 --> S4_1["Xodimga oylik hisoblanadi (Salaries: is_deduction) va Kassadan to'lanadi"]
+        S4_1 --> S4_2["Barcha operatsiyalar ActivityLog'da to'liq saqlanadi"]
     end
 
     subgraph STEP5 ["5️⃣ 5-BOSQICH: Kassa Smenasini Yopish va Transfer (Kassir -> Admin)"]
@@ -249,31 +260,31 @@ graph TD
         S6_1 --> S6_2["O'quvchi Bot orqali skanerlaydi (Telefoni yo'qlar qo'lda belgilanadi)"]
     end
 
-    subgraph STEP7 ["7️⃣ 7-BOSQICH: Amaliy Haydash Mashg'ulotlari (Instructor)"]
+    subgraph STEP7 ["7️⃣ 7-BOSQICH: Amaliy Haydash Mashg'ulotlari (Instructor & Vehicles)"]
         direction TB
-        S7["Instruktor va avtomobil bo'yicha amaliy dars slotlari belgilanadi (Drivings)"]
+        S7["Instruktor va aniq mashina (vehicle_id) bo'yicha amaliy dars slotlari belgilanadi"]
         S7 --> S7_1["Dars yakunlangach, o'quvchi instruktorga baho qo'yadi (Reviews)"]
     end
 
-    subgraph STEP8 ["8️⃣ 8-BOSQICH: LMS Testlar va Imtihonlar (Prava24 Dvigateli)"]
+    subgraph STEP8 ["8️⃣ 8-BOSQICH: LMS Testlar va Imtihonlar (Prava24 4 Tilda)"]
         direction TB
-        S8["1190+ rasmli savollar va biletlar bazasi"]
+        S8["1190+ rasmli savollar va biletlar bazasi 4 tilda (uz, ru, krill, en)"]
         S8 --> S8_1["Prava24 ExamInterface: 25 daqiqa taymer, swipe va klaviatura boshqaruvi"]
         S8_1 --> S8_2["Natijalar tahlili va imtihonga tayyorgarlik ko'rsatkichi (Attempts)"]
     end
 
     subgraph STEP9 ["9️⃣ 9-BOSQICH: Bitirish va Guvohnoma/Sertifikat Berish (Certificates)"]
         direction TB
-        S9["Talabaning barcha shartlari tekshiriladi: To'lov to'liq, Davomat >= 70%, Imtihon o'tilgan"]
+        S9["Talabaning barcha shartlari tekshiriladi: Barcha shartnomalar qarzi 0, Davomat >= 70%, Imtihon o'tilgan"]
         S9 --> S9_1["Rasmiy Bitiruv Guvohnomasi generatsiya qilinadi (Certificates: QR-kodli PDF)"]
         S9_1 --> S9_2["O'quvchi avtomaktabni muvaffaqiyatli bitiradi va YHXHB imtihoniga yuboriladi"]
     end
 
-    subgraph STEP10 ["🔟 10-BOSQICH: UNION Moliyaviy Tarixlar va Mini App"]
+    subgraph STEP10 ["🔟 10-BOSQICH: UNION Moliyaviy Tarixlar, Mini App & Drift Reconciliation"]
         direction TB
         S10["Talaba Tarixi: Har bir to'lovdan keyingi Qoldiq Qarz"]
         S10 --> S10_1["Kassa Tarixi: Kirim, Chiqim va Transferdan keyingi Kassa Qoldig'i"]
-        S10_1 --> S10_2["O'quvchi Telegram Mini App: Test, Davomat, Shartnoma va Guvohnomani ko'rish"]
+        S10_1 --> S10_2["Kunlik ReconcileFinancialBalancesJob: drift va xatoliklar nazorati"]
     end
 
     %% --- KETMA-KET TO'G'RI CHIZIQLI ZANJIR ---
@@ -292,76 +303,59 @@ graph TD
 
 ## Bosqichma-bosqich Ishlab Chiqish Rejasi
 
-### 🟢 1-Bosqich: Spatie RBAC (Permissions Matrix), Bot Chat Anketa & CRM Leads, Reception (Students, Contracts & Certificates), Kassir & Buxgalter (Non-negative Kassalar, Chiqimlar, Oylik, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
+### 🟢 1-Bosqich: Spatie RBAC, PII Shifrlash, Bot Chat Anketa & CRM Leads, Reception, Kassir & Buxgalter (Non-negative Kassalar, Row Lock, Reconciliation, Shifts, Transfers & UNION Tarix) va One-Time QR & Manual Davomat
 
 #### 1.1. Ma’lumotlar bazasi (Migrations & Models)
-1. **Spatie Roles & Permissions:**
-   - `RolePermissionSeeder`: 7 ta rol va to‘liq Permissions ro‘yxati.
-   - Multi-role: `$user->assignRole(['teacher', 'instructor'])`.
+1. **Spatie Roles & Permissions & Audit:**
+   - `RolePermissionSeeder`: 7 ta rol, `(name, guard_name)` unique, `model_has_permissions`.
+   - `activity_log` (Spatie Activitylog migratsiyasi).
 2. **`leads` (Bot Chatida Ketma-ket Anketa va Hujjatlar yuklash):**
-   - `telegram_id`, `category`, `preferred_time`, `passport_photo_url`, `photo_url`, `medical_certificate_photo_url`, `pinfl`, `birth_date`, `address`, `is_form_completed`.
+   - `passport_series`, `passport_number`, `pinfl`, `passport_photo_url`, `medical_certificate_photo_url` — modelda `encrypted` cast.
+   - `stage`: `trial_lesson` (ochiq/sinov darslari uchun).
 3. **`students`, `contracts` va `certificates`:**
-   - `students`: O‘quvchi shaxsiy ma'lumotlari (`pinfl`, `passport_series`, `passport_number`, `photo_url`, `passport_photo_url`, `telegram_chat_id`).
-   - `contracts`: Shartnoma raqami, narx, chegirma, to‘langan summa, qoldiq qarz (`debt_amount >= 0`).
-   - `certificates`: Bitiruv guvohnomasi raqami, seriyasi, QR tekshirish tokeni, PDF havolasi.
+   - `students`: `pinfl` unique, `(passport_series, passport_number)` unique composite index, `encrypted` cast.
+   - `contracts`: `overpaid_amount`, `debt_amount` (CHECK `debt_amount >= 0`).
+   - `certificates`: QR tokenli rasmiy guvohnoma.
 4. **`cash_register_types`, `cash_registers`, `expense_categories`, `expenses`, `cash_shifts` va `cash_transfers`:**
-   - `cash_registers`: `balance >= 0` tekshiruvi.
-   - `expenses`: Chiqim kassa balansidan oshmasligi sharti.
-   - `cash_shifts` va `cash_transfers`.
+   - `cash_registers`: CHECK `balance >= 0`.
+   - `expenses`: Chiqim kassa balansidan oshmasligi sharti (`lockForUpdate()`).
 5. **`salaries` va `salary_payments` (Xodimlar Oyligi):**
-   - `salaries`: Oylik belgilash.
-   - `salary_payments`: Kassadan to‘lash.
-   - `users.salary_balance`: Non-negative qoldiq.
-6. **`lesson_sessions` va `attendances`:**
-   - Dinamik QR token + `is_manual`, `marked_by_user_id`, `manual_reason` ustunlari.
+   - `salaries`: `is_deduction` (jarima va avanslar uchun `true`), `amount` (doim musbat).
+   - `users.salary_balance`: CHECK `salary_balance >= 0`.
+6. **`vehicles`, `drivings` va `reviews`:**
+   - `users` dan avtomobil maydonlari olib tashlangan, `drivings.vehicle_id` qo‘shilgan.
+7. **`lesson_sessions` va `attendances`:**
+   - Dinamik QR token + `is_manual`, `marked_by_user_id`, `manual_reason`.
 
-#### 1.2. Backend & Controllers
-- `LeadController.php`: Bot orqali tushgan arizalar va **"Convert to Student & Contract" (1-klik bilan o‘quvchiga aylantirish)**.
-- `ContractController.php`: Reception uchun shartnoma ochish, chegirma belgilash, PDF yuklash.
-- `CertificateController.php`: Bitiruvchiga guvohnoma chiqarish, QR kodli PDF yaratish.
-- `PaymentController.php`: Kassir/Accountant uchun to‘lov qabul qilish, to‘lovni tahrirlash (Diff orqali), qarzdorlar tahlili.
-- `ExpenseController.php`: Kassadan chiqim qilish (`balance >= amount` tekshiruvi bilan).
-- `SalaryController.php`: Accountant/Admin uchun oylik belgilash va kassadan to‘lash.
-- `AttendanceController.php`: Teacher/Admin uchun jonli QR-kodli dars ochish va `attendance.mark_manual` orqali qo‘lda davomat qilish.
-- `StudentStatementService.php`, `CashRegisterStatementService.php`, `EmployeeStatementService.php`: `UNION` orqali xronologik tarixlar.
-- `CashShiftController.php` & `CashTransferController.php`.
-- `TelegramService.php`: Bot chatida interaktiv qabul anketasi (`State Machine`), rasmlarni saqlash, `/start att_<TOKEN>` davomat va bildirishnomalar.
+#### 1.2. Backend & Controllers & Jobs
+- `LeadController.php`: Bot chat arizalari va 1-klikda talabaga aylantirish.
+- `ContractController.php`, `CertificateController.php`.
+- `PaymentController.php`, `ExpenseController.php`, `SalaryController.php`, `CashTransferController.php`: Barchasi `DB::transaction()` va `lockForUpdate()` bilan o‘raladi, o‘zgarishlar `activity_log` ga yoziladi.
+- `ReconcileFinancialBalancesJob.php`: Har yarim kechada hisobiy qoldiqlarni qayta tekshiruvchi job.
+- `StudentStatementService.php`, `CashRegisterStatementService.php`, `EmployeeStatementService.php`: `UNION` xronologik ko‘chirmalar.
+- `TelegramService.php`: Bot chat wizard va QR davomat tekshiruvi.
 
 #### 1.3. Frontend (Inertia + React + Tailwind)
-- `Leads/Index.tsx`: CRM Kanban doskasi va Bot chatida to‘ldirilgan anketalarni (rasmlari bilan) 1-klikda talabaga aylantirish modali.
-- `Students/Index.tsx` & `Students/Show.tsx`: O‘quvchi profili va **UNION Moliyaviy Tarix jadvali**.
-- `Contracts/Index.tsx`: Shartnomalar va qoldiq qarzlar nazorati.
-- `Certificates/Index.tsx` & `Certificates/Show.tsx`: Bitiruv guvohnomalari ro‘yxati va Guvohnoma chop etish oynasi.
-- `Payments/Index.tsx`: To‘lov qabul qilish va kassa turlari bo‘yicha balanslar.
-- `Expenses/Index.tsx`: Xarajatlar ro‘yxati va chiqim qilish modali.
-- `Salaries/Index.tsx` & `Salaries/Show.tsx`: Oylik hisoblash, kassadan to‘lash va **UNION Xodim Oylik Tarixi jadvali**.
-- `Payments/CashRegisterShow.tsx`: Kassa ko‘chirmasi — **UNION Harakatlar Tarixi jadvali**.
-- `Payments/CashShifts.tsx`: Kassa smenasini yopish oynasi va type bo‘yicha transferlar.
-- `Payments/AdminTreasury.tsx`: Faqat Superadmin uchun Markaziy Admin Kassalar boshqaruvi.
-- `Attendance/LiveSession.tsx`: Proyektor uchun to‘liq ekranli dinamik QR-kod oynasi + **"Qo‘lda davomat qilish" modali**.
-- `Attendance/Index.tsx`: Davomat jurnali.
+- `Leads/Index.tsx`: CRM Kanban (sinov darslari `trial_lesson` bosqichi bilan).
+- `Students/Index.tsx`, `Contracts/Index.tsx`, `Certificates/Index.tsx`.
+- `Payments/Index.tsx`, `Expenses/Index.tsx`, `Salaries/Index.tsx`, `Payments/CashRegisterShow.tsx`.
+- `Attendance/LiveSession.tsx` & `Attendance/Index.tsx`.
+- `ActivityLogs/Index.tsx`: Superadmin uchun audit jurnali.
 
 ---
 
-### 🔵 2-Bosqich: LMS (Prava24 Test Dvigateli & Dizayni)
-- 1190 ta rasmli savollar bazasi (`avtoimtihon_1190.json`), biletlar (`tickets.json`), yo‘l belgilari.
-- `ExamInterface.tsx`, `AttemptTimer.tsx`, `FinishAttemptModal.tsx` — Prava24 bilan 100% bir xil dizayn va boshqaruv.
-- O‘quvchilarning imtihonga tayyorgarlik ko‘rsatkichlari.
+### 🔵 2-Bosqich: LMS (Prava24 Test Dvigateli & Dizayni — 4 Tilda)
+- 1190 ta rasmli savollar bazasi (`avtoimtihon_1190.json`), biletlar (`tickets.json`), yo‘l belgilari — 4 tilda (`uz`, `ru`, `krill`, `en`).
+- `ExamInterface.tsx`, `AttemptTimer.tsx`, `FinishAttemptModal.tsx`.
 
 ---
 
 ### 🟡 3-Bosqich: O‘quvchi Telegram Mini App (Web App)
-- Mini App ichida:
-  - 📝 **Prava24 Test & Mock:** Telefon orqali test ishlash.
-  - 📊 **Mening Davomatim:** Darslardagi qatnashish foizi.
-  - 💳 **Mening Shartnomam & To‘lovlarim:** Shartnoma summasi, to‘langan qismi, qoldiq qarz va to‘lovlar tarixi.
-  - 🚗 **Amaliy Darslar:** Instruktorning bo‘sh slotlariga yozilish.
-  - 🎓 **Mening Guvohnomam:** Bitiruv guvohnomasining elektron varianti va QR kodi.
+- Test ishlash (4 tilda), davomat foizi, shartnoma qoldig‘i, haydash slotlari, elektron guvohnoma.
 
 ---
 
-### 🟣 4-Bosqich: CRM (Lidlar & Voronka) va Avtopark Nazorati (ERP)
-- Reception/Sotuvchilar uchun Lidlar Kanban doskasi.
+### 🟣 4-Bosqich: Avtopark Nazorati & Tahlil (ERP)
 - Avtopark: Moy, gaz/metan, texnik ko‘rik va sug‘urta muddatlari monitoringi.
 - Instruktorlar KPI & Oylik hisobi.
 
@@ -369,7 +363,7 @@ graph TD
 
 ## Mahalliylashtirish (4 ta tilda)
 
-Barcha modullar to‘rtta tilda to‘liq ishlaydi:
+Barcha UI interfeyslar va LMS savollar bazasi to‘rtta tilda to‘liq ishlaydi:
 - `ru.json` (Ruscha)
 - `uz.json` (O‘zbekcha lotin)
 - `krill.json` (O‘zbekcha kirill)
