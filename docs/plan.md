@@ -159,48 +159,58 @@ Tizimda **Spatie Many-to-Many (`model_has_roles`)** mexanizmi qo‘llaniladi. Bu
 
 ```mermaid
 graph TD
-    subgraph sub1 ["1. Spatie RBAC va Multi-Role"]
-        U["Users"] --> R["Spatie Roles: 7 ta rol"]
-        R --> P["Permissions Matrix: Sidebar va Action ruxsatlari"]
+    %% --- 1-QAVAT: ROLLAR VA QABUL ---
+    subgraph sub1 ["🔐 1. Spatie RBAC va Foydalanuvchilar"]
+        U["Users (Barcha xodimlar)"] --> R["7 ta Asosiy Rol (Multi-Role)"]
+        R --> P["Permissions Matritsasi (Sidebar & Actions)"]
     end
 
-    subgraph sub2 ["2. Qabul va Shartnoma"]
-        R1_REC["Reception: Students"] --> R2_CON["Shartnoma: Contracts"]
-        R2_CON --> R3_GRP["Guruhlar: Groups"]
+    subgraph sub2 ["🎓 2. Qabul va Shartnomalar (Reception)"]
+        R1_REC["Reception: O'quvchi kiritish"] --> R2_CON["Shartnoma tuzish (Narx, Chegirma)"]
+        R2_CON --> R3_GRP["Guruhga biriktirish"]
     end
 
-    subgraph sub3 ["3. Kassir, Buxgalteriya va Chiqimlar"]
+    %% --- 2-QAVAT: MOLIYA VA DAVOMAT ---
+    subgraph sub3 ["💳 3. Kassalar, Xarajatlar va Oyliklar (ERP)"]
         KT["Kassa Turlari: Naqd, Karta"] --> K1["Filial Kassalari"]
-        K1 --> K2["Kirim: Payments"]
-        K1 --> K3["Chiqim: Expenses - balance yetarli bo'lsa"]
-        K1 --> K4["Oylik To'lash: SalaryPayments"]
+        K1 --> K2["Kirim: To'lovlar"]
+        K1 --> K3["Chiqim: Xarajatlar (Ijara, Reklama)"]
+        K1 --> K4["Chiqim: Xodimlar Oyligi"]
         K2 & K3 & K4 -->|"Non-negative check"| K5["kassa.balance >= 0"]
         K2 -.->|"UNION"| ST["Talaba Tarixi: Qoldiq Qarz"]
         K1 -.->|"UNION"| KTAR["Kassa Tarixi: Kassa Qoldig'i"]
         K4 -.->|"UNION"| XT["Xodim Tarixi: Qoldiq Oylik"]
-        K5 --> K6["Kassa smenasi yopiladi: CashShifts"]
-        K6 --> K7["Type bo'yicha Transfer: CashTransfers"]
-        K7 --> K8["Admin Kassalar: branch_id=null"]
+        K5 --> K6["Kassa Smenasini Yopish"]
+        K6 --> K7["Type bo'yicha Transfer: Admin Kassaga"]
     end
 
-    subgraph sub4 ["4. O'qituvchi va Davomat"]
-        T1["Teacher dars ochadi: LessonSessions"] --> T2["Ekranda Dinamik QR"]
-        T2 --> T3["O'quvchi Telegram Bot orqali Skanerlaydi"]
-        T1 -->|"attendance.mark_manual"| T4["Telefoni yo'q talabani qo'lda belgilash"]
-        T3 & T4 --> T5["Attendances"]
+    subgraph sub4 ["📱 4. Darslar, QR Davomat va Haydash"]
+        T1["Teacher: Nazariy dars ochish"] --> T2["Ekranda Dinamik QR Token"]
+        T2 --> T3["O'quvchi Telegram orqali Skanerlaydi"]
+        T1 -->|"attendance.mark_manual"| T4["Telefoni yo'qni qo'lda belgilash"]
+        T3 & T4 --> T5["Davomat Jurnali (Attendances)"]
+        T5 -.-> D1["Amaliy Haydash Slotlari (Drivings)"]
     end
 
-    subgraph sub5 ["5. LMS Prava24 Test va Imtihon"]
+    %% --- 3-QAVAT: LMS VA TELEGRAM MINI APP ---
+    subgraph sub5 ["📚 5. LMS va Prava24 Test Dvigateli"]
         L1["1190+ Savollar va Biletlar"] --> L2["Prava24 ExamInterface"]
-        L2 --> L3["Urinishlar va Natijalar Tahlili: Attempts"]
+        L2 --> L3["Urinishlar va Natijalar Tahlili (Attempts)"]
     end
 
-    subgraph sub6 ["6. O'quvchi Telegram Mini App"]
-        M1["Mini App"] --> M2["Test va Mock"]
+    subgraph sub6 ["📲 6. O'quvchi Telegram Mini App"]
+        M1["Mini App Asosiy Menyu"] --> M2["Prava24 Test va Mock"]
         M1 --> M3["Mening Davomatim"]
-        M1 --> M4["Shartnoma va To'lovlarim"]
+        M1 --> M4["Mening Shartnomam va To'lovlarim"]
         M1 --> M5["Haydashga Yozilish"]
     end
+
+    %% --- MODULLAR O'RTASIDAGI VERTIKAL OQIM (Katta va qulay ko'rinish uchun) ---
+    sub1 --> sub2
+    sub2 --> sub3
+    sub2 --> sub4
+    sub4 --> sub5
+    sub3 & sub4 & sub5 --> sub6
 ```
 
 ---
