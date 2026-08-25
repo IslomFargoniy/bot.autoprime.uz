@@ -138,7 +138,7 @@ Table permissions {
 }
 
 Table model_has_roles {
-  role_id bigint [ref: > roles.id]
+  role_id bigint [not null, ref: > roles.id]
   model_type varchar(255) [not null]
   model_id bigint [not null, note: 'Bitta userga bir vaqtning o\'zida bir nechta rol berilishi mumkin (masalan: teacher + instructor)']
 
@@ -148,7 +148,7 @@ Table model_has_roles {
 }
 
 Table model_has_permissions {
-  permission_id bigint [ref: > permissions.id]
+  permission_id bigint [not null, ref: > permissions.id]
   model_type varchar(255) [not null]
   model_id bigint [not null, note: 'Foydalanuvchiga rolisiz, to\'g\'ridan-to\'g\'ri alohida ruxsat berish imkoni uchun']
 
@@ -158,8 +158,8 @@ Table model_has_permissions {
 }
 
 Table role_has_permissions {
-  permission_id bigint [ref: > permissions.id]
-  role_id bigint [ref: > roles.id]
+  permission_id bigint [not null, ref: > permissions.id]
+  role_id bigint [not null, ref: > roles.id]
 
   indexes {
     (permission_id, role_id) [pk]
@@ -183,7 +183,7 @@ Table branches {
 
 Table users {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null, note: 'null bo\'lsa super_admin yoki bosh accountant']
+  branch_id bigint [null, ref: >? branches.id, note: 'null bo\'lsa super_admin yoki bosh accountant']
   name varchar(255) [not null]
   phone varchar(50) [unique, not null]
   email varchar(255) [unique, null]
@@ -198,8 +198,8 @@ Table users {
 
 Table groups {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  teacher_id bigint [ref: > users.id, null, note: 'Guruhning asosiy nazariyotchi o\'qituvchisi']
+  branch_id bigint [not null, ref: > branches.id]
+  teacher_id bigint [null, ref: >? users.id, note: 'Guruhning asosiy nazariyotchi o\'qituvchisi']
   name varchar(255) [not null]
   category varchar(20) [default: 'B']
   start_date date
@@ -211,7 +211,7 @@ Table groups {
 
 Table autodromes {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
+  branch_id bigint [not null, ref: > branches.id]
   name varchar(255) [not null]
   location_url varchar(500) [null]
   is_active boolean [default: true]
@@ -226,9 +226,9 @@ Table autodromes {
 
 Table students {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  group_id bigint [ref: > groups.id, null]
-  registered_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan reception/admin']
+  branch_id bigint [not null, ref: > branches.id]
+  group_id bigint [null, ref: >? groups.id]
+  registered_by_user_id bigint [null, ref: >? users.id, note: 'Qabul qilgan reception/admin']
   full_name varchar(255) [not null]
   phone varchar(50) [not null]
   passport_series varchar(10) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
@@ -252,10 +252,10 @@ Table students {
 
 Table contracts {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  student_id bigint [ref: > students.id]
-  group_id bigint [ref: > groups.id, null]
-  created_by_user_id bigint [ref: > users.id, note: 'Shartnoma rasmiylashtirgan xodim (reception/admin)']
+  branch_id bigint [not null, ref: > branches.id]
+  student_id bigint [not null, ref: > students.id]
+  group_id bigint [null, ref: >? groups.id]
+  created_by_user_id bigint [not null, ref: > users.id, note: 'Shartnoma rasmiylashtirgan xodim (reception/admin)']
   contract_number varchar(50) [unique, not null, note: 'Masalan: AP-2026-0012']
   contract_date date [not null]
   total_amount decimal(12,2) [not null, note: 'Kursning to\'liq narxi']
@@ -274,11 +274,11 @@ Table contracts {
 
 Table certificates {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  student_id bigint [ref: > students.id]
-  contract_id bigint [ref: > contracts.id]
-  group_id bigint [ref: > groups.id]
-  issued_by_user_id bigint [ref: > users.id, note: 'Guvohnomani rasmiylashtirgan admin/reception']
+  branch_id bigint [not null, ref: > branches.id]
+  student_id bigint [not null, ref: > students.id]
+  contract_id bigint [not null, ref: > contracts.id]
+  group_id bigint [not null, ref: > groups.id]
+  issued_by_user_id bigint [not null, ref: > users.id, note: 'Guvohnomani rasmiylashtirgan admin/reception']
   certificate_number varchar(50) [unique, not null, note: 'Masalan: G-2026-00452']
   series varchar(10) [default: 'AF']
   category varchar(10) [default: 'B']
@@ -309,8 +309,8 @@ Table cash_register_types {
 
 Table cash_registers {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null, note: 'NULL bo\'lsa — Markaziy Admin Kassa (Faqat Superadmin boshqaradi)']
-  cash_register_type_id bigint [ref: > cash_register_types.id, not null]
+  branch_id bigint [null, ref: >? branches.id, note: 'NULL bo\'lsa — Markaziy Admin Kassa (Faqat Superadmin boshqaradi)']
+  cash_register_type_id bigint [not null, ref: > cash_register_types.id]
   name varchar(100) [not null, note: 'Masalan: Chilonzor Naqd Kassa, Bosh Admin Naqd Kassa']
   balance decimal(14,2) [default: 0, note: 'Qat\'iy qoida: Minusga ketishi mumkin emas (balance >= 0). DB CHECK constraint + application-level row lock (lockForUpdate) bilan ta\'minlanishi shart']
   is_active boolean [default: true]
@@ -320,11 +320,11 @@ Table cash_registers {
 
 Table payments {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  contract_id bigint [ref: > contracts.id, null, note: 'To\'lov to\'g\'ridan-to\'g\'ri shartnomaga yopiladi']
-  student_id bigint [ref: > students.id]
-  cash_register_id bigint [ref: > cash_registers.id]
-  received_by_user_id bigint [ref: > users.id, note: 'To\'lovni qabul qilgan kassir/accountant/admin']
+  branch_id bigint [not null, ref: > branches.id]
+  contract_id bigint [null, ref: >? contracts.id, note: 'To\'lov to\'g\'ridan-to\'g\'ri shartnomaga yopiladi']
+  student_id bigint [not null, ref: > students.id]
+  cash_register_id bigint [not null, ref: > cash_registers.id]
+  received_by_user_id bigint [not null, ref: > users.id, note: 'To\'lovni qabul qilgan kassir/accountant/admin']
   amount decimal(12,2) [not null]
   payment_type payment_type_enum [default: 'contract_tuition']
   receipt_number varchar(100) [unique]
@@ -336,7 +336,7 @@ Table payments {
 
 Table expense_categories {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null, note: 'null bo\'lsa umumiy kategoriya']
+  branch_id bigint [null, ref: >? branches.id, note: 'null bo\'lsa umumiy kategoriya']
   name varchar(255) [not null, note: 'Masalan: Bino ijarasi, Banner, Reklama/SMM, Xodimlar oyligi, Kommunal']
   is_active boolean [default: true]
   created_at timestamp
@@ -345,10 +345,10 @@ Table expense_categories {
 
 Table expenses {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  cash_register_id bigint [ref: > cash_registers.id]
-  expense_category_id bigint [ref: > expense_categories.id]
-  user_id bigint [ref: > users.id, note: 'Chiqim qilgan kassir/accountant/admin']
+  branch_id bigint [not null, ref: > branches.id]
+  cash_register_id bigint [not null, ref: > cash_registers.id]
+  expense_category_id bigint [not null, ref: > expense_categories.id]
+  user_id bigint [not null, ref: > users.id, note: 'Chiqim qilgan kassir/accountant/admin']
   amount decimal(12,2) [not null, note: 'Kassa balansidan katta bo\'lishi mumkin emas']
   recipient varchar(255) [null, note: 'Pulni oluvchi shaxs yoki kompaniya']
   description text [null, note: 'Xarajat sababi va izoh']
@@ -360,8 +360,8 @@ Table expenses {
 
 Table cash_shifts {
   id bigint [pk, increment]
-  cash_register_id bigint [ref: > cash_registers.id]
-  user_id bigint [ref: > users.id, note: 'Kassa smenasini yopgan kassir']
+  cash_register_id bigint [not null, ref: > cash_registers.id]
+  user_id bigint [not null, ref: > users.id, note: 'Kassa smenasini yopgan kassir']
   opened_at timestamp [not null]
   closed_at timestamp [null]
   opening_balance decimal(14,2) [not null, default: 0]
@@ -377,12 +377,12 @@ Table cash_shifts {
 
 Table cash_transfers {
   id bigint [pk, increment]
-  from_cash_register_id bigint [ref: > cash_registers.id, note: 'Filial kassasi (masalan, Chilonzor Naqd)']
-  to_cash_register_id bigint [ref: > cash_registers.id, note: 'Mos turdagi Admin Kassa (masalan, Admin Naqd)']
-  cash_shift_id bigint [ref: > cash_shifts.id, null]
+  from_cash_register_id bigint [not null, ref: > cash_registers.id, note: 'Filial kassasi (masalan, Chilonzor Naqd)']
+  to_cash_register_id bigint [not null, ref: > cash_registers.id, note: 'Mos turdagi Admin Kassa (masalan, Admin Naqd)']
+  cash_shift_id bigint [null, ref: >? cash_shifts.id]
   amount decimal(14,2) [not null, note: 'Filial kassa balansidan katta bo\'lishi mumkin emas']
-  sent_by_user_id bigint [ref: > users.id, note: 'O\'tkazgan kassir/admin']
-  approved_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan Superadmin']
+  sent_by_user_id bigint [not null, ref: > users.id, note: 'O\'tkazgan kassir/admin']
+  approved_by_user_id bigint [null, ref: >? users.id, note: 'Qabul qilgan Superadmin']
   status cash_transfer_status_enum [default: 'pending']
   notes text [null]
   created_at timestamp
@@ -396,9 +396,9 @@ Table cash_transfers {
 
 Table salaries {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null]
-  user_id bigint [ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki bir vaqtda ikkalasi bo\'lgan xodim)']
-  created_by_user_id bigint [ref: > users.id, note: 'Oylikni hisoblagan accountant/admin/superadmin']
+  branch_id bigint [null, ref: >? branches.id]
+  user_id bigint [not null, ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki bir vaqtda ikkalasi bo\'lgan xodim)']
+  created_by_user_id bigint [not null, ref: > users.id, note: 'Oylikni hisoblagan accountant/admin/superadmin']
   period varchar(20) [not null, note: 'Masalan: 2026-08']
   salary_type salary_type_enum [default: 'base_salary', note: 'base_salary (nazariya darslari), driving_hourly_rate (amaliy haydash), bonus_kpi, penalty, advance']
   amount decimal(12,2) [not null, note: 'Hisoblangan summa (doim musbat)']
@@ -412,10 +412,10 @@ Table salaries {
 
 Table salary_payments {
   id bigint [pk, increment]
-  salary_id bigint [ref: > salaries.id, null]
-  user_id bigint [ref: > users.id, note: 'Pulni olgan xodim']
-  cash_register_id bigint [ref: > cash_registers.id, note: 'Qaysi kassadan berildi (Kassa balansi yetarli bo\'lishi shart)']
-  paid_by_user_id bigint [ref: > users.id, note: 'To\'lagan kassir/accountant/superadmin']
+  salary_id bigint [null, ref: >? salaries.id]
+  user_id bigint [not null, ref: > users.id, note: 'Pulni olgan xodim']
+  cash_register_id bigint [not null, ref: > cash_registers.id, note: 'Qaysi kassadan berildi (Kassa balansi yetarli bo\'lishi shart)']
+  paid_by_user_id bigint [not null, ref: > users.id, note: 'To\'lagan kassir/accountant/superadmin']
   amount decimal(12,2) [not null, note: 'Berilgan summa (-)']
   payment_method varchar(50) [default: 'cash', note: 'cash, card_transfer']
   comment text [null]
@@ -431,9 +431,9 @@ Table salary_payments {
 
 Table lesson_sessions {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  group_id bigint [ref: > groups.id]
-  teacher_id bigint [ref: > users.id, note: 'Dars o\'tuvchi xodim (teacher rolidagi user)']
+  branch_id bigint [not null, ref: > branches.id]
+  group_id bigint [not null, ref: > groups.id]
+  teacher_id bigint [not null, ref: > users.id, note: 'Dars o\'tuvchi xodim (teacher rolidagi user)']
   topic varchar(255) [not null]
   room_number varchar(50) [null]
   started_at timestamp [not null]
@@ -446,12 +446,12 @@ Table lesson_sessions {
 
 Table attendances {
   id bigint [pk, increment]
-  lesson_session_id bigint [ref: > lesson_sessions.id]
-  student_id bigint [ref: > students.id]
+  lesson_session_id bigint [not null, ref: > lesson_sessions.id]
+  student_id bigint [not null, ref: > students.id]
   scanned_at timestamp [not null]
   status attendance_status_enum [default: 'present']
   is_manual boolean [default: false, note: 'Telefoni yo\'q talaba uchun qo\'lda belgilanganmi?']
-  marked_by_user_id bigint [ref: > users.id, null, note: 'Qo\'lda belgilagan xodim (permissionli admin/reception/teacher)']
+  marked_by_user_id bigint [null, ref: >? users.id, note: 'Qo\'lda belgilagan xodim (permissionli admin/reception/teacher)']
   manual_reason varchar(255) [null, note: 'Masalan: Telefoni yo\'q, quvvati tugagan']
   ip_address varchar(45) [null]
   created_at timestamp
@@ -469,11 +469,11 @@ Table attendances {
 
 Table drivings {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  instructor_id bigint [ref: > users.id, note: 'Haydash o\'rgatuvchi xodim (instructor rolidagi user)']
-  student_id bigint [ref: > students.id]
-  autodrome_id bigint [ref: > autodromes.id, null]
-  vehicle_id bigint [ref: > vehicles.id, null, note: 'Har bir amaliy dars qaysi mashinada o\'tilgani']
+  branch_id bigint [not null, ref: > branches.id]
+  instructor_id bigint [not null, ref: > users.id, note: 'Haydash o\'rgatuvchi xodim (instructor rolidagi user)']
+  student_id bigint [not null, ref: > students.id]
+  autodrome_id bigint [null, ref: >? autodromes.id]
+  vehicle_id bigint [null, ref: >? vehicles.id, note: 'Har bir amaliy dars qaysi mashinada o\'tilgani']
   date date [not null]
   start_time time [not null]
   end_time time [not null]
@@ -487,9 +487,9 @@ Table drivings {
 
 Table reviews {
   id bigint [pk, increment]
-  driving_id bigint [ref: > drivings.id, unique]
-  student_id bigint [ref: > students.id]
-  instructor_id bigint [ref: > users.id]
+  driving_id bigint [unique, not null, ref: - drivings.id]
+  student_id bigint [not null, ref: > students.id]
+  instructor_id bigint [not null, ref: > users.id]
   rating int [not null, note: '1 dan 5 gacha baho']
   comment text [null]
   tags json [null]
@@ -518,7 +518,7 @@ Table tickets {
 
 Table questions {
   id bigint [pk, increment]
-  ticket_id bigint [ref: > tickets.id]
+  ticket_id bigint [not null, ref: > tickets.id]
   question_number int [not null]
   question_uz text [not null]
   question_ru text [not null]
@@ -540,7 +540,7 @@ Table questions {
 
 Table answers {
   id bigint [pk, increment]
-  question_id bigint [ref: > questions.id]
+  question_id bigint [not null, ref: > questions.id]
   answer_uz text [not null]
   answer_ru text [not null]
   answer_krill text [null]
@@ -565,7 +565,7 @@ Table sign_categories {
 
 Table signs {
   id bigint [pk, increment]
-  category_id bigint [ref: > sign_categories.id]
+  category_id bigint [not null, ref: > sign_categories.id]
   sign_number varchar(50) [not null]
   name_uz varchar(255) [not null]
   name_ru varchar(255) [not null]
@@ -599,9 +599,9 @@ Table road_lines {
 
 Table attempts {
   id bigint [pk, increment]
-  student_id bigint [ref: > students.id, null]
-  user_id bigint [ref: > users.id, null]
-  ticket_id bigint [ref: > tickets.id, null]
+  student_id bigint [null, ref: >? students.id]
+  user_id bigint [null, ref: >? users.id]
+  ticket_id bigint [null, ref: >? tickets.id]
   attempt_type attempt_type_enum [default: 'random_mock']
   total_questions int [default: 20]
   correct_answers int [default: 0]
@@ -617,9 +617,9 @@ Table attempts {
 
 Table attempt_answers {
   id bigint [pk, increment]
-  attempt_id bigint [ref: > attempts.id]
-  question_id bigint [ref: > questions.id]
-  answer_id bigint [ref: > answers.id, null]
+  attempt_id bigint [not null, ref: > attempts.id]
+  question_id bigint [not null, ref: > questions.id]
+  answer_id bigint [null, ref: >? answers.id]
   is_correct boolean [default: false]
   answered_at timestamp [not null]
   duration_seconds int [default: 0]
@@ -634,10 +634,10 @@ Table attempt_answers {
 
 Table leads {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id, null, note: 'Tanlangan filial']
-  assigned_user_id bigint [ref: > users.id, null, note: 'Biriktirilgan reception/sotuvchi']
-  student_id bigint [ref: > students.id, null, note: 'Lid o\'quvchiga aylanganda to\'ldiriladi']
-  contract_id bigint [ref: > contracts.id, null, note: 'Lid shartnoma tuzganda to\'ldiriladi']
+  branch_id bigint [null, ref: >? branches.id, note: 'Tanlangan filial']
+  assigned_user_id bigint [null, ref: >? users.id, note: 'Biriktirilgan reception/sotuvchi']
+  student_id bigint [null, ref: >? students.id, note: 'Lid o\'quvchiga aylanganda to\'ldiriladi']
+  contract_id bigint [null, ref: >? contracts.id, note: 'Lid shartnoma tuzganda to\'ldiriladi']
   telegram_id bigint [null, note: 'Bot orqali bog\'langan Telegram ID']
   form_token varchar(64) [unique, null, note: 'O\'quvchi bot/webda o\'zi anketani to\'ldirishi uchun unikal token']
   is_form_completed boolean [default: false, note: 'O\'quvchi anketani va rasmlarni to\'liq yukladimi?']
@@ -668,8 +668,8 @@ Table leads {
 
 Table vehicles {
   id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  instructor_id bigint [ref: > users.id, null]
+  branch_id bigint [not null, ref: > branches.id]
+  instructor_id bigint [null, ref: >? users.id]
   make_model varchar(255) [not null, note: 'Masalan: Chevrolet Cobalt, Nexia 3']
   plate_number varchar(50) [unique, not null]
   fuel_type vehicle_fuel_enum [default: 'petrol']
@@ -686,7 +686,7 @@ Table vehicles {
 
 Table vehicle_maintenances {
   id bigint [pk, increment]
-  vehicle_id bigint [ref: > vehicles.id]
+  vehicle_id bigint [not null, ref: > vehicles.id]
   maintenance_type varchar(100) [not null, note: 'oil_change, tire_repair, gas_check, inspection']
   cost decimal(12,2) [not null]
   mileage int [not null]
@@ -709,7 +709,7 @@ Table activity_log {
   subject_type varchar(255) [null]
   subject_id bigint [null]
   causer_type varchar(255) [null]
-  causer_id bigint [null, ref: > users.id]
+  causer_id bigint [null, ref: >? users.id]
   properties json [null, note: 'Eski va yangi qiymatlar (old/new diff)']
   batch_uuid varchar(36) [null]
   event varchar(255) [null, note: 'created, updated, deleted, approved']
