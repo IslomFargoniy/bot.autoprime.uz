@@ -30,7 +30,7 @@ php -v
 ### 2-Qadam: Loyihani ko'chirib olish (Git Clone)
 ```bash
 cd /var/www/bot_autoprim_usr/data/www/bot.autoprime.uz
-git clone https://github.com/IslamAbdurahman/AutoPrimeBot.git .
+git clone https://github.com/IslomFargoniy/AutoPrimeBot.git .
 git config --global --add safe.directory $(pwd)
 ```
 
