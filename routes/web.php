@@ -27,7 +27,7 @@ Route::post('/api/telegram-auth', function (Request $request) {
         return response()->json(['success' => false, 'message' => 'InitData topilmadi.'], 400);
     }
 
-    $botToken = config('services.telegram.bot_token') ?? config('nutgram.token') ?? env('TELEGRAM_TOKEN');
+    $botToken = (string) (config('services.telegram.bot_token') ?? config('nutgram.token', ''));
 
     if (! $botToken) {
         return response()->json(['success' => false, 'message' => 'Bot Token sozlanmagan.'], 500);

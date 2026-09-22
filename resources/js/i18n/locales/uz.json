@@ -1,4 +1,14 @@
 {
+  "auth": {
+    "phone": "Telefon raqam",
+    "password": "Parol",
+    "remember_me": "Meni eslab qol",
+    "login_button": "Tizimga kirish",
+    "login_title": "Tizimga kirish",
+    "login_desc": "Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting",
+    "auto_logging_in": "Telegram orqali avtomatik kirilmoqda...",
+    "logout": "Chiqish"
+  },
   "sidebar": {
     "dashboard": "Bosh sahifa",
     "groups": "Guruhlar",
@@ -6,7 +16,15 @@
     "instructors": "Instruktorlar",
     "drivings": "Mashg'ulotlar",
     "autodromes": "Avtodromlar",
-    "admins": "Adminlar"
+    "admins": "Adminlar",
+    "courses": "Kurslar va Mavzular",
+    "contracts": "Shartnomalar",
+    "finance": "Kassa va Moliya",
+    "payroll": "Oylik maoshlar",
+    "attendance": "Davomat",
+    "prava24": "Testlar & Belgilar",
+    "vehicles": "Avtopark",
+    "leads": "Lidlar va Arizalar"
   },
   "common": {
     "search": "Qidirish...",

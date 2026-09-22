@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\GroupFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,47 +11,90 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $name
+ * @property int|null $branch_id
  * @property int|null $instructor_id
+ * @property int|null $teacher_id
+ * @property int|null $course_id
+ * @property string $name
+ * @property string $category
+ * @property array|null $days_of_week
+ * @property string|null $start_time
+ * @property string|null $end_time
+ * @property string|null $room
+ * @property int $max_students
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
+ * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read User|null $instructor
  */
-#[Fillable(['branch_id', 'name', 'instructor_id'])]
 class Group extends Model
 {
     /** @use HasFactory<GroupFactory> */
     use HasFactory;
 
-    /**
-     * @return BelongsTo<Branch, $this>
-     */
+    protected $fillable = [
+        'branch_id',
+        'instructor_id',
+        'teacher_id',
+        'course_id',
+        'name',
+        'category',
+        'days_of_week',
+        'start_time',
+        'end_time',
+        'room',
+        'max_students',
+        'start_date',
+        'end_date',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'days_of_week' => 'array',
+        'max_students' => 'integer',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'is_active' => 'boolean',
+    ];
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
     public function instructor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
-    /**
-     * @return HasMany<Student, $this>
-     */
+    public function teacher(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
     }
 
-    /**
-     * @return HasMany<Driving, $this>
-     */
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
+
     public function drivings(): HasMany
     {
         return $this->hasMany(Driving::class);
+    }
+
+    public function lessonSessions(): HasMany
+    {
+        return $this->hasMany(LessonSession::class);
     }
 }

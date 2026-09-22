@@ -165,8 +165,8 @@ class DrivingController extends Controller
 
         foreach ($validated['student_ids'] as $studentId) {
             $student = Student::find($studentId);
-            $groupId = $student?->group_id ?? ($validated['group_id'] ?? null);
-            $branchId = $student?->branch_id ?? $request->user()->branch_id;
+            $groupId = $student ? $student->group_id : ($validated['group_id'] ?? null);
+            $branchId = $student ? $student->branch_id : $request->user()->branch_id;
 
             $driving = Driving::create([
                 'branch_id' => $branchId,
@@ -216,13 +216,15 @@ class DrivingController extends Controller
             ]);
         }
 
-        if ($oldStatus !== $driving->status) {
-            if ($driving->status === 'completed') {
+        $newStatus = $validated['status'] ?? $driving->status;
+
+        if ($oldStatus !== $newStatus) {
+            if ($newStatus === 'completed') {
                 app(TelegramService::class)->sendLessonRatingPrompt($driving);
-            } elseif ($driving->status === 'cancelled') {
+            } elseif ($newStatus === 'cancelled') {
                 app(TelegramService::class)->sendDrivingCancelledNotification($driving);
             }
-        } elseif ($driving->status === 'scheduled' && (
+        } elseif ($newStatus === 'scheduled' && (
             $oldStartTime !== $driving->start_time ||
             $oldEndTime !== $driving->end_time ||
             $oldAutodromeId !== $driving->autodrome_id

@@ -5,10 +5,7 @@ use App\Models\Driving;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\TelegramService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use SergiX44\Nutgram\Nutgram;
-
-uses(RefreshDatabase::class);
 
 it('sends telegram notifications when driving is created, completed, or cancelled', function () {
     $student = Student::factory()->create(['telegram_id' => '123456789']);

@@ -1,4 +1,14 @@
 {
+  "auth": {
+    "phone": "Phone number",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "login_button": "Sign In",
+    "login_title": "Sign In",
+    "login_desc": "Enter your phone number and password to sign in",
+    "auto_logging_in": "Signing in automatically via Telegram...",
+    "logout": "Log out"
+  },
   "sidebar": {
     "dashboard": "Dashboard",
     "groups": "Groups",
@@ -6,7 +16,15 @@
     "instructors": "Instructors",
     "drivings": "Driving Sessions",
     "autodromes": "Autodromes",
-    "admins": "Admins"
+    "admins": "Admins",
+    "courses": "Courses & Topics",
+    "contracts": "Contracts",
+    "finance": "Cash & Finance",
+    "payroll": "Payroll & Salaries",
+    "attendance": "Attendance",
+    "prava24": "Tests & Traffic Signs",
+    "vehicles": "Vehicle Fleet",
+    "leads": "Leads & CRM"
   },
   "common": {
     "search": "Search...",

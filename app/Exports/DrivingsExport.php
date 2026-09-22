@@ -101,10 +101,10 @@ class DrivingsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
 
         return [
             $this->rowNumber,
-            $driving->student?->full_name ?? "Noma'lum",
-            $driving->group?->name ?? 'Guruhsiz',
-            $driving->instructor?->name ?? 'Biriktirilmagan',
-            $driving->autodrome?->name ?? 'Kiritilmagan',
+            $driving->student ? $driving->student->full_name : "Noma'lum",
+            $driving->group ? $driving->group->name : 'Guruhsiz',
+            $driving->instructor ? $driving->instructor->name : 'Biriktirilmagan',
+            $driving->autodrome ? $driving->autodrome->name : 'Kiritilmagan',
             $driving->start_time ? $driving->start_time->format('d.m.Y H:i') : '',
             $driving->end_time ? $driving->end_time->format('H:i') : '',
             $statusText,

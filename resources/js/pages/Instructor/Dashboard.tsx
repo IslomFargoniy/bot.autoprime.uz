@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import TMALayout from '@/Layouts/TMALayout';
+import TMALayout from '@/layouts/tma-layout';
 
 interface Group {
     id: number;
@@ -30,6 +30,7 @@ interface Driving {
     status: string;
     student?: Student;
     group?: Group;
+    autodrome_id?: number | null;
     autodrome?: Autodrome;
 }
 

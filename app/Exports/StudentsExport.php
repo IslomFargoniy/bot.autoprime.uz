@@ -69,7 +69,7 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
             $this->rowNumber,
             $student->full_name,
             $student->phone,
-            $student->group?->name ?? 'Guruhsiz',
+            $student->group ? $student->group->name : 'Guruhsiz',
             $totalDrivings,
             $avgRating,
         ];
