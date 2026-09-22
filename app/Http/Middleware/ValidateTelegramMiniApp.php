@@ -19,7 +19,7 @@ class ValidateTelegramMiniApp
     {
         // If already authenticated via session, allow the request to proceed.
         // This is necessary for Inertia AJAX requests to work without sending the token every time.
-        if (Auth::check() || app()->environment('testing')) {
+        if (Auth::check()) {
             return $next($request);
         }
 
@@ -45,7 +45,7 @@ class ValidateTelegramMiniApp
             return redirect()->route('login');
         }
 
-        $botToken = config('services.telegram.bot_token') ?? config('nutgram.token') ?? env('TELEGRAM_TOKEN');
+        $botToken = (string) (config('services.telegram.bot_token') ?? config('nutgram.token', ''));
 
         if (! $this->validateInitData($initData, $botToken)) {
             return response()->json(['error' => 'Unauthorized. Invalid Signature.'], 401);

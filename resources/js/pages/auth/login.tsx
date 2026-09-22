@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function Login({ status }: Props) {
+    const { t } = useTranslation();
     const [authenticating, setAuthenticating] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
 
@@ -55,7 +57,7 @@ export default function Login({ status }: Props) {
             <div className="flex flex-col items-center justify-center p-8 space-y-4">
                 <Spinner className="w-8 h-8 text-primary" />
                 <p className="text-sm font-medium text-muted-foreground animate-pulse">
-                    Telegram orqali avtomatik kirilmoqda...
+                    {t('auth.auto_logging_in', 'Telegram orqali avtomatik kirilmoqda...')}
                 </p>
             </div>
         );
@@ -63,7 +65,7 @@ export default function Login({ status }: Props) {
 
     return (
         <>
-            <Head title="Tizimga kirish" />
+            <Head title={t('auth.login_title', 'Tizimga kirish')} />
 
             {authError && (
                 <div className="p-3 mb-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 text-center font-medium">
@@ -80,7 +82,7 @@ export default function Login({ status }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="phone">Telefon raqam</Label>
+                                <Label htmlFor="phone">{t('auth.phone', 'Telefon raqam')}</Label>
                                 <Input
                                     id="phone"
                                     type="tel"
@@ -98,7 +100,7 @@ export default function Login({ status }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Parol</Label>
+                                <Label htmlFor="password">{t('auth.password', 'Parol')}</Label>
                                 <PasswordInput
                                     id="password"
                                     name="password"
@@ -116,7 +118,7 @@ export default function Login({ status }: Props) {
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Meni eslab qol</Label>
+                                <Label htmlFor="remember">{t('auth.remember_me', 'Meni eslab qol')}</Label>
                             </div>
 
                             <Button
@@ -127,7 +129,7 @@ export default function Login({ status }: Props) {
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Tizimga kirish
+                                {t('auth.login_button', 'Tizimga kirish')}
                             </Button>
                         </div>
                     </>

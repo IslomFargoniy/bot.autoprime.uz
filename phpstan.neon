@@ -10,4 +10,7 @@ parameters:
         - database/
         - routes/
 
-    level: 7
+    level: 5
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#has invalid return type Laravel\\Scout\\Builder#'

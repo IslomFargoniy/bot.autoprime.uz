@@ -83,7 +83,7 @@ class InstructorController extends Controller
             ])
             ->get();
 
-        $transformed = $items->map(function ($instructor) {
+        $transformed = $items->map(function (User $instructor) {
             $studentsCount = $instructor->groups->sum('students_count');
             $totalDrivings = $instructor->drivings->count();
             $completedDrivings = $instructor->drivings->where('status', 'completed')->count();

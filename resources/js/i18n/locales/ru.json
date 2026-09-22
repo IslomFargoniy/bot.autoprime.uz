@@ -1,4 +1,14 @@
 {
+  "auth": {
+    "phone": "Номер телефона",
+    "password": "Пароль",
+    "remember_me": "Запомнить меня",
+    "login_button": "Войти в систему",
+    "login_title": "Авторизация",
+    "login_desc": "Введите номер телефона и пароль для входа",
+    "auto_logging_in": "Автоматический вход через Telegram...",
+    "logout": "Выйти"
+  },
   "sidebar": {
     "dashboard": "Главная",
     "groups": "Группы",
@@ -6,7 +16,15 @@
     "instructors": "Инструкторы",
     "drivings": "Занятия",
     "autodromes": "Автодромы",
-    "admins": "Администраторы"
+    "admins": "Администраторы",
+    "courses": "Курсы и Темы",
+    "contracts": "Договоры",
+    "finance": "Касса и Финансы",
+    "payroll": "Заработная плата",
+    "attendance": "Посещаемость",
+    "prava24": "Тесты и Знаки",
+    "vehicles": "Автопарк",
+    "leads": "Лиды и Заявки"
   },
   "common": {
     "search": "Поиск...",

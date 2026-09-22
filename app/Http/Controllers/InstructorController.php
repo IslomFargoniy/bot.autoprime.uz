@@ -71,7 +71,7 @@ class InstructorController extends Controller
 
         $user = $request->user();
         $student = Student::find($request->student_id);
-        $groupId = $student?->group_id ?? $request->group_id;
+        $groupId = $student ? $student->group_id : $request->group_id;
 
         $driving = Driving::create([
             'instructor_id' => $user->id,

@@ -1,7 +1,7 @@
 import { useState, useMemo, FormEvent } from 'react';
 import { useForm, Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import TMALayout from '@/Layouts/TMALayout';
+import TMALayout from '@/layouts/tma-layout';
 
 interface Student {
     id: number;

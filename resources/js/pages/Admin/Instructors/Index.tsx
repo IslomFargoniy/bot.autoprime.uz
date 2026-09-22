@@ -9,7 +9,7 @@ import PasswordInput from '@/components/password-input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import Pagination from '@/components/pagination';
-import { SharedData } from '@/types/auth';
+import { SharedData, Branch } from '@/types/auth';
 import {
     Dialog,
     DialogContent,

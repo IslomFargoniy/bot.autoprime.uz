@@ -1,6 +1,7 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { Head } from '@inertiajs/react';
 import { initTelegramWebApp } from '@/hooks/use-telegram';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 interface TMALayoutProps {
     children: ReactNode;
@@ -42,8 +43,9 @@ export default function TMALayout({ children, title }: TMALayoutProps) {
                 style={{ paddingTop: 'calc(max(var(--tg-content-safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), env(safe-area-inset-top, 44px)) + 3.25rem)' }}
                 className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700"
             >
-                <div className="px-4 py-3">
-                    <h1 className="text-lg font-bold text-center truncate">{title || 'Boshqaruv Paneli'}</h1>
+                <div className="px-4 py-2 flex items-center justify-between gap-2">
+                    <h1 className="text-base font-bold truncate">{title || 'Boshqaruv Paneli'}</h1>
+                    <LanguageSwitcher />
                 </div>
             </header>
 

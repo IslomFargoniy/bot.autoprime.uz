@@ -72,7 +72,7 @@ class TelegramService
         if ($instructor && $instructor->photo_path) {
             $fullPath = storage_path('app/public/'.$instructor->photo_path);
             if (file_exists($fullPath)) {
-                $photoFile = InputFile::fromFile($fullPath);
+                $photoFile = InputFile::make($fullPath);
             }
         }
 

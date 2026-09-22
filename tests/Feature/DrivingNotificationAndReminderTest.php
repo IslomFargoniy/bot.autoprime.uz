@@ -8,11 +8,8 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\TelegramService;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use SergiX44\Nutgram\Nutgram;
-
-uses(RefreshDatabase::class);
 
 test('admin driving creation dispatches SendDrivingCreatedNotificationJob', function () {
     Queue::fake();
