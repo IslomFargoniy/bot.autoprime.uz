@@ -3,6 +3,8 @@
 Mazkur reja **lms.autoprime.uz** domenida alohida platforma sifatida O‘zbekiston avtomaktablari uchun to‘liq moslashtirilgan, **O‘quvchi hech qanday veb-sahifasiz to‘g‘ridan-to‘g‘ri Telegram Bot Chatida ketma-ket savol-javob orqali anketani to‘ldirishi, rasmlarni yuklashi, 1-klik shartnoma, Kassa, Guruhlar jadvali, Darslar, LMS Video & Materiallar, Testlar, Bitiruv Guvohnomasi va Xodimlar bilan Oybay Hisob-kitobgacha bo‘lgan 100% to‘liq platforma**ga aylantirish uchun ishlab chiqildi:
 
 * 🌐 **Loyiha Domeni**: `https://lms.autoprime.uz`
+* 🖥️ **Server Joylashuvi**: `/var/www/lms_autoprim_usr/data/www/lms.autoprime.uz` (IP: `193.181.213.60`)
+* ⚙️ **Muhit (Stack)**: PHP 8.3 (`/opt/php83/bin/php`), Node `v20.20.2`, MySQL
 * 🌿 **Git Brench**: `lms-autoprime`
 
 ---
@@ -71,56 +73,6 @@ Mazkur reja **lms.autoprime.uz** domenida alohida platforma sifatida O‘zbekist
 * 🎓 **Bitirish & Sertifikat/Guvohnoma** (QR-kodli rasmiy bitiruv guvohnomasi PDF)
 * 📜 **Gibrid Balans & UNION Moliyaviy Tarixlar** (Student, Kassa, Xodim ko‘chirmalari)
 * 📲 **Telegram Mini App** (O‘quvchining to‘liq shaxsiy kabineti)
-
----
-
-## O‘quvchining To‘liq Hayotiy Sikli (Bot Qabulidan ➡️ Sertifikatgacha)
-
-```
-1. TELEGRAM BOT CHATIDA KETMA-KET QABUL ANKETASI (Bot Chat Wizard & CRM Leads)
-   ├── Bot: "F.I.O ingizni kiriting" ➡️ O'quvchi yozadi
-   ├── Bot: [📱 Kontaktni yuborish] ➡️ O'quvchi bosadi
-   ├── Bot: Toifani tanlang: [🚗 B toifa] [🏍️ A toifa] [🚛 C toifa]
-   ├── Bot: Filialni tanlang: [🏢 Chilonzor] [🏢 Yunusobod]
-   ├── Bot: Qulay vaqt: [🌅 Ertalabki] [☀️ Kunduzgi] [🌙 Kechki]
-   ├── Bot: "Pasportingiz rasmini yuboring" ➡️ O'quvchi rasm tashlaydi (Encrypted)
-   ├── Bot: "3x4 rasmingizni yuboring" ➡️ O'quvchi rasm tashlaydi
-   └── Bot: "Tug'ilgan sana va manzilingizni kiriting" ➡️ O'quvchi yozadi.
-
-2. RECEPTION GA BILDIRISHNOMA & 1-KLIK BILAN SHARTNOMA
-   ├── Reception shartnoma turini tanlaydi (Narx, Muddatlar, [x] Nazariya, [x] Vajdeniya, [x] Test)
-   ├── Talaba mos guruhga (Dars kunlari: Dush-Chor-Juma, 18:30-20:30) biriktiriladi
-   ├── Shartnoma tasdiqlanadi ➡️ Talabaga PlayMobile orqali SMS boradi
-   └── Talaba to'lov kutilmoqda holatiga o'tadi.
-
-3. TO'LOV QABUL QILISH (Payments & Cash Registers)
-   ├── Kassir to'lov turiga mos kassani tanlaydi (Naqd / Click-Karta / Bank o'tkazma)
-   ├── To'lov qabul qilinadi (DB transaction + lockForUpdate) ➡️ Talabaga PlayMobile orqali SMS boradi
-   └── To'lov foiziga qarab talabaga rang beriladi:
-       ├── 0%  = Oq rang
-       ├── <50% = Qizil rang
-       ├── 50-75% = Sariq rang
-       └── 75%+ = Yashil rang
-
-4. NAZARIY TA'LIM VA LMS MATERIAL / DAVOMAT
-   ├── Talaba minimal to'lovni qilgan bo'lsa darsga kiritiladi (QR orqali davomat olinadi)
-   └── Shaxsiy kabinetida guruh toifasiga mos VIDEO darslar va PDF materiallardan foydalanadi.
-
-5. AMALIY HAYDASH (Drivings & Instructors & Vehicles)
-   ├── SHART: Talaba to'lovi kamida 75% bo'lishi shart (va has_driving=true)
-   └── Instruktor va mashina (vehicle_id) biriktiriladi. Dars yakunida o'quvchi baho qo'yadi.
-
-6. TEST VA ICHKI IMTIHON (LMS & Mock Exam — 4 Tilda)
-   └── Shartnomada has_lms=true bo'lsa, Prava24 1190+ bazasida 4 tilda mashq qiladi va imtihon topshiradi.
-
-7. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
-   └── Barcha shartlar bajarilgach (Qarz 0, Davomat >= 70%, Haydash soatlari o'tilgan, Imtihon o'tilgan)
-       talabaga QR-kodli rasmiy Bitiruv Guvohnomasi chiqariladi.
-
-8. XODIMLAR BILAN OYBAY HISOB-KITOB (Payroll & Vedomost)
-   └── Har oy oxirida (period: YYYY-MM) Oklad + Darsbay + Bonus - Avans/Jarima hisoblanadi 
-       va filial kassalaridan oylik to'lanadi (salary_payments).
-```
 
 ---
 
