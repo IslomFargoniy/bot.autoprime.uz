@@ -69,7 +69,7 @@ export default function Login({ status }: Props) {
 
             {authError && (
                 <div className="p-3 mb-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 text-center font-medium">
-                    {authError}
+                    {t(authError, authError)}
                 </div>
             )}
 

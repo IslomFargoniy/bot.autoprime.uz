@@ -11,9 +11,12 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->cookie('locale') ?? $request->header('X-Locale') ?? config('app.locale', 'uz');
+        $locale = $request->cookie('locale')
+            ?? ($request->hasSession() ? $request->session()->get('locale') : null)
+            ?? $request->header('X-Locale')
+            ?? config('app.locale', 'uz');
 
-        if (in_array($locale, ['uz', 'ru', 'en', 'krill'], true)) {
+        if (is_string($locale) && in_array($locale, ['uz', 'ru', 'en', 'krill'], true)) {
             App::setLocale($locale);
         }
 
