@@ -1,6 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Building2, FolderGit2, LayoutGrid, MapPin, ShieldCheck } from 'lucide-react';
+import {
+    Award,
+    Banknote,
+    BookOpen,
+    Building2,
+    Car,
+    CheckSquare,
+    FileText,
+    FolderGit2,
+    GraduationCap,
+    LayoutGrid,
+    MapPin,
+    ShieldCheck,
+    Users,
+    Wallet,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -47,24 +62,44 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
-            title: t('branches.title', 'Filiallar'),
-            href: '/admin/branches',
-            icon: Building2,
+            title: t('sidebar.leads', 'CRM Lidlar'),
+            href: '/admin/leads',
+            icon: Users,
         },
         {
-            title: t('sidebar.admins', 'Adminlar'),
-            href: '/admin/admins',
-            icon: ShieldCheck,
+            title: t('sidebar.contracts', 'Shartnomalar'),
+            href: '/admin/contracts',
+            icon: FileText,
         },
         {
-            title: t('sidebar.autodromes', 'Avtodromlar'),
-            href: '/admin/autodromes',
-            icon: MapPin,
+            title: t('sidebar.contract_types', 'Tariflar'),
+            href: '/admin/contract-types',
+            icon: FileText,
         },
         {
-            title: t('sidebar.instructors', 'Instruktorlar'),
-            href: '/admin/instructors',
-            icon: BookOpen,
+            title: t('sidebar.finance', 'Moliya & Kassa'),
+            href: '/admin/finance',
+            icon: Wallet,
+        },
+        {
+            title: t('sidebar.salaries', 'Xodimlar Oyligi'),
+            href: '/admin/salaries',
+            icon: Banknote,
+        },
+        {
+            title: t('sidebar.attendance', 'Davomat (QR)'),
+            href: '/admin/attendance',
+            icon: CheckSquare,
+        },
+        {
+            title: t('sidebar.certificates', 'Guvohnomalar'),
+            href: '/admin/certificates',
+            icon: Award,
+        },
+        {
+            title: t('sidebar.courses', 'LMS Kurslar'),
+            href: '/admin/courses',
+            icon: GraduationCap,
         },
         {
             title: t('sidebar.groups', 'Guruhlar'),
@@ -81,12 +116,37 @@ export function AppSidebar() {
             href: '/admin/drivings',
             icon: FolderGit2,
         },
+        {
+            title: t('sidebar.vehicles', 'Avtopark'),
+            href: '/admin/vehicles',
+            icon: Car,
+        },
+        {
+            title: t('sidebar.autodromes', 'Avtodromlar'),
+            href: '/admin/autodromes',
+            icon: MapPin,
+        },
+        {
+            title: t('sidebar.instructors', 'Instruktorlar'),
+            href: '/admin/instructors',
+            icon: BookOpen,
+        },
+        {
+            title: t('branches.title', 'Filiallar'),
+            href: '/admin/branches',
+            icon: Building2,
+        },
+        {
+            title: t('sidebar.admins', 'Adminlar'),
+            href: '/admin/admins',
+            icon: ShieldCheck,
+        },
     ].filter(item => {
         if (item.href === '/admin/branches' || item.href === '/admin/admins') {
             return isSuperAdmin;
         }
         if (isInstructor) {
-            return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings'].includes(item.href);
+            return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings', '/admin/vehicles'].includes(item.href);
         }
         return true;
     });

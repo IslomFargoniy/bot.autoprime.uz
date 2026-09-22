@@ -70,6 +70,16 @@ class Lead extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
+    public function convertedStudent(): BelongsTo
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     public function contract(): BelongsTo
     {
         return $this->belongsTo(Contract::class);

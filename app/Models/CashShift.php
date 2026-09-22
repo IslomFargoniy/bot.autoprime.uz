@@ -45,6 +45,16 @@ class CashShift extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function openedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function closedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function transfers(): HasMany
     {
         return $this->hasMany(CashTransfer::class);

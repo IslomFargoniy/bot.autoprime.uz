@@ -34,6 +34,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Group|null $group
+ * @property-read Contract|null $activeContract
+ * @property-read User|null $registeredBy
  */
 class Student extends Model
 {
@@ -104,6 +106,9 @@ class Student extends Model
         return $this->hasMany(Contract::class);
     }
 
+    /**
+     * @return HasOne<Contract, $this>
+     */
     public function activeContract(): HasOne
     {
         return $this->hasOne(Contract::class)->where('status', 'active')->latestOfMany();
@@ -124,6 +129,9 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * @return HasMany<Attempt, $this>
+     */
     public function attempts(): HasMany
     {
         return $this->hasMany(Attempt::class);

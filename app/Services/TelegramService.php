@@ -2,13 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Contract;
 use App\Models\Driving;
+use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 class TelegramService
 {
@@ -394,6 +397,114 @@ class TelegramService
             );
         } catch (\Throwable $e) {
             Log::error("Failed to send Telegram 2h driving reminder to student {$student->id}: ".$e->getMessage());
+        }
+    }
+
+    /**
+     * Send official payment receipt notification to student.
+     */
+    public function sendPaymentReceiptNotification(Payment $payment): void
+    {
+        $bot = $this->getBot();
+        if (! $bot) {
+            return;
+        }
+
+        $payment->loadMissing(['student', 'contract', 'cashRegister']);
+        $student = $payment->student;
+        $contract = $payment->contract;
+
+        if (! $student || ! $student->telegram_id) {
+            return;
+        }
+
+        $amountFormatted = number_format((float) $payment->amount, 0, '.', ' ');
+        $paidAt = $payment->paid_at ? Carbon::parse($payment->paid_at)->format('d.m.Y H:i') : now()->format('d.m.Y H:i');
+        $methodLabel = match ($payment->payment_method) {
+            'cash' => '💵 Naqd pul',
+            'card_click' => '💳 Karta / Click / Payme',
+            'bank_transfer' => '🏦 Bank o\'tkazmasi',
+            default => $payment->payment_method,
+        };
+
+        $text = "🧾 <b>To'lov qabul qilindi! (Rasmiy Chek)</b>\n\n";
+        $text .= "🔢 <b>Chek raqami:</b> #{$payment->receipt_number}\n";
+        $text .= "💰 <b>To'langan summa:</b> <code>{$amountFormatted} UZS</code>\n";
+        $text .= "💳 <b>To'lov usuli:</b> {$methodLabel}\n";
+        $text .= "📅 <b>Sana:</b> {$paidAt}\n";
+
+        if ($contract) {
+            $debtFormatted = number_format((float) $contract->debt_amount, 0, '.', ' ');
+            $pct = $contract->payment_percentage;
+            $text .= "📄 <b>Shartnoma:</b> {$contract->contract_number}\n";
+            $text .= "📊 <b>To'lov holati:</b> {$pct}%\n";
+            $text .= "⚠️ <b>Qoldiq qarz:</b> {$debtFormatted} UZS\n";
+        }
+
+        $appUrl = config('app.url');
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make(
+                '📲 Shaxsiy Kabinet (Mini App)',
+                web_app: new WebAppInfo($appUrl.'/mini-app')
+            ));
+
+        try {
+            $bot->sendMessage(
+                text: $text,
+                chat_id: $student->telegram_id,
+                parse_mode: 'HTML',
+                reply_markup: $keyboard
+            );
+        } catch (\Throwable $e) {
+            Log::error("Failed to send payment receipt to student {$student->id}: ".$e->getMessage());
+        }
+    }
+
+    /**
+     * Send contract signed notification to student.
+     */
+    public function sendContractSignedNotification(Contract $contract): void
+    {
+        $bot = $this->getBot();
+        if (! $bot) {
+            return;
+        }
+
+        $contract->loadMissing(['student', 'contractType', 'group']);
+        $student = $contract->student;
+
+        if (! $student || ! $student->telegram_id) {
+            return;
+        }
+
+        $totalFormatted = number_format((float) $contract->final_amount, 0, '.', ' ');
+        $text = "🎉 <b>Shartnomangiz muvaffaqiyatli rasmiylashtirildi!</b>\n\n";
+        $text .= "📄 <b>Shartnoma raqami:</b> #{$contract->contract_number}\n";
+        if ($contract->contractType) {
+            $text .= "🎓 <b>Kurs:</b> {$contract->contractType->name}\n";
+        }
+        if ($contract->group) {
+            $text .= "👥 <b>Guruh:</b> {$contract->group->name}\n";
+        }
+        $text .= "💵 <b>Jami summa:</b> <code>{$totalFormatted} UZS</code>\n\n";
+        $text .= "<i>Shaxsiy kabinetingiz orqali dars jadvali, LMS materiallar va to'lovlarni kuzatishingiz mumkin.</i>";
+
+        $appUrl = config('app.url');
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make(
+                '📲 Shaxsiy Kabinet (Mini App)',
+                web_app: new WebAppInfo($appUrl.'/mini-app')
+            ));
+
+        try {
+            $bot->sendMessage(
+                text: $text,
+                chat_id: $student->telegram_id,
+                parse_mode: 'HTML',
+                reply_markup: $keyboard
+            );
+        } catch (\Throwable $e) {
+            Log::error("Failed to send contract signed notification to student {$student->id}: ".$e->getMessage());
         }
     }
 }

@@ -45,6 +45,11 @@ class Vehicle extends Model
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
+    public function defaultInstructor(): BelongsTo
+    {
+        return $this->instructor();
+    }
+
     public function drivings(): HasMany
     {
         return $this->hasMany(Driving::class);
