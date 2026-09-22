@@ -7,7 +7,9 @@
     "login_title": "Tizimga kirish",
     "login_desc": "Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting",
     "auto_logging_in": "Telegram orqali avtomatik kirilmoqda...",
-    "logout": "Chiqish"
+    "logout": "Chiqish",
+    "failed": "Kiritilgan telefon raqam yoki parol noto'g'ri.",
+    "throttle": "Kirish urinishlari ko'payib ketdi. Iltimos, bir ozdan keyin qayta urinib ko'ring."
   },
   "sidebar": {
     "dashboard": "Bosh sahifa",

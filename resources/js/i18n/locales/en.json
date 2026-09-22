@@ -7,7 +7,9 @@
     "login_title": "Sign In",
     "login_desc": "Enter your phone number and password to sign in",
     "auto_logging_in": "Signing in automatically via Telegram...",
-    "logout": "Log out"
+    "logout": "Log out",
+    "failed": "These credentials do not match our records.",
+    "throttle": "Too many login attempts. Please try again later."
   },
   "sidebar": {
     "dashboard": "Dashboard",
