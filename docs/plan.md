@@ -11,6 +11,7 @@ Tizim uchta asosiy interfeysdan iborat:
 * 🖥️ **Server Joylashuvi**: `/var/www/lms_autoprim_usr/data/www/lms.autoprime.uz` (IP: `193.181.213.60`)
 * ⚙️ **Muhit (Stack)**: PHP 8.3 (`/opt/php83/bin/php`), Node `v20.20.2`, MySQL, Laravel 13, Inertia v3, React 19, Tailwind v4
 * 🌿 **Git Brench**: `lms-autoprime`
+* 🤖 **Telegram Bot**: [@LmsAutoprimeBot](https://t.me/LmsAutoprimeBot)
 * 📱 **Telegram Webhook**: `https://lms.autoprime.uz/api/telegram/webhook`
 * 📲 **Telegram Mini App**: `https://lms.autoprime.uz/mini-app`
 
