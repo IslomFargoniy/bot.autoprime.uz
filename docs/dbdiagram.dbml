@@ -190,20 +190,10 @@ Table users {
   password varchar(255)
   telegram_id bigint [unique, null]
   telegram_username varchar(255) [null]
+  base_salary decimal(12,2) [default: 0, note: 'Shtatdagi doimiy oklad']
+  driving_hourly_rate decimal(12,2) [default: 0, note: 'Instruktorning 1 soat/dars amaliy haydash stavkasi']
+  lesson_rate decimal(12,2) [default: 0, note: 'O\'qituvchining 1 nazariy dars stavkasi']
   salary_balance decimal(12,2) [default: 0, note: 'Xodimga to\'lanishi kerak bo\'lgan qoldiq oylik (Minusga ketmaydi >= 0). DB CHECK constraint + application-level row lock bilan ta\'minlanishi shart']
-  is_active boolean [default: true]
-  created_at timestamp
-  updated_at timestamp
-}
-
-Table groups {
-  id bigint [pk, increment]
-  branch_id bigint [ref: > branches.id]
-  teacher_id bigint [ref: > users.id, null, note: 'Guruhning asosiy nazariyotchi o\'qituvchisi']
-  name varchar(255) [not null]
-  category varchar(20) [default: 'B']
-  start_date date
-  end_date date
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -221,26 +211,90 @@ Table autodromes {
 
 
 // ==========================================
-// 🎓 3. O'QUVCHILAR, SHARTNOMALAR & SERTIFIKATLAR (QABULDAN BITIRISHGACHA)
+// 📚 3. LMS KURSLAR, MAVZULAR & MATERIALAR
+// ==========================================
+
+Table courses {
+  id bigint [pk, increment]
+  name varchar(255) [not null, note: 'Masalan: B toifa to\'liq kursi, A toifa, C toifa']
+  category varchar(20) [default: 'B', note: 'A, B, C, BC, D, E']
+  description text [null]
+  thumbnail_url varchar(500) [null]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table topics {
+  id bigint [pk, increment]
+  course_id bigint [ref: > courses.id]
+  title_uz varchar(255) [not null]
+  title_ru varchar(255) [null]
+  title_krill varchar(255) [null]
+  title_en varchar(255) [null]
+  description text [null]
+  video_url varchar(500) [null, note: 'YouTube/Vimeo/Streaming video havolasi']
+  duration_minutes int [default: 0, note: 'Video davomiyligi (daqiqa)']
+  order_number int [default: 1, note: 'Ketma-ketlik tartibi']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table lesson_materials {
+  id bigint [pk, increment]
+  topic_id bigint [ref: > topics.id]
+  title varchar(255) [not null, note: 'Material nomi (masalan: 1-Mavzu Prezentatsiyasi)']
+  file_url varchar(500) [not null, note: 'PDF, PPTX yoki yuklash fayl havolasi']
+  file_type varchar(20) [default: 'pdf', note: 'pdf, pptx, docx, link']
+  file_size varchar(50) [null, note: 'Fayl hajmi (masalan: 4.2 MB)']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table groups {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id]
+  teacher_id bigint [ref: > users.id, null, note: 'Guruhning asosiy nazariyotchi o\'qituvchisi']
+  course_id bigint [ref: > courses.id, null, note: 'Guruhga biriktirilgan LMS kursi']
+  name varchar(255) [not null]
+  category varchar(20) [default: 'B']
+  days_of_week json [null, note: 'Dars kunlari: ["mon", "wed", "fri"] yoki ["tue", "thu", "sat"]']
+  start_time time [null, note: 'Dars boshlanish vaqti (masalan: 18:30:00)']
+  end_time time [null, note: 'Dars tugash vaqti (masalan: 20:30:00)']
+  room varchar(100) [null, note: 'Auditoriya / Xona nomi']
+  max_students int [default: 30, note: 'Guruh sig\'imi']
+  start_date date
+  end_date date
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+// ==========================================
+// 🎓 4. O'QUVCHILAR, SHARTNOMALAR & SERTIFIKATLAR (QABULDAN BITIRISHGACHA)
 // ==========================================
 
 Table students {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
-  group_id bigint [ref: > groups.id, null]
+  group_id bigint [ref: > groups.id, null, note: 'Joriy faol guruhi (Asosiy bog\'liqlik contracts orqali bo\'ladi)']
   registered_by_user_id bigint [ref: > users.id, null, note: 'Qabul qilgan reception/admin']
   full_name varchar(255) [not null]
   phone varchar(50) [not null]
   passport_series varchar(10) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
   passport_number varchar(20) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
-  pinfl varchar(14) [unique, null, note: 'JSHSHIR (14 xonali) — Model darajasida encrypted cast bilan shifrlanishi shart']
+  pinfl varchar(255) [null, note: 'JSHSHIR (14 xonali) — Model darajasida encrypted cast bilan shifrlanadi']
+  pinfl_hash varchar(64) [unique, null, note: 'HMAC-SHA256 blind index hash — takrorlanmaslik (unique) tekshirish va qidirish uchun']
   birth_date date [null]
   address varchar(500) [null]
   photo_url varchar(500) [null, note: '3x4 rasmi']
-  passport_photo_url varchar(500) [null, note: 'Pasport rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
-  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
+  passport_photo_url varchar(500) [null, note: 'Pasport rasmi — Shifrlangan fayl yo\'li']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Shifrlangan fayl yo\'li']
   medical_certificate_date date [null, note: '083-forma tibbiy ma\'lumotnoma sanasi']
-  telegram_chat_id bigint [null, note: 'Telefoni/Telegrami yo\'q bo\'lsa null bo\'ladi']
+  telegram_chat_id bigint [null, note: 'Telegram botga bog\'langan chat ID']
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -250,20 +304,45 @@ Table students {
   }
 }
 
+Table contract_types {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, null, note: 'null bo\'lsa barcha filiallar uchun umumiy tarif']
+  name varchar(255) [not null, note: 'Standart B, VIP B, Faqat Nazariya, Faqat Haydash']
+  category varchar(20) [default: 'B', note: 'A, B, C, BC, D, E']
+  price decimal(12,2) [not null, note: 'Standart shartnoma narxi']
+  has_theory boolean [default: true, note: 'Nazariy ta\'lim moduli']
+  has_driving boolean [default: true, note: 'Amaliy haydash moduli']
+  has_lms boolean [default: true, note: 'Testlar va LMS video darslar moduli']
+  required_driving_lessons int [default: 10, note: 'Bitirish uchun majburiy amaliy darslar soni']
+  required_theory_lessons int [default: 24, note: 'Bitirish uchun majburiy nazariy darslar soni']
+  min_theory_payment_percent decimal(5,2) [default: 30.00, note: 'Darsga kirish uchun minimal to\'lov foizi (standart: 30%)']
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
 Table contracts {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
   student_id bigint [ref: > students.id]
-  group_id bigint [ref: > groups.id, null]
+  contract_type_id bigint [ref: > contract_types.id, null, note: 'Tanlangan tarif turi']
+  group_id bigint [ref: > groups.id, null, note: 'Shartnoma bo\'yicha biriktirilgan guruh']
   created_by_user_id bigint [ref: > users.id, note: 'Shartnoma rasmiylashtirgan xodim (reception/admin)']
   contract_number varchar(50) [unique, not null, note: 'Masalan: AP-2026-0012']
   contract_date date [not null]
+  start_date date [null]
+  end_date date [null]
+  has_theory boolean [default: true, note: 'Nazariya moduli faolligi']
+  has_driving boolean [default: true, note: 'Haydash moduli faolligi']
+  has_lms boolean [default: true, note: 'Test va LMS moduli faolligi']
+  required_driving_lessons int [default: 10, note: 'Shartnoma bo\'yicha majburiy haydash darslari']
+  required_theory_lessons int [default: 24, note: 'Shartnoma bo\'yicha majburiy nazariy darslar']
   total_amount decimal(12,2) [not null, note: 'Kursning to\'liq narxi']
   discount_amount decimal(12,2) [default: 0, note: 'Chegirma miqdori']
   final_amount decimal(12,2) [not null, note: 'To\'lanishi kerak bo\'lgan yakuniy summa (total - discount)']
   paid_amount decimal(12,2) [default: 0, note: 'Haqiqatda to\'langan summa']
   debt_amount decimal(12,2) [default: 0, note: 'Qoldiq qarzdorlik (Minusga ketmaydi >= 0). DB CHECK constraint + application-level row lock bilan ta\'minlanishi shart']
-  overpaid_amount decimal(12,2) [default: 0, note: 'Ortiqcha to\'lov miqdori (ortiqcha to\'lovlarni kuzatish uchun)']
+  overpaid_amount decimal(12,2) [default: 0, note: 'Ortiqcha to\'lov miqdori']
   status contract_status_enum [default: 'active']
   payment_status payment_status_enum [default: 'unpaid']
   terms text [null, note: 'Maxsus shartlar yoki izoh']
@@ -295,13 +374,13 @@ Table certificates {
 
 
 // ==========================================
-// 💳 4. ERP: KASSALAR, XARAJATLAR & KASSA YOPISH
+// 💳 5. ERP: KASSALAR, XARAJATLAR & KASSA YOPISH
 // ==========================================
 
 Table cash_register_types {
   id bigint [pk, increment]
   name varchar(100) [not null, note: 'Naqd pul, Plastik karta / Terminal, Bank hisob raqami']
-  code varchar(50) [unique, not null, note: 'cash, card, bank_transfer']
+  code varchar(50) [unique, not null, note: 'cash, card_click, bank_transfer']
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
@@ -323,10 +402,11 @@ Table payments {
   branch_id bigint [ref: > branches.id]
   contract_id bigint [ref: > contracts.id, null, note: 'To\'lov to\'g\'ridan-to\'g\'ri shartnomaga yopiladi']
   student_id bigint [ref: > students.id]
-  cash_register_id bigint [ref: > cash_registers.id]
+  cash_register_id bigint [ref: > cash_registers.id, note: 'Tanlangan kassa turi to\'lov usuli bilan 100% mos kelishi shart']
   received_by_user_id bigint [ref: > users.id, note: 'To\'lovni qabul qilgan kassir/accountant/admin']
   amount decimal(12,2) [not null]
   payment_type payment_type_enum [default: 'contract_tuition']
+  payment_method varchar(50) [default: 'cash', note: 'cash, click, payme, card_terminal, bank_transfer']
   receipt_number varchar(100) [unique]
   comment text [null]
   paid_at timestamp [not null]
@@ -360,7 +440,7 @@ Table expenses {
 
 Table cash_shifts {
   id bigint [pk, increment]
-  cash_register_id bigint [ref: > cash_registers.id]
+  cash_register_id bigint [ref: > cash_registers.id, note: 'Asosan Naqd kassa (cash) uchun smena yuritiladi']
   user_id bigint [ref: > users.id, note: 'Kassa smenasini yopgan kassir']
   opened_at timestamp [not null]
   closed_at timestamp [null]
@@ -377,8 +457,8 @@ Table cash_shifts {
 
 Table cash_transfers {
   id bigint [pk, increment]
-  from_cash_register_id bigint [ref: > cash_registers.id, note: 'Filial kassasi (masalan, Chilonzor Naqd)']
-  to_cash_register_id bigint [ref: > cash_registers.id, note: 'Mos turdagi Admin Kassa (masalan, Admin Naqd)']
+  from_cash_register_id bigint [ref: > cash_registers.id, note: 'Filial naqd kassasi']
+  to_cash_register_id bigint [ref: > cash_registers.id, note: 'Mos turdagi Admin Kassa']
   cash_shift_id bigint [ref: > cash_shifts.id, null]
   amount decimal(14,2) [not null, note: 'Filial kassa balansidan katta bo\'lishi mumkin emas']
   sent_by_user_id bigint [ref: > users.id, note: 'O\'tkazgan kassir/admin']
@@ -391,16 +471,16 @@ Table cash_transfers {
 
 
 // ==========================================
-// 💼 5. ERP: XODIMLAR OYLIGI & ISH HAQI (PAYROLL)
+// 💼 6. ERP: XODIMLAR OYLIGI & ISH HAQI (PAYROLL)
 // ==========================================
 
 Table salaries {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id, null]
-  user_id bigint [ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki bir vaqtda ikkalasi bo\'lgan xodim)']
+  user_id bigint [ref: > users.id, note: 'Oylik hisoblangan xodim (teacher, instructor yoki shtat xodimi)']
   created_by_user_id bigint [ref: > users.id, note: 'Oylikni hisoblagan accountant/admin/superadmin']
-  period varchar(20) [not null, note: 'Masalan: 2026-08']
-  salary_type salary_type_enum [default: 'base_salary', note: 'base_salary (nazariya darslari), driving_hourly_rate (amaliy haydash), bonus_kpi, penalty, advance']
+  period varchar(20) [not null, note: 'Masalan: 2026-08 (YYYY-MM)']
+  salary_type salary_type_enum [default: 'base_salary', note: 'base_salary, driving_hourly_rate, bonus_kpi, penalty, advance']
   amount decimal(12,2) [not null, note: 'Hisoblangan summa (doim musbat)']
   is_deduction boolean [default: false, note: 'penalty va advance turlari uchun true — shunda amount doim musbat qoladi, ishora aniq bo\'ladi']
   lessons_or_hours_count int [default: 0, note: 'O\'tgan dars/haydash soatlari soni']
@@ -426,7 +506,7 @@ Table salary_payments {
 
 
 // ==========================================
-// 📱 6. ERP & LMS: ONE-TIME QR & MANUAL DAVOMAT
+// 📱 7. ERP & LMS: ONE-TIME DYNAMIC QR & MANUAL DAVOMAT
 // ==========================================
 
 Table lesson_sessions {
@@ -464,12 +544,13 @@ Table attendances {
 
 
 // ==========================================
-// 🚗 7. ERP: AMALIY HAYDASH (DRIVINGS & INSTRUCTORS)
+// 🚗 8. ERP: AMALIY HAYDASH (DRIVINGS & INSTRUCTORS)
 // ==========================================
 
 Table drivings {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
+  contract_id bigint [ref: > contracts.id, null, note: 'Qaysi shartnoma bo\'yicha haydash mashg\'uloti']
   instructor_id bigint [ref: > users.id, note: 'Haydash o\'rgatuvchi xodim (instructor rolidagi user)']
   student_id bigint [ref: > students.id]
   autodrome_id bigint [ref: > autodromes.id, null]
@@ -500,7 +581,7 @@ Table reviews {
 
 
 // ==========================================
-// 📚 8. LMS: PRAVA24 TEST & IMTIHON DVIGATELI (4 TILDA)
+// 📚 9. LMS: PRAVA24 TEST & IMTIHON DVIGATELI (4 TILDA)
 // ==========================================
 
 Table tickets {
@@ -629,7 +710,7 @@ Table attempt_answers {
 
 
 // ==========================================
-// 👥 9. CRM: LIDLAR & BOT ORQALI ONLAYN ANKETA (LEADS & SELF-FILL WIZARD)
+// 👥 10. CRM: LIDLAR & BOT ORQALI ONLAYN ANKETA (LEADS & SELF-FILL WIZARD)
 // ==========================================
 
 Table leads {
@@ -647,12 +728,13 @@ Table leads {
   preferred_time varchar(50) [null, note: 'Ertalabki, Kunduzgi, Kechki']
   passport_series varchar(10) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
   passport_number varchar(20) [null, note: 'Model darajasida encrypted cast bilan shifrlanishi shart']
-  pinfl varchar(14) [null, note: 'JSHSHIR — Model darajasida encrypted cast bilan shifrlanishi shart']
+  pinfl varchar(255) [null, note: 'JSHSHIR — Model darajasida encrypted cast bilan shifrlanadi']
+  pinfl_hash varchar(64) [null, note: 'HMAC-SHA256 blind index hash']
   birth_date date [null]
   address varchar(500) [null]
   photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan 3x4 rasm']
-  passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi — Model darajasida encrypted cast bilan shifrlanishi shart']
-  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Model darajasida encrypted cast bilan shifrlanishi shart']
+  passport_photo_url varchar(500) [null, note: 'O\'quvchi bot orqali yuklagan pasport nusxasi — Shifrlangan fayl yo\'li']
+  medical_certificate_photo_url varchar(500) [null, note: '083-tibbiy ma\'lumotnoma rasmi — Shifrlangan fayl yo\'li']
   source lead_source_enum [default: 'telegram_bot']
   stage lead_stage_enum [default: 'new_lead', note: 'new_lead, form_sent, form_completed, contract_signed, rejected']
   notes text [null]
@@ -663,13 +745,13 @@ Table leads {
 
 
 // ==========================================
-// 🚙 10. ERP: AVTOPARK & XARAJATLAR (FLEET)
+// 🚙 11. ERP: AVTOPARK & XARAJATLAR (FLEET)
 // ==========================================
 
 Table vehicles {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id]
-  instructor_id bigint [ref: > users.id, null]
+  instructor_id bigint [ref: > users.id, null, note: 'Doimiy biriktirilgan asosiy instruktor (default_instructor_id)']
   make_model varchar(255) [not null, note: 'Masalan: Chevrolet Cobalt, Nexia 3']
   plate_number varchar(50) [unique, not null]
   fuel_type vehicle_fuel_enum [default: 'petrol']
@@ -699,7 +781,7 @@ Table vehicle_maintenances {
 
 
 // ==========================================
-// 🛡️ 11. AUDIT & LOGGING (SPATIE ACTIVITYLOG)
+// 🛡️ 12. AUDIT & LOGGING (SPATIE ACTIVITYLOG)
 // ==========================================
 
 Table activity_log {
@@ -737,8 +819,15 @@ TableGroup Core_MultiBranch {
   autodromes
 }
 
+TableGroup LMS_Courses_and_Materials {
+  courses
+  topics
+  lesson_materials
+}
+
 TableGroup Students_Contracts_and_Certificates {
   students
+  contract_types
   contracts
   certificates
 }
