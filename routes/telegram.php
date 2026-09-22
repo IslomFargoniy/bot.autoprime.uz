@@ -6,6 +6,7 @@ use App\Models\Driving;
 use App\Models\Review;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\LeadWizardService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use SergiX44\Nutgram\Nutgram;
@@ -14,8 +15,6 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\ReplyKeyboardMarkup;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\ReplyKeyboardRemove;
-use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
-
 /*
 |--------------------------------------------------------------------------
 | Nutgram Handlers
@@ -26,22 +25,25 @@ use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 |
 */
 
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
+
 $bot->onCommand('start', function (Nutgram $bot) {
     $telegramId = $bot->userId();
     $user = User::where('telegram_id', $telegramId)->first();
     $student = Student::where('telegram_id', $telegramId)->first();
 
+    $appUrl = config('app.url');
+    if (! str_starts_with($appUrl, 'https://')) {
+        $appUrl = preg_replace('/^http:/i', 'https:', $appUrl);
+    }
+
     if ($user) {
         $roleTitle = $user->role === 'instructor' ? '👨‍🏫 Instruktor' : '👑 Admin';
-        $appUrl = config('app.url');
-        if (! str_starts_with($appUrl, 'https://')) {
-            $appUrl = preg_replace('/^http:/i', 'https:', $appUrl);
-        }
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(InlineKeyboardButton::make(
-                '🚀 Mini App ni ochish',
-                web_app: new WebAppInfo($appUrl)
+                '🚀 Boshqaruv Panelini ochish',
+                web_app: new WebAppInfo($appUrl.'/admin/dashboard')
             ));
 
         $msg = "📌 <b>Tizimga kirildi: {$roleTitle}</b>\n\nAssalomu alaykum, <b>{$user->name}</b>! AutoPrime tizimiga xush kelibsiz.";
@@ -57,22 +59,42 @@ $bot->onCommand('start', function (Nutgram $bot) {
 
     if ($student) {
         $roleTitle = "🎓 O'quvchi";
-        $msg = "📌 <b>Tizimga kirildi: {$roleTitle}</b>\n\nAssalomu alaykum, <b>{$student->full_name}</b>! AutoPrime o'quvchi botiga xush kelibsiz.";
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make(
+                '📲 Shaxsiy Kabinet (Mini App)',
+                web_app: new WebAppInfo($appUrl.'/mini-app')
+            ))
+            ->addRow(InlineKeyboardButton::make(
+                '🚗 Mashg\'ulotlarim',
+                callback_data: 'drivings:scheduled'
+            ));
 
-        $bot->sendMessage($msg, parse_mode: 'HTML');
+        $msg = "📌 <b>Tizimga kirildi: {$roleTitle}</b>\n\nAssalomu alaykum, <b>{$student->full_name}</b>! AutoPrime o'quvchi portaliga xush kelibsiz.\n\nDarslar jadvali, to'lovlar, video darsliklar va testlar uchun shaxsiy kabinetingizga kiring:";
+
+        $bot->sendMessage($msg, parse_mode: 'HTML', reply_markup: $keyboard);
 
         return;
     }
 
-    $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
-        ->addRow(
-            KeyboardButton::make('📱 Telefon raqamni yuborish', request_contact: true)
-        );
+    // New visitor / Prospective student
+    $keyboard = InlineKeyboardMarkup::make()
+        ->addRow(InlineKeyboardButton::make(
+            '🎓 O\'qishga ariza topshirish (Qabul anketasi)',
+            callback_data: 'wizard:start'
+        ))
+        ->addRow(InlineKeyboardButton::make(
+            '🔑 Tizimga kirish (Xodim / O\'quvchi)',
+            callback_data: 'wizard:login'
+        ));
 
-    $bot->sendMessage(
-        text: 'Assalomu alaykum! Tizimga kirish uchun pastdagi tugma orqali telefon raqamingizni yuboring:',
-        reply_markup: $keyboard
-    );
+    $text = "🚗 <b>AutoPrime Avtomaktabi Rasmiy Botiga Xush Kelibsiz!</b>\n\n".
+            "Bizning platformamiz orqali siz:\n".
+            "• Avtomaktabga masofadan turib ariza topshirishingiz\n".
+            "• Video darslar va yo'l harakati qoidalarini o'rganishingiz\n".
+            "• 1190+ testlar orqali haydovchilik imtihoniga tayyorlanishingiz mumkin.\n\n".
+            "Iltimos, kerakli bo'limni tanlang:";
+
+    $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
 })->description('Botni ishga tushirish');
 
 if (! function_exists('getDrivingsKeyboard')) {
@@ -281,6 +303,45 @@ $bot->onCallbackQueryData('drivings:{status}', function (Nutgram $bot, $status) 
     $bot->answerCallbackQuery();
 });
 
+$bot->onCallbackQueryData('wizard:start', function (Nutgram $bot) {
+    $bot->answerCallbackQuery();
+    app(LeadWizardService::class)->start($bot);
+});
+
+$bot->onCallbackQueryData('wizard:login', function (Nutgram $bot) {
+    $bot->answerCallbackQuery();
+    $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true, one_time_keyboard: true)
+        ->addRow(
+            KeyboardButton::make('📱 Telefon raqamni yuborish', request_contact: true)
+        );
+
+    $bot->sendMessage(
+        'Tizimga kirish uchun pastdagi <b>[📱 Telefon raqamni yuborish]</b> tugmasini bosing:',
+        parse_mode: 'HTML',
+        reply_markup: $keyboard
+    );
+});
+
+$bot->onCallbackQueryData('wizard_cat:{cat}', function (Nutgram $bot, $cat) {
+    $bot->answerCallbackQuery();
+    app(LeadWizardService::class)->handleCategorySelect($bot, $cat);
+});
+
+$bot->onCallbackQueryData('wizard_branch:{branchId}', function (Nutgram $bot, $branchId) {
+    $bot->answerCallbackQuery();
+    app(LeadWizardService::class)->handleBranchSelect($bot, (int) $branchId);
+});
+
+$bot->onCallbackQueryData('wizard_time:{timeKey}', function (Nutgram $bot, $timeKey) {
+    $bot->answerCallbackQuery();
+    app(LeadWizardService::class)->handleTimeSelect($bot, $timeKey);
+});
+
+$bot->onCallbackQueryData('wizard_skip:{stepKey}', function (Nutgram $bot, $stepKey) {
+    $bot->answerCallbackQuery();
+    app(LeadWizardService::class)->handleSkip($bot, $stepKey);
+});
+
 $bot->onContact(function (Nutgram $bot) {
     $contact = $bot->message()->contact;
 
@@ -291,6 +352,13 @@ $bot->onContact(function (Nutgram $bot) {
     }
 
     $telegramId = $bot->userId();
+    $wizard = app(LeadWizardService::class);
+    if ($wizard->isInWizard($telegramId)) {
+        $wizard->handleContact($bot, $contact->phone_number);
+
+        return;
+    }
+
     $phone = $contact->phone_number;
 
     // Normalize phone (sometimes Telegram returns with or without +)
@@ -337,13 +405,36 @@ $bot->onContact(function (Nutgram $bot) {
         $student->update(['telegram_id' => $telegramId]);
         $roleTitle = "🎓 O'quvchi";
 
+        $appUrl = config('app.url');
+        if (! str_starts_with($appUrl, 'https://')) {
+            $appUrl = preg_replace('/^http:/i', 'https:', $appUrl);
+        }
+
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make(
+                '📲 Shaxsiy Kabinet (Mini App)',
+                web_app: new WebAppInfo($appUrl.'/mini-app')
+            ));
+
         $bot->sendMessage(
             "✅ Muvaffaqiyatli avtorizatsiyadan o'tdingiz!\n\n👤 <b>Ismingiz:</b> {$student->full_name}\n📌 <b>Siz tizimga <u>{$roleTitle}</u> sifatida kirdingiz.</b>",
             parse_mode: 'HTML',
             reply_markup: ReplyKeyboardRemove::make(true)
         );
+
+        $bot->sendMessage('Shaxsiy kabinetingizga kirish uchun tugmani bosing:', reply_markup: $keyboard);
     } else {
-        $bot->sendMessage("Kechirasiz, tizimda ushbu raqam bilan o'quvchi yoki xodim topilmadi.");
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make(
+                '🎓 Avtomaktabga ariza topshirish (Qabul anketasi)',
+                callback_data: 'wizard:start'
+            ));
+
+        $bot->sendMessage(
+            "Kechirasiz, tizimda <b>{$phone}</b> raqami bilan ro'yxatdan o'tgan o'quvchi yoki xodim topilmadi.\n\nAutoPrime avtomaktabiga o'qishga ariza topshirmoqchimisiz?",
+            parse_mode: 'HTML',
+            reply_markup: $keyboard
+        );
     }
 });
 
@@ -526,6 +617,13 @@ $bot->onMessageType(MessageType::TEXT, function (Nutgram $bot) {
     }
 
     $userId = $bot->userId();
+    $wizard = app(LeadWizardService::class);
+    if ($wizard->isInWizard($userId)) {
+        $wizard->handleText($bot, $text);
+
+        return;
+    }
+
     $cacheKey = "awaiting_review_comment_{$userId}";
     $cacheData = Cache::get($cacheKey);
 
@@ -561,5 +659,13 @@ $bot->onMessageType(MessageType::TEXT, function (Nutgram $bot) {
         Cache::forget($cacheKey);
 
         $bot->sendMessage('✅ Fikringiz uchun rahmat! Izohingiz saqlandi.');
+    }
+});
+
+$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
+    $userId = $bot->userId();
+    $wizard = app(LeadWizardService::class);
+    if ($wizard->isInWizard($userId)) {
+        $wizard->handlePhoto($bot);
     }
 });

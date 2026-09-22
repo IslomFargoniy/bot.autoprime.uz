@@ -38,6 +38,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property float $base_salary
  * @property float $driving_hourly_rate
  * @property float $lesson_rate
+ * @property float $salary_balance
  * @property int|null $branch_id
  * @property int|null $groups_count
  * @property-read Branch|null $branch
@@ -56,6 +57,7 @@ use Spatie\Permission\Traits\HasRoles;
     'base_salary',
     'driving_hourly_rate',
     'lesson_rate',
+    'salary_balance',
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser

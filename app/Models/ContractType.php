@@ -7,6 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int|null $branch_id
+ * @property string $name
+ * @property string $category
+ * @property float $price
+ * @property bool $has_theory
+ * @property bool $has_driving
+ * @property bool $has_lms
+ * @property int $required_driving_lessons
+ * @property int $required_theory_lessons
+ * @property float $min_theory_payment_percent
+ * @property bool $is_active
+ */
 class ContractType extends Model
 {
     use HasFactory;

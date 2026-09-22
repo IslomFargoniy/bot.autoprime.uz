@@ -2,12 +2,44 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $branch_id
+ * @property int $student_id
+ * @property int|null $contract_type_id
+ * @property int|null $group_id
+ * @property int|null $created_by_user_id
+ * @property string $contract_number
+ * @property Carbon|null $contract_date
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
+ * @property bool $has_theory
+ * @property bool $has_driving
+ * @property bool $has_lms
+ * @property int|null $required_driving_lessons
+ * @property int|null $required_theory_lessons
+ * @property float $total_amount
+ * @property float $discount_amount
+ * @property float $final_amount
+ * @property float $paid_amount
+ * @property float $debt_amount
+ * @property float $overpaid_amount
+ * @property string $status
+ * @property string $payment_status
+ * @property-read float $payment_percentage
+ * @property-read string $payment_badge_color
+ * @property-read Student|null $student
+ * @property-read ContractType|null $contractType
+ * @property-read Group|null $group
+ * @property-read User|null $createdBy
+ */
 class Contract extends Model
 {
     use HasFactory;
@@ -56,21 +88,35 @@ class Contract extends Model
         'overpaid_amount' => 'decimal:2',
     ];
 
+    protected $appends = [
+        'payment_percentage',
+        'payment_badge_color',
+    ];
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<ContractType, $this>
+     */
     public function contractType(): BelongsTo
     {
         return $this->belongsTo(ContractType::class);
     }
 
+    /**
+     * @return BelongsTo<Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
@@ -120,5 +166,64 @@ class Contract extends Model
             'overpaid_amount' => $overpaid,
             'payment_status' => $paymentStatus,
         ]);
+    }
+
+    /**
+     * Get calculated payment percentage
+     */
+    public function getPaymentPercentageAttribute(): float
+    {
+        $final = (float) $this->final_amount;
+        if ($final <= 0) {
+            return 100.0;
+        }
+
+        return round(((float) $this->paid_amount / $final) * 100, 1);
+    }
+
+    /**
+     * Get payment status badge color name
+     * 0% = white, <50% = red, 50-74.9% = yellow, 75%+ = green
+     */
+    public function getPaymentBadgeColorAttribute(): string
+    {
+        $pct = $this->payment_percentage;
+        if ($pct <= 0) {
+            return 'white';
+        }
+        if ($pct < 50) {
+            return 'red';
+        }
+        if ($pct < 75) {
+            return 'yellow';
+        }
+
+        return 'green';
+    }
+
+    /**
+     * Check if student can attend theory classes (min theory payment met)
+     */
+    public function canAccessTheory(): bool
+    {
+        if (! $this->has_theory) {
+            return false;
+        }
+
+        $minPercent = (float) ($this->contractType ? $this->contractType->min_theory_payment_percent : 30.0);
+
+        return $this->payment_percentage >= $minPercent;
+    }
+
+    /**
+     * Check if student can attend driving classes (75% min payment met)
+     */
+    public function canAccessDriving(): bool
+    {
+        if (! $this->has_driving) {
+            return false;
+        }
+
+        return $this->payment_percentage >= 75.0;
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Driving;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Services\BranchSessionService;
 use App\Services\TelegramService;
 use Carbon\Carbon;
@@ -159,20 +160,78 @@ class DrivingController extends Controller
             'student_ids.*' => 'exists:students,id',
             'group_id' => 'nullable|exists:groups,id',
             'autodrome_id' => 'nullable|exists:autodromes,id',
+            'vehicle_id' => 'nullable|exists:vehicles,id',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
         ]);
 
+        // 1. Collision check for instructor
+        $instructorCollision = Driving::where('instructor_id', $validated['instructor_id'])
+            ->where('status', 'scheduled')
+            ->where(function ($q) use ($validated) {
+                $q->where(function ($q2) use ($validated) {
+                    $q2->where('start_time', '<', $validated['end_time'])
+                        ->where('end_time', '>', $validated['start_time']);
+                });
+            })
+            ->exists();
+
+        if ($instructorCollision) {
+            return redirect()->back()->withErrors([
+                'start_time' => 'Instruktor ushbu vaqt oralig\'ida boshqa darsga band (vaqt kesishuvi aniqlandi).',
+            ]);
+        }
+
+        // 2. Auto-detect or validate vehicle
+        $vehicle = null;
+        if (! empty($validated['vehicle_id'])) {
+            $vehicle = Vehicle::find($validated['vehicle_id']);
+        } else {
+            $vehicle = Vehicle::where('default_instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+        }
+
+        if ($vehicle) {
+            $vehicleCollision = Driving::where('vehicle_id', $vehicle->id)
+                ->where('status', 'scheduled')
+                ->where(function ($q) use ($validated) {
+                    $q->where(function ($q2) use ($validated) {
+                        $q2->where('start_time', '<', $validated['end_time'])
+                            ->where('end_time', '>', $validated['start_time']);
+                    });
+                })
+                ->exists();
+
+            if ($vehicleCollision) {
+                return redirect()->back()->withErrors([
+                    'start_time' => "Avtomobil ({$vehicle->plate_number}) ushbu vaqt oralig'ida boshqa darsga band.",
+                ]);
+            }
+        }
+
+        // 3. Check 75% payment rule for students
         foreach ($validated['student_ids'] as $studentId) {
-            $student = Student::find($studentId);
-            $groupId = $student ? $student->group_id : ($validated['group_id'] ?? null);
-            $branchId = $student ? $student->branch_id : $request->user()->branch_id;
+            $student = Student::with('activeContract.contractType')->find($studentId);
+            if (! $student) {
+                continue;
+            }
+
+            $activeContract = $student->activeContract;
+            if ($activeContract && $activeContract->has_driving && ! $activeContract->canAccessDriving()) {
+                return redirect()->back()->withErrors([
+                    'student_ids' => "{$student->full_name} talabasi amaliy haydash uchun kamida 75% to'lov qilishi shart (Hozirgi to'lov: {$activeContract->payment_percentage}%).",
+                ]);
+            }
+
+            $groupId = $student->group_id ?: ($validated['group_id'] ?? null);
+            $branchId = $student->branch_id ?: $request->user()->branch_id;
 
             $driving = Driving::create([
                 'branch_id' => $branchId,
                 'instructor_id' => $validated['instructor_id'],
                 'student_id' => $studentId,
                 'group_id' => $groupId,
+                'contract_id' => $activeContract?->id,
+                'vehicle_id' => $vehicle?->id,
                 'autodrome_id' => $validated['autodrome_id'] ?? null,
                 'start_time' => $validated['start_time'],
                 'end_time' => $validated['end_time'],

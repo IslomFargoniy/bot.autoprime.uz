@@ -39,4 +39,9 @@ class Topic extends Model
     {
         return $this->hasMany(LessonMaterial::class);
     }
+
+    public function lessonMaterials(): HasMany
+    {
+        return $this->materials();
+    }
 }

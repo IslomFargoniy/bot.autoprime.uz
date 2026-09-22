@@ -1,15 +1,25 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AutodromeController;
 use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\CertificateController;
+use App\Http\Controllers\Admin\ContractController;
+use App\Http\Controllers\Admin\ContractTypeController;
+use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DrivingController;
+use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
+use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Student\MiniAppController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -123,6 +133,11 @@ Route::get('/home', function () {})->name('home');
 // Public route for downloading Excel template (no auth required)
 Route::get('admin/groups/download-template', [GroupController::class, 'downloadTemplate'])->name('groups.download-template');
 
+// Student TMA & Dynamic QR Verification (Public / WebApp authenticated)
+Route::get('/mini-app', [MiniAppController::class, 'index'])->name('student.mini-app');
+Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->name('attendance.scan-qr');
+Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
+
 Route::middleware(['auth.telegram'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -155,4 +170,54 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::resource('admin/autodromes', AutodromeController::class)->except(['create', 'show', 'edit']);
     Route::resource('admin/admins', AdminController::class)->except(['create', 'show', 'edit']);
     Route::resource('admin/branches', BranchController::class)->except(['create', 'show', 'edit']);
+
+    // CRM Leads
+    Route::get('admin/leads', [LeadController::class, 'index'])->name('leads.index');
+    Route::post('admin/leads', [LeadController::class, 'store'])->name('leads.store');
+    Route::put('admin/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
+    Route::post('admin/leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
+    Route::delete('admin/leads/{lead}', [LeadController::class, 'destroy'])->name('leads.destroy');
+
+    // Contract Types & Tariffs
+    Route::resource('admin/contract-types', ContractTypeController::class)->except(['create', 'show', 'edit']);
+
+    // Contracts
+    Route::get('admin/contracts/{contract}/download-pdf', [ContractController::class, 'downloadPdf'])->name('contracts.download-pdf');
+    Route::resource('admin/contracts', ContractController::class)->except(['create', 'edit']);
+
+    // Finance & Cash Registers
+    Route::get('admin/finance', [FinanceController::class, 'index'])->name('finance.index');
+    Route::post('admin/finance/payment', [FinanceController::class, 'storePayment'])->name('finance.store-payment');
+    Route::post('admin/finance/expense', [FinanceController::class, 'storeExpense'])->name('finance.store-expense');
+    Route::post('admin/finance/transfer', [FinanceController::class, 'createTransfer'])->name('finance.create-transfer');
+    Route::post('admin/finance/transfer/{transfer}/approve', [FinanceController::class, 'approveTransfer'])->name('finance.approve-transfer');
+    Route::post('admin/finance/shift', [FinanceController::class, 'toggleShift'])->name('finance.toggle-shift');
+
+    // Payroll & Salaries
+    Route::get('admin/salaries', [SalaryController::class, 'index'])->name('salaries.index');
+    Route::post('admin/salaries/generate', [SalaryController::class, 'generateMonthlyPayroll'])->name('salaries.generate');
+    Route::post('admin/salaries/adjustment', [SalaryController::class, 'storeCustomAdjustment'])->name('salaries.store-adjustment');
+    Route::post('admin/salaries/{salary}/pay', [SalaryController::class, 'pay'])->name('salaries.pay');
+
+    // Attendance & Dynamic QR
+    Route::get('admin/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('admin/attendance/start-session', [AttendanceController::class, 'startSession'])->name('attendance.start-session');
+    Route::get('admin/attendance/session/{session}/screen', [AttendanceController::class, 'sessionScreen'])->name('attendance.screen');
+    Route::get('admin/attendance/session/{session}/qr', [AttendanceController::class, 'getRotatingQr'])->name('attendance.rotating-qr');
+    Route::post('admin/attendance/session/{session}/finish', [AttendanceController::class, 'finishSession'])->name('attendance.finish-session');
+    Route::post('admin/attendance/mark-manual', [AttendanceController::class, 'markManual'])->name('attendance.mark-manual');
+
+    // Certificates & Graduation
+    Route::get('admin/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+    Route::post('admin/certificates', [CertificateController::class, 'store'])->name('certificates.store');
+    Route::get('admin/certificates/{certificate}/download-pdf', [CertificateController::class, 'downloadPdf'])->name('certificates.download-pdf');
+
+    // Courses & LMS
+    Route::resource('admin/courses', CourseController::class)->except(['create', 'show', 'edit']);
+    Route::post('admin/courses/{course}/topics', [CourseController::class, 'storeTopic'])->name('courses.store-topic');
+    Route::post('admin/topics/{topic}/materials', [CourseController::class, 'storeMaterial'])->name('topics.store-material');
+
+    // Vehicles & Fleet
+    Route::resource('admin/vehicles', VehicleController::class)->except(['create', 'show', 'edit']);
+    Route::post('admin/vehicles/{vehicle}/maintenances', [VehicleController::class, 'storeMaintenance'])->name('vehicles.store-maintenance');
 });

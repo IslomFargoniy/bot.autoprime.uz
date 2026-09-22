@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $branch_id
+ * @property int $cash_register_type_id
+ * @property string $name
+ * @property float $balance
+ * @property bool $is_active
+ * @property-read Branch|null $branch
+ * @property-read CashRegisterType|null $type
+ */
 class CashRegister extends Model
 {
     use HasFactory;
@@ -29,6 +39,9 @@ class CashRegister extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * @return BelongsTo<CashRegisterType, $this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(CashRegisterType::class, 'cash_register_type_id');

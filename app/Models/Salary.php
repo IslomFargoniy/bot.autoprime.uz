@@ -46,8 +46,18 @@ class Salary extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    public function calculatedBy(): BelongsTo
+    {
+        return $this->createdBy();
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(SalaryPayment::class);
+    }
+
+    public function salaryPayments(): HasMany
+    {
+        return $this->payments();
     }
 }

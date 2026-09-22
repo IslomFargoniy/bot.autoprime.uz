@@ -45,6 +45,11 @@ class CashTransfer extends Model
         return $this->belongsTo(User::class, 'sent_by_user_id');
     }
 
+    public function transferredBy(): BelongsTo
+    {
+        return $this->sentBy();
+    }
+
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_user_id');

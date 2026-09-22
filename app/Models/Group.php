@@ -27,6 +27,8 @@ use Illuminate\Support\Carbon;
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read User|null $teacher
+ * @property-read User|null $instructor
  */
 class Group extends Model
 {
@@ -68,6 +70,9 @@ class Group extends Model
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
@@ -78,6 +83,9 @@ class Group extends Model
         return $this->belongsTo(Course::class);
     }
 
+    /**
+     * @return HasMany<Student, $this>
+     */
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
