@@ -22,6 +22,18 @@ class Course extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['title'];
+
+    public function getTitleAttribute(): string
+    {
+        return $this->name ?? '';
+    }
+
+    public function setTitleAttribute(?string $value): void
+    {
+        $this->attributes['name'] = $value;
+    }
+
     public function topics(): HasMany
     {
         return $this->hasMany(Topic::class)->orderBy('order_number');

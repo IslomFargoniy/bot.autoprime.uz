@@ -31,7 +31,12 @@ class CourseController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        Course::create($validated);
+        Course::create([
+            'name' => $validated['title'],
+            'category' => $validated['category'],
+            'description' => $validated['description'] ?? null,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
 
         return redirect()->back()->with('success', 'LMS kursi yaratildi.');
     }
@@ -44,7 +49,11 @@ class CourseController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $course->update($validated);
+        $course->update([
+            'name' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
 
         return redirect()->back()->with('success', 'Kurs yangilandi.');
     }
@@ -70,12 +79,12 @@ class CourseController extends Controller
 
         Topic::create([
             'course_id' => $course->id,
-            'title' => $validated['title'],
+            'title_uz' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'video_url' => $validated['video_url'] ?? null,
             'duration_minutes' => $validated['duration_minutes'] ?? 30,
             'order_number' => $order,
-            'is_published' => true,
+            'is_active' => true,
         ]);
 
         return redirect()->back()->with('success', 'Yangi mavzu qo\'shildi.');

@@ -35,6 +35,28 @@ class Vehicle extends Model
         'mot_expiry_date' => 'date',
     ];
 
+    protected $appends = ['model', 'default_instructor_id'];
+
+    public function getModelAttribute(): string
+    {
+        return $this->make_model ?? '';
+    }
+
+    public function setModelAttribute(?string $value): void
+    {
+        $this->attributes['make_model'] = $value;
+    }
+
+    public function getDefaultInstructorIdAttribute(): ?int
+    {
+        return $this->instructor_id;
+    }
+
+    public function setDefaultInstructorIdAttribute(?int $value): void
+    {
+        $this->attributes['instructor_id'] = $value;
+    }
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);

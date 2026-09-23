@@ -74,6 +74,7 @@ class InstructorController extends Controller
         $groupId = $student ? $student->group_id : $request->group_id;
 
         $driving = Driving::create([
+            'branch_id' => $user->branch_id ?? ($student ? $student->branch_id : null),
             'instructor_id' => $user->id,
             'group_id' => $groupId,
             'student_id' => $request->student_id,

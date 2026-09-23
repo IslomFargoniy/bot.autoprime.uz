@@ -72,13 +72,11 @@ class VehicleController extends Controller
 
         Vehicle::create([
             'branch_id' => $branchId,
-            'default_instructor_id' => $validated['default_instructor_id'] ?? null,
+            'instructor_id' => $validated['default_instructor_id'] ?? null,
             'plate_number' => strtoupper($validated['plate_number']),
-            'model' => $validated['model'],
-            'year' => $validated['year'] ?? null,
+            'make_model' => $validated['model'],
             'fuel_type' => $validated['fuel_type'],
             'status' => $validated['status'],
-            'notes' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Avtomobil muvaffaqiyatli qo\'shildi.');
@@ -97,7 +95,14 @@ class VehicleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $vehicle->update($validated);
+        $vehicle->update([
+            'branch_id' => $validated['branch_id'] ?? $vehicle->branch_id,
+            'instructor_id' => $validated['default_instructor_id'] ?? null,
+            'plate_number' => strtoupper($validated['plate_number']),
+            'make_model' => $validated['model'],
+            'fuel_type' => $validated['fuel_type'],
+            'status' => $validated['status'],
+        ]);
 
         return redirect()->back()->with('success', 'Avtomobil ma\'lumotlari yangilandi.');
     }
@@ -124,10 +129,9 @@ class VehicleController extends Controller
             'vehicle_id' => $vehicle->id,
             'maintenance_type' => $validated['maintenance_type'],
             'cost' => $validated['cost'],
-            'performed_date' => $validated['performed_date'],
-            'next_due_date' => $validated['next_due_date'] ?? null,
-            'odometer' => $validated['odometer'] ?? null,
-            'notes' => $validated['notes'] ?? null,
+            'performed_at' => $validated['performed_date'],
+            'mileage' => $validated['odometer'] ?? null,
+            'description' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Texnik xizmat yozuvi kiritildi.');

@@ -27,6 +27,18 @@ class Expense extends Model
         'spent_at' => 'datetime',
     ];
 
+    protected $appends = ['expense_date'];
+
+    public function getExpenseDateAttribute(): ?string
+    {
+        return $this->spent_at?->toDateString();
+    }
+
+    public function setExpenseDateAttribute($value): void
+    {
+        $this->attributes['spent_at'] = $value;
+    }
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
