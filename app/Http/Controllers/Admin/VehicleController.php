@@ -68,7 +68,7 @@ class VehicleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
+        $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()?->id ?? 1;
 
         Vehicle::create([
             'branch_id' => $branchId,
