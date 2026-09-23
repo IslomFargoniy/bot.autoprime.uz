@@ -11,6 +11,12 @@
     "failed": "Kiritilgan telefon raqam yoki parol noto'g'ri.",
     "throttle": "Kirish urinishlari ko'payib ketdi. Iltimos, bir ozdan keyin qayta urinib ko'ring."
   },
+  "roles": {
+    "superadmin": "Bosh Admin",
+    "admin": "Admin",
+    "instructor": "Instruktor",
+    "student": "O'quvchi"
+  },
   "sidebar": {
     "dashboard": "Bosh sahifa",
     "groups": "Guruhlar",
