@@ -11,6 +11,12 @@
     "failed": "These credentials do not match our records.",
     "throttle": "Too many login attempts. Please try again later."
   },
+  "roles": {
+    "superadmin": "Super Admin",
+    "admin": "Admin",
+    "instructor": "Instructor",
+    "student": "Student"
+  },
   "sidebar": {
     "dashboard": "Dashboard",
     "groups": "Groups",

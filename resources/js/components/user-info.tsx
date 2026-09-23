@@ -2,6 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
 import type { User } from '@/types';
 
+import { useTranslation } from 'react-i18next';
+
 export function UserInfo({
     user,
     showEmail = false,
@@ -9,13 +11,25 @@ export function UserInfo({
     user: User;
     showEmail?: boolean;
 }) {
+    const { t } = useTranslation();
     const getInitials = useInitials();
 
-    const roleTitle = user?.role === 'instructor'
-        ? "👨‍🏫 Instruktor"
-        : user?.role === 'admin'
-        ? "👑 Admin"
-        : "🎓 O'quvchi";
+    const getRoleTitle = (role?: string) => {
+        switch (role) {
+            case 'superadmin':
+                return `👑 ${t('roles.superadmin', 'Bosh Admin')}`;
+            case 'admin':
+                return `🛡️ ${t('roles.admin', 'Admin')}`;
+            case 'instructor':
+                return `👨‍🏫 ${t('roles.instructor', 'Instruktor')}`;
+            case 'student':
+                return `🎓 ${t('roles.student', "O'quvchi")}`;
+            default:
+                return role ? `👑 ${t('roles.superadmin', 'Bosh Admin')}` : `👑 ${t('roles.superadmin', 'Bosh Admin')}`;
+        }
+    };
+
+    const roleTitle = getRoleTitle(user?.role);
 
     return (
         <>
