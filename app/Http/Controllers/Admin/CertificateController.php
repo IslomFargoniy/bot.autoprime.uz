@@ -161,7 +161,7 @@ class CertificateController extends Controller
         $verifyHash = hash('sha256', $student->id.$contract->id.uniqid().config('app.key'));
 
         Certificate::create([
-            'branch_id' => $contract->branch_id,
+            'branch_id' => $contract->branch_id ?? $student->branch_id ?? Branch::first()?->id ?? 1,
             'student_id' => $student->id,
             'contract_id' => $contract->id,
             'issued_by_user_id' => $request->user()->id,
