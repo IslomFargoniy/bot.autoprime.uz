@@ -69,7 +69,7 @@ class ContractController extends Controller
             })
             ->get();
 
-        $groups = Group::where('status', 'active')
+        $groups = Group::where('is_active', true)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })

@@ -8,7 +8,9 @@ use App\Models\Branch;
 use App\Models\Group;
 use App\Models\LessonSession;
 use App\Models\Student;
+use App\Models\Topic;
 use App\Services\BranchSessionService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +24,7 @@ class AttendanceController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
         $query = Attendance::with(['student.group', 'session.teacher', 'markedBy'])
-            ->orderBy('date', 'desc')
+            ->orderBy('scanned_at', 'desc')
             ->orderBy('created_at', 'desc');
 
         if ($request->filled('group_id')) {
@@ -32,7 +34,7 @@ class AttendanceController extends Controller
         }
 
         if ($request->filled('date')) {
-            $query->where('date', $request->date);
+            $query->whereDate('scanned_at', $request->date);
         }
 
         if ($targetBranchId) {
@@ -48,7 +50,7 @@ class AttendanceController extends Controller
             ->orderBy('started_at', 'desc')
             ->get();
 
-        $groups = Group::where('status', 'active')
+        $groups = Group::where('is_active', true)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -89,12 +91,20 @@ class AttendanceController extends Controller
 
         $group = Group::findOrFail($validated['group_id']);
 
+        $topicTitle = 'Nazariy dars';
+        if (! empty($validated['topic_id'])) {
+            $topic = Topic::find($validated['topic_id']);
+            if ($topic) {
+                $topicTitle = $topic->title_uz ?? $topic->title ?? $topicTitle;
+            }
+        }
+
         $session = LessonSession::create([
             'branch_id' => $group->branch_id,
             'group_id' => $group->id,
             'teacher_id' => $request->user()->id,
-            'topic_id' => $validated['topic_id'] ?? null,
-            'qr_secret' => bin2hex(random_bytes(16)),
+            'topic' => $topicTitle,
+            'qr_secret_salt' => bin2hex(random_bytes(16)),
             'started_at' => now(),
             'status' => 'active',
         ]);
@@ -145,18 +155,18 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'session_id' => 'nullable|exists:lesson_sessions,id',
             'student_id' => 'required|exists:students,id',
-            'date' => 'required|date',
-            'status' => 'required|in:present,absent,excused',
+            'date' => 'nullable|date',
+            'status' => 'required|in:present,late,absent',
             'manual_reason' => 'required|string|max:255',
         ]);
 
         Attendance::updateOrCreate(
             [
-                'session_id' => $validated['session_id'] ?? null,
+                'lesson_session_id' => $validated['session_id'] ?? null,
                 'student_id' => $validated['student_id'],
-                'date' => $validated['date'],
             ],
             [
+                'scanned_at' => ! empty($validated['date']) ? Carbon::parse($validated['date']) : now(),
                 'status' => $validated['status'],
                 'is_manual' => true,
                 'manual_reason' => $validated['manual_reason'],
@@ -173,7 +183,7 @@ class AttendanceController extends Controller
     public function finishSession(LessonSession $session): RedirectResponse
     {
         $session->update([
-            'status' => 'completed',
+            'status' => 'finished',
             'ended_at' => now(),
         ]);
 

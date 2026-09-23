@@ -49,6 +49,7 @@ class Group extends Model
         'max_students',
         'start_date',
         'end_date',
+        'status',
         'is_active',
     ];
 

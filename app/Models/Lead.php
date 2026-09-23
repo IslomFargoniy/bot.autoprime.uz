@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Crypt;
 
 class Lead extends Model
 {
@@ -39,19 +40,63 @@ class Lead extends Model
 
     protected $casts = [
         'is_form_completed' => 'boolean',
-        'passport_series' => 'encrypted',
-        'passport_number' => 'encrypted',
-        'pinfl' => 'encrypted',
         'birth_date' => 'date',
     ];
 
+    public function setPassportSeriesAttribute(?string $value): void
+    {
+        $this->attributes['passport_series'] = ! empty($value) ? Crypt::encryptString($value) : null;
+    }
+
+    public function getPassportSeriesAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
+        }
+    }
+
+    public function setPassportNumberAttribute(?string $value): void
+    {
+        $this->attributes['passport_number'] = ! empty($value) ? Crypt::encryptString($value) : null;
+    }
+
+    public function getPassportNumberAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
+        }
+    }
+
     public function setPinflAttribute(?string $value): void
     {
-        $this->attributes['pinfl'] = $value;
         if (! empty($value)) {
+            $this->attributes['pinfl'] = Crypt::encryptString($value);
             $this->attributes['pinfl_hash'] = hash_hmac('sha256', $value, (string) config('app.key'));
         } else {
+            $this->attributes['pinfl'] = null;
             $this->attributes['pinfl_hash'] = null;
+        }
+    }
+
+    public function getPinflAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
         }
     }
 
