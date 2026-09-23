@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 
 /**
  * @property int $id
@@ -65,24 +66,68 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'passport_series' => 'encrypted',
-        'passport_number' => 'encrypted',
-        'pinfl' => 'encrypted',
         'birth_date' => 'date',
         'medical_certificate_date' => 'date',
         'is_active' => 'boolean',
     ];
+
+    public function setPassportSeriesAttribute(?string $value): void
+    {
+        $this->attributes['passport_series'] = ! empty($value) ? Crypt::encryptString($value) : null;
+    }
+
+    public function getPassportSeriesAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
+        }
+    }
+
+    public function setPassportNumberAttribute(?string $value): void
+    {
+        $this->attributes['passport_number'] = ! empty($value) ? Crypt::encryptString($value) : null;
+    }
+
+    public function getPassportNumberAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
+        }
+    }
 
     /**
      * Mutator to automatically calculate blind index HMAC hash on PINFL
      */
     public function setPinflAttribute(?string $value): void
     {
-        $this->attributes['pinfl'] = $value;
         if (! empty($value)) {
+            $this->attributes['pinfl'] = Crypt::encryptString($value);
             $this->attributes['pinfl_hash'] = hash_hmac('sha256', $value, (string) config('app.key'));
         } else {
+            $this->attributes['pinfl'] = null;
             $this->attributes['pinfl_hash'] = null;
+        }
+    }
+
+    public function getPinflAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable) {
+            return $value;
         }
     }
 
