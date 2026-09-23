@@ -206,6 +206,8 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::get('admin/attendance/session/{session}/qr', [AttendanceController::class, 'getRotatingQr'])->name('attendance.rotating-qr');
     Route::post('admin/attendance/session/{session}/finish', [AttendanceController::class, 'finishSession'])->name('attendance.finish-session');
     Route::post('admin/attendance/mark-manual', [AttendanceController::class, 'markManual'])->name('attendance.mark-manual');
+    Route::get('admin/attendance/group-attendances', [AttendanceController::class, 'getGroupAttendances'])->name('attendance.group-attendances');
+    Route::post('admin/attendance/mark-group', [AttendanceController::class, 'markGroup'])->name('attendance.mark-group');
 
     // Certificates & Graduation
     Route::get('admin/certificates', [CertificateController::class, 'index'])->name('certificates.index');

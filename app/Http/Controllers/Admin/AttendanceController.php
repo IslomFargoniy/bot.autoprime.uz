@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -148,6 +149,138 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Get attendance roster for a group on a specific date.
+     */
+    public function getGroupAttendances(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'date' => 'nullable|date',
+        ]);
+
+        $groupId = (int) $validated['group_id'];
+        $date = ! empty($validated['date']) ? Carbon::parse($validated['date'])->toDateString() : now()->toDateString();
+
+        $group = Group::findOrFail($groupId);
+
+        $students = Student::where('group_id', $groupId)
+            ->where('status', 'active')
+            ->orderBy('full_name')
+            ->select(['id', 'full_name', 'phone', 'group_id'])
+            ->get();
+
+        $session = LessonSession::where('group_id', $groupId)
+            ->whereDate('started_at', $date)
+            ->first();
+
+        $attendances = collect();
+        if ($session) {
+            $attendances = Attendance::where('lesson_session_id', $session->id)->get()->keyBy('student_id');
+        }
+
+        $roster = $students->map(function ($student) use ($attendances) {
+            $att = $attendances->get($student->id);
+
+            return [
+                'id' => $student->id,
+                'full_name' => $student->full_name,
+                'phone' => $student->phone,
+                'status' => $att ? $att->status : 'present',
+                'is_attended' => $att ? ($att->status === 'present' || $att->status === 'late') : true,
+                'is_manual' => $att ? (bool) $att->is_manual : true,
+                'manual_reason' => $att ? $att->manual_reason : null,
+                'already_recorded' => $att !== null,
+            ];
+        });
+
+        return response()->json([
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+            ],
+            'date' => $date,
+            'session' => $session ? [
+                'id' => $session->id,
+                'topic' => $session->topic,
+                'status' => $session->status,
+            ] : null,
+            'students' => $roster,
+        ]);
+    }
+
+    /**
+     * Mark group attendance roster in bulk.
+     */
+    public function markGroup(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'date' => 'required|date',
+            'topic' => 'nullable|string|max:255',
+            'attendances' => 'required|array',
+            'attendances.*.student_id' => 'required|exists:students,id',
+            'attendances.*.status' => 'required|in:present,late,absent',
+            'attendances.*.manual_reason' => 'nullable|string|max:255',
+        ]);
+
+        $group = Group::findOrFail($validated['group_id']);
+        $date = Carbon::parse($validated['date'])->toDateString();
+
+        DB::transaction(function () use ($validated, $group, $date, $request) {
+            $session = LessonSession::where('group_id', $group->id)
+                ->whereDate('started_at', $date)
+                ->first();
+
+            if (! $session) {
+                $session = LessonSession::create([
+                    'branch_id' => $group->branch_id,
+                    'group_id' => $group->id,
+                    'teacher_id' => $request->user()->id,
+                    'topic' => ! empty($validated['topic']) ? $validated['topic'] : 'Nazariy dars (Guruh jurnali)',
+                    'room_number' => $group->room ?? '101-xona',
+                    'started_at' => Carbon::parse($date)->setTime(9, 0),
+                    'ended_at' => Carbon::parse($date)->setTime(10, 30),
+                    'status' => 'finished',
+                    'qr_secret_salt' => bin2hex(random_bytes(16)),
+                ]);
+            } elseif (! empty($validated['topic']) && $session->topic !== $validated['topic']) {
+                $session->update(['topic' => $validated['topic']]);
+            }
+
+            foreach ($validated['attendances'] as $item) {
+                $status = $item['status'];
+                $reason = $item['manual_reason'] ?? null;
+
+                $existing = Attendance::where('lesson_session_id', $session->id)
+                    ->where('student_id', $item['student_id'])
+                    ->first();
+
+                if ($existing) {
+                    $isManual = ($existing->status !== $status) ? true : $existing->is_manual;
+                    $existing->update([
+                        'status' => $status,
+                        'is_manual' => $isManual,
+                        'manual_reason' => $reason ?? $existing->manual_reason,
+                        'marked_by_user_id' => $request->user()->id,
+                    ]);
+                } else {
+                    Attendance::create([
+                        'lesson_session_id' => $session->id,
+                        'student_id' => $item['student_id'],
+                        'scanned_at' => Carbon::parse($date)->setTimeFrom(now()),
+                        'status' => $status,
+                        'is_manual' => true,
+                        'manual_reason' => $reason ?? ($status === 'present' ? 'Guruh jurnali orqali' : 'Kelmagan'),
+                        'marked_by_user_id' => $request->user()->id,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Guruh davomati muvaffaqiyatli saqlandi.');
+    }
+
+    /**
      * Mark attendance manually for a student without smartphone.
      */
     public function markManual(Request $request): RedirectResponse
@@ -160,13 +293,41 @@ class AttendanceController extends Controller
             'manual_reason' => 'required|string|max:255',
         ]);
 
+        $student = Student::findOrFail($validated['student_id']);
+        $date = ! empty($validated['date']) ? Carbon::parse($validated['date'])->toDateString() : now()->toDateString();
+
+        $sessionId = $validated['session_id'] ?? null;
+        if (! $sessionId && $student->group_id) {
+            $session = LessonSession::where('group_id', $student->group_id)
+                ->whereDate('started_at', $date)
+                ->first();
+
+            if (! $session) {
+                $session = LessonSession::create([
+                    'branch_id' => $student->branch_id ?? ($student->group ? $student->group->branch_id : 1),
+                    'group_id' => $student->group_id,
+                    'teacher_id' => $request->user()->id,
+                    'topic' => 'Nazariy dars (Qo\'lda belgilash)',
+                    'started_at' => Carbon::parse($date)->setTime(9, 0),
+                    'ended_at' => Carbon::parse($date)->setTime(10, 30),
+                    'status' => 'finished',
+                    'qr_secret_salt' => bin2hex(random_bytes(16)),
+                ]);
+            }
+            $sessionId = $session->id;
+        }
+
+        if (! $sessionId) {
+            return redirect()->back()->withErrors(['student_id' => 'Talaba biror guruhga biriktirilmagan.']);
+        }
+
         Attendance::updateOrCreate(
             [
-                'lesson_session_id' => $validated['session_id'] ?? null,
-                'student_id' => $validated['student_id'],
+                'lesson_session_id' => $sessionId,
+                'student_id' => $student->id,
             ],
             [
-                'scanned_at' => ! empty($validated['date']) ? Carbon::parse($validated['date']) : now(),
+                'scanned_at' => Carbon::parse($date)->setTimeFrom(now()),
                 'status' => $validated['status'],
                 'is_manual' => true,
                 'manual_reason' => $validated['manual_reason'],

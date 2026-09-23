@@ -515,7 +515,22 @@
     "scan_instruction": "Scan with Telegram Mini App camera",
     "scanned_students": "Attended Students",
     "waiting_for_scans": "Waiting for students to scan.",
-    "confirm_finish": "Finish this lesson session?"
+    "confirm_finish": "Finish this lesson session?",
+    "group_journal_modal_title": "Group Attendance Journal",
+    "select_group": "Select Group",
+    "lesson_topic": "Lesson Topic",
+    "all_present": "All Present",
+    "all_absent": "All Absent",
+    "present_stats": "{{present}} of {{total}} students present ({{percent}}%)",
+    "group_saved": "Group attendance saved successfully",
+    "save_roster": "Save Attendance",
+    "single_student": "Single Student",
+    "group_roster": "Group Journal",
+    "no_students_in_group": "No active students in this group",
+    "check_all": "Select all",
+    "late": "Late",
+    "notes_placeholder": "Note (optional)...",
+    "loading_roster": "Loading group roster..."
   },
   "certificates": {
     "title": "Graduation Certificates",
