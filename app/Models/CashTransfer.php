@@ -25,6 +25,16 @@ class CashTransfer extends Model
         'amount' => 'decimal:2',
     ];
 
+    public function getTransferredByUserIdAttribute(): ?int
+    {
+        return $this->sent_by_user_id;
+    }
+
+    public function setTransferredByUserIdAttribute(?int $value): void
+    {
+        $this->attributes['sent_by_user_id'] = $value;
+    }
+
     public function fromCashRegister(): BelongsTo
     {
         return $this->belongsTo(CashRegister::class, 'from_cash_register_id');

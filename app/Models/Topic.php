@@ -30,6 +30,35 @@ class Topic extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['title', 'is_published'];
+
+    public function getTitleAttribute(): string
+    {
+        $locale = app()->getLocale();
+
+        return match ($locale) {
+            'ru' => $this->title_ru ?: ($this->title_uz ?? ''),
+            'krill' => $this->title_krill ?: ($this->title_uz ?? ''),
+            'en' => $this->title_en ?: ($this->title_uz ?? ''),
+            default => $this->title_uz ?: '',
+        };
+    }
+
+    public function setTitleAttribute(?string $value): void
+    {
+        $this->attributes['title_uz'] = $value;
+    }
+
+    public function getIsPublishedAttribute(): bool
+    {
+        return (bool) $this->is_active;
+    }
+
+    public function setIsPublishedAttribute(?bool $value): void
+    {
+        $this->attributes['is_active'] = (bool) $value;
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);

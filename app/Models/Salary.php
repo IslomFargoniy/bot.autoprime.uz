@@ -31,6 +31,48 @@ class Salary extends Model
         'accrued_at' => 'datetime',
     ];
 
+    protected $appends = ['type', 'description', 'status', 'is_paid'];
+
+    public function getIsPaidAttribute(): bool
+    {
+        return $this->payments()->sum('amount') >= (float) $this->amount;
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return $this->is_paid ? 'paid' : 'accrued';
+    }
+
+    public function getTypeAttribute(): ?string
+    {
+        return $this->salary_type;
+    }
+
+    public function setTypeAttribute(?string $value): void
+    {
+        $this->attributes['salary_type'] = $value;
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->notes;
+    }
+
+    public function setDescriptionAttribute(?string $value): void
+    {
+        $this->attributes['notes'] = $value;
+    }
+
+    public function getCalculatedByUserIdAttribute(): ?int
+    {
+        return $this->created_by_user_id;
+    }
+
+    public function setCalculatedByUserIdAttribute(?int $value): void
+    {
+        $this->attributes['created_by_user_id'] = $value;
+    }
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);

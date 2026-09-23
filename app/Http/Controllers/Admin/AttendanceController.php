@@ -117,7 +117,7 @@ class AttendanceController extends Controller
      */
     public function sessionScreen(LessonSession $session): Response
     {
-        $session->load(['group', 'teacher', 'topic', 'attendances.student']);
+        $session->load(['group', 'teacher', 'attendances.student']);
 
         $qrToken = $session->generateQrToken();
 

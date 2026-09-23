@@ -26,6 +26,18 @@ class SalaryPayment extends Model
         'paid_at' => 'datetime',
     ];
 
+    protected $appends = ['notes'];
+
+    public function getNotesAttribute(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setNotesAttribute(?string $value): void
+    {
+        $this->attributes['comment'] = $value;
+    }
+
     public function salary(): BelongsTo
     {
         return $this->belongsTo(Salary::class);

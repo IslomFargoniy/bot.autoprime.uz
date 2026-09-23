@@ -49,6 +49,18 @@ class Payment extends Model
         'paid_at' => 'datetime',
     ];
 
+    protected $appends = ['notes'];
+
+    public function getNotesAttribute(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setNotesAttribute(?string $value): void
+    {
+        $this->attributes['comment'] = $value;
+    }
+
     /**
      * @return BelongsTo<Branch, $this>
      */

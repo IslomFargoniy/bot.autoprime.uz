@@ -154,7 +154,7 @@ class FinanceController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'receipt_number' => $receiptNumber,
                 'paid_at' => now(),
-                'notes' => $validated['notes'] ?? null,
+                'comment' => $validated['notes'] ?? null,
             ]);
 
             // Increase register balance
@@ -201,7 +201,7 @@ class FinanceController extends Controller
                 'user_id' => $request->user()->id,
                 'amount' => $validated['amount'],
                 'description' => $validated['description'],
-                'expense_date' => now()->toDateString(),
+                'spent_at' => now(),
             ]);
 
             $lockedRegister->decrement('balance', (float) $validated['amount']);
@@ -232,7 +232,7 @@ class FinanceController extends Controller
         CashTransfer::create([
             'from_cash_register_id' => $validated['from_cash_register_id'],
             'to_cash_register_id' => $validated['to_cash_register_id'],
-            'transferred_by_user_id' => $request->user()->id,
+            'sent_by_user_id' => $request->user()->id,
             'amount' => $validated['amount'],
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
@@ -264,7 +264,6 @@ class FinanceController extends Controller
             $transfer->update([
                 'status' => 'approved',
                 'approved_by_user_id' => $request->user()->id,
-                'approved_at' => now(),
             ]);
         });
 
@@ -288,7 +287,7 @@ class FinanceController extends Controller
         if ($validated['action'] === 'open') {
             CashShift::create([
                 'cash_register_id' => $reg->id,
-                'opened_by_user_id' => $request->user()->id,
+                'user_id' => $request->user()->id,
                 'opening_balance' => $validated['opening_balance'] ?? $reg->balance,
                 'opened_at' => now(),
                 'status' => 'open',
@@ -312,7 +311,6 @@ class FinanceController extends Controller
             ->sum('amount');
 
         $openShift->update([
-            'closed_by_user_id' => $request->user()->id,
             'closing_balance' => $validated['closing_balance'] ?? $reg->balance,
             'total_income' => $totalIncome,
             'total_expense' => $totalExpense,

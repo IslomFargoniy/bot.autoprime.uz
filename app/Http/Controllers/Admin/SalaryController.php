@@ -85,7 +85,7 @@ class SalaryController extends Controller
                 // Check if already generated base payroll for this period
                 $existing = Salary::where('user_id', $emp->id)
                     ->where('period', $period)
-                    ->where('type', 'base_salary')
+                    ->where('salary_type', 'base_salary')
                     ->first();
 
                 if ($existing) {
@@ -116,7 +116,7 @@ class SalaryController extends Controller
                 // 2. Calculate Theory lessons for Teachers
                 if ($emp->role === 'teacher' || $emp->lesson_rate > 0) {
                     $lessonCount = LessonSession::where('teacher_id', $emp->id)
-                        ->where('status', 'completed')
+                        ->whereIn('status', ['finished', 'completed'])
                         ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
                         ->count();
 
@@ -131,14 +131,16 @@ class SalaryController extends Controller
 
                 // Accrue salary
                 Salary::create([
+                    'branch_id' => $emp->branch_id,
                     'user_id' => $emp->id,
-                    'calculated_by_user_id' => $request->user()->id,
+                    'created_by_user_id' => $request->user()->id,
                     'period' => $period,
-                    'type' => 'base_salary',
+                    'salary_type' => 'base_salary',
                     'amount' => $totalGross,
                     'is_deduction' => false,
-                    'status' => 'accrued',
-                    'description' => "Oylik hisob-kitob ({$period}): Oklad: {$baseSalary} + Vajdeniya: {$drivingAmount} ({$drivingHours} soat) + Nazariya: {$lessonAmount} ({$lessonCount} ta dars)",
+                    'lessons_or_hours_count' => (int) round($drivingHours + $lessonCount),
+                    'notes' => "Oylik hisob-kitob ({$period}): Oklad: {$baseSalary} + Vajdeniya: {$drivingAmount} ({$drivingHours} soat) + Nazariya: {$lessonAmount} ({$lessonCount} ta dars)",
+                    'accrued_at' => now(),
                 ]);
 
                 // Update employee salary_balance
@@ -168,14 +170,15 @@ class SalaryController extends Controller
 
         DB::transaction(function () use ($validated, $isDeduction, $employee, $request) {
             Salary::create([
+                'branch_id' => $employee->branch_id,
                 'user_id' => $employee->id,
-                'calculated_by_user_id' => $request->user()->id,
+                'created_by_user_id' => $request->user()->id,
                 'period' => $validated['period'],
-                'type' => $validated['type'],
+                'salary_type' => $validated['type'],
                 'amount' => $validated['amount'],
                 'is_deduction' => $isDeduction,
-                'status' => 'accrued',
-                'description' => $validated['description'],
+                'notes' => $validated['description'],
+                'accrued_at' => now(),
             ]);
 
             if ($isDeduction) {
@@ -219,16 +222,11 @@ class SalaryController extends Controller
                 'amount' => $validated['amount'],
                 'payment_method' => $validated['payment_method'],
                 'paid_at' => now(),
-                'notes' => $validated['notes'] ?? null,
+                'comment' => $validated['notes'] ?? null,
             ]);
 
             $lockedRegister->decrement('balance', (float) $validated['amount']);
             $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
-
-            $totalPaidForSalary = SalaryPayment::where('salary_id', $salary->id)->sum('amount');
-            if ($totalPaidForSalary >= $salary->amount) {
-                $salary->update(['status' => 'paid']);
-            }
         });
 
         return redirect()->back()->with('success', 'Oylik to\'lovi kassadan muvaffaqiyatli amalga oshirildi.');
