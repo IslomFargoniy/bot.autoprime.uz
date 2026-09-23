@@ -77,9 +77,14 @@ class ComprehensiveDemoDataSeeder extends Seeder
         $commonPassword = Hash::make('12345678');
 
         // Super Admin (Requested by user: +998911157709)
-        $superAdmin = User::updateOrCreate(
-            ['phone' => '+998911157709'],
-            [
+        $superAdmin = User::where('id', 1)
+            ->orWhere('phone', '+998911157709')
+            ->orWhere('email', 'admin@autoprime.uz')
+            ->first();
+
+        if ($superAdmin) {
+            $superAdmin->update([
+                'phone' => '+998911157709',
                 'name' => 'Islombek Bosh Administrator',
                 'role' => 'superadmin',
                 'branch_id' => null,
@@ -87,8 +92,19 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'password' => $commonPassword,
                 'email' => 'admin@autoprime.uz',
                 'base_salary' => 15000000,
-            ]
-        );
+            ]);
+        } else {
+            $superAdmin = User::create([
+                'name' => 'Islombek Bosh Administrator',
+                'phone' => '+998911157709',
+                'role' => 'superadmin',
+                'branch_id' => null,
+                'status' => 'active',
+                'password' => $commonPassword,
+                'email' => 'admin@autoprime.uz',
+                'base_salary' => 15000000,
+            ]);
+        }
         $superAdmin->syncRoles(['super_admin', 'superadmin']);
 
         // Filial Admin
@@ -488,9 +504,9 @@ class ComprehensiveDemoDataSeeder extends Seeder
             ['name' => 'Chilonzor Bosh Avtodromi'],
             [
                 'branch_id' => $branchChilonzor->id,
-                'address' => 'Chilonzor tumani, Bunyodkor shoh ko\'chasi 15',
-                'coordinates' => '41.2858, 69.2038',
-                'is_active' => true,
+                'latitude' => 41.2858,
+                'longitude' => 69.2038,
+                'radius_meters' => 300,
             ]
         );
 
@@ -498,9 +514,9 @@ class ComprehensiveDemoDataSeeder extends Seeder
             ['name' => 'Yunusobod O\'quv Avtodromi'],
             [
                 'branch_id' => $branchYunusobod->id,
-                'address' => 'Yunusobod tumani, 12-mavze, 45-uy ro\'parasi',
-                'coordinates' => '41.3654, 69.2891',
-                'is_active' => true,
+                'latitude' => 41.3654,
+                'longitude' => 69.2891,
+                'radius_meters' => 300,
             ]
         );
 
@@ -588,7 +604,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'max_students' => 25,
                 'start_date' => $now->copy()->subDays(30),
                 'end_date' => $now->copy()->addDays(45),
-                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -608,7 +623,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'max_students' => 30,
                 'start_date' => $now->copy()->subDays(15),
                 'end_date' => $now->copy()->addDays(60),
-                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -628,7 +642,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'max_students' => 20,
                 'start_date' => $now->copy()->subDays(10),
                 'end_date' => $now->copy()->addDays(30),
-                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -649,7 +662,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '30101951234567',
                 'birth_date' => '1995-01-15',
                 'address' => 'Toshkent sh., Chilonzor 9-mavze, 12-uy',
-                'status' => 'studying',
+                'status' => 'graduated',
                 'is_active' => true,
             ]
         );
@@ -707,7 +720,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '40203981234567',
                 'birth_date' => '1998-03-20',
                 'address' => 'Toshkent sh., Uchtepa tumani, 26-mavze',
-                'status' => 'studying',
+                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -765,7 +778,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '31505921234567',
                 'birth_date' => '1992-05-15',
                 'address' => 'Toshkent sh., Shayxontohur tumani, Navoiy ko\'chasi',
-                'status' => 'studying',
+                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -823,7 +836,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '42010011234567',
                 'birth_date' => '2001-10-20',
                 'address' => 'Toshkent sh., Sergeli tumani, 5A-mavze',
-                'status' => 'studying',
+                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -881,7 +894,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '31008971234567',
                 'birth_date' => '1997-08-10',
                 'address' => 'Toshkent sh., Olmazor tumani, Qorasaroy',
-                'status' => 'registered',
+                'status' => 'active',
                 'is_active' => true,
             ]
         );
@@ -923,7 +936,7 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'pinfl' => '42512991234567',
                 'birth_date' => '1999-12-25',
                 'address' => 'Toshkent sh., Yunusobod 4-mavze, 8-uy',
-                'status' => 'studying',
+                'status' => 'active',
                 'is_active' => true,
             ]
         );
