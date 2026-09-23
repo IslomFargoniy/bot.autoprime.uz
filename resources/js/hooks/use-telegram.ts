@@ -64,11 +64,11 @@ export function initTelegramWebApp() {
     tg.ready();
     tg.expand();
 
-    if (typeof tg.requestFullscreen === 'function') {
+    if (tg.isVersionAtLeast?.('8.0') && typeof tg.requestFullscreen === 'function') {
         try {
             tg.requestFullscreen();
-        } catch (e) {
-            console.log('requestFullscreen error', e);
+        } catch {
+            // Fullscreen unsupported or rejected by client
         }
     }
 
