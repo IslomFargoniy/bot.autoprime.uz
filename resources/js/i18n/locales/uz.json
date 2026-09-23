@@ -518,7 +518,22 @@
     "scan_instruction": "Telegram Mini App orqali kamerani QR kodga qarating",
     "scanned_students": "Kelgan Talabalar",
     "waiting_for_scans": "Hali hech kim skanerlamadi. QR kodni o'quvchilarga ko'rsating.",
-    "confirm_finish": "Dars sessiyasini yakunlamoqchimisiz?"
+    "confirm_finish": "Dars sessiyasini yakunlamoqchimisiz?",
+    "group_journal_modal_title": "Guruh Davomat Jurnali",
+    "select_group": "Guruhni tanlang",
+    "lesson_topic": "Dars mavzusi",
+    "all_present": "Barchasi bor",
+    "all_absent": "Barchasi yo'q",
+    "present_stats": "{{present}} / {{total}} ta talaba bor ({{percent}}%)",
+    "group_saved": "Guruh davomati muvaffaqiyatli saqlandi",
+    "save_roster": "Davomatni Saqlash",
+    "single_student": "Yakka talaba",
+    "group_roster": "Guruh jurnali",
+    "no_students_in_group": "Ushbu guruhda faol talabalar topilmadi",
+    "check_all": "Barchasini belgilash",
+    "late": "Kechikkan",
+    "notes_placeholder": "Izoh (ixtiyoriy)...",
+    "loading_roster": "Guruh ro'yxati yuklanmoqda..."
   },
   "certificates": {
     "title": "Bitiruv Guvohnomalari",

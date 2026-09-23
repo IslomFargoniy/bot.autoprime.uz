@@ -518,7 +518,22 @@
     "scan_instruction": "Наведите камеру в Telegram Mini App на QR-код",
     "scanned_students": "Отметившиеся ученики",
     "waiting_for_scans": "Пока никто не отметился. Покажите QR ученикам.",
-    "confirm_finish": "Вы уверены, что хотите завершить урок?"
+    "confirm_finish": "Вы уверены, что хотите завершить урок?",
+    "group_journal_modal_title": "Групповой журнал посещаемости",
+    "select_group": "Выберите группу",
+    "lesson_topic": "Тема урока",
+    "all_present": "Все присутствуют",
+    "all_absent": "Все отсутствуют",
+    "present_stats": "{{present}} из {{total}} учеников на уроке ({{percent}}%)",
+    "group_saved": "Посещаемость группы успешно сохранена",
+    "save_roster": "Сохранить журнал",
+    "single_student": "Один ученик",
+    "group_roster": "Журнал группы",
+    "no_students_in_group": "В этой группе нет активных учеников",
+    "check_all": "Отметить всех",
+    "late": "Опоздал",
+    "notes_placeholder": "Примечание (необязательно)...",
+    "loading_roster": "Загрузка списка группы..."
   },
   "certificates": {
     "title": "Свидетельства об окончании",

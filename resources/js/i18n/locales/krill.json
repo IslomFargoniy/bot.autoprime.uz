@@ -515,7 +515,22 @@
     "scan_instruction": "Telegram Mini App орқали камерани QR кодга қаратинг",
     "scanned_students": "Келган Талабалар",
     "waiting_for_scans": "Ҳали ҳеч ким сканерламади. QR кодни ўқувчиларга кўрсатинг.",
-    "confirm_finish": "Дарс сессиясини якунламоқчимисиз?"
+    "confirm_finish": "Дарс сессиясини якунламоқчимисиз?",
+    "group_journal_modal_title": "Гуруҳ Давомат Журнали",
+    "select_group": "Гуруҳни танланг",
+    "lesson_topic": "Дарс мавзуси",
+    "all_present": "Барчаси бор",
+    "all_absent": "Барчаси йўқ",
+    "present_stats": "{{present}} / {{total}} та талаба бор ({{percent}}%)",
+    "group_saved": "Гуруҳ давомати муваффақиятли сақланди",
+    "save_roster": "Давоматни Сақлаш",
+    "single_student": "Якка талаба",
+    "group_roster": "Гуруҳ журнали",
+    "no_students_in_group": "Ушбу гуруҳда фаол талабалар топилмади",
+    "check_all": "Барчасини белгилаш",
+    "late": "Кечиккан",
+    "notes_placeholder": "Изоҳ (ихтиёрий)...",
+    "loading_roster": "Гуруҳ рўйхати юкланмоқда..."
   },
   "certificates": {
     "title": "Битирув Гувоҳномалари",
