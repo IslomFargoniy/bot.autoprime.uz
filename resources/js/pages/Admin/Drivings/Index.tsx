@@ -216,7 +216,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
-            return `${d}-${m}-${y}`;
+            return `${y}-${m}-${d}`;
         };
 
         setData({
@@ -507,7 +507,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                     <div className="space-y-2">
                                         <Label>{t('common.date_from', 'Sana dan')}</Label>
                                         <DatePicker
-                                            placeholder="DD-MM-YYYY"
+                                            placeholder="YYYY-MM-DD"
                                             value={fromDate}
                                             onChange={(val) => handleFilterDateChange('from', val)}
                                             className="w-full"
@@ -517,7 +517,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                     <div className="space-y-2">
                                         <Label>{t('common.date_to', 'Sana gacha')}</Label>
                                         <DatePicker
-                                            placeholder="DD-MM-YYYY"
+                                            placeholder="YYYY-MM-DD"
                                             value={toDate}
                                             onChange={(val) => handleFilterDateChange('to', val)}
                                             className="w-full"
@@ -578,7 +578,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                         )}
 
                         <DatePicker
-                            placeholder={t('common.date_from', 'Dan') + ' DD-MM-YYYY'}
+                            placeholder={t('common.date_from', 'Dan') + ' YYYY-MM-DD'}
                             value={fromDate}
                             onChange={(val) => handleFilterDateChange('from', val)}
                             className="w-36"
@@ -586,7 +586,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                         />
 
                         <DatePicker
-                            placeholder={t('common.date_to', 'Gacha') + ' DD-MM-YYYY'}
+                            placeholder={t('common.date_to', 'Gacha') + ' YYYY-MM-DD'}
                             value={toDate}
                             onChange={(val) => handleFilterDateChange('to', val)}
                             className="w-36"
@@ -705,7 +705,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                         id="date" 
                                         value={data.date} 
                                         onChange={(val) => setData('date', val)} 
-                                        placeholder="DD-MM-YYYY"
+                                        placeholder="YYYY-MM-DD"
                                         className="w-full"
                                         required 
                                     />
@@ -923,7 +923,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             id="date" 
                                             value={data.date} 
                                             onChange={(val) => setData('date', val)} 
-                                            placeholder="DD-MM-YYYY"
+                                            placeholder="YYYY-MM-DD"
                                             className="w-full"
                                             required 
                                         />

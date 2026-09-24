@@ -23,6 +23,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface VehicleMaintenance {
     id: number;
@@ -412,23 +413,23 @@ export default function VehiclesIndex({
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label htmlFor="m_date">{t('vehicles.performed_date', 'Bajarilgan sana')}</Label>
-                                    <Input
+                                    <DatePicker
                                         id="m_date"
-                                        type="date"
                                         value={maintenanceForm.data.performed_date}
-                                        onChange={(e) => maintenanceForm.setData('performed_date', e.target.value)}
+                                        onChange={(val) => maintenanceForm.setData('performed_date', val)}
+                                        placeholder="YYYY-MM-DD"
                                         required
-                                        className="mt-1"
+                                        className="mt-1 h-9 text-xs"
                                     />
                                 </div>
                                 <div>
                                     <Label htmlFor="m_next">{t('vehicles.next_due_date', 'Keyingi muddat')}</Label>
-                                    <Input
+                                    <DatePicker
                                         id="m_next"
-                                        type="date"
                                         value={maintenanceForm.data.next_due_date}
-                                        onChange={(e) => maintenanceForm.setData('next_due_date', e.target.value)}
-                                        className="mt-1"
+                                        onChange={(val) => maintenanceForm.setData('next_due_date', val)}
+                                        placeholder="YYYY-MM-DD"
+                                        className="mt-1 h-9 text-xs"
                                     />
                                 </div>
                             </div>

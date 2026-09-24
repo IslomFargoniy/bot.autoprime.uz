@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -357,10 +358,9 @@ export default function AttendanceIndex({
                 </div>
                 <div className="w-44">
                     <Label className="text-[11px] text-gray-500 mb-1 block">{t('attendance.date', 'Sana')}</Label>
-                    <Input
-                        type="date"
+                    <DatePicker
                         value={filterDate}
-                        onChange={(e) => handleFilterChange('date', e.target.value)}
+                        onChange={(val) => handleFilterChange('date', val)}
                         className="h-8 text-xs"
                     />
                 </div>
@@ -529,11 +529,10 @@ export default function AttendanceIndex({
                                     <Label htmlFor="roster_date" className="text-xs mb-1 block">
                                         {t('attendance.date', 'Sana')}
                                     </Label>
-                                    <Input
+                                    <DatePicker
                                         id="roster_date"
-                                        type="date"
                                         value={rosterDate}
-                                        onChange={(e) => setRosterDate(e.target.value)}
+                                        onChange={(val) => setRosterDate(val)}
                                         className="h-9 text-xs"
                                         required
                                     />
@@ -724,13 +723,12 @@ export default function AttendanceIndex({
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label htmlFor="man_date">{t('attendance.date', 'Sana')}</Label>
-                                    <Input
+                                    <DatePicker
                                         id="man_date"
-                                        type="date"
                                         value={manualForm.data.date}
-                                        onChange={(e) => manualForm.setData('date', e.target.value)}
+                                        onChange={(val) => manualForm.setData('date', val)}
                                         required
-                                        className="mt-1"
+                                        className="mt-1 h-9 text-xs"
                                     />
                                 </div>
                                 <div>
