@@ -22,6 +22,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 
 interface Instructor {
@@ -486,19 +487,20 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                     {!isInstructor && (
                                         <div className="space-y-2">
                                             <Label>{t('drivings.instructor', 'Instruktor')}</Label>
-                                            <select
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                            <SearchableSelect
                                                 value={instructorId}
-                                                onChange={(e) => {
-                                                    setInstructorId(e.target.value);
-                                                    applyFilters(search, status, e.target.value, fromDate, toDate, perPage);
+                                                onChange={(val) => {
+                                                    const nextVal = val ? String(val) : '';
+                                                    setInstructorId(nextVal);
+                                                    applyFilters(search, status, nextVal, fromDate, toDate, perPage);
                                                 }}
-                                            >
-                                                <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                                                {instructors.map((ins) => (
-                                                    <option key={ins.id} value={ins.id}>{ins.name}</option>
-                                                ))}
-                                            </select>
+                                                options={[
+                                                    { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                                    ...instructors.map((ins) => ({ value: String(ins.id), label: ins.name })),
+                                                ]}
+                                                placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                                                allowClear
+                                            />
                                         </div>
                                     )}
 
@@ -745,18 +747,14 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                 {!isInstructor && (
                                     <div>
                                         <Label htmlFor="instructor_id">{t('drivings.instructor', 'Instruktor')}</Label>
-                                        <select 
-                                            id="instructor_id" 
-                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                            value={data.instructor_id} 
-                                            onChange={e => setData('instructor_id', e.target.value)} 
+                                        <SearchableSelect
+                                            id="instructor_id"
+                                            value={data.instructor_id}
+                                            onChange={(val) => setData('instructor_id', val)}
+                                            options={instructors.map((i) => ({ value: i.id, label: i.name }))}
+                                            placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
                                             required
-                                        >
-                                            <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                                            {instructors.map(i => (
-                                                <option key={i.id} value={i.id}>{i.name}</option>
-                                            ))}
-                                        </select>
+                                        />
                                         {errors.instructor_id && <div className="text-destructive text-sm mt-1">{errors.instructor_id}</div>}
                                     </div>
                                 )}
@@ -765,17 +763,14 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
                                             <Label htmlFor="group_id">{t('drivings.group_optional', 'Guruh (Ixtiyoriy)')}</Label>
-                                            <select 
-                                                id="group_id" 
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                                value={data.group_id} 
-                                                onChange={e => setData('group_id', e.target.value)}
-                                            >
-                                                <option value="">{t('common.select', '-- Tanlang --')}</option>
-                                                {groups.map(g => (
-                                                    <option key={g.id} value={g.id}>{g.name}</option>
-                                                ))}
-                                            </select>
+                                            <SearchableSelect
+                                                id="group_id"
+                                                value={data.group_id}
+                                                onChange={(val) => setData('group_id', val)}
+                                                options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                                placeholder={t('common.select', '-- Tanlang --')}
+                                                allowClear
+                                            />
                                         </div>
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
@@ -912,17 +907,14 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
                                     <div>
                                         <Label htmlFor="autodrome_id">{t('drivings.autodrome', 'Avtodrom')}</Label>
-                                        <select
+                                        <SearchableSelect
                                             id="autodrome_id"
-                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                                             value={data.autodrome_id}
-                                            onChange={e => setData('autodrome_id', e.target.value)}
-                                        >
-                                            <option value="">{t('common.select', '-- Tanlang --')}</option>
-                                            {autodromes.map(a => (
-                                                <option key={a.id} value={a.id}>{a.name}</option>
-                                            ))}
-                                        </select>
+                                            onChange={(val) => setData('autodrome_id', val)}
+                                            options={autodromes.map((a) => ({ value: a.id, label: a.name }))}
+                                            placeholder={t('common.select', '-- Tanlang --')}
+                                            allowClear
+                                        />
                                         {errors.autodrome_id && <div className="text-destructive text-sm mt-1">{errors.autodrome_id}</div>}
                                     </div>
                                     <div>

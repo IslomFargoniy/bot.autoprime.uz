@@ -25,6 +25,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface CashRegister {
     id: number;
@@ -478,19 +479,22 @@ export default function FinanceIndex({
                     <form onSubmit={handlePaymentSubmit} className="space-y-4 text-xs">
                         <div>
                             <Label htmlFor="pay_contract_id">{t('finance.select_contract', 'Shartnoma')}</Label>
-                            <select
+                            <SearchableSelect
                                 id="pay_contract_id"
                                 value={paymentForm.data.contract_id}
-                                onChange={(e) => paymentForm.setData('contract_id', e.target.value)}
-                                className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
+                                onChange={(val) => paymentForm.setData('contract_id', val)}
+                                options={contracts.map((c) => {
+                                    const st = students.find((s) => s.id === c.student_id);
+                                    return {
+                                        value: c.id,
+                                        label: `#${c.contract_number}${st ? ` - ${st.full_name}` : ''}`,
+                                        sublabel: `Qarz: ${Number(c.debt_amount).toLocaleString('uz-UZ')} UZS`,
+                                    };
+                                })}
+                                placeholder={t('finance.select_contract', 'Shartnoma')}
+                                className="mt-1"
                                 required
-                            >
-                                {contracts.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        #{c.contract_number} (Qarz: {Number(c.debt_amount).toLocaleString('uz-UZ')} UZS)
-                                    </option>
-                                ))}
-                            </select>
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -590,16 +594,14 @@ export default function FinanceIndex({
                             </div>
                             <div>
                                 <Label htmlFor="exp_category_id">{t('finance.category', 'Kategoriya')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="exp_category_id"
                                     value={expenseForm.data.expense_category_id}
-                                    onChange={(e) => expenseForm.setData('expense_category_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {expenseCategories.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => expenseForm.setData('expense_category_id', val)}
+                                    options={expenseCategories.map((c) => ({ value: c.id, label: c.name }))}
+                                    placeholder={t('finance.category', 'Kategoriya')}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 

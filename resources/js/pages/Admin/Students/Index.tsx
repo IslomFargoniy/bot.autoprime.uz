@@ -24,6 +24,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { Filter } from 'lucide-react';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Group {
     id: number;
@@ -191,19 +192,19 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                         <option value="75">75</option>
                         <option value="all">{t('common.all', 'Barchasi')}</option>
                     </select>
-                    <select
-                        className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <SearchableSelect
                         value={groupId}
-                        onChange={(e) => {
-                            setGroupId(e.target.value);
-                            applyFilters(search, e.target.value, perPage);
+                        onChange={(val) => {
+                            setGroupId(val);
+                            applyFilters(search, val, perPage);
                         }}
-                    >
-                        <option value="">{t('students.all_groups', 'Barcha guruhlar')}</option>
-                        {groups.map(grp => (
-                            <option key={grp.id} value={grp.id}>{grp.name}</option>
-                        ))}
-                    </select>
+                        options={[
+                            { value: '', label: t('students.all_groups', 'Barcha guruhlar') },
+                            ...groups.map(grp => ({ value: grp.id, label: grp.name }))
+                        ]}
+                        className="w-48"
+                        triggerClassName="h-10 text-sm"
+                    />
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
@@ -234,19 +235,19 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                             <div className="grid gap-4 py-4 mt-2">
                                 <div className="space-y-2">
                                     <Label>{t('students.group', 'Guruh')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    <SearchableSelect
                                         value={groupId}
-                                        onChange={(e) => {
-                                            setGroupId(e.target.value);
-                                            applyFilters(search, e.target.value, perPage);
+                                        onChange={(val) => {
+                                            setGroupId(val);
+                                            applyFilters(search, val, perPage);
                                         }}
-                                    >
-                                        <option value="">{t('students.all_groups', 'Barcha guruhlar')}</option>
-                                        {groups.map(grp => (
-                                            <option key={grp.id} value={grp.id}>{grp.name}</option>
-                                        ))}
-                                    </select>
+                                        options={[
+                                            { value: '', label: t('students.all_groups', 'Barcha guruhlar') },
+                                            ...groups.map(grp => ({ value: grp.id, label: grp.name }))
+                                        ]}
+                                        placeholder={t('students.all_groups', 'Barcha guruhlar')}
+                                        triggerClassName="h-10 text-sm"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('common.pagination', 'Sahifalash')}</Label>
@@ -294,32 +295,29 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                         </div>
                         <div>
                             <Label htmlFor="group_id">{t('students.group', 'Guruh')}</Label>
-                            <select
+                            <SearchableSelect
                                 id="group_id"
-                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 value={data.group_id}
-                                onChange={e => setData('group_id', e.target.value)}
-                            >
-                                <option value="">{t('common.select', '-- Tanlang --')}</option>
-                                {groups.map(grp => (
-                                    <option key={grp.id} value={grp.id}>{grp.name}</option>
-                                ))}
-                            </select>
+                                onChange={(val) => setData('group_id', val)}
+                                options={groups.map((grp) => ({ value: grp.id, label: grp.name }))}
+                                placeholder={t('common.select', '-- Tanlang --')}
+                                allowClear
+                                triggerClassName="h-10 text-sm"
+                            />
                             {errors.group_id && <div className="text-destructive text-sm mt-1">{errors.group_id}</div>}
                         </div>
                         {isSuperAdmin && (
                             <div>
                                 <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <select 
-                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    value={data.branch_id} 
-                                    onChange={e => setData('branch_id', e.target.value)}
-                                >
-                                    <option value="">{t('branches.branch_optional', 'Filial (Ixtiyoriy)')}</option>
-                                    {branches.map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                <SearchableSelect
+                                    id="branch_id"
+                                    value={data.branch_id}
+                                    onChange={(val) => setData('branch_id', val)}
+                                    options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                    allowClear
+                                    triggerClassName="h-10 text-sm"
+                                />
                                 {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
                             </div>
                         )}
