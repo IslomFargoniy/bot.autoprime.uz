@@ -142,7 +142,10 @@
     "excel_columns_hint": "Устунлар: full_name, phone бўлиши керак.",
     "download_template": "Шаблонни юклаб олиш",
     "students_title": "Гуруҳ Талабалари",
-    "no_students_in_group": "Гуруҳда ҳозирча талабалар йўқ. Excel орқали юкланг."
+    "no_students_in_group": "Гуруҳда ҳозирча талабалар йўқ. Excel орқали юкланг.",
+    "take_attendance": "Давомат",
+    "course": "LMS Курс",
+    "course_optional": "LMS Курс (Ихтиёрий)"
   },
   "students": {
     "title": "Ўқувчилар",

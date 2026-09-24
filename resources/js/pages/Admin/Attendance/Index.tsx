@@ -82,6 +82,7 @@ interface PageProps {
         group_id?: string | number;
         date?: string;
         branch_id?: string | number;
+        action?: string;
     };
 }
 
@@ -94,7 +95,7 @@ export default function AttendanceIndex({
 }: PageProps) {
     const { t } = useTranslation();
     const [showSessionModal, setShowSessionModal] = useState(false);
-    const [showManualModal, setShowManualModal] = useState(false);
+    const [showManualModal, setShowManualModal] = useState(Boolean(filters.action === 'mark' || filters.group_id));
     const [attendanceMode, setAttendanceMode] = useState<'group' | 'single'>('group');
 
     // Page filter states
@@ -105,6 +106,16 @@ export default function AttendanceIndex({
     const [rosterGroupId, setRosterGroupId] = useState<number | string>(
         filters.group_id || groups[0]?.id || ''
     );
+
+    useEffect(() => {
+        if (filters.action === 'mark' || filters.group_id) {
+            if (filters.group_id) {
+                setRosterGroupId(filters.group_id);
+            }
+            setAttendanceMode('group');
+            setShowManualModal(true);
+        }
+    }, [filters.action, filters.group_id]);
     const [rosterDate, setRosterDate] = useState<string>(
         new Date().toISOString().split('T')[0]
     );

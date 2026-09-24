@@ -113,6 +113,7 @@ export default function FinanceIndex({
     expenseCategories,
     registerTypes,
     contracts,
+    students = [],
 }: PageProps) {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'registers' | 'payments' | 'expenses' | 'shifts' | 'transfers'>('registers');
@@ -483,8 +484,8 @@ export default function FinanceIndex({
                                 id="pay_contract_id"
                                 value={paymentForm.data.contract_id}
                                 onChange={(val) => paymentForm.setData('contract_id', val)}
-                                options={contracts.map((c) => {
-                                    const st = students.find((s) => s.id === c.student_id);
+                                options={(contracts || []).map((c) => {
+                                    const st = (students || []).find((s) => s.id === c.student_id);
                                     return {
                                         value: c.id,
                                         label: `#${c.contract_number}${st ? ` - ${st.full_name}` : ''}`,

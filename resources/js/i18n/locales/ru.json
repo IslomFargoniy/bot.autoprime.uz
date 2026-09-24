@@ -145,7 +145,10 @@
     "excel_columns_hint": "Колонки должны быть: full_name, phone.",
     "download_template": "Скачать шаблон",
     "students_title": "Ученики группы",
-    "no_students_in_group": "В группе пока нет учеников. Загрузите через Excel."
+    "no_students_in_group": "В группе пока нет учеников. Загрузите через Excel.",
+    "take_attendance": "Посещаемость",
+    "course": "LMS Курс",
+    "course_optional": "LMS Курс (Необязательно)"
   },
   "students": {
     "title": "Ученики",

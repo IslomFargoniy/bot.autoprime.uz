@@ -6,6 +6,7 @@ use App\Exports\GroupStudentsExport;
 use App\Http\Controllers\Controller;
 use App\Imports\StudentsImport;
 use App\Models\Branch;
+use App\Models\Course;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\BranchSessionService;
@@ -29,7 +30,7 @@ class GroupController extends Controller
         $user = $request->user();
         $isInstructor = $user->role === 'instructor';
 
-        $query = Group::with(['instructor', 'branch'])->orderBy('id', 'desc');
+        $query = Group::with(['instructor', 'branch', 'course'])->orderBy('id', 'desc');
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
@@ -65,11 +66,13 @@ class GroupController extends Controller
             ->get();
 
         $branches = Branch::where('status', 'active')->get();
+        $courses = Course::where('is_active', true)->select(['id', 'name', 'category'])->get();
 
         return Inertia::render('Admin/Groups/Index', [
             'groups' => $groups,
             'instructors' => $instructors,
             'branches' => $branches,
+            'courses' => $courses,
             'filters' => [
                 'search' => $request->search,
                 'instructor_id' => $request->instructor_id,
@@ -89,6 +92,7 @@ class GroupController extends Controller
             'name' => 'required|string|max:100',
             'instructor_id' => 'nullable|exists:users,id',
             'branch_id' => 'nullable|exists:branches,id',
+            'course_id' => 'nullable|exists:courses,id',
         ]);
 
         $user = $request->user();
@@ -113,6 +117,7 @@ class GroupController extends Controller
             'name' => 'required|string|max:100',
             'instructor_id' => 'nullable|exists:users,id',
             'branch_id' => 'nullable|exists:branches,id',
+            'course_id' => 'nullable|exists:courses,id',
         ]);
 
         $group->update($validated);
@@ -138,7 +143,7 @@ class GroupController extends Controller
             abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni ko\'rishingiz mumkin.');
         }
 
-        $group->load('instructor');
+        $group->load(['instructor', 'course', 'branch']);
 
         $students = $group->students()
             ->withCount(['drivings as completed_drivings_count' => function ($q) {

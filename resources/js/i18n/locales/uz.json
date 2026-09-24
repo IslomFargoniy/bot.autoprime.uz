@@ -145,7 +145,10 @@
     "excel_columns_hint": "Ustunlar: full_name, phone bo'lishi kerak.",
     "download_template": "Shablonni yuklab olish",
     "students_title": "Guruh Talabalari",
-    "no_students_in_group": "Guruhda hozircha talabalar yo'q. Excel orqali yuklang."
+    "no_students_in_group": "Guruhda hozircha talabalar yo'q. Excel orqali yuklang.",
+    "take_attendance": "Davomat",
+    "course": "LMS Kurs",
+    "course_optional": "LMS Kurs (Ixtiyoriy)"
   },
   "students": {
     "title": "O'quvchilar",
