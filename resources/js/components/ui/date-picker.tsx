@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DatePickerProps {
-    value?: string; // 'DD-MM-YYYY' or 'YYYY-MM-DD'
+    value?: string; // Standard format: 'YYYY-MM-DD' (e.g. 2026-09-22)
     onChange: (dateStr: string) => void;
     placeholder?: string;
     className?: string;
@@ -16,7 +16,7 @@ interface DatePickerProps {
 export function DatePicker({
     value = '',
     onChange,
-    placeholder = 'DD-MM-YYYY',
+    placeholder = 'YYYY-MM-DD',
     className,
     id,
     required,
@@ -25,8 +25,8 @@ export function DatePicker({
 }: DatePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Convert value to standard 'YYYY-MM-DD' for native <input type="date">
-    const getIsoDate = (val: string) => {
+    // Normalize any incoming format (including legacy DD-MM-YYYY) to 'YYYY-MM-DD'
+    const toYmd = (val: string) => {
         if (!val) return '';
         if (val.includes('-')) {
             const parts = val.split('-');
@@ -38,42 +38,15 @@ export function DatePicker({
                 return val;
             }
         }
-        return '';
-    };
-
-    // Format value as 'DD-MM-YYYY' for display
-    const getDisplayDate = (val: string) => {
-        if (!val) return '';
-        if (val.includes('-')) {
-            const parts = val.split('-');
-            if (parts[0].length === 2 && parts[2]?.length === 4) {
-                // already DD-MM-YYYY
-                return val;
-            }
-            if (parts[0].length === 4 && parts[2]?.length === 2) {
-                // YYYY-MM-DD -> DD-MM-YYYY
-                return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-        }
         return val;
     };
 
     const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const isoVal = e.target.value; // 'YYYY-MM-DD' or ''
-        if (!isoVal) {
-            onChange('');
-            return;
-        }
-        const [yyyy, mm, dd] = isoVal.split('-');
-        if (yyyy && mm && dd) {
-            onChange(`${dd}-${mm}-${yyyy}`);
-        } else {
-            onChange(isoVal);
-        }
+        const isoVal = e.target.value; // Native date input always provides 'YYYY-MM-DD'
+        onChange(isoVal || '');
     };
 
-    const displayDate = getDisplayDate(value);
-    const isoDate = getIsoDate(value);
+    const ymdDate = toYmd(value);
 
     return (
         <div
@@ -96,9 +69,9 @@ export function DatePicker({
             }}
             title={title}
         >
-            {/* Formatted Date Display */}
-            <span className={cn('truncate font-medium text-foreground', !displayDate && 'text-muted-foreground font-normal')}>
-                {displayDate || placeholder}
+            {/* Formatted Date Display: YYYY-MM-DD */}
+            <span className={cn('truncate font-medium text-foreground', !ymdDate && 'text-muted-foreground font-normal')}>
+                {ymdDate || placeholder}
             </span>
 
             <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0 ml-2 pointer-events-none" />
@@ -108,7 +81,7 @@ export function DatePicker({
                 ref={inputRef}
                 id={id}
                 type="date"
-                value={isoDate}
+                value={ymdDate}
                 onChange={handleNativeChange}
                 disabled={disabled}
                 required={required}

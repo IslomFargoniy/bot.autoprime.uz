@@ -60,14 +60,14 @@ export default function DashboardIndex({ metrics, chartData, branches = [], filt
                 <div className="w-full md:w-auto">
                     <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                         <DatePicker
-                            placeholder={t('common.from', 'Dan') + ' DD-MM-YYYY'}
+                            placeholder={t('common.from', 'Dan') + ' YYYY-MM-DD'}
                             value={from}
                             onChange={(val) => setFrom(val)}
                             className="flex-1 md:w-36"
                             title={t('common.from', 'Dan')}
                         />
                         <DatePicker
-                            placeholder={t('common.to', 'Gacha') + ' DD-MM-YYYY'}
+                            placeholder={t('common.to', 'Gacha') + ' YYYY-MM-DD'}
                             value={to}
                             onChange={(val) => setTo(val)}
                             className="flex-1 md:w-36"

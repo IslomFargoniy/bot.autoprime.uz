@@ -13,6 +13,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface Contract {
     id: number;
@@ -325,22 +326,22 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="start_date">{t('contracts.start_date', 'Boshlanish Sanasi')}</Label>
-                                <Input
+                                <DatePicker
                                     id="start_date"
-                                    type="date"
                                     value={form.data.start_date}
-                                    onChange={(e) => form.setData('start_date', e.target.value)}
-                                    className="mt-1"
+                                    onChange={(val) => form.setData('start_date', val)}
+                                    placeholder="YYYY-MM-DD"
+                                    className="mt-1 h-9 text-xs"
                                 />
                             </div>
                             <div>
                                 <Label htmlFor="end_date">{t('contracts.end_date', 'Tugash Sanasi')}</Label>
-                                <Input
+                                <DatePicker
                                     id="end_date"
-                                    type="date"
                                     value={form.data.end_date}
-                                    onChange={(e) => form.setData('end_date', e.target.value)}
-                                    className="mt-1"
+                                    onChange={(val) => form.setData('end_date', val)}
+                                    placeholder="YYYY-MM-DD"
+                                    className="mt-1 h-9 text-xs"
                                 />
                             </div>
                         </div>

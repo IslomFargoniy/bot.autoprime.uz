@@ -217,7 +217,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                         <option value="all">{t('common.all', 'Barchasi')}</option>
                     </select>
                     <DatePicker
-                        placeholder={t('common.from', 'Dan') + ' DD-MM-YYYY'}
+                        placeholder={t('common.from', 'Dan') + ' YYYY-MM-DD'}
                         value={from}
                         onChange={(val) => {
                             setFrom(val);
@@ -227,7 +227,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                         title={t('common.from', 'Dan')}
                     />
                     <DatePicker
-                        placeholder={t('common.to', 'Gacha') + ' DD-MM-YYYY'}
+                        placeholder={t('common.to', 'Gacha') + ' YYYY-MM-DD'}
                         value={to}
                         onChange={(val) => {
                             setTo(val);
@@ -271,7 +271,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                 <div>
                                     <Label>{t('common.from', 'Dan')}</Label>
                                     <DatePicker
-                                        placeholder="DD-MM-YYYY"
+                                        placeholder="YYYY-MM-DD"
                                         value={from}
                                         onChange={(val) => setFrom(val)}
                                         className="w-full mt-1"
@@ -280,7 +280,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                 <div>
                                     <Label>{t('common.to', 'Gacha')}</Label>
                                     <DatePicker
-                                        placeholder="DD-MM-YYYY"
+                                        placeholder="YYYY-MM-DD"
                                         value={to}
                                         onChange={(val) => setTo(val)}
                                         className="w-full mt-1"

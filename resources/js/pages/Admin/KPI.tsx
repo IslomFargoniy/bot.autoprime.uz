@@ -55,7 +55,7 @@ export default function KPI({ instructors = [], filters = {} }: PageProps) {
                 
                 <div className="flex gap-2 w-full md:w-auto">
                     <DatePicker 
-                        placeholder={t('common.date_from', 'Dan') + ' DD-MM-YYYY'}
+                        placeholder={t('common.date_from', 'Dan') + ' YYYY-MM-DD'}
                         value={fromDate}
                         onChange={(val) => handleFilterDateChange('from', val)}
                         className="w-full md:w-36"
@@ -63,7 +63,7 @@ export default function KPI({ instructors = [], filters = {} }: PageProps) {
                     />
                     
                     <DatePicker 
-                        placeholder={t('common.date_to', 'Gacha') + ' DD-MM-YYYY'}
+                        placeholder={t('common.date_to', 'Gacha') + ' YYYY-MM-DD'}
                         value={toDate}
                         onChange={(val) => handleFilterDateChange('to', val)}
                         className="w-full md:w-36"
