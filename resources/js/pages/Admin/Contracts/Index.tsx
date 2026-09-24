@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Contract {
     id: number;
@@ -256,11 +257,11 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                     <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
                         <div>
                             <Label htmlFor="student_id">{t('contracts.select_student', 'Talaba (O\'quvchi)')}</Label>
-                            <select
+                            <SearchableSelect
                                 id="student_id"
                                 value={form.data.student_id}
-                                onChange={(e) => {
-                                    const stId = Number(e.target.value);
+                                onChange={(val) => {
+                                    const stId = Number(val);
                                     const found = students.find((s) => s.id === stId);
                                     form.setData({
                                         ...form.data,
@@ -268,15 +269,15 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         group_id: found?.group_id ? String(found.group_id) : form.data.group_id,
                                     });
                                 }}
-                                className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
+                                options={students.map((s) => ({
+                                    value: s.id,
+                                    label: s.full_name,
+                                    sublabel: s.phone,
+                                }))}
+                                placeholder={t('contracts.select_student', 'Talaba (O\'quvchi)')}
+                                className="mt-1"
                                 required
-                            >
-                                {students.map((s) => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.full_name} ({s.phone})
-                                    </option>
-                                ))}
-                            </select>
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -298,17 +299,15 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                             </div>
                             <div>
                                 <Label htmlFor="group_id">{t('contracts.select_group', 'Guruh')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="group_id"
                                     value={form.data.group_id}
-                                    onChange={(e) => form.setData('group_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="">{t('common.not_assigned', 'Biriktirilmagan')}</option>
-                                    {groups.map((g) => (
-                                        <option key={g.id} value={g.id}>{g.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => form.setData('group_id', val)}
+                                    options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                    placeholder={t('common.not_assigned', 'Biriktirilmagan')}
+                                    allowClear
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 

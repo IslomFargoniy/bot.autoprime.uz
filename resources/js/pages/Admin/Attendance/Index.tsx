@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -342,16 +343,17 @@ export default function AttendanceIndex({
             <div className="flex flex-wrap items-end gap-3 mb-4 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
                 <div className="flex-1 min-w-[200px]">
                     <Label className="text-[11px] text-gray-500 mb-1 block">{t('attendance.group', 'Guruh')}</Label>
-                    <select
+                    <SearchableSelect
+                        size="sm"
                         value={filterGroupId}
-                        onChange={(e) => handleFilterChange('group_id', e.target.value)}
-                        className="w-full h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 text-xs"
-                    >
-                        <option value="">{t('common.all', 'Barcha guruhlar')}</option>
-                        {groups.map((g) => (
-                            <option key={g.id} value={g.id}>{g.name}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => handleFilterChange('group_id', val ? String(val) : '')}
+                        options={[
+                            { value: '', label: t('common.all', 'Barcha guruhlar') },
+                            ...groups.map((g) => ({ value: String(g.id), label: g.name })),
+                        ]}
+                        placeholder={t('common.all', 'Barcha guruhlar')}
+                        allowClear
+                    />
                 </div>
                 <div className="w-44">
                     <Label className="text-[11px] text-gray-500 mb-1 block">{t('attendance.date', 'Sana')}</Label>
@@ -448,17 +450,15 @@ export default function AttendanceIndex({
                     <form onSubmit={handleStartSession} className="space-y-4 text-xs">
                         <div>
                             <Label htmlFor="sess_group">{t('attendance.group', 'Guruhni Tanlang')}</Label>
-                            <select
+                            <SearchableSelect
                                 id="sess_group"
                                 value={sessionForm.data.group_id}
-                                onChange={(e) => sessionForm.setData('group_id', e.target.value)}
-                                className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
+                                onChange={(val) => sessionForm.setData('group_id', val)}
+                                options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                placeholder={t('attendance.select_group', 'Guruhni tanlang')}
+                                className="mt-1"
                                 required
-                            >
-                                {groups.map((g) => (
-                                    <option key={g.id} value={g.id}>{g.name}</option>
-                                ))}
-                            </select>
+                            />
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" onClick={() => setShowSessionModal(false)}>
@@ -516,17 +516,14 @@ export default function AttendanceIndex({
                                     <Label htmlFor="roster_group" className="text-xs mb-1 block">
                                         {t('attendance.select_group', 'Guruhni tanlang')}
                                     </Label>
-                                    <select
+                                    <SearchableSelect
                                         id="roster_group"
                                         value={rosterGroupId}
-                                        onChange={(e) => setRosterGroupId(e.target.value)}
-                                        className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs"
+                                        onChange={(val) => setRosterGroupId(val)}
+                                        options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                        placeholder={t('attendance.select_group', 'Guruhni tanlang')}
                                         required
-                                    >
-                                        {groups.map((g) => (
-                                            <option key={g.id} value={g.id}>{g.name}</option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                                 <div>
                                     <Label htmlFor="roster_date" className="text-xs mb-1 block">
@@ -708,17 +705,20 @@ export default function AttendanceIndex({
                         <form onSubmit={handleManualSubmit} className="space-y-4 text-xs">
                             <div>
                                 <Label htmlFor="man_student">{t('attendance.student', 'Talaba')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="man_student"
                                     value={manualForm.data.student_id}
-                                    onChange={(e) => manualForm.setData('student_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
+                                    onChange={(val) => manualForm.setData('student_id', val)}
+                                    options={students.map((st) => ({
+                                        value: st.id,
+                                        label: st.full_name,
+                                        sublabel: st.phone,
+                                    }))}
+                                    placeholder={t('attendance.student', 'Talaba')}
+                                    searchPlaceholder={t('common.search_student', 'Talaba ismi yoki telefon...')}
+                                    className="mt-1"
                                     required
-                                >
-                                    {students.map((st) => (
-                                        <option key={st.id} value={st.id}>{st.full_name} ({st.phone})</option>
-                                    ))}
-                                </select>
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
