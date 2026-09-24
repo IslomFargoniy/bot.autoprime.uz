@@ -87,11 +87,6 @@ export function AppSidebar() {
             icon: Banknote,
         },
         {
-            title: t('sidebar.attendance', 'Davomat (QR)'),
-            href: '/admin/attendance',
-            icon: CheckSquare,
-        },
-        {
             title: t('sidebar.certificates', 'Guvohnomalar'),
             href: '/admin/certificates',
             icon: Award,

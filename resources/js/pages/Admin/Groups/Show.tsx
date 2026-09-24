@@ -1,6 +1,6 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Users, Upload, ArrowLeft, Download, Trash2 } from 'lucide-react';
+import { Users, Upload, ArrowLeft, Download, Trash2, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRef, useState } from 'react';
@@ -12,6 +12,10 @@ interface Group {
     instructor?: {
         name: string;
     };
+    course?: {
+        id: number;
+        name: string;
+    } | null;
 }
 
 interface Student {
@@ -85,9 +89,16 @@ export default function GroupShow({ group, students }: PageProps) {
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {t('groups.instructor_label', 'Instruktor')}: {group.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')} • {t('groups.students_count_label', 'Talabalar soni')}: {students.length}
+                            {group.course && ` • LMS: ${group.course.name}`}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <Link href={`/admin/attendance?group_id=${group.id}&action=mark`}>
+                                <CheckSquare className="w-4 h-4 mr-2" />
+                                {t('groups.take_attendance', 'Davomat')}
+                            </Link>
+                        </Button>
                         <Button variant="outline" onClick={() => window.location.href = `/admin/groups/${group.id}/export-students`}>
                             <Download className="w-4 h-4 mr-2" />
                             {t('common.export_excel', 'Excel yuklab olish')}

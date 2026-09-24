@@ -2,11 +2,12 @@ import { useState, useCallback } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, Eye } from 'lucide-react';
+import { Trash2, Edit2, Plus, Search, Eye, CheckSquare, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Branch, SharedData } from '@/types/auth';
 import {
     Dialog,
@@ -31,6 +32,12 @@ interface Instructor {
     name: string;
 }
 
+interface Course {
+    id: number;
+    name: string;
+    category?: string;
+}
+
 interface Group {
     id: number;
     name: string;
@@ -38,6 +45,8 @@ interface Group {
     instructor?: Instructor;
     branch_id?: number | null;
     branch?: Branch | null;
+    course_id?: number | null;
+    course?: Course | null;
 }
 
 interface PageProps {
@@ -48,6 +57,7 @@ interface PageProps {
     };
     instructors: Instructor[];
     branches?: Branch[];
+    courses?: Course[];
     filters?: {
         search?: string;
         instructor_id?: string;
@@ -55,7 +65,7 @@ interface PageProps {
     };
 }
 
-export default function GroupsIndex({ groups, instructors, branches = [], filters = {} }: PageProps) {
+export default function GroupsIndex({ groups, instructors, branches = [], courses = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth?.user?.role === 'instructor';
@@ -82,6 +92,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
         name: '',
         instructor_id: '',
         branch_id: '' as string | number,
+        course_id: '' as string | number,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -116,6 +127,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
             name: group.name,
             instructor_id: group.instructor_id ? String(group.instructor_id) : '',
             branch_id: group.branch_id ? String(group.branch_id) : '',
+            course_id: group.course_id ? String(group.course_id) : '',
         });
         setShowForm(true);
     };
@@ -267,31 +279,48 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                         {isSuperAdmin && (
                             <div>
                                 <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <select 
-                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    value={data.branch_id} 
-                                    onChange={e => setData('branch_id', e.target.value)}
-                                >
-                                    <option value="">{t('branches.branch_optional', 'Filial (Ixtiyoriy)')}</option>
-                                    {branches.map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                <SearchableSelect
+                                    id="branch_id"
+                                    value={data.branch_id ? String(data.branch_id) : ''}
+                                    onChange={(val) => setData('branch_id', val)}
+                                    options={branches.map((b) => ({
+                                        value: b.id,
+                                        label: b.name,
+                                    }))}
+                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                    allowClear
+                                />
                                 {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
                             </div>
                         )}
                         <div>
+                            <Label htmlFor="course_id">{t('groups.course', 'LMS Kurs')}</Label>
+                            <SearchableSelect
+                                id="course_id"
+                                value={data.course_id ? String(data.course_id) : ''}
+                                onChange={(val) => setData('course_id', val)}
+                                options={courses.map((c) => ({
+                                    value: c.id,
+                                    label: `${c.name}${c.category ? ` (${c.category.toUpperCase()})` : ''}`,
+                                }))}
+                                placeholder={t('groups.course_optional', 'LMS Kurs (Ixtiyoriy)')}
+                                allowClear
+                            />
+                            {errors.course_id && <div className="text-destructive text-sm mt-1">{errors.course_id}</div>}
+                        </div>
+                        <div>
                             <Label htmlFor="instructor_id">{t('drivings.instructor', 'Instruktor')}</Label>
-                            <select 
-                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                value={data.instructor_id} 
-                                onChange={e => setData('instructor_id', e.target.value)}
-                            >
-                                <option value="">{t('groups.select_instructor', '-- Tanlang --')}</option>
-                                {instructors.map(inst => (
-                                    <option key={inst.id} value={inst.id}>{inst.name}</option>
-                                ))}
-                            </select>
+                            <SearchableSelect
+                                id="instructor_id"
+                                value={data.instructor_id ? String(data.instructor_id) : ''}
+                                onChange={(val) => setData('instructor_id', val)}
+                                options={instructors.map((inst) => ({
+                                    value: inst.id,
+                                    label: inst.name,
+                                }))}
+                                placeholder={t('groups.select_instructor', '-- Tanlang --')}
+                                allowClear
+                            />
                             {errors.instructor_id && <div className="text-destructive text-sm mt-1">{errors.instructor_id}</div>}
                         </div>
                         <div className="flex gap-2 justify-end pt-4">
@@ -311,7 +340,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                             <th className="px-4 py-3 font-medium">{t('groups.name', 'Guruh nomi')}</th>
                             <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
                             <th className="px-4 py-3 font-medium">{t('drivings.instructor', 'Instruktor')}</th>
-                            {!isInstructor && <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>}
+                            <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -319,24 +348,40 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                             <tr key={item.id} className="hover:bg-muted/30">
                                 <td className="px-4 py-3">{(groups.from || 1) + index}</td>
                                 <td className="px-4 py-3 font-medium">
-                                    <Link href={`/admin/groups/${item.id}`} className="text-blue-600 hover:underline">
-                                        {item.name}
-                                    </Link>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <Link href={`/admin/groups/${item.id}`} className="text-blue-600 hover:underline">
+                                            {item.name}
+                                        </Link>
+                                        {item.course && (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-normal px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 w-fit">
+                                                <GraduationCap className="w-3 h-3" />
+                                                {item.course.name}
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-4 py-3 text-xs">{item.branch?.name || '-'}</td>
                                 <td className="px-4 py-3 text-muted-foreground">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</td>
-                                {!isInstructor && (
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                )}
+                                <td className="px-4 py-3 text-right">
+                                    <div className="flex justify-end items-center gap-2">
+                                        <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
+                                            <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
+                                                <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                                {t('groups.take_attendance', 'Davomat')}
+                                            </Link>
+                                        </Button>
+                                        {!isInstructor && (
+                                            <>
+                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
+                                                    <Edit2 className="w-4 h-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -351,6 +396,12 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                                     <Link href={`/admin/groups/${item.id}`} className="font-semibold text-blue-600 hover:underline text-lg block">
                                         {item.name}
                                     </Link>
+                                    {item.course && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-normal px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mt-1">
+                                            <GraduationCap className="w-3 h-3" />
+                                            {item.course.name}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             
@@ -359,22 +410,30 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                                 <div className="font-medium">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</div>
                             </div>
                             
-                            <div className="flex gap-2 justify-end pt-1">
-                                <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
-                                    <Link href={`/admin/groups/${item.id}`}>
-                                        <Eye className="w-4 h-4" />
+                            <div className="flex items-center justify-between pt-2 border-t mt-2">
+                                <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
+                                    <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
+                                        <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                        {t('groups.take_attendance', 'Davomat')}
                                     </Link>
                                 </Button>
-                                {!isInstructor && (
-                                    <>
-                                        <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </>
-                                )}
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
+                                        <Link href={`/admin/groups/${item.id}`}>
+                                            <Eye className="w-4 h-4" />
+                                        </Link>
+                                    </Button>
+                                    {!isInstructor && (
+                                        <>
+                                            <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

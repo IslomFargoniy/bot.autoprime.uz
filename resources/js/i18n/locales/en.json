@@ -142,7 +142,10 @@
     "excel_columns_hint": "Columns must be: full_name, phone.",
     "download_template": "Download template",
     "students_title": "Group Students",
-    "no_students_in_group": "No students in this group yet. Upload via Excel."
+    "no_students_in_group": "No students in this group yet. Upload via Excel.",
+    "take_attendance": "Attendance",
+    "course": "LMS Course",
+    "course_optional": "LMS Course (Optional)"
   },
   "students": {
     "title": "Students",

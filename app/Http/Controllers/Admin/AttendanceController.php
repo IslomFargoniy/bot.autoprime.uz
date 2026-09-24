@@ -76,6 +76,7 @@ class AttendanceController extends Controller
                 'group_id' => $request->group_id,
                 'date' => $request->date,
                 'branch_id' => $targetBranchId,
+                'action' => $request->action,
             ],
         ]);
     }
