@@ -11,6 +11,7 @@ import {
     FileText,
     FolderGit2,
     GraduationCap,
+    HelpCircle,
     LayoutGrid,
     MapPin,
     ShieldCheck,
@@ -107,6 +108,11 @@ export function AppSidebar() {
                     title: t('sidebar.attendance', 'Davomat (QR)'),
                     href: '/admin/attendance',
                     icon: CheckSquare,
+                },
+                {
+                    title: t('sidebar.tests', 'Prava24 Testlar'),
+                    href: '/admin/tests',
+                    icon: HelpCircle,
                 },
                 {
                     title: t('sidebar.certificates', 'Guvohnomalar'),

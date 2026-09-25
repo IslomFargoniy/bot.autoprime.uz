@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\InstructorController as AdminInstructorController
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
@@ -227,6 +228,7 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::resource('admin/courses', CourseController::class)->except(['create', 'show', 'edit']);
     Route::post('admin/courses/{course}/topics', [CourseController::class, 'storeTopic'])->name('courses.store-topic');
     Route::post('admin/topics/{topic}/materials', [CourseController::class, 'storeMaterial'])->name('topics.store-material');
+    Route::get('admin/tests', [TestController::class, 'index'])->name('tests.index');
 
     // Vehicles & Fleet
     Route::resource('admin/vehicles', VehicleController::class)->except(['create', 'show', 'edit']);
