@@ -36,13 +36,12 @@
     "finance": "Молия & Касса",
     "payroll": "Ойлик маошлар",
     "attendance": "Давомат (QR)",
-    "prava24": "Тестлар & Белгилар",
     "vehicles": "Автопарк",
     "leads": "CRM Лидлар",
     "contract_types": "Тарифлар",
     "salaries": "Ходимлар Ойлиги",
     "certificates": "Гувоҳномалар",
-    "tests": "Prava24 Тестлар",
+    "tests": "Тестлар & Имтиҳонлар",
     "branches": "Филиаллар"
   },
   "common": {
@@ -354,7 +353,7 @@
     "submit_scan": "Юбориш",
     "guest_student": "Меҳмон Ўқувчи"
   },
-  "prava24": {
+  "quiz": {
     "tab_exam": "Имтиҳон",
     "tab_tickets": "Билетлар",
     "tab_signs": "Белгилар",
@@ -659,7 +658,26 @@
     "download_pdf": "PDF Материал"
   },
   "tests": {
-    "page_title": "Prava24 Тестлар & Имтиҳонлар",
+    "page_title": "Тестлар & Имтиҳонлар",
+    "add_ticket": "+ Билет Қўшиш",
+    "edit_ticket": "Билетни Таҳрирлаш",
+    "delete_ticket": "Билетни Ўчириш",
+    "confirm_delete_ticket": "Ушбу билет ва унинг барча саволлари ўчирилади. Розимисиз?",
+    "add_question": "+ Савол Қўшиш",
+    "edit_question": "Саволни Таҳрирлаш",
+    "delete_question": "Саволни Ўчириш",
+    "confirm_delete_question": "Ушбу саволни ростдан ҳам ўчирмоқчимисиз?",
+    "add_sign": "+ Белги Қўшиш",
+    "edit_sign": "Белгини Таҳрирлаш",
+    "delete_sign": "Белгини Ўчириш",
+    "confirm_delete_sign": "Ушбу йўл белгисини ўчирмоқчимисиз?",
+    "ticket_num_label": "Билет Рақами",
+    "ticket_title_label": "Билет Номи",
+    "question_text_label": "Савол Матни",
+    "answers_options_label": "Жавоб Вариантлари",
+    "correct_label": "Тўғри",
+    "explanation_placeholder": "Йўл ҳаракати қоидаси бўйича тушунтириш...",
+    "image_file_or_url": "Расм (Файл ёки Ҳавола)",
     "preview_mini_app": "Ўқувчи Мини Аппида Кўриш",
     "stats_tickets": "Жами Билетлар",
     "stats_questions": "Жами Саволлар",

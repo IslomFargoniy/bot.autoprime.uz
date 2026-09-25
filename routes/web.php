@@ -21,7 +21,7 @@ use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\MiniAppController;
-use App\Http\Controllers\Student\Prava24Controller;
+use App\Http\Controllers\Student\StudentTestController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -140,13 +140,14 @@ Route::get('/mini-app', [MiniAppController::class, 'index'])->name('student.mini
 Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->name('attendance.scan-qr');
 Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
 
-// Prava24 Tests & Mock Exam Endpoints
-Route::get('/api/prava24/tickets', [Prava24Controller::class, 'getTickets'])->name('prava24.tickets');
-Route::get('/api/prava24/ticket/{ticket}', [Prava24Controller::class, 'getTicketQuestions'])->name('prava24.ticket.questions');
-Route::get('/api/prava24/exam', [Prava24Controller::class, 'getMockExam'])->name('prava24.exam');
-Route::post('/api/prava24/submit', [Prava24Controller::class, 'submitAttempt'])->name('prava24.submit');
-Route::get('/api/prava24/signs', [Prava24Controller::class, 'getSigns'])->name('prava24.signs');
-Route::get('/api/prava24/stats', [Prava24Controller::class, 'getStudentStats'])->name('prava24.stats');
+// Student Tests & Mock Exam Endpoints
+Route::get('/api/tests/tickets', [StudentTestController::class, 'getTickets'])->name('tests.tickets');
+Route::get('/api/tests/ticket/{ticket}', [StudentTestController::class, 'getTicketQuestions'])->name('tests.ticket.questions');
+Route::get('/api/tests/exam', [StudentTestController::class, 'getMockExam'])->name('tests.exam');
+Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt'])->name('tests.submit');
+Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
+Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats'])->name('tests.stats');
+
 
 Route::middleware(['auth.telegram'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -228,7 +229,20 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::resource('admin/courses', CourseController::class)->except(['create', 'show', 'edit']);
     Route::post('admin/courses/{course}/topics', [CourseController::class, 'storeTopic'])->name('courses.store-topic');
     Route::post('admin/topics/{topic}/materials', [CourseController::class, 'storeMaterial'])->name('topics.store-material');
+
+    // Tests & Questions Management
     Route::get('admin/tests', [TestController::class, 'index'])->name('tests.index');
+    Route::post('admin/tests/tickets', [TestController::class, 'storeTicket'])->name('tests.tickets.store');
+    Route::put('admin/tests/tickets/{ticket}', [TestController::class, 'updateTicket'])->name('tests.tickets.update');
+    Route::delete('admin/tests/tickets/{ticket}', [TestController::class, 'destroyTicket'])->name('tests.tickets.destroy');
+
+    Route::post('admin/tests/questions', [TestController::class, 'storeQuestion'])->name('tests.questions.store');
+    Route::put('admin/tests/questions/{question}', [TestController::class, 'updateQuestion'])->name('tests.questions.update');
+    Route::delete('admin/tests/questions/{question}', [TestController::class, 'destroyQuestion'])->name('tests.questions.destroy');
+
+    Route::post('admin/tests/signs', [TestController::class, 'storeSign'])->name('tests.signs.store');
+    Route::put('admin/tests/signs/{sign}', [TestController::class, 'updateSign'])->name('tests.signs.update');
+    Route::delete('admin/tests/signs/{sign}', [TestController::class, 'destroySign'])->name('tests.signs.destroy');
 
     // Vehicles & Fleet
     Route::resource('admin/vehicles', VehicleController::class)->except(['create', 'show', 'edit']);

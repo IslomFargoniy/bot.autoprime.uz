@@ -36,13 +36,12 @@
     "finance": "Финансы и Кассы",
     "payroll": "Заработная плата",
     "attendance": "Посещаемость (QR)",
-    "prava24": "Тесты и Знаки",
     "vehicles": "Автопарк",
     "leads": "CRM Лиды",
     "contract_types": "Тарифы",
     "salaries": "Зарплаты",
     "certificates": "Сертификаты",
-    "tests": "Тесты Prava24",
+    "tests": "Тесты & Экзамены",
     "branches": "Филиалы"
   },
   "common": {
@@ -357,7 +356,7 @@
     "submit_scan": "Отправить",
     "guest_student": "Гость"
   },
-  "prava24": {
+  "quiz": {
     "tab_exam": "Экзамен",
     "tab_tickets": "Билеты",
     "tab_signs": "Знаки",
@@ -662,7 +661,26 @@
     "download_pdf": "PDF Материал"
   },
   "tests": {
-    "page_title": "Тесты & Экзамены Prava24",
+    "page_title": "Тесты & Экзамены",
+    "add_ticket": "+ Добавить Билет",
+    "edit_ticket": "Редактировать Билет",
+    "delete_ticket": "Удалить Билет",
+    "confirm_delete_ticket": "Этот билет и все его вопросы будут удалены. Вы уверены?",
+    "add_question": "+ Добавить Вопрос",
+    "edit_question": "Редактировать Вопрос",
+    "delete_question": "Удалить Вопрос",
+    "confirm_delete_question": "Вы уверены, что хотите удалить этот вопрос?",
+    "add_sign": "+ Добавить Знак",
+    "edit_sign": "Редактировать Знак",
+    "delete_sign": "Удалить Знак",
+    "confirm_delete_sign": "Вы уверены, что хотите удалить этот дорожный знак?",
+    "ticket_num_label": "Номер Билета",
+    "ticket_title_label": "Название Билета",
+    "question_text_label": "Текст Вопроса",
+    "answers_options_label": "Варианты Ответов",
+    "correct_label": "Верный",
+    "explanation_placeholder": "Пояснение по правилам дорожного движения...",
+    "image_file_or_url": "Изображение (Файл или URL)",
     "preview_mini_app": "Смотреть в Mini App",
     "stats_tickets": "Всего Билетов",
     "stats_questions": "Всего Вопросов",

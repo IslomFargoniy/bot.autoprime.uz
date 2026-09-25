@@ -13,20 +13,16 @@ use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class Prava24Controller extends Controller
+class StudentTestController extends Controller
 {
     /**
-     * Resolve student from Telegram initData, session, or request param.
+     * Resolve the current student from Telegram WebApp initData or Auth session.
      */
     protected function resolveStudent(Request $request): ?Student
     {
         $telegramId = null;
 
-        $initData = $request->header('X-Telegram-Init-Data')
-            ?? $request->input('initData')
-            ?? $request->query('_auth')
-            ?? $request->session()->get('tg_init_data');
-
+        $initData = $request->header('X-Telegram-Init-Data') ?: $request->input('initData');
         if ($initData) {
             parse_str($initData, $parsedData);
             if (isset($parsedData['user'])) {
@@ -35,23 +31,23 @@ class Prava24Controller extends Controller
             }
         }
 
-        if (! $telegramId && $request->filled('student_id')) {
-            return Student::find($request->student_id);
-        }
-
-        if (! $telegramId && (app()->environment('local') || config('app.debug'))) {
-            $telegramId = $request->query('test_telegram_id');
-        }
-
         if (! $telegramId && $request->user()) {
             $telegramId = $request->user()->telegram_id;
         }
 
-        if (! $telegramId) {
-            return null;
+        if ($telegramId) {
+            $student = Student::where('telegram_id', $telegramId)->first();
+            if ($student) {
+                return $student;
+            }
         }
 
-        return Student::where('telegram_id', (string) $telegramId)->first();
+        $studentId = $request->input('student_id');
+        if ($studentId) {
+            return Student::find($studentId);
+        }
+
+        return null;
     }
 
     /**
@@ -62,7 +58,7 @@ class Prava24Controller extends Controller
         $tickets = Ticket::where('is_active', true)
             ->withCount('questions')
             ->orderBy('ticket_number')
-            ->get(['id', 'ticket_number', 'title_uz', 'title_ru', 'title_krill', 'title_en', 'description', 'is_active']);
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -71,57 +67,58 @@ class Prava24Controller extends Controller
     }
 
     /**
-     * Get specific ticket questions with answers.
+     * Get questions for a specific ticket.
      */
     public function getTicketQuestions(Ticket $ticket): JsonResponse
     {
-        $questions = Question::where('ticket_id', $ticket->id)
-            ->where('is_active', true)
-            ->with(['answers' => function ($q) {
-                $q->orderBy('order');
-            }])
-            ->orderBy('question_number')
-            ->get();
+        $ticket->load([
+            'questions' => function ($q) {
+                $q->where('is_active', true)
+                    ->with(['answers' => function ($ans) {
+                        $ans->orderBy('order');
+                    }])
+                    ->orderBy('question_number');
+            },
+        ]);
 
         return response()->json([
             'success' => true,
             'ticket' => $ticket,
-            'questions' => $questions,
         ]);
     }
 
     /**
-     * Get 20 random questions for internal mock exam.
+     * Generate 20 random questions for internal mock exam.
      */
     public function getMockExam(): JsonResponse
     {
         $questions = Question::where('is_active', true)
-            ->with(['answers' => function ($q) {
-                $q->orderBy('order');
+            ->with(['answers' => function ($ans) {
+                $ans->orderBy('order');
             }])
             ->inRandomOrder()
-            ->take(20)
+            ->limit(20)
             ->get();
 
         return response()->json([
             'success' => true,
-            'exam_title' => 'Prava24 Ichki Nazorat Imtihoni',
+            'exam_title' => 'Ichki Nazorat Imtihoni',
             'duration_minutes' => 25,
-            'total_questions' => $questions->count(),
+            'total_questions' => 20,
             'passing_score' => 18,
             'questions' => $questions,
         ]);
     }
 
     /**
-     * Submit exam or ticket practice answers.
+     * Submit an attempt, evaluate score, and persist result.
      */
     public function submitAttempt(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'student_id' => 'nullable|integer',
             'ticket_id' => 'nullable|exists:tickets,id',
-            'attempt_type' => 'required|in:ticket_exam,random_mock,marathon,mistakes',
+            'attempt_type' => 'required|in:ticket_exam,random_mock,marathon,mistakes,exam,ticket',
             'duration_seconds' => 'nullable|integer',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:questions,id',
@@ -166,7 +163,7 @@ class Prava24Controller extends Controller
 
         // Passing condition: 18 out of 20 for mock exam, or >= 90%
         $isPassed = false;
-        if ($validated['attempt_type'] === 'random_mock') {
+        if (in_array($validated['attempt_type'], ['random_mock', 'exam'])) {
             $isPassed = ($correctCount >= 18 && $totalQuestions >= 20) || ($scorePercentage >= 90.0);
         } else {
             $isPassed = $scorePercentage >= 90.0;
@@ -174,11 +171,18 @@ class Prava24Controller extends Controller
 
         $duration = (int) ($validated['duration_seconds'] ?? 0);
 
+        $attemptType = $validated['attempt_type'];
+        if ($attemptType === 'exam') {
+            $attemptType = 'random_mock';
+        } elseif ($attemptType === 'ticket') {
+            $attemptType = 'ticket_exam';
+        }
+
         $attempt = Attempt::create([
             'student_id' => $studentId,
             'user_id' => $userId,
             'ticket_id' => $validated['ticket_id'] ?? null,
-            'attempt_type' => $validated['attempt_type'],
+            'attempt_type' => $attemptType,
             'total_questions' => $totalQuestions,
             'correct_answers' => $correctCount,
             'wrong_answers' => $wrongCount,
@@ -214,7 +218,7 @@ class Prava24Controller extends Controller
     }
 
     /**
-     * Get traffic signs categorized and road lines.
+     * Get traffic signs and road lines grouped by categories.
      */
     public function getSigns(): JsonResponse
     {
@@ -234,7 +238,7 @@ class Prava24Controller extends Controller
     }
 
     /**
-     * Get student attempts statistics.
+     * Get student exam attempts history and certificate eligibility stats.
      */
     public function getStudentStats(Request $request): JsonResponse
     {
@@ -242,26 +246,30 @@ class Prava24Controller extends Controller
 
         if (! $student) {
             return response()->json([
-                'success' => false,
-                'message' => 'Student not found',
-            ], 404);
+                'success' => true,
+                'has_student' => false,
+                'passed_exam' => false,
+                'total_attempts' => 0,
+                'attempts' => [],
+            ]);
         }
 
         $attempts = Attempt::where('student_id', $student->id)
             ->with('ticket')
-            ->orderBy('created_at', 'desc')
-            ->take(15)
+            ->latest('id')
+            ->limit(30)
             ->get();
 
-        $passedCount = Attempt::where('student_id', $student->id)->where('is_passed', true)->count();
-        $totalAttempts = Attempt::where('student_id', $student->id)->count();
+        $passedMock = Attempt::where('student_id', $student->id)
+            ->where('is_passed', true)
+            ->exists();
 
         return response()->json([
             'success' => true,
-            'has_passed_exam' => $passedCount > 0,
-            'total_attempts' => $totalAttempts,
-            'passed_attempts' => $passedCount,
-            'recent_attempts' => $attempts,
+            'has_student' => true,
+            'passed_exam' => $passedMock,
+            'total_attempts' => $attempts->count(),
+            'attempts' => $attempts,
         ]);
     }
 }

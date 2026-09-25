@@ -1,6 +1,6 @@
 // ==========================================
 // 🚗 AUTOPRIME — ALL-IN-ONE AVTOMAKTAB PLATFORMASI
-// (CRM + ERP + LMS + PRAVA24 TEST ENGINE + CERTIFICATES + BOT QABUL)
+// (CRM + ERP + LMS + TEST ENGINE + CERTIFICATES + BOT QABUL)
 // DBML fayli: https://dbdiagram.io uchun
 // ==========================================
 
@@ -581,7 +581,7 @@ Table reviews {
 
 
 // ==========================================
-// 📚 9. LMS: PRAVA24 TEST & IMTIHON DVIGATELI (4 TILDA)
+// 📚 9. LMS: TEST & IMTIHON DVIGATELI (4 TILDA)
 // ==========================================
 
 Table tickets {
@@ -857,7 +857,7 @@ TableGroup ERP_Drivings_Scheduling {
   reviews
 }
 
-TableGroup LMS_Prava24_Quiz_Engine {
+TableGroup LMS__Quiz_Engine {
   tickets
   questions
   answers

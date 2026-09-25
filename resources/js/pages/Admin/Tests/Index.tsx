@@ -2,27 +2,31 @@ import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import {
-    Award,
     BookOpen,
     CheckCircle2,
     Clock,
     ExternalLink,
-    FileText,
     HelpCircle,
     RotateCcw,
     Search,
-    ShieldAlert,
     XCircle,
     Eye,
+    Plus,
+    Pencil,
+    Trash2,
+    Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import { toast } from 'sonner';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
 } from '@/components/ui/dialog';
 
 interface Attempt {
@@ -54,6 +58,7 @@ interface Ticket {
     id: number;
     ticket_number: number;
     title_uz: string;
+    description?: string;
     questions_count?: number;
 }
 
@@ -64,6 +69,7 @@ interface SignCategory {
     slug: string;
     signs: Array<{
         id: number;
+        category_id: number;
         sign_number: string;
         name_uz: string;
         description_uz?: string;
@@ -111,7 +117,6 @@ export default function TestsIndex({
     filters,
 }: PageProps) {
     const { t, i18n } = useTranslation();
-    const currentLang = i18n.language || 'uz';
 
     const [activeTab, setActiveTab] = useState<'attempts' | 'tickets' | 'signs'>('attempts');
     const [search, setSearch] = useState(filters.search || '');
@@ -122,6 +127,35 @@ export default function TestsIndex({
     const [inspectingTicket, setInspectingTicket] = useState<Ticket | null>(null);
     const [ticketQuestions, setTicketQuestions] = useState<any[]>([]);
     const [loadingTicketQuestions, setLoadingTicketQuestions] = useState(false);
+
+    // Management Modals: Ticket
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+    const [ticketNumber, setTicketNumber] = useState('');
+    const [ticketTitle, setTicketTitle] = useState('');
+    const [ticketDesc, setTicketDesc] = useState('');
+
+    // Management Modals: Question
+    const [showQuestionModal, setShowQuestionModal] = useState(false);
+    const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+    const [questionText, setQuestionText] = useState('');
+    const [questionDesc, setQuestionDesc] = useState('');
+    const [questionImage, setQuestionImage] = useState('');
+    const [questionAnswers, setQuestionAnswers] = useState<Array<{ text: string; is_correct: boolean }>>([
+        { text: '', is_correct: true },
+        { text: '', is_correct: false },
+        { text: '', is_correct: false },
+        { text: '', is_correct: false },
+    ]);
+
+    // Management Modals: Sign
+    const [showSignModal, setShowSignModal] = useState(false);
+    const [editingSign, setEditingSign] = useState<any | null>(null);
+    const [signCategoryId, setSignCategoryId] = useState<number>(signCategories[0]?.id || 1);
+    const [signNumber, setSignNumber] = useState('');
+    const [signName, setSignName] = useState('');
+    const [signDesc, setSignDesc] = useState('');
+    const [signImage, setSignImage] = useState('');
 
     // Signs category filter
     const [selectedSignCategory, setSelectedSignCategory] = useState<number | 'lines' | 'all'>('all');
@@ -151,7 +185,7 @@ export default function TestsIndex({
         setInspectingTicket(ticket);
         setLoadingTicketQuestions(true);
         try {
-            const res = await fetch(`/api/prava24/ticket/${ticket.id}`);
+            const res = await fetch(`/api/tests/ticket/${ticket.id}`);
             const data = await res.json();
             if (data.success && data.ticket?.questions) {
                 setTicketQuestions(data.ticket.questions);
@@ -162,6 +196,217 @@ export default function TestsIndex({
             setTicketQuestions([]);
         } finally {
             setLoadingTicketQuestions(false);
+        }
+    };
+
+    // Ticket CRUD handlers
+    const openCreateTicketModal = () => {
+        setEditingTicket(null);
+        setTicketNumber(String(tickets.length + 1));
+        setTicketTitle(`Bilet ${tickets.length + 1}`);
+        setTicketDesc('');
+        setShowTicketModal(true);
+    };
+
+    const openEditTicketModal = (tkt: Ticket, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingTicket(tkt);
+        setTicketNumber(String(tkt.ticket_number));
+        setTicketTitle(tkt.title_uz);
+        setTicketDesc(tkt.description || '');
+        setShowTicketModal(true);
+    };
+
+    const handleTicketSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editingTicket) {
+            router.put(
+                `/admin/tests/tickets/${editingTicket.id}`,
+                {
+                    ticket_number: Number(ticketNumber),
+                    title_uz: ticketTitle,
+                    description: ticketDesc,
+                },
+                {
+                    onSuccess: () => {
+                        setShowTicketModal(false);
+                        toast.success(t('tests.ticket_updated', 'Bilet yangilandi'));
+                    },
+                    onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                }
+            );
+        } else {
+            router.post(
+                '/admin/tests/tickets',
+                {
+                    ticket_number: Number(ticketNumber),
+                    title_uz: ticketTitle,
+                    description: ticketDesc,
+                },
+                {
+                    onSuccess: () => {
+                        setShowTicketModal(false);
+                        toast.success(t('tests.ticket_created', 'Bilet yaratildi'));
+                    },
+                    onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                }
+            );
+        }
+    };
+
+    const handleDeleteTicket = (tkt: Ticket, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (window.confirm(t('tests.confirm_delete_ticket', 'Ushbu bilet va uning barcha savollari o\'chiriladi. Rozimisiz?'))) {
+            router.delete(`/admin/tests/tickets/${tkt.id}`, {
+                onSuccess: () => toast.success(t('tests.ticket_deleted', 'Bilet o\'chirildi')),
+            });
+        }
+    };
+
+    // Question CRUD handlers
+    const openCreateQuestionModal = () => {
+        setEditingQuestion(null);
+        setQuestionText('');
+        setQuestionDesc('');
+        setQuestionImage('');
+        setQuestionAnswers([
+            { text: '', is_correct: true },
+            { text: '', is_correct: false },
+            { text: '', is_correct: false },
+            { text: '', is_correct: false },
+        ]);
+        setShowQuestionModal(true);
+    };
+
+    const openEditQuestionModal = (q: any) => {
+        setEditingQuestion(q);
+        setQuestionText(q.question_uz);
+        setQuestionDesc(q.description_uz || '');
+        setQuestionImage(q.image_url || '');
+        if (q.answers && q.answers.length > 0) {
+            setQuestionAnswers(q.answers.map((a: any) => ({ text: a.answer_uz, is_correct: !!a.is_correct })));
+        } else {
+            setQuestionAnswers([
+                { text: '', is_correct: true },
+                { text: '', is_correct: false },
+                { text: '', is_correct: false },
+                { text: '', is_correct: false },
+            ]);
+        }
+        setShowQuestionModal(true);
+    };
+
+    const handleQuestionSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!inspectingTicket) return;
+
+        const hasCorrect = questionAnswers.some((a) => a.is_correct && a.text.trim());
+        if (!hasCorrect) {
+            toast.error(t('tests.error_no_correct_answer', 'Kamida bitta to\'g\'ri javob belgilanishi shart'));
+            return;
+        }
+
+        const validAnswers = questionAnswers.filter((a) => a.text.trim());
+        if (validAnswers.length < 2) {
+            toast.error(t('tests.error_min_answers', 'Kamida 2 ta javob varianti kiritilishi shart'));
+            return;
+        }
+
+        const payload = {
+            ticket_id: inspectingTicket.id,
+            question_uz: questionText,
+            description_uz: questionDesc,
+            image_url: questionImage || null,
+            answers: validAnswers,
+        };
+
+        if (editingQuestion) {
+            router.put(`/admin/tests/questions/${editingQuestion.id}`, payload, {
+                onSuccess: () => {
+                    setShowQuestionModal(false);
+                    openTicketDetails(inspectingTicket);
+                    toast.success(t('tests.question_updated', 'Savol yangilandi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        } else {
+            router.post('/admin/tests/questions', payload, {
+                onSuccess: () => {
+                    setShowQuestionModal(false);
+                    openTicketDetails(inspectingTicket);
+                    toast.success(t('tests.question_created', 'Savol qo\'shildi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleDeleteQuestion = (q: any) => {
+        if (window.confirm(t('tests.confirm_delete_question', 'Ushbu savolni rostdan ham o\'chirmoqchimisiz?'))) {
+            router.delete(`/admin/tests/questions/${q.id}`, {
+                onSuccess: () => {
+                    if (inspectingTicket) openTicketDetails(inspectingTicket);
+                    toast.success(t('tests.question_deleted', 'Savol o\'chirildi'));
+                },
+            });
+        }
+    };
+
+    // Sign CRUD handlers
+    const openCreateSignModal = () => {
+        setEditingSign(null);
+        setSignCategoryId(signCategories[0]?.id || 1);
+        setSignNumber('');
+        setSignName('');
+        setSignDesc('');
+        setSignImage('');
+        setShowSignModal(true);
+    };
+
+    const openEditSignModal = (sign: any) => {
+        setEditingSign(sign);
+        setSignCategoryId(sign.category_id);
+        setSignNumber(sign.sign_number);
+        setSignName(sign.name_uz);
+        setSignDesc(sign.description_uz || '');
+        setSignImage(sign.image_url || '');
+        setShowSignModal(true);
+    };
+
+    const handleSignSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = {
+            category_id: signCategoryId,
+            sign_number: signNumber,
+            name_uz: signName,
+            description_uz: signDesc,
+            image_url: signImage || null,
+        };
+
+        if (editingSign) {
+            router.put(`/admin/tests/signs/${editingSign.id}`, payload, {
+                onSuccess: () => {
+                    setShowSignModal(false);
+                    toast.success(t('tests.sign_updated', 'Yo\'l belgisi yangilandi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        } else {
+            router.post('/admin/tests/signs', payload, {
+                onSuccess: () => {
+                    setShowSignModal(false);
+                    toast.success(t('tests.sign_created', 'Yo\'l belgisi qo\'shildi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleDeleteSign = (sign: any) => {
+        if (window.confirm(t('tests.confirm_delete_sign', 'Ushbu yo\'l belgisini o\'chirmoqchimisiz?'))) {
+            router.delete(`/admin/tests/signs/${sign.id}`, {
+                onSuccess: () => toast.success(t('tests.sign_deleted', 'Yo\'l belgisi o\'chirildi')),
+            });
         }
     };
 
@@ -185,7 +430,7 @@ export default function TestsIndex({
 
     return (
         <div className="p-6 space-y-6">
-            <Head title={t('tests.page_title', 'Prava24 Testlar & Imtihonlar')} />
+            <Head title={t('tests.page_title', 'Testlar & Imtihonlar')} />
 
             {/* Header: Title and primary actions inline */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -194,13 +439,26 @@ export default function TestsIndex({
                         <HelpCircle className="w-6 h-6" />
                     </div>
                     <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {t('tests.page_title', 'Prava24 Testlar & Imtihonlar')}
+                        {t('tests.page_title', 'Testlar & Imtihonlar')}
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {activeTab === 'tickets' && (
+                        <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs">
+                            <Plus className="w-4 h-4 mr-1.5" />
+                            {t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                        </Button>
+                    )}
+                    {activeTab === 'signs' && (
+                        <Button onClick={openCreateSignModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs">
+                            <Plus className="w-4 h-4 mr-1.5" />
+                            {t('tests.add_sign', '+ Belgi Qo\'shish')}
+                        </Button>
+                    )}
                     <Button
                         variant="outline"
+                        size="sm"
                         onClick={() => window.open('/mini-app', '_blank')}
                         className="text-xs"
                     >
@@ -219,7 +477,7 @@ export default function TestsIndex({
                     <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
                         {stats.total_tickets}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">130 ta bilet</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{tickets.length} ta bilet</p>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
@@ -453,21 +711,37 @@ export default function TestsIndex({
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         {filteredTickets.map((tkt) => (
                             <div
                                 key={tkt.id}
                                 onClick={() => openTicketDetails(tkt)}
-                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 p-3 rounded-xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group"
+                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 p-3 rounded-xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group relative"
                             >
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-600">
                                         #{tkt.ticket_number}
                                     </span>
-                                    <Eye className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500" />
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={(e) => openEditTicketModal(tkt, e)}
+                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-blue-600"
+                                            title={t('common.edit', 'Tahrirlash')}
+                                        >
+                                            <Pencil className="w-3 h-3" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeleteTicket(tkt, e)}
+                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-red-600"
+                                            title={t('common.delete', 'O\'chirish')}
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                                    {tkt.questions_count || 10} {t('tests.questions_unit', 'savol')}
+                                <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                                    <span>{tkt.questions_count || 10} {t('tests.questions_unit', 'savol')}</span>
+                                    <Eye className="w-3 h-3 text-gray-400" />
                                 </div>
                             </div>
                         ))}
@@ -551,8 +825,25 @@ export default function TestsIndex({
                                   .map((sign) => (
                                       <div
                                           key={sign.id}
-                                          className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow"
+                                          className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow relative group"
                                       >
+                                          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <button
+                                                  onClick={() => openEditSignModal(sign)}
+                                                  className="p-1 bg-white/80 dark:bg-gray-700/80 rounded shadow hover:text-blue-600 text-gray-600"
+                                                  title={t('common.edit', 'Tahrirlash')}
+                                              >
+                                                  <Pencil className="w-3 h-3" />
+                                              </button>
+                                              <button
+                                                  onClick={() => handleDeleteSign(sign)}
+                                                  className="p-1 bg-white/80 dark:bg-gray-700/80 rounded shadow hover:text-red-600 text-gray-600"
+                                                  title={t('common.delete', 'O\'chirish')}
+                                              >
+                                                  <Trash2 className="w-3 h-3" />
+                                              </button>
+                                          </div>
+
                                           {sign.image_url ? (
                                               <img
                                                   src={sign.image_url}
@@ -581,10 +872,16 @@ export default function TestsIndex({
             <Dialog open={!!inspectingTicket} onOpenChange={(open) => !open && setInspectingTicket(null)}>
                 <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-base">
-                            <BookOpen className="w-5 h-5 text-blue-600" />
-                            {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`} ({t('tests.ticket_modal_title', 'Savollar va Javoblar')})
-                        </DialogTitle>
+                        <div className="flex items-center justify-between pr-6">
+                            <DialogTitle className="flex items-center gap-2 text-base">
+                                <BookOpen className="w-5 h-5 text-blue-600" />
+                                {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`}
+                            </DialogTitle>
+                            <Button size="sm" onClick={openCreateQuestionModal} className="text-xs">
+                                <Plus className="w-3.5 h-3.5 mr-1" />
+                                {t('tests.add_question', '+ Savol Qo\'shish')}
+                            </Button>
+                        </div>
                     </DialogHeader>
 
                     {loadingTicketQuestions ? (
@@ -600,7 +897,7 @@ export default function TestsIndex({
                             {ticketQuestions.map((q, idx) => (
                                 <div
                                     key={q.id}
-                                    className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-850 space-y-3"
+                                    className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-850 space-y-3 relative group"
                                 >
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex items-center gap-2">
@@ -610,6 +907,23 @@ export default function TestsIndex({
                                             <h4 className="font-semibold text-xs text-gray-900 dark:text-white">
                                                 {q.question_uz}
                                             </h4>
+                                        </div>
+
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <button
+                                                onClick={() => openEditQuestionModal(q)}
+                                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-blue-600"
+                                                title={t('common.edit', 'Tahrirlash')}
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteQuestion(q)}
+                                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-red-600"
+                                                title={t('common.delete', 'O\'chirish')}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
                                         </div>
                                     </div>
 
@@ -662,6 +976,223 @@ export default function TestsIndex({
                             ))}
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Create/Edit Ticket Modal */}
+            <Dialog open={showTicketModal} onOpenChange={setShowTicketModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingTicket ? t('tests.edit_ticket', 'Biletni Tahrirlash') : t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleTicketSubmit} className="space-y-3.5 pt-2">
+                        <div>
+                            <Label className="text-xs">{t('tests.ticket_num_label', 'Bilet Raqami')}</Label>
+                            <Input
+                                type="number"
+                                required
+                                value={ticketNumber}
+                                onChange={(e) => setTicketNumber(e.target.value)}
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('tests.ticket_title_label', 'Bilet Nomi')}</Label>
+                            <Input
+                                required
+                                value={ticketTitle}
+                                onChange={(e) => setTicketTitle(e.target.value)}
+                                placeholder="Bilet 1..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('common.description', 'Tavsif')}</Label>
+                            <Input
+                                value={ticketDesc}
+                                onChange={(e) => setTicketDesc(e.target.value)}
+                                placeholder="Qo'shimcha izoh..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowTicketModal(false)}>
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button type="submit" size="sm">
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create/Edit Question Modal */}
+            <Dialog open={showQuestionModal} onOpenChange={setShowQuestionModal}>
+                <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingQuestion ? t('tests.edit_question', 'Savolni Tahrirlash') : t('tests.add_question', '+ Savol Qo\'shish')}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleQuestionSubmit} className="space-y-3.5 pt-2">
+                        <div>
+                            <Label className="text-xs">{t('tests.question_text_label', 'Savol Matni')}</Label>
+                            <textarea
+                                required
+                                rows={3}
+                                value={questionText}
+                                onChange={(e) => setQuestionText(e.target.value)}
+                                placeholder="Savol matnini kiriting..."
+                                className="w-full mt-1 p-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">{t('tests.image_file_or_url', 'Rasm Havolasi (URL)')}</Label>
+                            <Input
+                                value={questionImage}
+                                onChange={(e) => setQuestionImage(e.target.value)}
+                                placeholder="/storage/questions/... yoki https://..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs font-bold block mb-1.5">
+                                {t('tests.answers_options_label', 'Javob Variantlari (To\'g\'risini tanlang)')}
+                            </Label>
+                            <div className="space-y-2">
+                                {questionAnswers.map((ans, aIdx) => (
+                                    <div key={aIdx} className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="correct_answer_radio"
+                                            checked={ans.is_correct}
+                                            onChange={() => {
+                                                const updated = questionAnswers.map((item, i) => ({
+                                                    ...item,
+                                                    is_correct: i === aIdx,
+                                                }));
+                                                setQuestionAnswers(updated);
+                                            }}
+                                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0 cursor-pointer"
+                                            title={t('tests.correct_label', 'To\'g\'ri')}
+                                        />
+                                        <span className="font-mono text-xs font-bold text-gray-400 w-4">
+                                            {String.fromCharCode(65 + aIdx)}.
+                                        </span>
+                                        <Input
+                                            value={ans.text}
+                                            onChange={(e) => {
+                                                const updated = [...questionAnswers];
+                                                updated[aIdx].text = e.target.value;
+                                                setQuestionAnswers(updated);
+                                            }}
+                                            placeholder={`Variant ${aIdx + 1}...`}
+                                            className="text-xs"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">{t('tests.explanation', 'Qoidalar bo\'yicha izoh (YHQ moddasi)')}</Label>
+                            <textarea
+                                rows={2}
+                                value={questionDesc}
+                                onChange={(e) => setQuestionDesc(e.target.value)}
+                                placeholder={t('tests.explanation_placeholder', 'Yo\'l harakati qoidasi bo\'yicha tushuntirish...')}
+                                className="w-full mt-1 p-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowQuestionModal(false)}>
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button type="submit" size="sm">
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create/Edit Sign Modal */}
+            <Dialog open={showSignModal} onOpenChange={setShowSignModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingSign ? t('tests.edit_sign', 'Belgini Tahrirlash') : t('tests.add_sign', '+ Belgi Qo\'shish')}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSignSubmit} className="space-y-3.5 pt-2">
+                        <div>
+                            <Label className="text-xs">{t('tests.sign_category', 'Toifa')}</Label>
+                            <select
+                                value={signCategoryId}
+                                onChange={(e) => setSignCategoryId(Number(e.target.value))}
+                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            >
+                                {signCategories.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name_uz}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('tests.sign_number', 'Belgi Raqami')}</Label>
+                            <Input
+                                required
+                                value={signNumber}
+                                onChange={(e) => setSignNumber(e.target.value)}
+                                placeholder="1.1, 3.27..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('tests.sign_name', 'Belgi Nomi')}</Label>
+                            <Input
+                                required
+                                value={signName}
+                                onChange={(e) => setSignName(e.target.value)}
+                                placeholder="To'xtash taqiqlanadi..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('tests.image_file_or_url', 'Rasm Havolasi (URL)')}</Label>
+                            <Input
+                                value={signImage}
+                                onChange={(e) => setSignImage(e.target.value)}
+                                placeholder="/storage/signs/..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('common.description', 'Tavsif')}</Label>
+                            <textarea
+                                rows={2}
+                                value={signDesc}
+                                onChange={(e) => setSignDesc(e.target.value)}
+                                placeholder="Belgi qoidasi va talabi..."
+                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowSignModal(false)}>
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button type="submit" size="sm">
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>
