@@ -18,6 +18,8 @@ import {
     Phone,
     Car,
 } from 'lucide-react';
+import { Prava24Quiz } from '@/components/prava24-quiz';
+
 
 interface StudentProps {
     student: {
@@ -91,7 +93,7 @@ export default function MiniApp({
     attendances = [],
 }: StudentProps) {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'lms' | 'driving'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'lms' | 'driving' | 'tests'>('overview');
     const [scanStatus, setScanStatus] = useState<{ loading: boolean; message?: string; success?: boolean } | null>(null);
     const [manualToken, setManualToken] = useState('');
     const [showManualModal, setShowManualModal] = useState(false);
@@ -275,6 +277,16 @@ export default function MiniApp({
                     }`}
                 >
                     {t('tma.tab_driving', 'Vajdeniya')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('tests')}
+                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                        activeTab === 'tests'
+                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                >
+                    {t('tma.tab_tests', 'Testlar')}
                 </button>
             </div>
 
@@ -485,6 +497,13 @@ export default function MiniApp({
                             </div>
                         ))
                     )}
+                </div>
+            )}
+
+            {/* Tab: Tests (Prava24) */}
+            {activeTab === 'tests' && (
+                <div className="space-y-4">
+                    <Prava24Quiz studentId={student?.id} />
                 </div>
             )}
 

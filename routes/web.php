@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\MiniAppController;
+use App\Http\Controllers\Student\Prava24Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -137,6 +138,14 @@ Route::get('admin/groups/download-template', [GroupController::class, 'downloadT
 Route::get('/mini-app', [MiniAppController::class, 'index'])->name('student.mini-app');
 Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->name('attendance.scan-qr');
 Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
+
+// Prava24 Tests & Mock Exam Endpoints
+Route::get('/api/prava24/tickets', [Prava24Controller::class, 'getTickets'])->name('prava24.tickets');
+Route::get('/api/prava24/ticket/{ticket}', [Prava24Controller::class, 'getTicketQuestions'])->name('prava24.ticket.questions');
+Route::get('/api/prava24/exam', [Prava24Controller::class, 'getMockExam'])->name('prava24.exam');
+Route::post('/api/prava24/submit', [Prava24Controller::class, 'submitAttempt'])->name('prava24.submit');
+Route::get('/api/prava24/signs', [Prava24Controller::class, 'getSigns'])->name('prava24.signs');
+Route::get('/api/prava24/stats', [Prava24Controller::class, 'getStudentStats'])->name('prava24.stats');
 
 Route::middleware(['auth.telegram'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
