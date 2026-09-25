@@ -36,13 +36,12 @@
     "finance": "Finance & Registers",
     "payroll": "Payroll & Salaries",
     "attendance": "Attendance (QR)",
-    "prava24": "Tests & Traffic Signs",
     "vehicles": "Fleet & Vehicles",
     "leads": "CRM Leads",
     "contract_types": "Tariffs",
     "salaries": "Payroll",
     "certificates": "Certificates",
-    "tests": "Prava24 Tests",
+    "tests": "Tests & Exams",
     "branches": "Branches"
   },
   "common": {
@@ -354,7 +353,7 @@
     "submit_scan": "Submit",
     "guest_student": "Guest Student"
   },
-  "prava24": {
+  "quiz": {
     "tab_exam": "Exam",
     "tab_tickets": "Tickets",
     "tab_signs": "Signs",
@@ -659,7 +658,26 @@
     "download_pdf": "PDF Material"
   },
   "tests": {
-    "page_title": "Prava24 Tests & Exams",
+    "page_title": "Tests & Exams",
+    "add_ticket": "+ Add Ticket",
+    "edit_ticket": "Edit Ticket",
+    "delete_ticket": "Delete Ticket",
+    "confirm_delete_ticket": "This ticket and all its questions will be deleted. Are you sure?",
+    "add_question": "+ Add Question",
+    "edit_question": "Edit Question",
+    "delete_question": "Delete Question",
+    "confirm_delete_question": "Are you sure you want to delete this question?",
+    "add_sign": "+ Add Sign",
+    "edit_sign": "Edit Sign",
+    "delete_sign": "Delete Sign",
+    "confirm_delete_sign": "Are you sure you want to delete this traffic sign?",
+    "ticket_num_label": "Ticket Number",
+    "ticket_title_label": "Ticket Title",
+    "question_text_label": "Question Text",
+    "answers_options_label": "Answer Options",
+    "correct_label": "Correct",
+    "explanation_placeholder": "Traffic rule explanation...",
+    "image_file_or_url": "Image (File or URL)",
     "preview_mini_app": "View in Mini App",
     "stats_tickets": "Total Tickets",
     "stats_questions": "Total Questions",

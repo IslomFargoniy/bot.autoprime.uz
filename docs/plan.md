@@ -66,7 +66,7 @@ Tizim uchta asosiy interfeysdan iborat:
    └── Dars yakunida o'quvchi instruktorga baho (Review: 1-5 yulduz + teglar) qo'yadi.
 
 7. TEST VA ICHKI IMTIHON (LMS & Mock Exam — 4 Tilda)
-   └── Telegram Mini App orqali Prava24 1190+ bazasida 4 tilda mashq qiladi va ichki imtihon topshiradi.
+   └── Telegram Mini App orqali 1190+ bazasida 4 tilda mashq qiladi va ichki imtihon topshiradi.
 
 8. BITIRISH & GUVOHNOMA/SERTIFIKAT (Certificates)
    └── 4 ta shart tizim tomonidan qat'iy va avtomatik tekshiriladi:
@@ -121,7 +121,7 @@ O'quvchi Telegramdagi *"📱 Shaxsiy Kabinet"* yoki *"🚗 O'qishni boshlash"* t
 * **Darslar Jadvali**: Guruh dars kunlari, vaqtlari, xonasi va o'qituvchisi.
 * **📷 Dinamik QR Davomat Skaneri**: Dars paytida ekrandagi QR kodni bitta tugma bilan Mini App kamerasi orqali skanerlash (`Telegram.WebApp.showScanQrPopup()`).
 * **LMS Video Darslar & PDF Materiallar**: Guruh toifasiga mos mavzularni ko'rish, videolarni tomosha qilish, dars slaydlarini yuklab olish.
-* **Prava24 Testlar**: 1190+ rasmli testlar bilan biletlar bo'yicha mashq qilish va nazorat imtihonini topshirish.
+* **Testlar**: 1190+ rasmli testlar bilan biletlar bo'yicha mashq qilish va nazorat imtihonini topshirish.
 
 ---
 
@@ -173,9 +173,9 @@ Admin cheksiz shartnoma tariflarini yaratadi va boshqaradi:
 
 ---
 
-### 📚 7. LMS Testlar & Prava24 Imtihon Dvigateli (4 Tilda)
+### 📚 7. LMS Testlar & Imtihon Dvigateli (4 Tilda)
 * 1190+ rasmli savollar va biletlar bazasi 4 tilda (`uz`, `ru`, `krill`, `en`).
-* Prava24 ExamInterface: 25 daqiqa taymer, swipe va klaviatura boshqaruvi.
+* ExamInterface: 25 daqiqa taymer, swipe va klaviatura boshqaruvi.
 * Yo'l belgilari (`sign_categories`, `signs`) va yo'l chiziqlari (`road_lines`) — 4 tilda.
 * Ichki nazorat imtihoni: 20 savoldan kamida 18 ta to'g'ri javob = o'tdi (`is_passed = true`).
 
@@ -368,7 +368,7 @@ Tizimda **Spatie Multi-Role (`model_has_roles`)** va **To'g'ridan-to'g'ri Ruxsat
 | `autodromes.manage` | *Action* | Avtodromlarni boshqarish |
 | `reviews.view` | *Action* | Instruktor baholari va sharhlar |
 
-#### 📚 LMS & Prava24 Testlar
+#### 📚 LMS & Testlar
 | Permission | Turi | Vazifasi |
 |---|---|---|
 | `lms.view` | *Sidebar* | Testlar va imtihonlar bo'limi |

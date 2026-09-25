@@ -71,11 +71,11 @@ interface RoadLine {
     color?: string;
 }
 
-interface Prava24QuizProps {
+interface TestQuizProps {
     studentId?: number;
 }
 
-export function Prava24Quiz({ studentId }: Prava24QuizProps) {
+export function TestQuiz({ studentId }: TestQuizProps) {
     const { t, i18n } = useTranslation();
     const currentLang = i18n.language || 'uz';
 
@@ -161,7 +161,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
 
     const fetchTickets = async () => {
         try {
-            const res = await fetch('/api/prava24/tickets');
+            const res = await fetch('/api/tests/tickets');
             const data = await res.json();
             if (data.success) {
                 setTickets(data.tickets);
@@ -174,7 +174,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
     const fetchSigns = async () => {
         if (signCategories.length > 0) return;
         try {
-            const res = await fetch('/api/prava24/signs');
+            const res = await fetch('/api/tests/signs');
             const data = await res.json();
             if (data.success) {
                 setSignCategories(data.categories);
@@ -190,7 +190,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch(`/api/prava24/stats${studentId ? `?student_id=${studentId}` : ''}`);
+            const res = await fetch(`/api/tests/stats${studentId ? `?student_id=${studentId}` : ''}`);
             const data = await res.json();
             if (data.success) {
                 setStats(data);
@@ -212,7 +212,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
         setTimeLeft(25 * 60);
 
         try {
-            const res = await fetch('/api/prava24/exam');
+            const res = await fetch('/api/tests/exam');
             const data = await res.json();
             if (data.success && data.questions.length > 0) {
                 setQuestions(data.questions);
@@ -237,7 +237,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
         setTimeLeft(15 * 60);
 
         try {
-            const res = await fetch(`/api/prava24/ticket/${ticket.id}`);
+            const res = await fetch(`/api/tests/ticket/${ticket.id}`);
             const data = await res.json();
             if (data.success && data.questions.length > 0) {
                 setQuestions(data.questions);
@@ -285,7 +285,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
         };
 
         try {
-            const res = await fetch('/api/prava24/submit', {
+            const res = await fetch('/api/tests/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -322,7 +322,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <button
                         onClick={() => {
-                            if (window.confirm(t('prava24.exit_confirm', 'Haqiqatan ham testdan chiqmoqchimisiz?'))) {
+                            if (window.confirm(t('quiz.exit_confirm', 'Haqiqatan ham testdan chiqmoqchimisiz?'))) {
                                 setActiveQuizMode(null);
                                 setIsTimerRunning(false);
                             }
@@ -336,11 +336,11 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                     <div className="text-center">
                         <span className="text-xs font-bold text-gray-900 dark:text-white block">
                             {activeQuizMode === 'exam'
-                                ? t('prava24.mock_exam_title', 'Ichki Nazorat Imtihoni')
+                                ? t('quiz.mock_exam_title', 'Ichki Nazorat Imtihoni')
                                 : `${selectedTicket?.title_uz || 'Bilet'} (${currentIndex + 1}/${questions.length})`}
                         </span>
                         <span className="text-[10px] text-gray-400">
-                            {t('prava24.passing_rule', 'O\'tish: kamida 90%')}
+                            {t('quiz.passing_rule', 'O\'tish: kamida 90%')}
                         </span>
                     </div>
 
@@ -401,7 +401,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                         {/* Question Text */}
                         <div className="space-y-1">
                             <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                                {t('prava24.question_label', 'Savol')} #{currentIndex + 1}
+                                {t('quiz.question_label', 'Savol')} #{currentIndex + 1}
                             </span>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
                                 {getLocalized(currentQ, 'question')}
@@ -450,7 +450,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 rounded-xl text-xs space-y-1">
                                 <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-300">
                                     <AlertCircle className="w-4 h-4 shrink-0" />
-                                    <span>{t('prava24.explanation', 'Qoidalar bo\'yicha izoh')}:</span>
+                                    <span>{t('quiz.explanation', 'Qoidalar bo\'yicha izoh')}:</span>
                                 </div>
                                 <p className="text-amber-900/80 dark:text-amber-200/80 leading-relaxed pl-5">
                                     {getLocalized(currentQ, 'description')}
@@ -484,7 +484,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                         className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center gap-1.5 shadow-sm"
                                     >
                                         <Check className="w-4 h-4" />
-                                        {t('prava24.submit_test', 'Imtihonni Yakunlash')}
+                                        {t('quiz.submit_test', 'Imtihonni Yakunlash')}
                                     </button>
                                 )
                             )}
@@ -505,32 +505,32 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             <div className="space-y-1">
                                 <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">
                                     {result.is_passed
-                                        ? t('prava24.congrats_passed', 'Tabriklaymiz, Imtihondan O\'tdingiz!')
-                                        : t('prava24.failed_title', 'Afsuski, O\'ta Olmadingiz')}
+                                        ? t('quiz.congrats_passed', 'Tabriklaymiz, Imtihondan O\'tdingiz!')
+                                        : t('quiz.failed_title', 'Afsuski, O\'ta Olmadingiz')}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {result.is_passed
-                                        ? t('prava24.cert_criteria_met', 'Bitiruv Guvohnomasi uchun ichki test sinovi muvaffaqiyatli topshirildi!')
-                                        : t('prava24.retry_prompt', 'Kamida 18 ta to\'g\'ri javob kerak. Yana bir bor mashq qilib ko\'ring.')}
+                                        ? t('quiz.cert_criteria_met', 'Bitiruv Guvohnomasi uchun ichki test sinovi muvaffaqiyatli topshirildi!')
+                                        : t('quiz.retry_prompt', 'Kamida 18 ta to\'g\'ri javob kerak. Yana bir bor mashq qilib ko\'ring.')}
                                 </p>
                             </div>
 
                             {/* Score Card */}
                             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4 grid grid-cols-3 gap-2 text-xs">
                                 <div>
-                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('prava24.score', 'Natija')}</span>
+                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('quiz.score', 'Natija')}</span>
                                     <span className={`text-base font-extrabold mt-0.5 block ${result.is_passed ? 'text-emerald-600' : 'text-red-500'}`}>
                                         {result.score_percentage}%
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('prava24.correct', 'To\'g\'ri')}</span>
+                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('quiz.correct', 'To\'g\'ri')}</span>
                                     <span className="text-base font-extrabold text-emerald-600 mt-0.5 block">
                                         {result.correct_answers}
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('prava24.wrong', 'Xato')}</span>
+                                    <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('quiz.wrong', 'Xato')}</span>
                                     <span className="text-base font-extrabold text-red-500 mt-0.5 block">
                                         {result.wrong_answers}
                                     </span>
@@ -547,7 +547,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                     className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-1.5 shadow-sm"
                                 >
                                     <RotateCcw className="w-4 h-4" />
-                                    {t('prava24.restart_quiz', 'Qaytadan topshirish')}
+                                    {t('quiz.restart_quiz', 'Qaytadan topshirish')}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -556,7 +556,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                     }}
                                     className="w-full py-2 px-4 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
-                                    {t('prava24.back_to_menu', 'Bosh menyuga qaytish')}
+                                    {t('quiz.back_to_menu', 'Bosh menyuga qaytish')}
                                 </button>
                             </div>
                         </div>
@@ -579,7 +579,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
-                    🎯 {t('prava24.tab_exam', 'Imtihon')}
+                    🎯 {t('quiz.tab_exam', 'Imtihon')}
                 </button>
                 <button
                     onClick={() => setSubTab('tickets')}
@@ -589,7 +589,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
-                    📑 {t('prava24.tab_tickets', 'Biletlar')}
+                    📑 {t('quiz.tab_tickets', 'Biletlar')}
                 </button>
                 <button
                     onClick={() => {
@@ -602,7 +602,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
-                    🚸 {t('prava24.tab_signs', 'Belgilar')}
+                    🚸 {t('quiz.tab_signs', 'Belgilar')}
                 </button>
                 <button
                     onClick={() => {
@@ -615,7 +615,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
-                    📊 {t('prava24.tab_stats', 'Tarix')}
+                    📊 {t('quiz.tab_stats', 'Tarix')}
                 </button>
             </div>
 
@@ -627,13 +627,13 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                         <div className="flex items-start justify-between">
                             <div className="space-y-1">
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-xs">
-                                    PRAVA24 1190+ TEST
+                                    NAZARIY TESTLAR
                                 </span>
                                 <h2 className="text-lg font-extrabold leading-tight">
-                                    {t('prava24.mock_exam_card_title', 'Ichki Nazorat Imtihoni')}
+                                    {t('quiz.mock_exam_card_title', 'Ichki Nazorat Imtihoni')}
                                 </h2>
                                 <p className="text-xs text-blue-100 max-w-xs leading-relaxed">
-                                    {t('prava24.mock_exam_desc', '20 ta savol, 25 daqiqa vaqt. Bitiruv Guvohnomasi olish uchun kamida 18 ta to\'g\'ri javob talab etiladi.')}
+                                    {t('quiz.mock_exam_desc', '20 ta savol, 25 daqiqa vaqt. Bitiruv Guvohnomasi olish uchun kamida 18 ta to\'g\'ri javob talab etiladi.')}
                                 </p>
                             </div>
                             <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xs flex items-center justify-center">
@@ -643,15 +643,15 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
 
                         {/* Certificate status pill */}
                         <div className="p-3 bg-black/20 rounded-2xl backdrop-blur-xs flex items-center justify-between text-xs">
-                            <span className="text-blue-100">{t('prava24.cert_status', 'Guvohnoma imtihon holati')}:</span>
+                            <span className="text-blue-100">{t('quiz.cert_status', 'Guvohnoma imtihon holati')}:</span>
                             <span className={`px-2 py-0.5 rounded-lg font-bold text-[11px] ${
                                 stats?.has_passed_exam
                                     ? 'bg-emerald-400 text-emerald-950'
                                     : 'bg-yellow-400 text-yellow-950'
                             }`}>
                                 {stats?.has_passed_exam
-                                    ? t('prava24.status_passed', 'Topshirilgan ✅')
-                                    : t('prava24.status_pending', 'Topshirilmagan')}
+                                    ? t('quiz.status_passed', 'Topshirilgan ✅')
+                                    : t('quiz.status_pending', 'Topshirilmagan')}
                             </span>
                         </div>
 
@@ -661,19 +661,19 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             className="w-full py-3.5 px-4 bg-white text-blue-700 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-md hover:bg-blue-50 active:scale-98 transition-all text-sm"
                         >
                             <Play className="w-4 h-4 fill-current" />
-                            {quizLoading ? t('common.loading', 'Yuklanmoqda...') : t('prava24.start_exam_btn', 'Imtihonni Boshlash')}
+                            {quizLoading ? t('common.loading', 'Yuklanmoqda...') : t('quiz.start_exam_btn', 'Imtihonni Boshlash')}
                         </button>
                     </div>
 
                     {/* Quick Stats Grid */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                            <span className="text-gray-400 text-[10px] uppercase font-bold block">{t('prava24.total_tickets', 'Jami Biletlar')}</span>
+                            <span className="text-gray-400 text-[10px] uppercase font-bold block">{t('quiz.total_tickets', 'Jami Biletlar')}</span>
                             <span className="text-xl font-extrabold text-gray-900 dark:text-white mt-1 block">130 ta</span>
                             <span className="text-[10px] text-gray-400 mt-0.5 block">1300 ta rasmli savol</span>
                         </div>
                         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                            <span className="text-gray-400 text-[10px] uppercase font-bold block">{t('prava24.my_attempts', 'Urinishlarim')}</span>
+                            <span className="text-gray-400 text-[10px] uppercase font-bold block">{t('quiz.my_attempts', 'Urinishlarim')}</span>
                             <span className="text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1 block">
                                 {stats?.total_attempts || 0} ta
                             </span>
@@ -695,7 +695,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             type="text"
                             value={ticketSearch}
                             onChange={(e) => setTicketSearch(e.target.value)}
-                            placeholder={t('prava24.search_ticket', 'Bilet raqami (masalan: 12)...')}
+                            placeholder={t('quiz.search_ticket', 'Bilet raqami (masalan: 12)...')}
                             className="w-full pl-9 pr-4 py-2.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -753,7 +753,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700'
                             }`}
                         >
-                            {t('prava24.road_lines_tab', 'Yo\'l chiziqlari (22 ta)')}
+                            {t('quiz.road_lines_tab', 'Yo\'l chiziqlari (22 ta)')}
                         </button>
                     </div>
 
@@ -852,12 +852,12 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                 <div className="space-y-3">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 space-y-2">
                         <h3 className="text-xs font-bold text-gray-900 dark:text-white">
-                            {t('prava24.exam_status_summary', 'Imtihon Natijalari')}
+                            {t('quiz.exam_status_summary', 'Imtihon Natijalari')}
                         </h3>
                         <p className="text-[11px] text-gray-500 leading-relaxed">
                             {stats?.has_passed_exam
-                                ? t('prava24.summary_passed_msg', '🎉 Siz ichki imtihonni muvaffaqiyatli topshirgansiz. Bitiruv talablari bo\'yicha ushbu band qondirildi.')
-                                : t('prava24.summary_not_passed_msg', '⚠️ Bitiruv Guvohnomasi olish uchun kamida bitta Ichki Nazorat Imtihonidan (20 tadan 18 ta) o\'tishingiz kerak.')}
+                                ? t('quiz.summary_passed_msg', '🎉 Siz ichki imtihonni muvaffaqiyatli topshirgansiz. Bitiruv talablari bo\'yicha ushbu band qondirildi.')
+                                : t('quiz.summary_not_passed_msg', '⚠️ Bitiruv Guvohnomasi olish uchun kamida bitta Ichki Nazorat Imtihonidan (20 tadan 18 ta) o\'tishingiz kerak.')}
                         </p>
                     </div>
 
@@ -872,7 +872,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-gray-900 dark:text-white">
                                                 {att.attempt_type === 'random_mock'
-                                                    ? t('prava24.mock_exam_title', 'Ichki Imtihon')
+                                                    ? t('quiz.mock_exam_title', 'Ichki Imtihon')
                                                     : (att.ticket?.title_uz || 'Bilet')}
                                             </span>
                                             <span
@@ -882,7 +882,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                                                         : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
                                                 }`}
                                             >
-                                                {att.is_passed ? t('prava24.passed', 'O\'tdi') : t('prava24.failed', 'O\'tmadi')}
+                                                {att.is_passed ? t('quiz.passed', 'O\'tdi') : t('quiz.failed', 'O\'tmadi')}
                                             </span>
                                         </div>
                                         <span className="text-[10px] text-gray-400 block">
@@ -901,7 +901,7 @@ export function Prava24Quiz({ studentId }: Prava24QuizProps) {
                             ))
                         ) : (
                             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center text-xs text-gray-400 border border-gray-100 dark:border-gray-700">
-                                {t('prava24.no_attempts_yet', 'Hali imtihon topshirilmagan.')}
+                                {t('quiz.no_attempts_yet', 'Hali imtihon topshirilmagan.')}
                             </div>
                         )}
                     </div>

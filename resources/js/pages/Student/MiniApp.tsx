@@ -18,7 +18,7 @@ import {
     Phone,
     Car,
 } from 'lucide-react';
-import { Prava24Quiz } from '@/components/prava24-quiz';
+import { TestQuiz } from '@/components/test-quiz';
 
 
 interface StudentProps {
@@ -500,10 +500,10 @@ export default function MiniApp({
                 </div>
             )}
 
-            {/* Tab: Tests (Prava24) */}
+            {/* Tab: Tests */}
             {activeTab === 'tests' && (
                 <div className="space-y-4">
-                    <Prava24Quiz studentId={student?.id} />
+                    <TestQuiz studentId={student?.id} />
                 </div>
             )}
 

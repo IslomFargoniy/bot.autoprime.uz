@@ -110,7 +110,7 @@ export function AppSidebar() {
                     icon: CheckSquare,
                 },
                 {
-                    title: t('sidebar.tests', 'Prava24 Testlar'),
+                    title: t('sidebar.tests', 'Testlar & Imtihonlar'),
                     href: '/admin/tests',
                     icon: HelpCircle,
                 },

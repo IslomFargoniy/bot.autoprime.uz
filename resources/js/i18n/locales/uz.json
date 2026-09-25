@@ -36,13 +36,12 @@
     "finance": "Moliya & Kassa",
     "payroll": "Oylik maoshlar",
     "attendance": "Davomat (QR)",
-    "prava24": "Testlar & Belgilar",
     "vehicles": "Avtopark",
     "leads": "CRM Lidlar",
     "contract_types": "Tariflar",
     "salaries": "Xodimlar Oyligi",
     "certificates": "Guvohnomalar",
-    "tests": "Prava24 Testlar",
+    "tests": "Testlar & Imtihonlar",
     "branches": "Filiallar"
   },
   "common": {
@@ -357,7 +356,7 @@
     "submit_scan": "Yuborish",
     "guest_student": "Mehmon O'quvchi"
   },
-  "prava24": {
+  "quiz": {
     "tab_exam": "Imtihon",
     "tab_tickets": "Biletlar",
     "tab_signs": "Belgilar",
@@ -662,7 +661,26 @@
     "download_pdf": "PDF Material"
   },
   "tests": {
-    "page_title": "Prava24 Testlar & Imtihonlar",
+    "page_title": "Testlar & Imtihonlar",
+    "add_ticket": "+ Bilet Qo'shish",
+    "edit_ticket": "Biletni Tahrirlash",
+    "delete_ticket": "Biletni O'chirish",
+    "confirm_delete_ticket": "Ushbu bilet va uning barcha savollari o'chiriladi. Rozimisiz?",
+    "add_question": "+ Savol Qo'shish",
+    "edit_question": "Savolni Tahrirlash",
+    "delete_question": "Savolni O'chirish",
+    "confirm_delete_question": "Ushbu savolni rostdan ham o'chirmoqchimisiz?",
+    "add_sign": "+ Belgi Qo'shish",
+    "edit_sign": "Belgini Tahrirlash",
+    "delete_sign": "Belgini O'chirish",
+    "confirm_delete_sign": "Ushbu yo'l belgisini o'chirmoqchimisiz?",
+    "ticket_num_label": "Bilet Raqami",
+    "ticket_title_label": "Bilet Nomi",
+    "question_text_label": "Savol Matni",
+    "answers_options_label": "Javob Variantlari",
+    "correct_label": "To'g'ri",
+    "explanation_placeholder": "Yo'l harakati qoidasi bo'yicha tushuntirish...",
+    "image_file_or_url": "Rasm (Fayl yoki Havola)",
     "preview_mini_app": "O'quvchi Mini Appida Ko'rish",
     "stats_tickets": "Jami Biletlar",
     "stats_questions": "Jami Savollar",
