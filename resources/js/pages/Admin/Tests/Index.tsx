@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import {
     BookOpen,
     CheckCircle2,
-    Clock,
     ExternalLink,
     HelpCircle,
     RotateCcw,
@@ -14,7 +13,9 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Check,
+    ImageIcon,
+    Layers,
+    FolderPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
+    DialogDescription,
 } from '@/components/ui/dialog';
 
 interface Attempt {
@@ -60,6 +62,7 @@ interface Ticket {
     title_uz: string;
     description?: string;
     questions_count?: number;
+    is_active?: boolean;
 }
 
 interface SignCategory {
@@ -67,6 +70,7 @@ interface SignCategory {
     name_uz: string;
     name_ru?: string;
     slug: string;
+    order: number;
     signs: Array<{
         id: number;
         category_id: number;
@@ -79,7 +83,7 @@ interface SignCategory {
 
 interface RoadLine {
     id: number;
-    number: string;
+    line_number: string;
     name_uz: string;
     description_uz?: string;
     image_url?: string;
@@ -116,7 +120,7 @@ export default function TestsIndex({
     roadLines,
     filters,
 }: PageProps) {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const [activeTab, setActiveTab] = useState<'attempts' | 'tickets' | 'signs'>('attempts');
     const [search, setSearch] = useState(filters.search || '');
@@ -141,6 +145,8 @@ export default function TestsIndex({
     const [questionText, setQuestionText] = useState('');
     const [questionDesc, setQuestionDesc] = useState('');
     const [questionImage, setQuestionImage] = useState('');
+    const [questionFile, setQuestionFile] = useState<File | null>(null);
+    const [questionPreview, setQuestionPreview] = useState<string | null>(null);
     const [questionAnswers, setQuestionAnswers] = useState<Array<{ text: string; is_correct: boolean }>>([
         { text: '', is_correct: true },
         { text: '', is_correct: false },
@@ -156,10 +162,31 @@ export default function TestsIndex({
     const [signName, setSignName] = useState('');
     const [signDesc, setSignDesc] = useState('');
     const [signImage, setSignImage] = useState('');
+    const [signFile, setSignFile] = useState<File | null>(null);
+    const [signPreview, setSignPreview] = useState<string | null>(null);
+
+    // Management Modals: Road Line
+    const [showRoadLineModal, setShowRoadLineModal] = useState(false);
+    const [editingRoadLine, setEditingRoadLine] = useState<RoadLine | null>(null);
+    const [roadLineNumber, setRoadLineNumber] = useState('');
+    const [roadLineName, setRoadLineName] = useState('');
+    const [roadLineDesc, setRoadLineDesc] = useState('');
+    const [roadLineImage, setRoadLineImage] = useState('');
+    const [roadLineFile, setRoadLineFile] = useState<File | null>(null);
+    const [roadLinePreview, setRoadLinePreview] = useState<string | null>(null);
+
+    // Management Modals: Category
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<SignCategory | null>(null);
+    const [categoryName, setCategoryName] = useState('');
 
     // Signs category filter
     const [selectedSignCategory, setSelectedSignCategory] = useState<number | 'lines' | 'all'>('all');
     const [ticketSearch, setTicketSearch] = useState('');
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const signFileInputRef = useRef<HTMLInputElement>(null);
+    const lineFileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFilterSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -199,7 +226,16 @@ export default function TestsIndex({
         }
     };
 
-    // Ticket CRUD handlers
+    // Helper for image url
+    const formatImageUrl = (url?: string) => {
+        if (!url) return null;
+        if (url.startsWith('http') || url.startsWith('/storage')) return url;
+        return `/storage/${url.replace(/^\/+/, '')}`;
+    };
+
+    // ==========================================
+    // TICKET CRUD
+    // ==========================================
     const openCreateTicketModal = () => {
         setEditingTicket(null);
         setTicketNumber(String(tickets.length + 1));
@@ -208,8 +244,8 @@ export default function TestsIndex({
         setShowTicketModal(true);
     };
 
-    const openEditTicketModal = (tkt: Ticket, e: React.MouseEvent) => {
-        e.stopPropagation();
+    const openEditTicketModal = (tkt: Ticket, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
         setEditingTicket(tkt);
         setTicketNumber(String(tkt.ticket_number));
         setTicketTitle(tkt.title_uz);
@@ -254,21 +290,30 @@ export default function TestsIndex({
         }
     };
 
-    const handleDeleteTicket = (tkt: Ticket, e: React.MouseEvent) => {
-        e.stopPropagation();
+    const handleDeleteTicket = (tkt: Ticket, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
         if (window.confirm(t('tests.confirm_delete_ticket', 'Ushbu bilet va uning barcha savollari o\'chiriladi. Rozimisiz?'))) {
             router.delete(`/admin/tests/tickets/${tkt.id}`, {
-                onSuccess: () => toast.success(t('tests.ticket_deleted', 'Bilet o\'chirildi')),
+                onSuccess: () => {
+                    if (inspectingTicket?.id === tkt.id) {
+                        setInspectingTicket(null);
+                    }
+                    toast.success(t('tests.ticket_deleted', 'Bilet o\'chirildi'));
+                },
             });
         }
     };
 
-    // Question CRUD handlers
+    // ==========================================
+    // QUESTION CRUD
+    // ==========================================
     const openCreateQuestionModal = () => {
         setEditingQuestion(null);
         setQuestionText('');
         setQuestionDesc('');
         setQuestionImage('');
+        setQuestionFile(null);
+        setQuestionPreview(null);
         setQuestionAnswers([
             { text: '', is_correct: true },
             { text: '', is_correct: false },
@@ -283,6 +328,8 @@ export default function TestsIndex({
         setQuestionText(q.question_uz);
         setQuestionDesc(q.description_uz || '');
         setQuestionImage(q.image_url || '');
+        setQuestionFile(null);
+        setQuestionPreview(formatImageUrl(q.image_url));
         if (q.answers && q.answers.length > 0) {
             setQuestionAnswers(q.answers.map((a: any) => ({ text: a.answer_uz, is_correct: !!a.is_correct })));
         } else {
@@ -294,6 +341,29 @@ export default function TestsIndex({
             ]);
         }
         setShowQuestionModal(true);
+    };
+
+    const handleQuestionImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setQuestionFile(file);
+            setQuestionPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const addQuestionAnswerOption = () => {
+        setQuestionAnswers([...questionAnswers, { text: '', is_correct: false }]);
+    };
+
+    const removeQuestionAnswerOption = (index: number) => {
+        if (questionAnswers.length <= 2) return;
+        const next = [...questionAnswers];
+        const removedWasCorrect = next[index].is_correct;
+        next.splice(index, 1);
+        if (removedWasCorrect && next.length > 0) {
+            next[0].is_correct = true;
+        }
+        setQuestionAnswers(next);
     };
 
     const handleQuestionSubmit = (e: React.FormEvent) => {
@@ -312,16 +382,25 @@ export default function TestsIndex({
             return;
         }
 
-        const payload = {
-            ticket_id: inspectingTicket.id,
-            question_uz: questionText,
-            description_uz: questionDesc,
-            image_url: questionImage || null,
-            answers: validAnswers,
-        };
+        const formData = new FormData();
+        formData.append('ticket_id', String(inspectingTicket.id));
+        formData.append('question_uz', questionText);
+        formData.append('description_uz', questionDesc || '');
+
+        if (questionFile) {
+            formData.append('image', questionFile);
+        } else if (questionImage) {
+            formData.append('image_url', questionImage);
+        }
+
+        validAnswers.forEach((ans, idx) => {
+            formData.append(`answers[${idx}][text]`, ans.text);
+            formData.append(`answers[${idx}][is_correct]`, ans.is_correct ? '1' : '0');
+        });
 
         if (editingQuestion) {
-            router.put(`/admin/tests/questions/${editingQuestion.id}`, payload, {
+            formData.append('_method', 'PUT');
+            router.post(`/admin/tests/questions/${editingQuestion.id}`, formData, {
                 onSuccess: () => {
                     setShowQuestionModal(false);
                     openTicketDetails(inspectingTicket);
@@ -330,7 +409,7 @@ export default function TestsIndex({
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         } else {
-            router.post('/admin/tests/questions', payload, {
+            router.post('/admin/tests/questions', formData, {
                 onSuccess: () => {
                     setShowQuestionModal(false);
                     openTicketDetails(inspectingTicket);
@@ -352,7 +431,9 @@ export default function TestsIndex({
         }
     };
 
-    // Sign CRUD handlers
+    // ==========================================
+    // SIGN CRUD
+    // ==========================================
     const openCreateSignModal = () => {
         setEditingSign(null);
         setSignCategoryId(signCategories[0]?.id || 1);
@@ -360,6 +441,8 @@ export default function TestsIndex({
         setSignName('');
         setSignDesc('');
         setSignImage('');
+        setSignFile(null);
+        setSignPreview(null);
         setShowSignModal(true);
     };
 
@@ -370,21 +453,28 @@ export default function TestsIndex({
         setSignName(sign.name_uz);
         setSignDesc(sign.description_uz || '');
         setSignImage(sign.image_url || '');
+        setSignFile(null);
+        setSignPreview(formatImageUrl(sign.image_url));
         setShowSignModal(true);
     };
 
     const handleSignSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const payload = {
-            category_id: signCategoryId,
-            sign_number: signNumber,
-            name_uz: signName,
-            description_uz: signDesc,
-            image_url: signImage || null,
-        };
+        const formData = new FormData();
+        formData.append('category_id', String(signCategoryId));
+        formData.append('sign_number', signNumber);
+        formData.append('name_uz', signName);
+        formData.append('description_uz', signDesc || '');
+
+        if (signFile) {
+            formData.append('image', signFile);
+        } else if (signImage) {
+            formData.append('image_url', signImage);
+        }
 
         if (editingSign) {
-            router.put(`/admin/tests/signs/${editingSign.id}`, payload, {
+            formData.append('_method', 'PUT');
+            router.post(`/admin/tests/signs/${editingSign.id}`, formData, {
                 onSuccess: () => {
                     setShowSignModal(false);
                     toast.success(t('tests.sign_updated', 'Yo\'l belgisi yangilandi'));
@@ -392,7 +482,7 @@ export default function TestsIndex({
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         } else {
-            router.post('/admin/tests/signs', payload, {
+            router.post('/admin/tests/signs', formData, {
                 onSuccess: () => {
                     setShowSignModal(false);
                     toast.success(t('tests.sign_created', 'Yo\'l belgisi qo\'shildi'));
@@ -406,6 +496,117 @@ export default function TestsIndex({
         if (window.confirm(t('tests.confirm_delete_sign', 'Ushbu yo\'l belgisini o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/tests/signs/${sign.id}`, {
                 onSuccess: () => toast.success(t('tests.sign_deleted', 'Yo\'l belgisi o\'chirildi')),
+            });
+        }
+    };
+
+    // ==========================================
+    // ROAD LINE CRUD
+    // ==========================================
+    const openCreateRoadLineModal = () => {
+        setEditingRoadLine(null);
+        setRoadLineNumber('');
+        setRoadLineName('');
+        setRoadLineDesc('');
+        setRoadLineImage('');
+        setRoadLineFile(null);
+        setRoadLinePreview(null);
+        setShowRoadLineModal(true);
+    };
+
+    const openEditRoadLineModal = (line: RoadLine) => {
+        setEditingRoadLine(line);
+        setRoadLineNumber(line.line_number || (line as any).number || '');
+        setRoadLineName(line.name_uz);
+        setRoadLineDesc(line.description_uz || '');
+        setRoadLineImage(line.image_url || '');
+        setRoadLineFile(null);
+        setRoadLinePreview(formatImageUrl(line.image_url));
+        setShowRoadLineModal(true);
+    };
+
+    const handleRoadLineSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('line_number', roadLineNumber);
+        formData.append('name_uz', roadLineName);
+        formData.append('description_uz', roadLineDesc || '');
+
+        if (roadLineFile) {
+            formData.append('image', roadLineFile);
+        } else if (roadLineImage) {
+            formData.append('image_url', roadLineImage);
+        }
+
+        if (editingRoadLine) {
+            formData.append('_method', 'PUT');
+            router.post(`/admin/tests/road-lines/${editingRoadLine.id}`, formData, {
+                onSuccess: () => {
+                    setShowRoadLineModal(false);
+                    toast.success(t('tests.road_line_updated', 'Yo\'l chizig\'i yangilandi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        } else {
+            router.post('/admin/tests/road-lines', formData, {
+                onSuccess: () => {
+                    setShowRoadLineModal(false);
+                    toast.success(t('tests.road_line_created', 'Yo\'l chizig\'i qo\'shildi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleDeleteRoadLine = (line: RoadLine) => {
+        if (window.confirm(t('tests.confirm_delete_road_line', 'Ushbu yo\'l chizig\'ini o\'chirmoqchimisiz?'))) {
+            router.delete(`/admin/tests/road-lines/${line.id}`, {
+                onSuccess: () => toast.success(t('tests.road_line_deleted', 'Yo\'l chizig\'i o\'chirildi')),
+            });
+        }
+    };
+
+    // ==========================================
+    // CATEGORY CRUD
+    // ==========================================
+    const openCreateCategoryModal = () => {
+        setEditingCategory(null);
+        setCategoryName('');
+        setShowCategoryModal(true);
+    };
+
+    const handleCategorySubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editingCategory) {
+            router.put(`/admin/tests/sign-categories/${editingCategory.id}`, {
+                name_uz: categoryName,
+            }, {
+                onSuccess: () => {
+                    setShowCategoryModal(false);
+                    toast.success(t('tests.category_updated', 'Toifa yangilandi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        } else {
+            router.post('/admin/tests/sign-categories', {
+                name_uz: categoryName,
+            }, {
+                onSuccess: () => {
+                    setShowCategoryModal(false);
+                    toast.success(t('tests.category_created', 'Toifa qo\'shildi'));
+                },
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleDeleteCategory = (cat: SignCategory) => {
+        if (window.confirm(t('tests.confirm_delete_category', 'Ushbu toifa va uning barcha belgilari o\'chiriladi. Rozimisiz?'))) {
+            router.delete(`/admin/tests/sign-categories/${cat.id}`, {
+                onSuccess: () => {
+                    setSelectedSignCategory('all');
+                    toast.success(t('tests.category_deleted', 'Toifa o\'chirildi'));
+                },
             });
         }
     };
@@ -443,18 +644,30 @@ export default function TestsIndex({
                     </h1>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                     {activeTab === 'tickets' && (
-                        <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs">
+                        <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_ticket', '+ Bilet Qo\'shish')}
                         </Button>
                     )}
-                    {activeTab === 'signs' && (
-                        <Button onClick={openCreateSignModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs">
+                    {activeTab === 'signs' && selectedSignCategory === 'lines' && (
+                        <Button onClick={openCreateRoadLineModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
                             <Plus className="w-4 h-4 mr-1.5" />
-                            {t('tests.add_sign', '+ Belgi Qo\'shish')}
+                            {t('tests.add_road_line', '+ Chiziq Qo\'shish')}
                         </Button>
+                    )}
+                    {activeTab === 'signs' && selectedSignCategory !== 'lines' && (
+                        <>
+                            <Button onClick={openCreateSignModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                                <Plus className="w-4 h-4 mr-1.5" />
+                                {t('tests.add_sign', '+ Belgi Qo\'shish')}
+                            </Button>
+                            <Button onClick={openCreateCategoryModal} variant="outline" size="sm" className="text-xs">
+                                <FolderPlus className="w-4 h-4 mr-1.5" />
+                                {t('tests.add_category', '+ Toifa Qo\'shish')}
+                            </Button>
+                        </>
                     )}
                     <Button
                         variant="outline"
@@ -497,7 +710,9 @@ export default function TestsIndex({
                     <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
                         {stats.total_signs + roadLines.length}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">259 belgi + 22 chiziq</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                        {stats.total_signs} {t('tests.signs_label', 'belgi')} + {roadLines.length} {t('tests.lines_label', 'chiziq')}
+                    </p>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
@@ -706,9 +921,15 @@ export default function TestsIndex({
                                 className="pl-9 text-xs"
                             />
                         </div>
-                        <span className="text-xs text-gray-400">
-                            {filteredTickets.length} / {tickets.length} {t('tests.tickets_count', 'ta bilet')}
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-400">
+                                {filteredTickets.length} / {tickets.length} {t('tests.tickets_count', 'ta bilet')}
+                            </span>
+                            <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                                <Plus className="w-4 h-4 mr-1.5" />
+                                {t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -716,32 +937,43 @@ export default function TestsIndex({
                             <div
                                 key={tkt.id}
                                 onClick={() => openTicketDetails(tkt)}
-                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 p-3 rounded-xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group relative"
+                                className="bg-white dark:bg-gray-800 border-2 border-emerald-500/40 hover:border-emerald-500 dark:border-emerald-500/30 dark:hover:border-emerald-500 p-3.5 rounded-2xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group relative"
                             >
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-600">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">
+                                        <Layers className="w-3.5 h-3.5" />
                                         #{tkt.ticket_number}
-                                    </span>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    </div>
+                                    {/* Action Buttons: Clearly visible */}
+                                    <div className="flex items-center gap-1">
                                         <button
                                             onClick={(e) => openEditTicketModal(tkt, e)}
-                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-blue-600"
+                                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
                                             title={t('common.edit', 'Tahrirlash')}
                                         >
                                             <Pencil className="w-3 h-3" />
                                         </button>
                                         <button
                                             onClick={(e) => handleDeleteTicket(tkt, e)}
-                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-red-600"
+                                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
                                             title={t('common.delete', 'O\'chirish')}
                                         >
                                             <Trash2 className="w-3 h-3" />
                                         </button>
                                     </div>
                                 </div>
-                                <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                                    <span>{tkt.questions_count || 10} {t('tests.questions_unit', 'savol')}</span>
-                                    <Eye className="w-3 h-3 text-gray-400" />
+
+                                <div className="my-2">
+                                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
+                                        {tkt.title_uz}
+                                    </p>
+                                </div>
+
+                                <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700/60 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                                    <span className="font-medium text-slate-600 dark:text-slate-300">
+                                        {tkt.questions_count || 10} {t('tests.questions_unit', 'savol')}
+                                    </span>
+                                    <Eye className="w-3.5 h-3.5 text-blue-500" />
                                 </div>
                             </div>
                         ))}
@@ -753,30 +985,40 @@ export default function TestsIndex({
             {activeTab === 'signs' && (
                 <div className="space-y-4">
                     {/* Category Filter Chips */}
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <button
                             onClick={() => setSelectedSignCategory('all')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'all'
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                         >
                             {t('tests.all_signs', 'Barchasi')} ({stats.total_signs + roadLines.length})
                         </button>
 
                         {signCategories.map((cat) => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedSignCategory(cat.id)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                    selectedSignCategory === cat.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
-                                }`}
-                            >
-                                {cat.name_uz} ({cat.signs?.length || 0})
-                            </button>
+                            <div key={cat.id} className="relative group inline-flex items-center">
+                                <button
+                                    onClick={() => setSelectedSignCategory(cat.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                        selectedSignCategory === cat.id
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    {cat.name_uz} ({cat.signs?.length || 0})
+                                </button>
+                                {selectedSignCategory === cat.id && (
+                                    <button
+                                        onClick={() => handleDeleteCategory(cat)}
+                                        className="ml-1 text-red-500 hover:text-red-700 p-1"
+                                        title={t('tests.delete_category', 'Toifani o\'chirish')}
+                                    >
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
+                                )}
+                            </div>
                         ))}
 
                         <button
@@ -784,35 +1026,58 @@ export default function TestsIndex({
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'lines'
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                         >
                             {t('tests.road_lines_category', 'Yo\'l chiziqlari')} ({roadLines.length})
                         </button>
+
+                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-blue-600 dark:text-blue-400">
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            {t('tests.add_category', '+ Toifa')}
+                        </Button>
                     </div>
 
-                    {/* Signs Grid */}
+                    {/* Signs or Lines Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         {selectedSignCategory === 'lines'
                             ? roadLines.map((line) => (
                                   <div
                                       key={line.id}
-                                      className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs"
+                                      className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs relative group"
                                   >
+                                      {/* Action buttons directly accessible */}
+                                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                                          <button
+                                              onClick={() => openEditRoadLineModal(line)}
+                                              className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
+                                              title={t('common.edit', 'Tahrirlash')}
+                                          >
+                                              <Pencil className="w-3 h-3" />
+                                          </button>
+                                          <button
+                                              onClick={() => handleDeleteRoadLine(line)}
+                                              className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
+                                              title={t('common.delete', 'O\'chirish')}
+                                          >
+                                              <Trash2 className="w-3 h-3" />
+                                          </button>
+                                      </div>
+
                                       {line.image_url ? (
                                           <img
-                                              src={line.image_url}
+                                              src={formatImageUrl(line.image_url) || ''}
                                               alt={line.name_uz}
-                                              className="w-16 h-16 object-contain mb-2"
+                                              className="w-16 h-16 object-contain mb-2 mt-4"
                                               loading="lazy"
                                           />
                                       ) : (
-                                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2">
+                                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2 mt-4">
                                               —
                                           </div>
                                       )}
                                       <p className="font-bold text-xs text-blue-600 dark:text-blue-400 mb-1">
-                                          {line.number}
+                                          {line.line_number || (line as any).number}
                                       </p>
                                       <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
                                           {line.name_uz}
@@ -827,17 +1092,18 @@ export default function TestsIndex({
                                           key={sign.id}
                                           className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow relative group"
                                       >
-                                          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          {/* Action buttons directly accessible */}
+                                          <div className="absolute top-2 right-2 flex items-center gap-1">
                                               <button
                                                   onClick={() => openEditSignModal(sign)}
-                                                  className="p-1 bg-white/80 dark:bg-gray-700/80 rounded shadow hover:text-blue-600 text-gray-600"
+                                                  className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
                                                   title={t('common.edit', 'Tahrirlash')}
                                               >
                                                   <Pencil className="w-3 h-3" />
                                               </button>
                                               <button
                                                   onClick={() => handleDeleteSign(sign)}
-                                                  className="p-1 bg-white/80 dark:bg-gray-700/80 rounded shadow hover:text-red-600 text-gray-600"
+                                                  className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
                                                   title={t('common.delete', 'O\'chirish')}
                                               >
                                                   <Trash2 className="w-3 h-3" />
@@ -846,13 +1112,13 @@ export default function TestsIndex({
 
                                           {sign.image_url ? (
                                               <img
-                                                  src={sign.image_url}
+                                                  src={formatImageUrl(sign.image_url) || ''}
                                                   alt={sign.name_uz}
-                                                  className="w-16 h-16 object-contain mb-2"
+                                                  className="w-16 h-16 object-contain mb-2 mt-4"
                                                   loading="lazy"
                                               />
                                           ) : (
-                                              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2">
+                                              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2 mt-4">
                                                   —
                                               </div>
                                           )}
@@ -872,16 +1138,43 @@ export default function TestsIndex({
             <Dialog open={!!inspectingTicket} onOpenChange={(open) => !open && setInspectingTicket(null)}>
                 <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <div className="flex items-center justify-between pr-6">
-                            <DialogTitle className="flex items-center gap-2 text-base">
+                        <div className="flex items-center justify-between pr-6 flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
                                 <BookOpen className="w-5 h-5 text-blue-600" />
-                                {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`}
-                            </DialogTitle>
-                            <Button size="sm" onClick={openCreateQuestionModal} className="text-xs">
-                                <Plus className="w-3.5 h-3.5 mr-1" />
-                                {t('tests.add_question', '+ Savol Qo\'shish')}
-                            </Button>
+                                <DialogTitle className="text-base font-bold">
+                                    {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`}
+                                </DialogTitle>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {inspectingTicket && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => openEditTicketModal(inspectingTicket)}
+                                            className="text-xs"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5 mr-1" />
+                                            {t('tests.edit_ticket', 'Tahrirlash')}
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => handleDeleteTicket(inspectingTicket)}
+                                            className="text-xs"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                            {t('tests.delete_ticket', 'O\'chirish')}
+                                        </Button>
+                                    </>
+                                )}
+                                <Button size="sm" onClick={openCreateQuestionModal} className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+                                    <Plus className="w-3.5 h-3.5 mr-1" />
+                                    {t('tests.add_question', '+ Savol Qo\'shish')}
+                                </Button>
+                            </div>
                         </div>
+                        <DialogDescription className="sr-only">Bilet savollarini ko'rish va boshqarish</DialogDescription>
                     </DialogHeader>
 
                     {loadingTicketQuestions ? (
@@ -900,7 +1193,7 @@ export default function TestsIndex({
                                     className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-850 space-y-3 relative group"
                                 >
                                     <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 flex-1">
                                             <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
                                                 {idx + 1}
                                             </span>
@@ -909,17 +1202,17 @@ export default function TestsIndex({
                                             </h4>
                                         </div>
 
-                                        <div className="flex items-center gap-1 shrink-0">
+                                        <div className="flex items-center gap-1.5 shrink-0">
                                             <button
                                                 onClick={() => openEditQuestionModal(q)}
-                                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-blue-600"
+                                                className="p-1.5 rounded-lg bg-gray-200/80 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/50 text-gray-700 hover:text-blue-600 dark:text-gray-300 transition-colors"
                                                 title={t('common.edit', 'Tahrirlash')}
                                             >
                                                 <Pencil className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteQuestion(q)}
-                                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-red-600"
+                                                className="p-1.5 rounded-lg bg-gray-200/80 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/50 text-gray-700 hover:text-red-600 dark:text-gray-300 transition-colors"
                                                 title={t('common.delete', 'O\'chirish')}
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -931,9 +1224,9 @@ export default function TestsIndex({
                                     {q.image_url && (
                                         <div className="flex justify-center bg-white dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
                                             <img
-                                                src={q.image_url}
+                                                src={formatImageUrl(q.image_url) || ''}
                                                 alt={`Savol ${idx + 1}`}
-                                                className="max-h-48 max-w-full rounded object-contain"
+                                                className="max-h-52 max-w-full rounded object-contain"
                                                 loading="lazy"
                                             />
                                         </div>
@@ -986,6 +1279,7 @@ export default function TestsIndex({
                         <DialogTitle>
                             {editingTicket ? t('tests.edit_ticket', 'Biletni Tahrirlash') : t('tests.add_ticket', '+ Bilet Qo\'shish')}
                         </DialogTitle>
+                        <DialogDescription className="sr-only">Bilet parametrlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleTicketSubmit} className="space-y-3.5 pt-2">
                         <div>
@@ -1021,7 +1315,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowTicketModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm">
+                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1036,10 +1330,11 @@ export default function TestsIndex({
                         <DialogTitle>
                             {editingQuestion ? t('tests.edit_question', 'Savolni Tahrirlash') : t('tests.add_question', '+ Savol Qo\'shish')}
                         </DialogTitle>
+                        <DialogDescription className="sr-only">Savol va javob variantlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleQuestionSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs">{t('tests.question_text_label', 'Savol Matni')}</Label>
+                            <Label className="text-xs font-semibold">{t('tests.question_text_label', 'Savol Matni')}</Label>
                             <textarea
                                 required
                                 rows={3}
@@ -1050,20 +1345,49 @@ export default function TestsIndex({
                             />
                         </div>
 
-                        <div>
-                            <Label className="text-xs">{t('tests.image_file_or_url', 'Rasm Havolasi (URL)')}</Label>
-                            <Input
-                                value={questionImage}
-                                onChange={(e) => setQuestionImage(e.target.value)}
-                                placeholder="/storage/questions/... yoki https://..."
-                                className="mt-1 text-xs"
-                            />
+                        {/* Image: Upload File or URL */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
+                                    {questionPreview ? (
+                                        <img src={questionPreview} alt="Preview" className="w-full h-full object-contain" />
+                                    ) : (
+                                        <ImageIcon className="w-6 h-6 text-gray-400" />
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleQuestionImageChange}
+                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
+                                    />
+                                    <Input
+                                        value={questionImage}
+                                        onChange={(e) => {
+                                            setQuestionImage(e.target.value);
+                                            if (e.target.value) setQuestionPreview(e.target.value);
+                                        }}
+                                        placeholder={t('tests.or_image_url', 'Yoki rasm havolasi (URL)...')}
+                                        className="text-xs"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <Label className="text-xs font-bold block mb-1.5">
-                                {t('tests.answers_options_label', 'Javob Variantlari (To\'g\'risini tanlang)')}
-                            </Label>
+                        {/* Answers List */}
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <Label className="text-xs font-bold">
+                                    {t('tests.answers_options_label', 'Javob Variantlari (To\'g\'risini tanlang)')}
+                                </Label>
+                                <Button type="button" size="sm" variant="outline" onClick={addQuestionAnswerOption} className="text-xs h-7">
+                                    <Plus className="w-3.5 h-3.5 mr-1" />
+                                    {t('tests.add_answer_option', 'Variant qo\'shish')}
+                                </Button>
+                            </div>
                             <div className="space-y-2">
                                 {questionAnswers.map((ans, aIdx) => (
                                     <div key={aIdx} className="flex items-center gap-2">
@@ -1078,7 +1402,7 @@ export default function TestsIndex({
                                                 }));
                                                 setQuestionAnswers(updated);
                                             }}
-                                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0 cursor-pointer"
+                                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0 cursor-pointer accent-emerald-600"
                                             title={t('tests.correct_label', 'To\'g\'ri')}
                                         />
                                         <span className="font-mono text-xs font-bold text-gray-400 w-4">
@@ -1092,8 +1416,18 @@ export default function TestsIndex({
                                                 setQuestionAnswers(updated);
                                             }}
                                             placeholder={`Variant ${aIdx + 1}...`}
-                                            className="text-xs"
+                                            className="text-xs flex-1"
                                         />
+                                        {questionAnswers.length > 2 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeQuestionAnswerOption(aIdx)}
+                                                className="text-gray-400 hover:text-red-500 p-1"
+                                                title={t('tests.remove_answer_option', 'O\'chirish')}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -1114,7 +1448,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowQuestionModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm">
+                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1129,6 +1463,7 @@ export default function TestsIndex({
                         <DialogTitle>
                             {editingSign ? t('tests.edit_sign', 'Belgini Tahrirlash') : t('tests.add_sign', '+ Belgi Qo\'shish')}
                         </DialogTitle>
+                        <DialogDescription className="sr-only">Yo'l belgisi parametrlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSignSubmit} className="space-y-3.5 pt-2">
                         <div>
@@ -1165,15 +1500,45 @@ export default function TestsIndex({
                                 className="mt-1 text-xs"
                             />
                         </div>
-                        <div>
-                            <Label className="text-xs">{t('tests.image_file_or_url', 'Rasm Havolasi (URL)')}</Label>
-                            <Input
-                                value={signImage}
-                                onChange={(e) => setSignImage(e.target.value)}
-                                placeholder="/storage/signs/..."
-                                className="mt-1 text-xs"
-                            />
+
+                        {/* Image file or URL */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
+                                    {signPreview ? (
+                                        <img src={signPreview} alt="Preview" className="w-full h-full object-contain" />
+                                    ) : (
+                                        <ImageIcon className="w-5 h-5 text-gray-400" />
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <input
+                                        ref={signFileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const f = e.target.files?.[0];
+                                            if (f) {
+                                                setSignFile(f);
+                                                setSignPreview(URL.createObjectURL(f));
+                                            }
+                                        }}
+                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
+                                    />
+                                    <Input
+                                        value={signImage}
+                                        onChange={(e) => {
+                                            setSignImage(e.target.value);
+                                            if (e.target.value) setSignPreview(e.target.value);
+                                        }}
+                                        placeholder="/storage/signs/... yoki URL"
+                                        className="text-xs"
+                                    />
+                                </div>
+                            </div>
                         </div>
+
                         <div>
                             <Label className="text-xs">{t('common.description', 'Tavsif')}</Label>
                             <textarea
@@ -1188,7 +1553,130 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowSignModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm">
+                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create/Edit Road Line Modal */}
+            <Dialog open={showRoadLineModal} onOpenChange={setShowRoadLineModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingRoadLine ? t('tests.edit_road_line', 'Chiziqni Tahrirlash') : t('tests.add_road_line', '+ Chiziq Qo\'shish')}
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">Yo'l chizig'i parametrlarini kiriting</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleRoadLineSubmit} className="space-y-3.5 pt-2">
+                        <div>
+                            <Label className="text-xs">{t('tests.line_number', 'Chiziq Raqami')}</Label>
+                            <Input
+                                required
+                                value={roadLineNumber}
+                                onChange={(e) => setRoadLineNumber(e.target.value)}
+                                placeholder="1.1, 1.2..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs">{t('tests.line_name', 'Chiziq Nomi')}</Label>
+                            <Input
+                                required
+                                value={roadLineName}
+                                onChange={(e) => setRoadLineName(e.target.value)}
+                                placeholder="Yaxlit chiziq..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+
+                        {/* Image file or URL */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
+                                    {roadLinePreview ? (
+                                        <img src={roadLinePreview} alt="Preview" className="w-full h-full object-contain" />
+                                    ) : (
+                                        <ImageIcon className="w-5 h-5 text-gray-400" />
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <input
+                                        ref={lineFileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const f = e.target.files?.[0];
+                                            if (f) {
+                                                setRoadLineFile(f);
+                                                setRoadLinePreview(URL.createObjectURL(f));
+                                            }
+                                        }}
+                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
+                                    />
+                                    <Input
+                                        value={roadLineImage}
+                                        onChange={(e) => {
+                                            setRoadLineImage(e.target.value);
+                                            if (e.target.value) setRoadLinePreview(e.target.value);
+                                        }}
+                                        placeholder="/storage/road_lines/... yoki URL"
+                                        className="text-xs"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">{t('common.description', 'Tavsif')}</Label>
+                            <textarea
+                                rows={2}
+                                value={roadLineDesc}
+                                onChange={(e) => setRoadLineDesc(e.target.value)}
+                                placeholder="Yo'l chizig'i qoidasi..."
+                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowRoadLineModal(false)}>
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create/Edit Category Modal */}
+            <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingCategory ? t('tests.edit_category', 'Toifani Tahrirlash') : t('tests.add_category', '+ Toifa Qo\'shish')}
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">Yo'l belgisi toifasi nomini kiriting</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleCategorySubmit} className="space-y-3.5 pt-2">
+                        <div>
+                            <Label className="text-xs">{t('tests.category_name', 'Toifa Nomi')}</Label>
+                            <Input
+                                required
+                                value={categoryName}
+                                onChange={(e) => setCategoryName(e.target.value)}
+                                placeholder="Ogohlantiruvchi belgilar..."
+                                className="mt-1 text-xs"
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowCategoryModal(false)}>
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
