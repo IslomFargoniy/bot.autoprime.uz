@@ -196,7 +196,7 @@ class Prava24Controller extends Controller
                 'answer_id' => $d['selected_answer_id'],
                 'is_correct' => $d['is_correct'],
                 'answered_at' => now(),
-                'duration_seconds' => null,
+                'duration_seconds' => 0,
             ]);
         }
 
