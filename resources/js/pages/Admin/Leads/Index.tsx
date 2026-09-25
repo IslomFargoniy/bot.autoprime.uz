@@ -120,17 +120,17 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
     const getStageBadge = (stage: string) => {
         switch (stage) {
             case 'new_lead':
-                return 'bg-blue-50 text-blue-700 border-blue-200';
+                return 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
             case 'form_sent':
-                return 'bg-amber-50 text-amber-700 border-amber-200';
+                return 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
             case 'form_completed':
-                return 'bg-purple-50 text-purple-700 border-purple-200';
+                return 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
             case 'contract_signed':
-                return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                return 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
             case 'rejected':
-                return 'bg-red-50 text-red-700 border-red-200';
+                return 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
             default:
-                return 'bg-gray-50 text-gray-700 border-gray-200';
+                return 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700';
         }
     };
 
@@ -185,7 +185,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('leads.client', 'Mijoz (F.I.O)')}</th>
                                 <th className="p-3.5 font-semibold">{t('leads.phone', 'Telefon')}</th>
@@ -199,18 +199,18 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {leads.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-400">
+                                    <td colSpan={7} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                         {t('leads.no_leads', 'Hech qanday lid topilmadi')}
                                     </td>
                                 </tr>
                             ) : (
                                 leads.data.map((lead) => (
-                                    <tr key={lead.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-750/50">
+                                    <tr key={lead.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                         <td className="p-3.5 font-medium text-gray-900 dark:text-white">
                                             {lead.full_name}
                                         </td>
                                         <td className="p-3.5 text-gray-600 dark:text-gray-300">
-                                            <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600">
+                                            <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400">
                                                 <Phone className="w-3.5 h-3.5 text-gray-400" />
                                                 {lead.phone}
                                             </a>
@@ -220,7 +220,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                                 {lead.category || 'B'}
                                             </span>
                                         </td>
-                                        <td className="p-3.5 text-gray-500">
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
                                             {lead.source}
                                         </td>
                                         <td className="p-3.5">
@@ -228,7 +228,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                                 {t(`leads.stage_${lead.stage}`, lead.stage)}
                                             </span>
                                         </td>
-                                        <td className="p-3.5 text-gray-500">
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
                                             {lead.branch?.name || '-'}
                                         </td>
                                         <td className="p-3.5 text-right space-x-1">
@@ -243,7 +243,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                                             branch_id: String(lead.branch_id || branches[0]?.id || ''),
                                                         });
                                                     }}
-                                                    className="h-7 text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                                    className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
                                                 >
                                                     <UserCheck className="w-3.5 h-3.5 mr-1" />
                                                     {t('leads.convert_button', 'Shartnoma tuzish')}

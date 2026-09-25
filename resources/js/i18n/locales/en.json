@@ -18,6 +18,12 @@
     "student": "Student"
   },
   "sidebar": {
+    "group_main": "Main",
+    "group_reception": "Reception",
+    "group_lms": "LMS & Education",
+    "group_autodrome": "Autodrome & Fleet",
+    "group_finance": "Finance",
+    "group_superadmin": "Superadmin",
     "dashboard": "Dashboard",
     "groups": "Groups",
     "students": "Students",
@@ -35,7 +41,8 @@
     "leads": "CRM Leads",
     "contract_types": "Tariffs",
     "salaries": "Payroll",
-    "certificates": "Certificates"
+    "certificates": "Certificates",
+    "branches": "Branches"
   },
   "common": {
     "search": "Search...",
