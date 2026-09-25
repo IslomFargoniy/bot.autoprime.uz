@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Models\Answer;
 use App\Models\Attempt;
 use App\Models\AttemptAnswer;
 use App\Models\Question;
 use App\Models\RoadLine;
-use App\Models\Sign;
 use App\Models\SignCategory;
 use App\Models\Student;
 use App\Models\Ticket;
@@ -223,8 +221,8 @@ class Prava24Controller extends Controller
         $categories = SignCategory::with(['signs' => function ($q) {
             $q->orderBy('order');
         }])
-        ->orderBy('order')
-        ->get();
+            ->orderBy('order')
+            ->get();
 
         $roadLines = RoadLine::orderBy('id')->get();
 

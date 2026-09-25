@@ -33,6 +33,7 @@ class ImportPrava24Data extends Command
         $tables = DB::select("SHOW TABLES FROM `{$sourceDb}`");
         if (empty($tables)) {
             $this->error("No tables found in `{$sourceDb}`.");
+
             return Command::FAILURE;
         }
 
@@ -51,7 +52,7 @@ class ImportPrava24Data extends Command
                 'name_ru' => $cat->name,
                 'name_krill' => $cat->name,
                 'name_en' => $cat->name,
-                'slug' => Str::slug($cat->name) . '-' . $cat->id,
+                'slug' => Str::slug($cat->name).'-'.$cat->id,
                 'order' => $cat->id,
                 'created_at' => $cat->created_at ?? now(),
                 'updated_at' => $cat->updated_at ?? now(),
@@ -71,7 +72,7 @@ class ImportPrava24Data extends Command
                 $nameUz = trim($matches[2]) ?: $signNumber;
             }
 
-            $img = $s->image_url ? '/storage/' . ltrim($s->image_url, '/') : null;
+            $img = $s->image_url ? '/storage/'.ltrim($s->image_url, '/') : null;
 
             DB::table('signs')->insert([
                 'id' => $s->id,
@@ -97,7 +98,7 @@ class ImportPrava24Data extends Command
         DB::table('road_lines')->truncate();
         $sourceRoadLines = DB::table("{$sourceDb}.road_lines")->orderBy('id')->get();
         foreach ($sourceRoadLines as $rl) {
-            $img = $rl->image_url ? '/storage/' . ltrim($rl->image_url, '/') : null;
+            $img = $rl->image_url ? '/storage/'.ltrim($rl->image_url, '/') : null;
 
             DB::table('road_lines')->insert([
                 'id' => $rl->id,
@@ -127,9 +128,9 @@ class ImportPrava24Data extends Command
                 'id' => $t->id,
                 'ticket_number' => $ticketNumber,
                 'title_uz' => $t->title,
-                'title_ru' => 'Билет ' . $ticketNumber,
-                'title_krill' => 'Билет ' . $ticketNumber,
-                'title_en' => 'Ticket ' . $ticketNumber,
+                'title_ru' => 'Билет '.$ticketNumber,
+                'title_krill' => 'Билет '.$ticketNumber,
+                'title_en' => 'Ticket '.$ticketNumber,
                 'description' => $t->description,
                 'is_active' => (bool) $t->is_active,
                 'created_at' => $t->created_at ?? now(),
@@ -153,7 +154,7 @@ class ImportPrava24Data extends Command
             }
 
             $qNum = $ticketQuestionCounters[$q->ticket_id];
-            $img = $q->image_url ? '/storage/' . ltrim($q->image_url, '/') : null;
+            $img = $q->image_url ? '/storage/'.ltrim($q->image_url, '/') : null;
 
             $questionsBatch[] = [
                 'id' => $q->id,
