@@ -6,6 +6,7 @@ import {
     BookOpen,
     Building2,
     Car,
+    CarFront,
     CheckSquare,
     FileText,
     FolderGit2,
@@ -17,7 +18,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { useTranslation } from 'react-i18next';
@@ -32,8 +32,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import type { NavItem, SharedData } from '@/types';
+import type { NavGroup, SharedData } from '@/types';
 
 export function AppSidebar() {
     const { t } = useTranslation();
@@ -55,96 +54,140 @@ export function AppSidebar() {
         }
     };
 
-    const mainNavItems: NavItem[] = [
+    const navGroups: NavGroup[] = [
         {
-            title: t('sidebar.dashboard', 'Bosh sahifa'),
-            href: '/admin/dashboard',
-            icon: LayoutGrid,
+            title: t('sidebar.group_main', 'Asosiy'),
+            items: [
+                {
+                    title: t('sidebar.dashboard', 'Bosh sahifa'),
+                    href: '/admin/dashboard',
+                    icon: LayoutGrid,
+                },
+            ],
         },
         {
-            title: t('sidebar.leads', 'CRM Lidlar'),
-            href: '/admin/leads',
-            icon: Users,
+            title: t('sidebar.group_reception', 'Reception'),
+            items: [
+                {
+                    title: t('sidebar.leads', 'CRM Lidlar'),
+                    href: '/admin/leads',
+                    icon: Users,
+                },
+                {
+                    title: t('sidebar.contracts', 'Shartnomalar'),
+                    href: '/admin/contracts',
+                    icon: FileText,
+                },
+                {
+                    title: t('sidebar.contract_types', 'Tariflar'),
+                    href: '/admin/contract-types',
+                    icon: FileText,
+                },
+            ],
         },
         {
-            title: t('sidebar.contracts', 'Shartnomalar'),
-            href: '/admin/contracts',
-            icon: FileText,
+            title: t('sidebar.group_lms', "LMS & Ta'lim"),
+            items: [
+                {
+                    title: t('sidebar.courses', 'LMS Kurslar'),
+                    href: '/admin/courses',
+                    icon: GraduationCap,
+                },
+                {
+                    title: t('sidebar.groups', 'Guruhlar'),
+                    href: '/admin/groups',
+                    icon: FolderGit2,
+                },
+                {
+                    title: t('sidebar.students', "O'quvchilar"),
+                    href: '/admin/students',
+                    icon: BookOpen,
+                },
+                {
+                    title: t('sidebar.attendance', 'Davomat (QR)'),
+                    href: '/admin/attendance',
+                    icon: CheckSquare,
+                },
+                {
+                    title: t('sidebar.certificates', 'Guvohnomalar'),
+                    href: '/admin/certificates',
+                    icon: Award,
+                },
+            ],
         },
         {
-            title: t('sidebar.contract_types', 'Tariflar'),
-            href: '/admin/contract-types',
-            icon: FileText,
+            title: t('sidebar.group_autodrome', 'Avtodrom & Avtopark'),
+            items: [
+                {
+                    title: t('sidebar.drivings', "Mashg'ulotlar"),
+                    href: '/admin/drivings',
+                    icon: CarFront,
+                },
+                {
+                    title: t('sidebar.vehicles', 'Avtopark'),
+                    href: '/admin/vehicles',
+                    icon: Car,
+                },
+                {
+                    title: t('sidebar.autodromes', 'Avtodromlar'),
+                    href: '/admin/autodromes',
+                    icon: MapPin,
+                },
+                {
+                    title: t('sidebar.instructors', 'Instruktorlar'),
+                    href: '/admin/instructors',
+                    icon: Users,
+                },
+            ],
         },
         {
-            title: t('sidebar.finance', 'Moliya & Kassa'),
-            href: '/admin/finance',
-            icon: Wallet,
+            title: t('sidebar.group_finance', 'Moliya'),
+            items: [
+                {
+                    title: t('sidebar.finance', 'Moliya & Kassa'),
+                    href: '/admin/finance',
+                    icon: Wallet,
+                },
+                {
+                    title: t('sidebar.salaries', 'Xodimlar Oyligi'),
+                    href: '/admin/salaries',
+                    icon: Banknote,
+                },
+            ],
         },
         {
-            title: t('sidebar.salaries', 'Xodimlar Oyligi'),
-            href: '/admin/salaries',
-            icon: Banknote,
+            title: t('sidebar.group_superadmin', 'Superadmin'),
+            items: [
+                {
+                    title: t('sidebar.branches', 'Filiallar'),
+                    href: '/admin/branches',
+                    icon: Building2,
+                },
+                {
+                    title: t('sidebar.admins', 'Adminlar'),
+                    href: '/admin/admins',
+                    icon: ShieldCheck,
+                },
+            ],
         },
-        {
-            title: t('sidebar.certificates', 'Guvohnomalar'),
-            href: '/admin/certificates',
-            icon: Award,
-        },
-        {
-            title: t('sidebar.courses', 'LMS Kurslar'),
-            href: '/admin/courses',
-            icon: GraduationCap,
-        },
-        {
-            title: t('sidebar.groups', 'Guruhlar'),
-            href: '/admin/groups',
-            icon: FolderGit2,
-        },
-        {
-            title: t('sidebar.students', 'O\'quvchilar'),
-            href: '/admin/students',
-            icon: BookOpen,
-        },
-        {
-            title: t('sidebar.drivings', 'Mashg\'ulotlar'),
-            href: '/admin/drivings',
-            icon: FolderGit2,
-        },
-        {
-            title: t('sidebar.vehicles', 'Avtopark'),
-            href: '/admin/vehicles',
-            icon: Car,
-        },
-        {
-            title: t('sidebar.autodromes', 'Avtodromlar'),
-            href: '/admin/autodromes',
-            icon: MapPin,
-        },
-        {
-            title: t('sidebar.instructors', 'Instruktorlar'),
-            href: '/admin/instructors',
-            icon: BookOpen,
-        },
-        {
-            title: t('branches.title', 'Filiallar'),
-            href: '/admin/branches',
-            icon: Building2,
-        },
-        {
-            title: t('sidebar.admins', 'Adminlar'),
-            href: '/admin/admins',
-            icon: ShieldCheck,
-        },
-    ].filter(item => {
-        if (item.href === '/admin/branches' || item.href === '/admin/admins') {
-            return isSuperAdmin;
-        }
-        if (isInstructor) {
-            return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings', '/admin/vehicles'].includes(item.href);
-        }
-        return true;
-    });
+    ];
+
+    const filteredGroups = navGroups
+        .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => {
+                if (item.href === '/admin/branches' || item.href === '/admin/admins') {
+                    return isSuperAdmin;
+                }
+                if (isInstructor) {
+                    return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings', '/admin/vehicles'].includes(
+                        item.href as string
+                    );
+                }
+                return true;
+            }),
+        }))
+        .filter((group) => group.items.length > 0);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -167,7 +210,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain groups={filteredGroups} />
             </SidebarContent>
 
             <SidebarFooter>

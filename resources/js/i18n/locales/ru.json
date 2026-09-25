@@ -18,6 +18,12 @@
     "student": "Ученик"
   },
   "sidebar": {
+    "group_main": "Главная",
+    "group_reception": "Ресепшн",
+    "group_lms": "LMS и Обучение",
+    "group_autodrome": "Автодром и Автопарк",
+    "group_finance": "Финансы",
+    "group_superadmin": "Суперадмин",
     "dashboard": "Главная",
     "groups": "Группы",
     "students": "Ученики",
@@ -35,7 +41,8 @@
     "leads": "CRM Лиды",
     "contract_types": "Тарифы",
     "salaries": "Зарплаты",
-    "certificates": "Сертификаты"
+    "certificates": "Сертификаты",
+    "branches": "Филиалы"
   },
   "common": {
     "search": "Поиск...",

@@ -185,10 +185,10 @@ export default function VehiclesIndex({
                                 </span>
                                 <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                                     v.status === 'active'
-                                        ? 'bg-emerald-50 text-emerald-700'
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                                         : v.status === 'maintenance'
-                                        ? 'bg-amber-50 text-amber-700'
-                                        : 'bg-gray-100 text-gray-500'
+                                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                                 }`}>
                                     {t(`vehicles.status_${v.status}`, v.status)}
                                 </span>
@@ -216,12 +216,12 @@ export default function VehiclesIndex({
                             {/* Recent Maintenance Alert */}
                             {v.maintenances && v.maintenances.length > 0 && (
                                 <div className="mt-3 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700/40 text-[11px] space-y-1">
-                                    <span className="text-gray-400 block font-medium">Oxirgi texnik xizmat:</span>
+                                    <span className="text-gray-500 dark:text-gray-400 block font-medium">Oxirgi texnik xizmat:</span>
                                     <div className="flex justify-between font-semibold">
                                         <span>{v.maintenances[0].maintenance_type}</span>
                                         <span>{Number(v.maintenances[0].cost).toLocaleString('uz-UZ')} UZS</span>
                                     </div>
-                                    <span className="text-gray-400 block text-[10px]">{v.maintenances[0].performed_date}</span>
+                                    <span className="text-gray-400 dark:text-gray-500 block text-[10px]">{v.maintenances[0].performed_date}</span>
                                 </div>
                             )}
                         </div>
@@ -231,7 +231,7 @@ export default function VehiclesIndex({
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setMaintainingVehicle(v)}
-                                className="h-8 text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
+                                className="h-8 text-xs text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/60 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                             >
                                 <Wrench className="w-3.5 h-3.5 mr-1" />
                                 {t('vehicles.maintenance_button', '+ Texnik xizmat')}

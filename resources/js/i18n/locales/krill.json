@@ -18,6 +18,12 @@
     "student": "Ўқувчи"
   },
   "sidebar": {
+    "group_main": "Асосий",
+    "group_reception": "Ресепшн",
+    "group_lms": "LMS & Таълим",
+    "group_autodrome": "Автодром & Автопарк",
+    "group_finance": "Молия",
+    "group_superadmin": "Суперадмин",
     "dashboard": "Бош саҳифа",
     "groups": "Гуруҳлар",
     "students": "Ўқувчилар",
@@ -35,7 +41,8 @@
     "leads": "CRM Лидлар",
     "contract_types": "Тарифлар",
     "salaries": "Ходимлар Ойлиги",
-    "certificates": "Гувоҳномалар"
+    "certificates": "Гувоҳномалар",
+    "branches": "Филиаллар"
   },
   "common": {
     "search": "Қидириш...",

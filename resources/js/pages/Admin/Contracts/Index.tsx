@@ -101,13 +101,13 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const getBadgeStyle = (color: string) => {
         switch (color) {
             case 'green':
-                return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                return 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
             case 'yellow':
-                return 'bg-amber-50 text-amber-700 border-amber-200';
+                return 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
             case 'red':
-                return 'bg-red-50 text-red-700 border-red-200';
+                return 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
             default:
-                return 'bg-slate-50 text-slate-700 border-slate-200';
+                return 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
         }
     };
 
@@ -134,7 +134,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                                 (filters.payment_status || 'all') === st
                                     ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100'
+                                    : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
                             }`}
                         >
                             {t(`contracts.status_${st}`, st)}
@@ -172,7 +172,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('contracts.number', '№')}</th>
                                 <th className="p-3.5 font-semibold">{t('contracts.student', 'Talaba')}</th>
@@ -188,13 +188,13 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {contracts.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={9} className="p-8 text-center text-gray-400">
+                                    <td colSpan={9} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                         {t('contracts.no_contracts', 'Shartnomalar topilmadi')}
                                     </td>
                                 </tr>
                             ) : (
                                 contracts.data.map((c) => (
-                                    <tr key={c.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-750/50">
+                                    <tr key={c.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                         <td className="p-3.5 font-semibold text-gray-900 dark:text-white">
                                             #{c.contract_number}
                                         </td>
@@ -205,7 +205,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         <td className="p-3.5 text-gray-600 dark:text-gray-300">
                                             {c.contract_type?.name || '-'} ({c.contract_type?.category || 'B'})
                                         </td>
-                                        <td className="p-3.5 text-gray-500">
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
                                             {c.group?.name || '-'}
                                         </td>
                                         <td className="p-3.5 font-medium">

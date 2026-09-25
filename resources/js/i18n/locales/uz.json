@@ -18,6 +18,12 @@
     "student": "O'quvchi"
   },
   "sidebar": {
+    "group_main": "Asosiy",
+    "group_reception": "Reception",
+    "group_lms": "LMS & Ta'lim",
+    "group_autodrome": "Avtodrom & Avtopark",
+    "group_finance": "Moliya",
+    "group_superadmin": "Superadmin",
     "dashboard": "Bosh sahifa",
     "groups": "Guruhlar",
     "students": "O'quvchilar",
@@ -35,7 +41,8 @@
     "leads": "CRM Lidlar",
     "contract_types": "Tariflar",
     "salaries": "Xodimlar Oyligi",
-    "certificates": "Guvohnomalar"
+    "certificates": "Guvohnomalar",
+    "branches": "Filiallar"
   },
   "common": {
     "search": "Qidirish...",

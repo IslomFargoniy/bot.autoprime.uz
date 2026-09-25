@@ -393,7 +393,7 @@ export default function AttendanceIndex({
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('attendance.date', 'Sana')}</th>
                                 <th className="p-3.5 font-semibold">{t('attendance.student', 'Talaba')}</th>
@@ -407,7 +407,7 @@ export default function AttendanceIndex({
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {attendances.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-400">
+                                    <td colSpan={7} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                         {t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
                                     </td>
                                 </tr>
@@ -416,7 +416,7 @@ export default function AttendanceIndex({
                                     <tr key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                                         <td className="p-3.5 font-medium text-gray-900 dark:text-white">{att.date}</td>
                                         <td className="p-3.5 font-medium">{att.student?.full_name}</td>
-                                        <td className="p-3.5 text-gray-500">{att.student?.group?.name || '-'}</td>
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{att.student?.group?.name || '-'}</td>
                                         <td className="p-3.5">
                                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                                                 att.status === 'present'
@@ -598,7 +598,7 @@ export default function AttendanceIndex({
                             {/* Roster Table */}
                             <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex-1 min-h-[220px] max-h-[360px] overflow-y-auto">
                                 <table className="w-full text-left text-xs">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/60 text-gray-500 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
+                                    <thead className="bg-gray-50 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
                                             <th className="p-2.5 w-10 text-center">
                                                 <input

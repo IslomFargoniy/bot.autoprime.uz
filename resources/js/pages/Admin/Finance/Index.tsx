@@ -226,7 +226,7 @@ export default function FinanceIndex({
                         <ArrowDownRight className="w-4 h-4 mr-1.5" />
                         {t('finance.accept_payment', 'To\'lov Qabul Qilish')}
                     </Button>
-                    <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 border-red-200 hover:bg-red-50">
+                    <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40">
                         <ArrowUpRight className="w-4 h-4 mr-1.5" />
                         {t('finance.add_expense', 'Chiqim Qilish')}
                     </Button>
@@ -249,14 +249,14 @@ export default function FinanceIndex({
                         className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex items-center justify-between"
                     >
                         <div>
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
                                 <span>{reg.type?.name || 'Kassa'}</span>
                                 {reg.branch && <span>• {reg.branch.name}</span>}
                             </div>
                             <h3 className="font-bold text-base text-gray-900 dark:text-white">{reg.name}</h3>
                             <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                                {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500">UZS</span>
+                                {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
                             </p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center font-bold">
@@ -271,7 +271,7 @@ export default function FinanceIndex({
                 <button
                     onClick={() => setActiveTab('registers')}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'registers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500'
+                        activeTab === 'registers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
                     {t('finance.tab_registers', 'Kassalar')}
@@ -279,7 +279,7 @@ export default function FinanceIndex({
                 <button
                     onClick={() => setActiveTab('payments')}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'payments' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500'
+                        activeTab === 'payments' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
                     {t('finance.tab_payments', 'Kirim To\'lovlar')}
@@ -287,7 +287,7 @@ export default function FinanceIndex({
                 <button
                     onClick={() => setActiveTab('expenses')}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'expenses' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500'
+                        activeTab === 'expenses' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
                     {t('finance.tab_expenses', 'Chiqim Xarajatlar')}
@@ -295,7 +295,7 @@ export default function FinanceIndex({
                 <button
                     onClick={() => setActiveTab('shifts')}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'shifts' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500'
+                        activeTab === 'shifts' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
                     {t('finance.tab_shifts', 'Kassa Smenalari')}
@@ -303,7 +303,7 @@ export default function FinanceIndex({
                 <button
                     onClick={() => setActiveTab('transfers')}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500'
+                        activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
                     {t('finance.tab_transfers', 'Transferlar')}
@@ -314,7 +314,7 @@ export default function FinanceIndex({
             {activeTab === 'payments' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('finance.receipt', 'Chek №')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.student', 'Talaba')}</th>
@@ -328,11 +328,11 @@ export default function FinanceIndex({
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {payments.data.map((p) => (
-                                <tr key={p.id} className="hover:bg-gray-50/50">
+                                <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                     <td className="p-3.5 font-semibold text-gray-900 dark:text-white">#{p.receipt_number}</td>
                                     <td className="p-3.5 font-medium">{p.student?.full_name}</td>
-                                    <td className="p-3.5 text-gray-500">#{p.contract?.contract_number}</td>
-                                    <td className="p-3.5 font-bold text-emerald-600">
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">#{p.contract?.contract_number}</td>
+                                    <td className="p-3.5 font-bold text-emerald-600 dark:text-emerald-400">
                                         +{Number(p.amount).toLocaleString('uz-UZ')} UZS
                                     </td>
                                     <td className="p-3.5">
@@ -340,9 +340,9 @@ export default function FinanceIndex({
                                             {p.payment_method}
                                         </span>
                                     </td>
-                                    <td className="p-3.5 text-gray-500">{p.cash_register?.name}</td>
-                                    <td className="p-3.5 text-gray-500">{p.received_by?.name || '-'}</td>
-                                    <td className="p-3.5 text-gray-400">{p.paid_at}</td>
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.cash_register?.name}</td>
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.received_by?.name || '-'}</td>
+                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{p.paid_at}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -354,7 +354,7 @@ export default function FinanceIndex({
             {activeTab === 'expenses' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('finance.category', 'Kategoriya')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.description', 'Tavsif')}</th>
@@ -366,15 +366,15 @@ export default function FinanceIndex({
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {expenses.data.map((e) => (
-                                <tr key={e.id} className="hover:bg-gray-50/50">
+                                <tr key={e.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                     <td className="p-3.5 font-medium">{e.category?.name || '-'}</td>
                                     <td className="p-3.5 text-gray-700 dark:text-gray-300">{e.description}</td>
-                                    <td className="p-3.5 font-bold text-red-500">
+                                    <td className="p-3.5 font-bold text-red-500 dark:text-red-400">
                                         -{Number(e.amount).toLocaleString('uz-UZ')} UZS
                                     </td>
-                                    <td className="p-3.5 text-gray-500">{e.cash_register?.name}</td>
-                                    <td className="p-3.5 text-gray-500">{e.user?.name || '-'}</td>
-                                    <td className="p-3.5 text-gray-400">{e.expense_date}</td>
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.cash_register?.name}</td>
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</td>
+                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{e.expense_date}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -386,7 +386,7 @@ export default function FinanceIndex({
             {activeTab === 'shifts' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.status', 'Holat')}</th>
@@ -400,19 +400,19 @@ export default function FinanceIndex({
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {shifts.data.map((sh) => (
-                                <tr key={sh.id} className="hover:bg-gray-50/50">
+                                <tr key={sh.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                     <td className="p-3.5 font-medium">{sh.cash_register?.name}</td>
                                     <td className="p-3.5">
-                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${sh.status === 'open' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${sh.status === 'open' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
                                             {sh.status === 'open' ? t('finance.open', 'Ochiq') : t('finance.closed', 'Yopiq')}
                                         </span>
                                     </td>
                                     <td className="p-3.5">{Number(sh.opening_balance).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-emerald-600 font-semibold">+{Number(sh.total_income).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-red-500 font-semibold">-{Number(sh.total_expense).toLocaleString('uz-UZ')} UZS</td>
+                                    <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-semibold">+{Number(sh.total_income).toLocaleString('uz-UZ')} UZS</td>
+                                    <td className="p-3.5 text-red-500 dark:text-red-400 font-semibold">-{Number(sh.total_expense).toLocaleString('uz-UZ')} UZS</td>
                                     <td className="p-3.5 font-bold">{Number(sh.closing_balance || 0).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-gray-400">{sh.opened_at}</td>
-                                    <td className="p-3.5 text-gray-400">{sh.closed_at || '-'}</td>
+                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{sh.opened_at}</td>
+                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{sh.closed_at || '-'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -424,7 +424,7 @@ export default function FinanceIndex({
             {activeTab === 'transfers' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('finance.from_register', 'Chiqim Kassasi')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</th>
@@ -436,22 +436,22 @@ export default function FinanceIndex({
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {transfers.data.map((tr) => (
-                                <tr key={tr.id} className="hover:bg-gray-50/50">
+                                <tr key={tr.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                     <td className="p-3.5 font-medium">{tr.from_cash_register?.name}</td>
                                     <td className="p-3.5 font-medium">{tr.to_cash_register?.name}</td>
                                     <td className="p-3.5 font-bold">{Number(tr.amount).toLocaleString('uz-UZ')} UZS</td>
                                     <td className="p-3.5">
                                         <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                                             tr.status === 'approved'
-                                                ? 'bg-emerald-50 text-emerald-700'
+                                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                                                 : tr.status === 'pending'
-                                                ? 'bg-amber-50 text-amber-700'
-                                                : 'bg-red-50 text-red-700'
+                                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                                : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
                                         }`}>
                                             {tr.status}
                                         </span>
                                     </td>
-                                    <td className="p-3.5 text-gray-500">{tr.transferred_by?.name || '-'}</td>
+                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{tr.transferred_by?.name || '-'}</td>
                                     <td className="p-3.5 text-right">
                                         {tr.status === 'pending' && (
                                             <Button

@@ -167,7 +167,7 @@ export default function SalariesIndex({
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('salaries.employee', 'Xodim')}</th>
                                 <th className="p-3.5 font-semibold">{t('salaries.role', 'Lavozim')}</th>
@@ -182,17 +182,17 @@ export default function SalariesIndex({
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {salaries.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="p-8 text-center text-gray-400">
+                                    <td colSpan={8} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                         {t('salaries.no_salaries', 'Ushbu oy uchun hali oyliklar hisoblanmagan.')}
                                     </td>
                                 </tr>
                             ) : (
                                 salaries.data.map((sal) => (
-                                    <tr key={sal.id} className="hover:bg-gray-50/50">
+                                    <tr key={sal.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                         <td className="p-3.5 font-medium text-gray-900 dark:text-white">
                                             {sal.user?.name}
                                         </td>
-                                        <td className="p-3.5 text-gray-500">
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
                                             {sal.user?.role}
                                         </td>
                                         <td className="p-3.5">
@@ -200,7 +200,7 @@ export default function SalariesIndex({
                                                 {sal.type}
                                             </span>
                                         </td>
-                                        <td className={`p-3.5 font-bold ${sal.is_deduction ? 'text-red-500' : 'text-emerald-600'}`}>
+                                        <td className={`p-3.5 font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                             {sal.is_deduction ? '-' : '+'}{Number(sal.amount).toLocaleString('uz-UZ')} UZS
                                         </td>
                                         <td className="p-3.5 font-semibold text-gray-800 dark:text-gray-200">
@@ -209,13 +209,13 @@ export default function SalariesIndex({
                                         <td className="p-3.5">
                                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                                                 sal.status === 'paid'
-                                                    ? 'bg-emerald-50 text-emerald-700'
-                                                    : 'bg-amber-50 text-amber-700'
+                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                                             }`}>
                                                 {sal.status}
                                             </span>
                                         </td>
-                                        <td className="p-3.5 text-gray-500 max-w-xs truncate">
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400 max-w-xs truncate">
                                             {sal.description || '-'}
                                         </td>
                                         <td className="p-3.5 text-right">

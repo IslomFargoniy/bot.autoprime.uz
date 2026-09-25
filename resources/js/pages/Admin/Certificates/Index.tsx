@@ -113,7 +113,7 @@ export default function CertificatesIndex({
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="p-3.5 font-semibold">{t('certificates.number', 'Guvohnoma №')}</th>
                                 <th className="p-3.5 font-semibold">{t('certificates.student', 'Bitiruvchi')}</th>
@@ -128,31 +128,31 @@ export default function CertificatesIndex({
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {certificates.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="p-8 text-center text-gray-400">
+                                    <td colSpan={8} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                         {t('certificates.no_certificates', 'Guvohnomalar topilmadi')}
                                     </td>
                                 </tr>
                             ) : (
                                 certificates.data.map((cert) => (
-                                    <tr key={cert.id} className="hover:bg-gray-50/50">
+                                    <tr key={cert.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
                                         <td className="p-3.5 font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                             <Award className="w-4 h-4 text-amber-500" />
                                             #{cert.certificate_number}
                                         </td>
                                         <td className="p-3.5 font-medium">{cert.student?.full_name}</td>
                                         <td className="p-3.5">
-                                            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold">
+                                            <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold">
                                                 {cert.category}
                                             </span>
                                         </td>
-                                        <td className="p-3.5 text-gray-500">#{cert.contract?.contract_number}</td>
-                                        <td className="p-3.5 text-gray-500">{cert.branch?.name || '-'}</td>
-                                        <td className="p-3.5 text-gray-600">{cert.issued_date}</td>
-                                        <td className="p-3.5 text-gray-500">{cert.issued_by?.name || '-'}</td>
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">#{cert.contract?.contract_number}</td>
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{cert.branch?.name || '-'}</td>
+                                        <td className="p-3.5 text-gray-600 dark:text-gray-300">{cert.issued_date}</td>
+                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{cert.issued_by?.name || '-'}</td>
                                         <td className="p-3.5 text-right space-x-1">
                                             <a
                                                 href={`/admin/certificates/${cert.id}/download-pdf`}
-                                                className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium text-xs"
+                                                className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs"
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
@@ -161,7 +161,7 @@ export default function CertificatesIndex({
                                             </a>
                                             <a
                                                 href={`/certificates/verify/${cert.qr_verify_hash}`}
-                                                className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs"
+                                                className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-xs"
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
