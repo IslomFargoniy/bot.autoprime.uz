@@ -244,6 +244,14 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::put('admin/tests/signs/{sign}', [TestController::class, 'updateSign'])->name('tests.signs.update');
     Route::delete('admin/tests/signs/{sign}', [TestController::class, 'destroySign'])->name('tests.signs.destroy');
 
+    Route::post('admin/tests/road-lines', [TestController::class, 'storeRoadLine'])->name('tests.road-lines.store');
+    Route::put('admin/tests/road-lines/{roadLine}', [TestController::class, 'updateRoadLine'])->name('tests.road-lines.update');
+    Route::delete('admin/tests/road-lines/{roadLine}', [TestController::class, 'destroyRoadLine'])->name('tests.road-lines.destroy');
+
+    Route::post('admin/tests/sign-categories', [TestController::class, 'storeSignCategory'])->name('tests.sign-categories.store');
+    Route::put('admin/tests/sign-categories/{signCategory}', [TestController::class, 'updateSignCategory'])->name('tests.sign-categories.update');
+    Route::delete('admin/tests/sign-categories/{signCategory}', [TestController::class, 'destroySignCategory'])->name('tests.sign-categories.destroy');
+
     // Vehicles & Fleet
     Route::resource('admin/vehicles', VehicleController::class)->except(['create', 'show', 'edit']);
     Route::post('admin/vehicles/{vehicle}/maintenances', [VehicleController::class, 'storeMaintenance'])->name('vehicles.store-maintenance');

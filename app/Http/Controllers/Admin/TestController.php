@@ -329,4 +329,132 @@ class TestController extends Controller
 
         return back()->with('success', 'Yo\'l belgisi o\'chirildi');
     }
+
+    /**
+     * Create a new Road Line.
+     */
+    public function storeRoadLine(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'line_number' => 'required|string|max:50',
+            'name_uz' => 'required|string|max:255',
+            'description_uz' => 'nullable|string',
+            'image' => 'nullable|image|max:5120',
+            'image_url' => 'nullable|string',
+        ]);
+
+        $imageUrl = $validated['image_url'] ?? null;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('road_lines', 'public');
+            $imageUrl = '/storage/'.$path;
+        }
+
+        RoadLine::create([
+            'line_number' => $validated['line_number'],
+            'name_uz' => $validated['name_uz'],
+            'name_ru' => $validated['name_uz'],
+            'name_krill' => $validated['name_uz'],
+            'name_en' => $validated['name_uz'],
+            'description_uz' => $validated['description_uz'] ?? '',
+            'description_ru' => $validated['description_uz'] ?? '',
+            'description_krill' => $validated['description_uz'] ?? '',
+            'description_en' => $validated['description_uz'] ?? '',
+            'image_url' => $imageUrl,
+        ]);
+
+        return back()->with('success', 'Yo\'l chizig\'i qo\'shildi');
+    }
+
+    /**
+     * Update an existing Road Line.
+     */
+    public function updateRoadLine(Request $request, RoadLine $roadLine): RedirectResponse
+    {
+        $validated = $request->validate([
+            'line_number' => 'required|string|max:50',
+            'name_uz' => 'required|string|max:255',
+            'description_uz' => 'nullable|string',
+            'image' => 'nullable|image|max:5120',
+            'image_url' => 'nullable|string',
+        ]);
+
+        $imageUrl = $roadLine->image_url;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('road_lines', 'public');
+            $imageUrl = '/storage/'.$path;
+        } elseif ($request->filled('image_url')) {
+            $imageUrl = $validated['image_url'];
+        }
+
+        $roadLine->update([
+            'line_number' => $validated['line_number'],
+            'name_uz' => $validated['name_uz'],
+            'description_uz' => $validated['description_uz'] ?? '',
+            'image_url' => $imageUrl,
+        ]);
+
+        return back()->with('success', 'Yo\'l chizig\'i yangilandi');
+    }
+
+    /**
+     * Delete a Road Line.
+     */
+    public function destroyRoadLine(RoadLine $roadLine): RedirectResponse
+    {
+        $roadLine->delete();
+
+        return back()->with('success', 'Yo\'l chizig\'i o\'chirildi');
+    }
+
+    /**
+     * Create a Sign Category.
+     */
+    public function storeSignCategory(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name_uz' => 'required|string|max:255',
+            'order' => 'nullable|integer',
+        ]);
+
+        $order = $validated['order'] ?? (SignCategory::max('order') + 1);
+
+        SignCategory::create([
+            'name_uz' => $validated['name_uz'],
+            'name_ru' => $validated['name_uz'],
+            'name_krill' => $validated['name_uz'],
+            'name_en' => $validated['name_uz'],
+            'slug' => \Illuminate\Support\Str::slug($validated['name_uz']),
+            'order' => $order,
+        ]);
+
+        return back()->with('success', 'Yo\'l belgisi toifasi qo\'shildi');
+    }
+
+    /**
+     * Update an existing Sign Category.
+     */
+    public function updateSignCategory(Request $request, SignCategory $signCategory): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name_uz' => 'required|string|max:255',
+            'order' => 'nullable|integer',
+        ]);
+
+        $signCategory->update($validated);
+
+        return back()->with('success', 'Toifa yangilandi');
+    }
+
+    /**
+     * Delete a Sign Category.
+     */
+    public function destroySignCategory(SignCategory $signCategory): RedirectResponse
+    {
+        DB::transaction(function () use ($signCategory) {
+            $signCategory->signs()->delete();
+            $signCategory->delete();
+        });
+
+        return back()->with('success', 'Toifa va uning belgilari o\'chirildi');
+    }
 }
