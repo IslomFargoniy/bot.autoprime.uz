@@ -224,6 +224,7 @@ class DrivingController extends Controller
 
             if ($activeContract && $activeContract->has_driving && $activeContract->hasReachedDrivingLimit()) {
                 $limit = $activeContract->required_driving_lessons ?: ($activeContract->contractType?->required_driving_lessons ?? 0);
+
                 return redirect()->back()->withErrors([
                     'student_ids' => "{$student->full_name} talabasining amaliy mashg'ulotlar limiti ({$limit} ta dars) to'lgan. Yangi dars biriktirish uchun qo'shimcha shartnoma yoki to'lov talab qilinadi.",
                 ]);

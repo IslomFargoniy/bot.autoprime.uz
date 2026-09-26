@@ -6,7 +6,9 @@ use App\Models\CashRegisterType;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Course;
+use App\Models\Driving;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Group;
 use App\Models\LessonSession;
 use App\Models\Payment;
@@ -316,7 +318,7 @@ test('deleting expense refunds the cash register balance', function () {
         'is_active' => true,
     ]);
 
-    $category = \App\Models\ExpenseCategory::firstOrCreate(['name' => 'Ofis xarajatlari'], ['is_active' => true]);
+    $category = ExpenseCategory::firstOrCreate(['name' => 'Ofis xarajatlari'], ['is_active' => true]);
 
     $expense = Expense::create([
         'branch_id' => $branch->id,
@@ -436,7 +438,7 @@ test('driving controller blocks scheduling when contract driving limit is reache
         ->and($contract->getRemainingDrivingLessonsCount())->toBe(2);
 
     // Create 2 drivings under this contract
-    \App\Models\Driving::create([
+    Driving::create([
         'branch_id' => $branch->id,
         'instructor_id' => $instructor->id,
         'student_id' => $student->id,
@@ -446,7 +448,7 @@ test('driving controller blocks scheduling when contract driving limit is reache
         'status' => 'scheduled',
     ]);
 
-    \App\Models\Driving::create([
+    Driving::create([
         'branch_id' => $branch->id,
         'instructor_id' => $instructor->id,
         'student_id' => $student->id,
