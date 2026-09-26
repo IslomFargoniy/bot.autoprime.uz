@@ -739,69 +739,69 @@ export default function TestsIndex({
 
             {/* KPI Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="bg-card text-card-foreground p-4 rounded-xl border border-border shadow-xs">
+                    <p className="text-xs text-muted-foreground font-medium">
                         {t('tests.stats_tickets', 'Jami Biletlar')}
                     </p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                    <p className="text-xl font-bold text-foreground mt-1">
                         {stats.total_tickets}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{tickets.length} ta bilet</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{tickets.length} ta bilet</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="bg-card text-card-foreground p-4 rounded-xl border border-border shadow-xs">
+                    <p className="text-xs text-muted-foreground font-medium">
                         {t('tests.stats_questions', 'Jami Savollar')}
                     </p>
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">
                         {stats.total_questions.toLocaleString()}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">4 tilda to'liq baza</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">4 tilda to'liq baza</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="bg-card text-card-foreground p-4 rounded-xl border border-border shadow-xs">
+                    <p className="text-xs text-muted-foreground font-medium">
                         {t('tests.stats_signs', 'Belgi & Chiziqlar')}
                     </p>
                     <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
                         {stats.total_signs + roadLines.length}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                         {stats.total_signs} {t('tests.signs_label', 'belgi')} + {roadLines.length} {t('tests.lines_label', 'chiziq')}
                     </p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="bg-card text-card-foreground p-4 rounded-xl border border-border shadow-xs">
+                    <p className="text-xs text-muted-foreground font-medium">
                         {t('tests.stats_attempts', 'Topshirilgan Testlar')}
                     </p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                    <p className="text-xl font-bold text-foreground mt-1">
                         {stats.total_attempts.toLocaleString()}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                         {t('tests.stats_passed_count', 'O\'tganlar')}: {stats.passed_attempts}
                     </p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="bg-card text-card-foreground p-4 rounded-xl border border-border shadow-xs">
+                    <p className="text-xs text-muted-foreground font-medium">
                         {t('tests.stats_pass_rate', 'O\'tish Ko\'rsatkichi')}
                     </p>
                     <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                         {passRate}%
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">kamida 18/20 (90%)</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">kamida 18/20 (90%)</p>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <div className="flex border-b border-border">
                 <button
                     onClick={() => setActiveTab('attempts')}
                     className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
                         activeTab === 'attempts'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                 >
                     {t('tests.tab_attempts', 'O\'quvchilar Imtihon Natijalari')} ({attempts.total})
@@ -811,7 +811,7 @@ export default function TestsIndex({
                     className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
                         activeTab === 'tickets'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                 >
                     {t('tests.tab_tickets', '130 ta Biletlar va Savollar')} ({tickets.length})
@@ -821,7 +821,7 @@ export default function TestsIndex({
                     className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
                         activeTab === 'signs'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                 >
                     {t('tests.tab_signs', 'Yo\'l belgilari & Chiziqlari')} ({stats.total_signs + roadLines.length})
@@ -832,9 +832,9 @@ export default function TestsIndex({
             {activeTab === 'attempts' && (
                 <div className="space-y-4">
                     {/* Filters Bar */}
-                    <form onSubmit={handleFilterSubmit} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-wrap items-center gap-3">
+                    <form onSubmit={handleFilterSubmit} className="bg-card text-card-foreground p-4 rounded-xl border border-border flex flex-wrap items-center gap-3">
                         <div className="relative flex-1 min-w-[200px]">
-                            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                             <Input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -846,7 +846,7 @@ export default function TestsIndex({
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 outline-none"
+                            className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-ring"
                         >
                             <option value="">{t('tests.filter_all_status', 'Barcha natijalar')}</option>
                             <option value="passed">{t('tests.filter_passed', 'Faqat o\'tganlar')}</option>
@@ -856,7 +856,7 @@ export default function TestsIndex({
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 outline-none"
+                            className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-ring"
                         >
                             <option value="">{t('tests.filter_all_types', 'Barcha turlar')}</option>
                             <option value="random_mock">{t('tests.type_mock', 'Ichki Nazorat Imtihoni')}</option>
@@ -873,10 +873,10 @@ export default function TestsIndex({
                     </form>
 
                     {/* Attempts Table */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                    <div className="bg-card text-card-foreground rounded-xl border border-border overflow-hidden shadow-xs">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs">
-                                <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-100 dark:border-gray-700">
+                                <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border">
                                     <tr>
                                         <th className="py-3 px-4">{t('tests.col_student', 'Talaba')}</th>
                                         <th className="py-3 px-4">{t('tests.col_branch', 'Filial')}</th>
@@ -887,25 +887,25 @@ export default function TestsIndex({
                                         <th className="py-3 px-4">{t('tests.col_date', 'Sana')}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tbody className="divide-y divide-border">
                                     {attempts.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="py-8 text-center text-gray-400">
+                                            <td colSpan={7} className="py-8 text-center text-muted-foreground">
                                                 {t('tests.no_attempts', 'Hech qanday imtihon natijalari topilmadi')}
                                             </td>
                                         </tr>
                                     ) : (
                                         attempts.data.map((att) => (
-                                            <tr key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-750">
+                                            <tr key={att.id} className="hover:bg-muted/40 transition-colors">
                                                 <td className="py-3 px-4">
-                                                    <p className="font-semibold text-gray-900 dark:text-white">
+                                                    <p className="font-semibold text-foreground">
                                                         {att.student?.full_name || t('tests.guest_student', 'Mehmon O\'quvchi')}
                                                     </p>
-                                                    <p className="text-[11px] text-gray-400">
+                                                    <p className="text-[11px] text-muted-foreground">
                                                         {att.student?.phone || '—'}
                                                     </p>
                                                 </td>
-                                                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                                                <td className="py-3 px-4 text-muted-foreground">
                                                     {att.student?.branch?.name || '—'}
                                                 </td>
                                                 <td className="py-3 px-4">
@@ -920,14 +920,14 @@ export default function TestsIndex({
                                                     )}
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="font-bold text-gray-900 dark:text-white">
+                                                    <div className="font-bold text-foreground">
                                                         {att.correct_answers} / {att.total_questions} ({Number(att.score_percentage).toFixed(0)}%)
                                                     </div>
-                                                    <div className="text-[10px] text-gray-400">
+                                                    <div className="text-[10px] text-muted-foreground">
                                                         {att.wrong_answers} {t('tests.wrong_count', 'ta xato')}
                                                     </div>
                                                 </td>
-                                                <td className="py-3 px-4 text-gray-500">
+                                                <td className="py-3 px-4 text-muted-foreground">
                                                     {formatSeconds(att.duration_seconds)}
                                                 </td>
                                                 <td className="py-3 px-4">
@@ -943,7 +943,7 @@ export default function TestsIndex({
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="py-3 px-4 text-gray-400 text-[11px]">
+                                                <td className="py-3 px-4 text-muted-foreground text-[11px]">
                                                     {new Date(att.created_at).toLocaleString('uz-UZ', {
                                                         year: 'numeric',
                                                         month: 'short',
@@ -1043,11 +1043,12 @@ export default function TestsIndex({
                     {/* Category Filter Chips */}
                     <div className="flex flex-wrap items-center gap-2">
                         <button
+                            type="button"
                             onClick={() => setSelectedSignCategory('all')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'all'
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                                    ? 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                                    : 'bg-muted/70 text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
                             }`}
                         >
                             {t('tests.all_signs', 'Barchasi')} ({stats.total_signs + roadLines.length})
@@ -1056,17 +1057,19 @@ export default function TestsIndex({
                         {signCategories.map((cat) => (
                             <div key={cat.id} className="relative group inline-flex items-center">
                                 <button
+                                    type="button"
                                     onClick={() => setSelectedSignCategory(cat.id)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                         selectedSignCategory === cat.id
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                                            ? 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                                            : 'bg-muted/70 text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
                                     }`}
                                 >
                                     {cat.name_uz} ({cat.signs?.length || 0})
                                 </button>
                                 {selectedSignCategory === cat.id && (
                                     <button
+                                        type="button"
                                         onClick={() => handleDeleteCategory(cat)}
                                         className="ml-1 text-rose-500 hover:text-rose-700 p-1"
                                         title={t('tests.delete_category', 'Toifani o\'chirish')}
@@ -1078,17 +1081,18 @@ export default function TestsIndex({
                         ))}
 
                         <button
+                            type="button"
                             onClick={() => setSelectedSignCategory('lines')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'lines'
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                                    ? 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                                    : 'bg-muted/70 text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
                             }`}
                         >
                             {t('tests.road_lines_category', 'Yo\'l chiziqlari')} ({roadLines.length})
                         </button>
 
-                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/10">
+                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-primary hover:bg-accent hover:text-accent-foreground">
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             {t('tests.add_category', '+ Toifa')}
                         </Button>
@@ -1100,20 +1104,20 @@ export default function TestsIndex({
                             ? roadLines.map((line) => (
                                   <div
                                       key={line.id}
-                                      className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs relative group"
+                                      className="bg-card text-card-foreground p-3 rounded-xl border border-border flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow relative group"
                                   >
                                       {/* Action buttons directly accessible */}
                                       <div className="absolute top-2 right-2 flex items-center gap-1">
                                           <button
                                               onClick={() => openEditRoadLineModal(line)}
-                                              className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
+                                              className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                                               title={t('common.edit', 'Tahrirlash')}
                                           >
                                               <Pencil className="w-3 h-3" />
                                           </button>
                                           <button
                                               onClick={() => handleDeleteRoadLine(line)}
-                                              className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
+                                              className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                                               title={t('common.delete', 'O\'chirish')}
                                           >
                                               <Trash2 className="w-3 h-3" />
@@ -1128,14 +1132,14 @@ export default function TestsIndex({
                                               loading="lazy"
                                           />
                                       ) : (
-                                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2 mt-4">
+                                          <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center text-muted-foreground mb-2 mt-4">
                                               —
                                           </div>
                                       )}
                                       <p className="font-bold text-xs text-blue-600 dark:text-blue-400 mb-1">
                                           {line.line_number || (line as any).number}
                                       </p>
-                                      <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
+                                      <p className="text-[11px] font-medium text-foreground line-clamp-2">
                                           {line.name_uz}
                                       </p>
                                   </div>
@@ -1146,20 +1150,20 @@ export default function TestsIndex({
                                   .map((sign) => (
                                       <div
                                           key={sign.id}
-                                          className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow relative group"
+                                          className="bg-card text-card-foreground p-3 rounded-xl border border-border flex flex-col items-center text-center shadow-xs hover:shadow-md transition-shadow relative group"
                                       >
                                           {/* Action buttons directly accessible */}
                                           <div className="absolute top-2 right-2 flex items-center gap-1">
                                               <button
                                                   onClick={() => openEditSignModal(sign)}
-                                                  className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
+                                                  className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                                                   title={t('common.edit', 'Tahrirlash')}
                                               >
                                                   <Pencil className="w-3 h-3" />
                                               </button>
                                               <button
                                                   onClick={() => handleDeleteSign(sign)}
-                                                  className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
+                                                  className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                                                   title={t('common.delete', 'O\'chirish')}
                                               >
                                                   <Trash2 className="w-3 h-3" />
@@ -1174,14 +1178,14 @@ export default function TestsIndex({
                                                   loading="lazy"
                                               />
                                           ) : (
-                                              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 mb-2 mt-4">
+                                              <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center text-muted-foreground mb-2 mt-4">
                                                   —
                                               </div>
                                           )}
                                           <p className="font-bold text-[11px] text-blue-600 dark:text-blue-400 mb-0.5">
                                               {sign.sign_number}
                                           </p>
-                                          <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
+                                          <p className="text-[11px] font-medium text-foreground line-clamp-2">
                                               {sign.name_uz}
                                           </p>
                                       </div>
@@ -1443,9 +1447,9 @@ export default function TestsIndex({
                                 className="hidden"
                             />
                             {questionPreview ? (
-                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                <div className="relative rounded-xl border border-border bg-muted/30 p-2.5 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                        <div className="w-16 h-16 rounded-lg border border-border bg-background flex items-center justify-center overflow-hidden shrink-0">
                                             <img
                                                 src={questionPreview}
                                                 alt="Preview"
@@ -1453,10 +1457,10 @@ export default function TestsIndex({
                                             />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                            <p className="text-xs font-medium text-foreground truncate">
                                                 {questionFile ? questionFile.name : t('tests.current_image', 'Joriy rasm')}
                                             </p>
-                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                            <p className="text-[11px] text-muted-foreground">
                                                 {questionFile ? `${(questionFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
                                             </p>
                                         </div>
@@ -1636,9 +1640,9 @@ export default function TestsIndex({
                                 className="hidden"
                             />
                             {signPreview ? (
-                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                <div className="relative rounded-xl border border-border bg-muted/30 p-2.5 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                        <div className="w-16 h-16 rounded-lg border border-border bg-background flex items-center justify-center overflow-hidden shrink-0">
                                             <img
                                                 src={signPreview}
                                                 alt="Preview"
@@ -1646,10 +1650,10 @@ export default function TestsIndex({
                                             />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                            <p className="text-xs font-medium text-foreground truncate">
                                                 {signFile ? signFile.name : t('tests.current_image', 'Joriy rasm')}
                                             </p>
-                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                            <p className="text-[11px] text-muted-foreground">
                                                 {signFile ? `${(signFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
                                             </p>
                                         </div>
@@ -1758,9 +1762,9 @@ export default function TestsIndex({
                                 className="hidden"
                             />
                             {roadLinePreview ? (
-                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                <div className="relative rounded-xl border border-border bg-muted/30 p-2.5 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                        <div className="w-16 h-16 rounded-lg border border-border bg-background flex items-center justify-center overflow-hidden shrink-0">
                                             <img
                                                 src={roadLinePreview}
                                                 alt="Preview"
@@ -1768,10 +1772,10 @@ export default function TestsIndex({
                                             />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                            <p className="text-xs font-medium text-foreground truncate">
                                                 {roadLineFile ? roadLineFile.name : t('tests.current_image', 'Joriy rasm')}
                                             </p>
-                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                            <p className="text-[11px] text-muted-foreground">
                                                 {roadLineFile ? `${(roadLineFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
                                             </p>
                                         </div>
