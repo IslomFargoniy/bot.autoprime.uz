@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
@@ -25,6 +26,8 @@ use Inertia\Response;
 
 class ContractController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -114,9 +117,9 @@ class ContractController extends Controller
     public function store(Request $request, TelegramService $telegramService): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_id' => ['required', $this->existsInUserBranch($request, 'students')],
             'contract_type_id' => 'required|exists:contract_types,id',
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
             'discount_amount' => 'nullable|numeric|min:0',
             'start_date' => 'nullable|date',
@@ -216,7 +219,7 @@ class ContractController extends Controller
     public function refund(Request $request, Contract $contract): RedirectResponse
     {
         $validated = $request->validate([
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'amount' => 'required|numeric|min:1',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'cancel_contract' => 'nullable|boolean',

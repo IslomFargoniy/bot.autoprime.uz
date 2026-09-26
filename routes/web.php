@@ -101,7 +101,7 @@ Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt']
 Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
 Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats'])->name('tests.stats');
 
-Route::middleware(['auth.telegram'])->group(function () {
+Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -253,5 +253,5 @@ Route::middleware(['auth.telegram'])->group(function () {
         ->middlewareFor('index', 'permission:fleet.view')
         ->middlewareFor(['store', 'update', 'destroy'], 'permission:fleet.manage');
     Route::post('admin/vehicles/{vehicle}/maintenances', [VehicleController::class, 'storeMaintenance'])->middleware('permission:fleet.manage')->name('vehicles.store-maintenance');
-    Route::delete('admin/vehicles/{vehicle}/maintenances/{maintenance}', [VehicleController::class, 'destroyMaintenance'])->middleware('permission:fleet.manage')->name('vehicles.destroy-maintenance');
+    Route::delete('admin/vehicles/{vehicle}/maintenances/{maintenance}', [VehicleController::class, 'destroyMaintenance'])->middleware('permission:fleet.manage')->scopeBindings()->name('vehicles.destroy-maintenance');
 });

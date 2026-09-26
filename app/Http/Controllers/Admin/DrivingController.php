@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\DrivingsExport;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendDrivingCreatedNotificationJob;
@@ -22,6 +23,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DrivingController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function export(Request $request)
     {
         $filters = $request->all();
@@ -155,12 +158,12 @@ class DrivingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'instructor_id' => 'required|exists:users,id',
+            'instructor_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'student_ids' => 'required|array',
-            'student_ids.*' => 'exists:students,id',
-            'group_id' => 'nullable|exists:groups,id',
-            'autodrome_id' => 'nullable|exists:autodromes,id',
-            'vehicle_id' => 'nullable|exists:vehicles,id',
+            'student_ids.*' => [$this->existsInUserBranch($request, 'students')],
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
+            'vehicle_id' => ['nullable', $this->existsInUserBranch($request, 'vehicles')],
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
         ]);
@@ -270,7 +273,7 @@ class DrivingController extends Controller
         }
 
         $validated = $request->validate([
-            'autodrome_id' => 'nullable|exists:autodromes,id',
+            'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
             'start_time' => 'sometimes|required|date',
             'end_time' => 'sometimes|required|date|after:start_time',
             'status' => 'sometimes|required|in:scheduled,completed,cancelled',

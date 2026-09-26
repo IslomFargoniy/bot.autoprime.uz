@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Contract;
@@ -20,6 +21,8 @@ use Inertia\Response;
 
 class LeadController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -127,7 +130,7 @@ class LeadController extends Controller
         $validated = $request->validate([
             'contract_type_id' => 'required|exists:contract_types,id',
             'branch_id' => 'nullable|exists:branches,id',
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'discount_amount' => 'nullable|numeric|min:0',
         ]);
 

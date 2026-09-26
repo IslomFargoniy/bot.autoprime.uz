@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
@@ -19,6 +20,8 @@ use Inertia\Response;
 
 class VehicleController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -155,7 +158,7 @@ class VehicleController extends Controller
             'performed_date' => 'required|date',
             'next_due_date' => 'nullable|date',
             'odometer' => 'nullable|numeric|min:0',
-            'cash_register_id' => 'nullable|exists:cash_registers,id',
+            'cash_register_id' => ['nullable', $this->existsInUserBranch($request, 'cash_registers')],
             'notes' => 'nullable|string',
         ]);
 

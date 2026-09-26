@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Branch;
@@ -18,6 +19,8 @@ use Inertia\Response;
 
 class CertificateController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -113,7 +116,7 @@ class CertificateController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'contract_id' => 'required|exists:contracts,id',
+            'contract_id' => ['required', $this->existsInUserBranch($request, 'contracts')],
             'notes' => 'nullable|string',
         ]);
 

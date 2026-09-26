@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureBranchAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth.telegram' => ValidateTelegramMiniApp::class,
+            'branch.access' => EnsureBranchAccess::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
         ]);

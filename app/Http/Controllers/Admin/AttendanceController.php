@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Branch;
@@ -20,6 +21,8 @@ use Inertia\Response;
 
 class AttendanceController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -48,6 +51,7 @@ class AttendanceController extends Controller
 
         $activeSessions = LessonSession::with(['group', 'teacher'])
             ->where('status', 'active')
+            ->when($targetBranchId, fn ($q) => $q->where('branch_id', $targetBranchId))
             ->orderBy('started_at', 'desc')
             ->get();
 
@@ -87,7 +91,7 @@ class AttendanceController extends Controller
     public function startSession(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'group_id' => 'required|exists:groups,id',
+            'group_id' => ['required', $this->existsInUserBranch($request, 'groups')],
             'topic_id' => 'nullable|exists:topics,id',
         ]);
 
@@ -155,7 +159,7 @@ class AttendanceController extends Controller
     public function getGroupAttendances(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'group_id' => 'required|exists:groups,id',
+            'group_id' => ['required', $this->existsInUserBranch($request, 'groups')],
             'date' => 'nullable|date',
         ]);
 
@@ -215,7 +219,7 @@ class AttendanceController extends Controller
     public function markGroup(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'group_id' => 'required|exists:groups,id',
+            'group_id' => ['required', $this->existsInUserBranch($request, 'groups')],
             'date' => 'required|date',
             'topic' => 'nullable|string|max:255',
             'attendances' => 'required|array',
@@ -288,7 +292,7 @@ class AttendanceController extends Controller
     {
         $validated = $request->validate([
             'session_id' => 'nullable|exists:lesson_sessions,id',
-            'student_id' => 'required|exists:students,id',
+            'student_id' => ['required', $this->existsInUserBranch($request, 'students')],
             'date' => 'nullable|date',
             'status' => 'required|in:present,late,absent',
             'manual_reason' => 'required|string|max:255',

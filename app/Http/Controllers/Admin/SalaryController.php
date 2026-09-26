@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
@@ -23,6 +24,8 @@ use Inertia\Response;
 
 class SalaryController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -175,7 +178,7 @@ class SalaryController extends Controller
     public function storeCustomAdjustment(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'period' => 'required|date_format:Y-m',
             'type' => 'required|in:bonus,kpi,fine,advance',
             'amount' => 'required|numeric|min:1',
@@ -228,7 +231,7 @@ class SalaryController extends Controller
     public function pay(Request $request, Salary $salary): RedirectResponse
     {
         $validated = $request->validate([
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'amount' => 'required|numeric|min:1',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',

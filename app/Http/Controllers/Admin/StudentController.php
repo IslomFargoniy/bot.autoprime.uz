@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\StudentsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
@@ -15,6 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function export(Request $request)
     {
         $filters = $request->all();
@@ -158,7 +161,7 @@ class StudentController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students',
             'telegram_id' => 'nullable|string|unique:students',
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
@@ -184,7 +187,7 @@ class StudentController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students,phone,'.$student->id,
             'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
@@ -195,6 +198,14 @@ class StudentController extends Controller
 
     public function show(Student $student, Request $request): Response
     {
+        $user = $request->user();
+        if ($user->isInstructor()) {
+            $isOwnStudent = $student->group?->instructor_id === $user->id
+                || $student->drivings()->where('instructor_id', $user->id)->exists();
+
+            abort_unless($isOwnStudent, 403, 'Siz faqat o\'z o\'quvchilaringizni ko\'ra olasiz.');
+        }
+
         $student->load('group.instructor');
 
         $drivingsQuery = $student->drivings()

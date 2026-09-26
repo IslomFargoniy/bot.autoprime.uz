@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
@@ -26,15 +27,21 @@ use Inertia\Response;
 
 class FinanceController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
+        $isBranchRestricted = $request->user()->isBranchRestricted();
 
-        // 1. Cash Registers
+        // 1. Cash Registers (branch staff only see their own branch registers)
         $registersQuery = CashRegister::with(['branch', 'type'])->orderBy('branch_id')->orderBy('name');
         if ($targetBranchId) {
-            $registersQuery->where(function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)->orWhereNull('branch_id');
+            $registersQuery->where(function ($q) use ($targetBranchId, $isBranchRestricted) {
+                $q->where('branch_id', $targetBranchId);
+                if (! $isBranchRestricted) {
+                    $q->orWhereNull('branch_id');
+                }
             });
         }
         $cashRegisters = $registersQuery->get();
@@ -48,6 +55,10 @@ class FinanceController extends Controller
             ->with(['type'])
             ->orderBy('name')
             ->get();
+        if ($isBranchRestricted) {
+            // Central registers stay selectable as transfer targets without exposing their balance.
+            $superadminRegisters->each->makeHidden('balance');
+        }
 
         // 3. Recent Payments
         $paymentsQuery = Payment::with(['student', 'contract', 'cashRegister', 'receivedBy'])
@@ -72,9 +83,15 @@ class FinanceController extends Controller
 
         if ($request->filled('history_register_id')) {
             $transactionsQuery->where('cash_register_id', $request->input('history_register_id'));
-        } elseif ($targetBranchId) {
-            $transactionsQuery->whereHas('cashRegister', function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)->orWhereNull('branch_id');
+        }
+        if ($targetBranchId) {
+            $transactionsQuery->whereHas('cashRegister', function ($q) use ($targetBranchId, $isBranchRestricted) {
+                $q->where(function ($scope) use ($targetBranchId, $isBranchRestricted) {
+                    $scope->where('branch_id', $targetBranchId);
+                    if (! $isBranchRestricted) {
+                        $scope->orWhereNull('branch_id');
+                    }
+                });
             });
         }
 
@@ -152,8 +169,8 @@ class FinanceController extends Controller
     public function storePayment(Request $request, TelegramService $telegramService): RedirectResponse
     {
         $validated = $request->validate([
-            'contract_id' => 'required|exists:contracts,id',
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'contract_id' => ['required', $this->existsInUserBranch($request, 'contracts')],
+            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'amount' => 'required|numeric|min:1',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',
@@ -233,7 +250,7 @@ class FinanceController extends Controller
     public function storeExpense(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:500',
@@ -281,7 +298,7 @@ class FinanceController extends Controller
     public function createTransfer(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'from_cash_register_id' => 'required|exists:cash_registers,id|different:to_cash_register_id',
+            'from_cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers'), 'different:to_cash_register_id'],
             'to_cash_register_id' => 'required|exists:cash_registers,id',
             'amount' => 'required|numeric|min:1',
             'notes' => 'nullable|string',

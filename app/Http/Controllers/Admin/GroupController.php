@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\GroupStudentsExport;
 use App\Http\Controllers\Controller;
 use App\Imports\StudentsImport;
@@ -18,8 +19,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class GroupController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function exportStudents(Request $request, Group $group)
     {
+        $user = $request->user();
+        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
+            abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni eksport qila olasiz.');
+        }
+
         $filename = "guruh_{$group->name}_oquvchilar.xlsx";
 
         return Excel::download(new GroupStudentsExport($group, $request->all()), $filename);
@@ -90,7 +98,7 @@ class GroupController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'instructor_id' => 'nullable|exists:users,id',
+            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
             'branch_id' => 'nullable|exists:branches,id',
             'course_id' => 'nullable|exists:courses,id',
         ]);
@@ -115,7 +123,7 @@ class GroupController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'instructor_id' => 'nullable|exists:users,id',
+            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
             'branch_id' => 'nullable|exists:branches,id',
             'course_id' => 'nullable|exists:courses,id',
         ]);
