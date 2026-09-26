@@ -208,7 +208,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5 text-blue-600" />
@@ -301,7 +301,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                         {/* Module Checkboxes */}
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 space-y-2">
                             <span className="font-semibold block mb-1">{t('contract_types.included_modules', 'Kiritilgan Modullar')}:</span>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"

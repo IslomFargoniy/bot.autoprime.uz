@@ -139,12 +139,12 @@ export default function CoursesIndex({ courses }: PageProps) {
             </div>
 
             {/* Course Category Tabs */}
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar whitespace-nowrap pb-1">
                 {courses.map((c) => (
                     <button
                         key={c.id}
                         onClick={() => setSelectedCourse(c)}
-                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 ${
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 shrink-0 ${
                             selectedCourse?.id === c.id
                                 ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60'
@@ -162,7 +162,7 @@ export default function CoursesIndex({ courses }: PageProps) {
             {/* Selected Course Topics List */}
             {selectedCourse ? (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-xs">
-                    <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-4 gap-2 flex-wrap">
                         <div>
                             <h3 className="font-bold text-base text-gray-900 dark:text-white">
                                 {selectedCourse.title} ({selectedCourse.category} toifa)
@@ -253,7 +253,7 @@ export default function CoursesIndex({ courses }: PageProps) {
 
             {/* Create Course Modal */}
             <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -316,7 +316,7 @@ export default function CoursesIndex({ courses }: PageProps) {
 
             {/* Create Topic Modal */}
             <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -385,7 +385,7 @@ export default function CoursesIndex({ courses }: PageProps) {
 
             {/* Add PDF Material Modal */}
             <Dialog open={!!selectedTopicForMaterial} onOpenChange={(open) => !open && setSelectedTopicForMaterial(null)}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5 text-red-500" />

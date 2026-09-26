@@ -281,7 +281,7 @@ export default function StudentsIndex({ students, groups, branches = [], filters
             </div>
 
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
-                <DialogContent>
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <GraduationCap className="w-5 h-5 text-blue-600 dark:text-blue-400" />

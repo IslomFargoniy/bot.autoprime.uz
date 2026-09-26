@@ -398,8 +398,9 @@ export default function AttendanceIndex({
                 )}
             </div>
 
-            {/* Attendance Records Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
+            {/* Attendance Records Table / Desktop & Tablet */}
+            <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
+                <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50/80 dark:bg-gray-700/50">
@@ -455,6 +456,69 @@ export default function AttendanceIndex({
                         )}
                     </TableBody>
                 </Table>
+                </div>
+            </div>
+
+            {/* Attendance Records Mobile Cards Feed */}
+            <div className="md:hidden space-y-3 mb-4">
+                {attendances.data.length === 0 ? (
+                    <div className="bg-card border rounded-xl p-8 text-center text-sm text-muted-foreground shadow-xs">
+                        {t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
+                    </div>
+                ) : (
+                    attendances.data.map((att) => (
+                        <div key={att.id} className="bg-card border rounded-xl p-4 space-y-2.5 shadow-xs">
+                            {/* Header: Student Name + Status Badge */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <div className="font-semibold text-sm text-foreground">{att.student?.full_name}</div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">{att.student?.group?.name || '-'}</div>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${
+                                    att.status === 'present'
+                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                        : att.status === 'late'
+                                        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                                        : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
+                                }`}>
+                                    {att.status === 'present'
+                                        ? t('attendance.present', 'Bor')
+                                        : att.status === 'late'
+                                        ? t('attendance.late', 'Kechikkan')
+                                        : t('attendance.absent', 'Yo\'q')}
+                                </span>
+                            </div>
+
+                            {/* Date & Mode info */}
+                            <div className="grid grid-cols-2 gap-2 p-2 bg-muted/40 rounded-lg text-xs">
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('attendance.date', 'Sana')}:</span>
+                                    <span className="font-medium">{att.date}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('attendance.time', 'Vaqt')}:</span>
+                                    <span className="font-mono text-muted-foreground">{att.scanned_at || '-'}</span>
+                                </div>
+                            </div>
+
+                            {/* Footer: Scan type & Teacher */}
+                            <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
+                                <div>
+                                    {att.is_manual ? (
+                                        <span className="text-amber-600 dark:text-amber-400 font-medium">
+                                            ✍️ {t('attendance.manual', "Qo'lda")} {att.manual_reason ? `(${att.manual_reason})` : ''}
+                                        </span>
+                                    ) : (
+                                        <span className="text-blue-600 dark:text-blue-400 font-medium">
+                                            📷 {t('attendance.qr_scanned', 'Dinamik QR')}
+                                        </span>
+                                    )}
+                                </div>
+                                <div>👨‍🏫 {att.session?.teacher?.name || att.marked_by?.name || '-'}</div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Pagination */}
@@ -462,7 +526,7 @@ export default function AttendanceIndex({
 
             {/* Start Session Modal */}
             <Dialog open={showSessionModal} onOpenChange={setShowSessionModal}>
-                <DialogContent className="max-w-sm">
+                <DialogContent className="w-[95vw] max-w-sm max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Tv className="w-5 h-5 text-blue-600" />
@@ -496,7 +560,7 @@ export default function AttendanceIndex({
 
             {/* Group Journal & Manual Attendance Modal */}
             <Dialog open={showManualModal} onOpenChange={setShowManualModal}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5 text-blue-600" />

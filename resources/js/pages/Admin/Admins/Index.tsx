@@ -245,7 +245,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
 
             {/* Dialog Form */}
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="w-[95vw] sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <ShieldCheck className="w-5 h-5 text-blue-600" />

@@ -242,21 +242,21 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
     };
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
             <Head title={t('autodromes.title', 'Avtodromlar')} />
             
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('autodromes.title', 'Avtodromlar')}</h1>
+            <div className="flex items-center justify-between gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold">{t('autodromes.title', 'Avtodromlar')}</h1>
                 {!isInstructor && (
-                    <Button onClick={() => setShowForm(true)} variant="brand" className="text-xs">
+                    <Button onClick={() => setShowForm(true)} variant="brand" size="sm" className="text-xs shrink-0">
                         <Plus className="w-4 h-4 mr-1.5" />
-                        {t('common.add', "Qo'shish")}
+                        <span>{t('common.add', "Qo'shish")}</span>
                     </Button>
                 )}
             </div>
 
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -267,7 +267,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <Label required htmlFor="name">{t('autodromes.name', 'Nomi')}</Label>
                                 <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} placeholder="Masalan: Asosiy avtodrom" required className="mt-1" />
@@ -280,11 +280,11 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                             </div>
                         </div>
 
-                        <div className="border rounded-xl p-2 bg-muted/40 dark:bg-slate-900/50 h-[400px]">
+                        <div className="border rounded-xl p-2 bg-muted/40 dark:bg-slate-900/50 h-[280px] sm:h-[380px]">
                             <div className="flex justify-between items-center mb-2 px-1">
-                                <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
-                                    <MapPin className="w-4 h-4" /> 
-                                    {t('autodromes.map_hint', 'Xaritadan joyni tanlang (ustiga bosing)')}
+                                <p className="text-xs sm:text-sm text-muted-foreground font-medium flex items-center gap-1.5 truncate">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0" /> 
+                                    <span className="truncate">{t('autodromes.map_hint', 'Xaritadan joyni tanlang (ustiga bosing)')}</span>
                                 </p>
                                 <Button
                                     type="button"
@@ -292,10 +292,10 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                                     size="sm"
                                     onClick={handleLocateMe}
                                     disabled={locating}
-                                    className="h-8 text-xs bg-background text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/60 shadow-xs"
+                                    className="h-7 text-xs bg-background text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/60 shadow-xs shrink-0"
                                 >
                                     {locating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Navigation className="w-3.5 h-3.5 mr-1" />}
-                                    {t('autodromes.locate_me', 'Hozirgi joylashuvim')}
+                                    <span>{t('autodromes.locate_me', 'Joylashuvim')}</span>
                                 </Button>
                             </div>
                             <MapContainer 
@@ -347,7 +347,8 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                 </DialogContent>
             </Dialog>
 
-            <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
+            {/* Desktop/Tablet Table */}
+            <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -399,6 +400,63 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Mobile Cards Feed */}
+            <div className="md:hidden space-y-3">
+                {autodromes.length === 0 ? (
+                    <div className="text-center py-8 bg-card border border-dashed rounded-xl p-4">
+                        <MapPin className="w-8 h-8 mx-auto text-muted-foreground mb-2 opacity-50" />
+                        <div className="font-medium text-sm">{t('common.no_data', "Ma'lumot topilmadi")}</div>
+                    </div>
+                ) : (
+                    autodromes.map((item, index) => (
+                        <div key={item.id} className="bg-card border rounded-xl p-3.5 shadow-2xs space-y-2.5">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-mono text-muted-foreground">#{index + 1}</span>
+                                        <span className="font-bold text-sm truncate">{item.name}</span>
+                                    </div>
+                                    {item.branch && (
+                                        <div className="text-xs text-muted-foreground truncate mt-0.5">
+                                            {item.branch.name}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className="font-mono font-semibold text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md">
+                                        {item.radius_meters}m
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs pt-1.5 border-t text-muted-foreground">
+                                <div className="flex items-center gap-1 font-mono text-[11px] truncate">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                                    <span className="truncate">{item.latitude?.toFixed(4)}, {item.longitude?.toFixed(4)}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                                    <span>{t('autodromes.completed_drivings', 'Darslar')}:</span>
+                                    <span className="font-bold">{item.completed_drivings_count || 0}</span>
+                                </div>
+                            </div>
+
+                            {!isInstructor && (
+                                <div className="flex justify-end gap-1 pt-2 border-t">
+                                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)} className="h-8 text-xs gap-1">
+                                        <Edit2 className="w-3.5 h-3.5 text-blue-500" />
+                                        <span>{t('common.edit', 'Tahrirlash')}</span>
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <span>{t('common.delete', 'O\'chirish')}</span>
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
