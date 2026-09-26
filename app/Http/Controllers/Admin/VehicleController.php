@@ -189,16 +189,9 @@ class VehicleController extends Controller
                         'spent_at' => $validated['performed_date'],
                     ]);
 
-                    $balBefore = (float) $lockedRegister->balance;
-                    $balAfter = $balBefore - (float) $validated['cost'];
-                    $lockedRegister->decrement('balance', (float) $validated['cost']);
-
-                    $lockedRegister->recordTransaction(
-                        type: 'out',
-                        category: 'expense',
+                    $lockedRegister->withdraw(
                         amount: (float) $validated['cost'],
-                        balanceBefore: $balBefore,
-                        balanceAfter: $balAfter,
+                        category: 'maintenance',
                         description: "Avtotransport xarajati: {$vehicle->plate_number} ({$validated['maintenance_type']})",
                         reference: $expense,
                         userId: $request->user()->id
@@ -238,15 +231,9 @@ class VehicleController extends Controller
                 if ($expense && $expense->cash_register_id) {
                     $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->lockForUpdate()->first();
                     if ($lockedRegister) {
-                        $balBefore = (float) $lockedRegister->balance;
-                        $balAfter = $balBefore + (float) $expense->amount;
-                        $lockedRegister->increment('balance', (float) $expense->amount);
-                        $lockedRegister->recordTransaction(
-                            type: 'in',
-                            category: 'refund',
+                        $lockedRegister->deposit(
                             amount: (float) $expense->amount,
-                            balanceBefore: $balBefore,
-                            balanceAfter: $balAfter,
+                            category: 'refund',
                             description: "O'chirilgan transport xarajati qaytarildi: {$expense->description}",
                             reference: $expense,
                             userId: auth()->id()

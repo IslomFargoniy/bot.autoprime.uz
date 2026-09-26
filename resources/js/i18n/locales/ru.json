@@ -664,6 +664,8 @@
         "operation_type": "Тип операции",
         "op_payment": "Приход: Оплата",
         "op_expense": "Расход",
+        "op_salary": "Выплата зарплаты",
+        "op_maintenance": "Автотранспорт",
         "op_transfer_in": "Перевод (Приход)",
         "op_transfer_out": "Перевод (Расход)",
         "op_sweep_out": "Очистка кассы (Расход)",

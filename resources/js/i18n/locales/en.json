@@ -664,6 +664,8 @@
         "operation_type": "Operation type",
         "op_payment": "Income: Payment",
         "op_expense": "Expense",
+        "op_salary": "Salary payout",
+        "op_maintenance": "Vehicle maintenance",
         "op_transfer_in": "Transfer In",
         "op_transfer_out": "Transfer Out",
         "op_sweep_out": "Register Sweep (Out)",

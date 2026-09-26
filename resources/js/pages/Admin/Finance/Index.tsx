@@ -378,6 +378,18 @@ export default function FinanceIndex({
                         {t('finance.op_expense', 'Chiqim: Xarajat')}
                     </span>
                 );
+            case 'salary':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300">
+                        {t('finance.op_salary', 'Oylik maosh')}
+                    </span>
+                );
+            case 'maintenance':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300">
+                        {t('finance.op_maintenance', 'Avtotransport')}
+                    </span>
+                );
             case 'transfer_in':
                 return (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300">
@@ -678,6 +690,8 @@ export default function FinanceIndex({
                                         { value: '', label: t('finance.all_categories', 'Barcha amallar') },
                                         { value: 'payment', label: t('finance.op_payment', 'Kirim: To\'lov') },
                                         { value: 'expense', label: t('finance.op_expense', 'Chiqim: Xarajat') },
+                                        { value: 'salary', label: t('finance.op_salary', 'Oylik maosh') },
+                                        { value: 'maintenance', label: t('finance.op_maintenance', 'Avtotransport') },
                                         { value: 'sweep_out', label: t('finance.op_sweep_out', 'Kassani bo\'shatish (Chiqim)') },
                                         { value: 'sweep_in', label: t('finance.op_sweep_in', 'Kassa bo\'shatishdan (Kirim)') },
                                         { value: 'transfer_out', label: t('finance.op_transfer_out', 'Transfer (Chiqim)') },

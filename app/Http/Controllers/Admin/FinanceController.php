@@ -189,19 +189,10 @@ class FinanceController extends Controller
                 'comment' => $validated['notes'] ?? null,
             ]);
 
-            $balBefore = (float) $lockedRegister->balance;
-            $balAfter = $balBefore + (float) $validated['amount'];
-
-            // Increase register balance
-            $lockedRegister->increment('balance', (float) $validated['amount']);
-
-            // Record transaction ledger with running balance
-            $lockedRegister->recordTransaction(
-                type: 'in',
-                category: 'payment',
+            // Deposit into register and record ledger transaction
+            $lockedRegister->deposit(
                 amount: (float) $validated['amount'],
-                balanceBefore: $balBefore,
-                balanceAfter: $balAfter,
+                category: 'payment',
                 description: "To'lov qabul qilindi: {$contract->student?->full_name} (#{$receiptNumber})",
                 reference: $payment,
                 userId: $request->user()->id
@@ -251,19 +242,12 @@ class FinanceController extends Controller
                 'spent_at' => now(),
             ]);
 
-            $balBefore = (float) $lockedRegister->balance;
-            $balAfter = $balBefore - (float) $validated['amount'];
-            $lockedRegister->decrement('balance', (float) $validated['amount']);
-
             $cat = ExpenseCategory::find($validated['expense_category_id']);
             $catName = $cat ? $cat->name : 'Xarajat';
 
-            $lockedRegister->recordTransaction(
-                type: 'out',
-                category: 'expense',
+            $lockedRegister->withdraw(
                 amount: (float) $validated['amount'],
-                balanceBefore: $balBefore,
-                balanceAfter: $balAfter,
+                category: 'expense',
                 description: "Xarajat: {$catName} - {$validated['description']}",
                 reference: $expense,
                 userId: $request->user()->id
@@ -314,44 +298,18 @@ class FinanceController extends Controller
         }
 
         DB::transaction(function () use ($transfer, $request) {
-            $fromReg = CashRegister::where('id', $transfer->from_cash_register_id)->lockForUpdate()->first();
-            $toReg = CashRegister::where('id', $transfer->to_cash_register_id)->lockForUpdate()->first();
-
-            if ((float) $fromReg->balance < (float) $transfer->amount) {
-                throw new \Exception("Chiqim kassasida yetarli mablag' mavjud emas.");
-            }
-
-            $fromBalBefore = (float) $fromReg->balance;
-            $fromBalAfter = $fromBalBefore - (float) $transfer->amount;
-            $toBalBefore = (float) $toReg->balance;
-            $toBalAfter = $toBalBefore + (float) $transfer->amount;
-
-            $fromReg->decrement('balance', (float) $transfer->amount);
-            $toReg->increment('balance', (float) $transfer->amount);
+            $fromReg = CashRegister::findOrFail($transfer->from_cash_register_id);
+            $toReg = CashRegister::findOrFail($transfer->to_cash_register_id);
 
             $transfer->update([
                 'status' => 'approved',
                 'approved_by_user_id' => $request->user()->id,
             ]);
 
-            $fromReg->recordTransaction(
-                type: 'out',
-                category: 'transfer_out',
+            $fromReg->transferTo(
+                targetRegister: $toReg,
                 amount: (float) $transfer->amount,
-                balanceBefore: $fromBalBefore,
-                balanceAfter: $fromBalAfter,
-                description: "Transfer chiqim: {$toReg->name} ga",
-                reference: $transfer,
-                userId: $request->user()->id
-            );
-
-            $toReg->recordTransaction(
-                type: 'in',
-                category: 'transfer_in',
-                amount: (float) $transfer->amount,
-                balanceBefore: $toBalBefore,
-                balanceAfter: $toBalAfter,
-                description: "Transfer kirim: {$fromReg->name} dan",
+                category: 'transfer',
                 reference: $transfer,
                 userId: $request->user()->id
             );
@@ -429,22 +387,10 @@ class FinanceController extends Controller
                 }
 
                 $superadminRegister = CashRegister::getSuperadminRegisterForType($branchRegister->cash_register_type_id);
-                $lockedSuperadmin = CashRegister::where('id', $superadminRegister->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                $branchBalBefore = (float) $branchRegister->balance;
-                $branchBalAfter = $branchBalBefore - $amountToTransfer;
-
-                $superBalBefore = (float) $lockedSuperadmin->balance;
-                $superBalAfter = $superBalBefore + $amountToTransfer;
-
-                $branchRegister->update(['balance' => $branchBalAfter]);
-                $lockedSuperadmin->update(['balance' => $superBalAfter]);
 
                 $transfer = CashTransfer::create([
                     'from_cash_register_id' => $branchRegister->id,
-                    'to_cash_register_id' => $lockedSuperadmin->id,
+                    'to_cash_register_id' => $superadminRegister->id,
                     'amount' => $amountToTransfer,
                     'sent_by_user_id' => $request->user()->id,
                     'approved_by_user_id' => $request->user()->id,
@@ -452,27 +398,18 @@ class FinanceController extends Controller
                     'notes' => $request->input('notes') ?: "Kassani bo'shatish (Superadmin transferi)",
                 ]);
 
-                $branchRegister->recordTransaction(
-                    type: 'out',
-                    category: 'sweep_out',
+                $branchRegister->transferTo(
+                    targetRegister: $superadminRegister,
                     amount: $amountToTransfer,
-                    balanceBefore: $branchBalBefore,
-                    balanceAfter: $branchBalAfter,
-                    description: "Kassani bo'shatish: {$lockedSuperadmin->name} ga o'tkazildi",
+                    category: 'sweep',
                     reference: $transfer,
                     userId: $request->user()->id
                 );
 
-                $lockedSuperadmin->recordTransaction(
-                    type: 'in',
-                    category: 'sweep_in',
-                    amount: $amountToTransfer,
-                    balanceBefore: $superBalBefore,
-                    balanceAfter: $superBalAfter,
-                    description: "Kassa bo'shatishdan qabul: {$branchRegister->name} dan",
-                    reference: $transfer,
-                    userId: $request->user()->id
-                );
+                $transferredCount++;
+                $totalSweptAmount += $amountToTransfer;
+            }
+        });
 
                 $transferredCount++;
                 $totalSweptAmount += $amountToTransfer;
@@ -504,17 +441,11 @@ class FinanceController extends Controller
     {
         DB::transaction(function () use ($expense) {
             if ($expense->cash_register_id) {
-                $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->lockForUpdate()->first();
+                $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->first();
                 if ($lockedRegister) {
-                    $balBefore = (float) $lockedRegister->balance;
-                    $balAfter = $balBefore + (float) $expense->amount;
-                    $lockedRegister->increment('balance', (float) $expense->amount);
-                    $lockedRegister->recordTransaction(
-                        type: 'in',
-                        category: 'refund',
+                    $lockedRegister->deposit(
                         amount: (float) $expense->amount,
-                        balanceBefore: $balBefore,
-                        balanceAfter: $balAfter,
+                        category: 'refund',
                         description: "O'chirilgan xarajat qaytarildi: {$expense->description}",
                         reference: $expense,
                         userId: auth()->id()
@@ -539,22 +470,16 @@ class FinanceController extends Controller
         try {
             DB::transaction(function () use ($payment) {
                 $lockedRegister = $payment->cash_register_id
-                    ? CashRegister::where('id', $payment->cash_register_id)->lockForUpdate()->first()
+                    ? CashRegister::where('id', $payment->cash_register_id)->first()
                     : null;
 
                 if ($payment->payment_type === 'refund') {
                     // Deleting a refund payment returns the money to the register
                     if ($lockedRegister) {
-                        $balBefore = (float) $lockedRegister->balance;
-                        $balAfter = $balBefore + (float) $payment->amount;
-                        $lockedRegister->increment('balance', (float) $payment->amount);
-                        $lockedRegister->recordTransaction(
-                            type: 'in',
-                            category: 'refund',
+                        $lockedRegister->deposit(
                             amount: (float) $payment->amount,
-                            balanceBefore: $balBefore,
-                            balanceAfter: $balAfter,
-                            description: "Qaytarilgan to'lov (#{$payment->receipt_number})",
+                            category: 'refund',
+                            description: "Qaytarilgan to'lov bekor qilindi (#{$payment->receipt_number})",
                             reference: $payment,
                             userId: auth()->id()
                         );
@@ -563,18 +488,9 @@ class FinanceController extends Controller
                 } else {
                     // Deleting an income payment deducts the money from the register
                     if ($lockedRegister) {
-                        if ((float) $lockedRegister->balance < (float) $payment->amount) {
-                            throw new \Exception("Kassada yetarli mablag' mavjud emas. To'lovni bekor qilish uchun kamida ".number_format((float) $payment->amount, 0, '', ' ')." UZS bo'lishi kerak.");
-                        }
-                        $balBefore = (float) $lockedRegister->balance;
-                        $balAfter = $balBefore - (float) $payment->amount;
-                        $lockedRegister->decrement('balance', (float) $payment->amount);
-                        $lockedRegister->recordTransaction(
-                            type: 'out',
-                            category: 'refund',
+                        $lockedRegister->withdraw(
                             amount: (float) $payment->amount,
-                            balanceBefore: $balBefore,
-                            balanceAfter: $balAfter,
+                            category: 'refund',
                             description: "Bekor qilingan to'lov (#{$payment->receipt_number})",
                             reference: $payment,
                             userId: auth()->id()

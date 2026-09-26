@@ -271,16 +271,9 @@ class ContractController extends Controller
             ]);
 
             // 3. Decrement cash register balance & record transaction
-            $balBefore = (float) $lockedRegister->balance;
-            $balAfter = $balBefore - (float) $validated['amount'];
-            $lockedRegister->decrement('balance', (float) $validated['amount']);
-
-            $lockedRegister->recordTransaction(
-                type: 'out',
-                category: 'refund',
+            $lockedRegister->withdraw(
                 amount: (float) $validated['amount'],
-                balanceBefore: $balBefore,
-                balanceAfter: $balAfter,
+                category: 'refund',
                 description: "To'lovni qaytarish: {$lockedContract->student?->full_name} (#{$lockedContract->contract_number})",
                 reference: $expense,
                 userId: $request->user()->id

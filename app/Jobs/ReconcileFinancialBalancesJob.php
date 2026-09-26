@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\CashRegister;
+use App\Models\CashTransaction;
 use App\Models\CashTransfer;
 use App\Models\Contract;
 use App\Models\Expense;
@@ -70,6 +71,13 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
             if (abs((float) $register->balance - $expectedBalance) > 0.01) {
                 Log::warning("[Reconciliation Drift] Register #{$register->name} (ID: {$register->id}) cached: {$register->balance}, calculated: {$expectedBalance}. Updating.");
                 $register->update(['balance' => $expectedBalance]);
+                $driftDetected = true;
+            }
+
+            // Cross-check register balance with latest CashTransaction ledger record
+            $latestTx = CashTransaction::where('cash_register_id', $register->id)->latest('id')->first();
+            if ($latestTx && abs((float) $register->balance - (float) $latestTx->balance_after) > 0.01) {
+                Log::warning("[Reconciliation Ledger Mismatch] Register #{$register->name} (ID: {$register->id}) balance: {$register->balance}, latest ledger balance_after: {$latestTx->balance_after}.");
                 $driftDetected = true;
             }
         }
