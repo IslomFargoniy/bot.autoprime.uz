@@ -601,6 +601,9 @@
         "method_click": "Click",
         "method_payme": "Payme",
         "method_other": "Other",
+        "selected_register_balance": "Selected Register Balance",
+        "insufficient_funds": "Insufficient register funds!",
+        "remaining_after_pay": "Remaining balance after payment",
         "register": "Register",
         "cashier": "Cashier",
         "date": "Date",
@@ -739,7 +742,12 @@
         "role_accountant": "Accountant",
         "status_paid": "Paid",
         "status_pending": "Calculated",
-        "status_calculated": "Calculated"
+        "status_calculated": "Calculated",
+        "for_period": "payroll period",
+        "due_amount": "Due Amount",
+        "set_full_amount": "Fill full amount",
+        "notes_optional": "Note (Optional)",
+        "notes_placeholder": "Payment details or receipt number..."
     },
     "attendance": {
         "title": "Attendance Log",
