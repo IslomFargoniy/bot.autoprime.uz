@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -60,6 +61,11 @@ class CashRegister extends Model
     public function shifts(): HasMany
     {
         return $this->hasMany(CashShift::class);
+    }
+
+    public function openShift(): HasOne
+    {
+        return $this->hasOne(CashShift::class)->where('status', 'open')->latestOfMany();
     }
 
     public function outgoingTransfers(): HasMany

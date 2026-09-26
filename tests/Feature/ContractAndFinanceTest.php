@@ -3,6 +3,7 @@
 use App\Models\Branch;
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
+use App\Models\CashShift;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Course;
@@ -455,4 +456,73 @@ test('driving controller allows scheduling while contract is valid and blocks wh
         'end_time' => now()->addDays(6)->setTime(11, 0)->format('Y-m-d H:i:s'),
     ]);
     $expiredLessonResponse->assertSessionHasErrors('student_ids');
+});
+
+test('cash shift can be opened, closed and prevents duplicate active shifts', function () {
+    $branch = Branch::firstOrCreate(['code' => 'shift-branch'], ['name' => 'Shift Filial', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+
+    $cashType = CashRegisterType::firstOrCreate(['code' => 'cash_shift'], ['name' => 'Kassa Shift', 'is_active' => true]);
+    $cashRegister = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => $cashType->id,
+        'name' => 'Shift Test Kassasi',
+        'balance' => 500000,
+        'is_active' => true,
+    ]);
+
+    // 1. Open Shift
+    $openResponse = $this->actingAs($admin)->post('/admin/finance/shift', [
+        'cash_register_id' => $cashRegister->id,
+        'action' => 'open',
+        'opening_balance' => 500000,
+        'note' => 'Ertalabki smena',
+    ]);
+    $openResponse->assertRedirect();
+    $openResponse->assertSessionHasNoErrors();
+
+    $shift = CashShift::where('cash_register_id', $cashRegister->id)->where('status', 'open')->first();
+    expect($shift)->not->toBeNull()
+        ->and((float) $shift->opening_balance)->toEqual(500000.0)
+        ->and($shift->note)->toEqual('Ertalabki smena');
+
+    // CashRegister openShift relation should work
+    $cashRegister->refresh();
+    expect($cashRegister->openShift)->not->toBeNull()
+        ->and($cashRegister->openShift->id)->toEqual($shift->id);
+
+    // 2. Prevent duplicate open shift
+    $duplicateResponse = $this->actingAs($admin)->post('/admin/finance/shift', [
+        'cash_register_id' => $cashRegister->id,
+        'action' => 'open',
+        'opening_balance' => 500000,
+    ]);
+    $duplicateResponse->assertSessionHasErrors('shift');
+
+    // 3. Close Shift
+    $closeResponse = $this->actingAs($admin)->post('/admin/finance/shift', [
+        'cash_register_id' => $cashRegister->id,
+        'action' => 'close',
+        'closing_balance' => 750000,
+        'note' => 'Kechki yopilish',
+    ]);
+    $closeResponse->assertRedirect();
+    $closeResponse->assertSessionHasNoErrors();
+
+    $shift->refresh();
+    expect($shift->status)->toEqual('closed')
+        ->and((float) $shift->closing_balance)->toEqual(750000.0)
+        ->and($shift->closed_at)->not->toBeNull();
+
+    // After closing, openShift should be null
+    $cashRegister->refresh();
+    expect($cashRegister->openShift)->toBeNull();
+
+    // 4. Closing again without open shift returns error
+    $closeAgainResponse = $this->actingAs($admin)->post('/admin/finance/shift', [
+        'cash_register_id' => $cashRegister->id,
+        'action' => 'close',
+        'closing_balance' => 750000,
+    ]);
+    $closeAgainResponse->assertSessionHasErrors('shift');
 });
