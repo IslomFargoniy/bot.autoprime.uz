@@ -243,7 +243,21 @@ class SalaryController extends Controller
                 'comment' => $validated['notes'] ?? null,
             ]);
 
+            $balBefore = (float) $lockedRegister->balance;
+            $balAfter = $balBefore - (float) $validated['amount'];
             $lockedRegister->decrement('balance', (float) $validated['amount']);
+
+            $lockedRegister->recordTransaction(
+                type: 'out',
+                category: 'expense',
+                amount: (float) $validated['amount'],
+                balanceBefore: $balBefore,
+                balanceAfter: $balAfter,
+                description: "Oylik maosh to'lovi: {$employee->name} ({$salary->period})",
+                reference: $expense,
+                userId: $request->user()->id
+            );
+
             $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
         });
 
