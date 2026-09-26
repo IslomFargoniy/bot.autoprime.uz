@@ -77,4 +77,63 @@ class CashRegister extends Model
     {
         return $this->hasMany(CashTransfer::class, 'to_cash_register_id');
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(CashTransaction::class)->orderBy('transacted_at', 'desc');
+    }
+
+    /**
+     * Get or create central/superadmin register for a specific CashRegisterType
+     */
+    public static function getSuperadminRegisterForType(int $typeId): self
+    {
+        $reg = self::whereNull('branch_id')
+            ->where('cash_register_type_id', $typeId)
+            ->first();
+
+        if ($reg) {
+            return $reg;
+        }
+
+        $type = CashRegisterType::find($typeId);
+        $typeName = $type ? $type->name : 'Kassa';
+
+        return self::create([
+            'branch_id' => null,
+            'cash_register_type_id' => $typeId,
+            'name' => "Bosh {$typeName} (Superadmin)",
+            'balance' => 0,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Helper to log an immutable ledger transaction with running balance
+     */
+    public function recordTransaction(
+        string $type,
+        string $category,
+        float $amount,
+        float $balanceBefore,
+        float $balanceAfter,
+        ?string $description = null,
+        $reference = null,
+        ?int $userId = null
+    ): CashTransaction {
+        return CashTransaction::create([
+            'cash_register_id' => $this->id,
+            'type' => $type,
+            'category' => $category,
+            'amount' => abs($amount),
+            'balance_before' => $balanceBefore,
+            'balance_after' => $balanceAfter,
+            'description' => $description,
+            'reference_type' => $reference ? get_class($reference) : null,
+            'reference_id' => $reference ? $reference->id : null,
+            'user_id' => $userId,
+            'transacted_at' => now(),
+        ]);
+    }
 }
+

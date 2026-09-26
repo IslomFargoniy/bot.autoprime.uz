@@ -7,14 +7,16 @@ import {
     ArrowDownRight,
     ArrowUpRight,
     ArrowLeftRight,
-    Clock,
     CheckCircle2,
     DollarSign,
     CreditCard,
     Building2,
-    Lock,
-    Unlock,
     Trash2,
+    History,
+    ArrowDownToLine,
+    ShieldCheck,
+    Search,
+    RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,12 +41,13 @@ import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface CashRegister {
     id: number;
+    branch_id?: number | null;
+    cash_register_type_id?: number;
     name: string;
     balance: number | string;
     type?: { id: number; code: string; name: string };
-    branch?: { id: number; name: string };
+    branch?: { id: number; name: string } | null;
     is_active: boolean;
-    open_shift?: CashShift | null;
 }
 
 interface Payment {
@@ -63,24 +66,30 @@ interface Expense {
     id: number;
     amount: number | string;
     description: string;
-    expense_date: string;
+    spent_at?: string;
+    expense_date?: string;
     category?: { name: string };
     cash_register?: { name: string };
     user?: { name: string };
 }
 
-interface CashShift {
+interface CashTransaction {
     id: number;
-    cash_register?: { name: string };
-    opening_balance: number | string;
-    closing_balance?: number | string;
-    total_income: number | string;
-    total_expense: number | string;
-    status: 'open' | 'closed';
-    opened_at: string;
-    closed_at?: string;
-    opened_by?: { name: string };
-    closed_by?: { name: string };
+    cash_register_id: number;
+    type: 'in' | 'out';
+    category: 'payment' | 'expense' | 'transfer_in' | 'transfer_out' | 'sweep_in' | 'sweep_out' | 'refund' | 'initial';
+    amount: number | string;
+    balance_before: number | string;
+    balance_after: number | string;
+    description?: string;
+    user?: { name: string };
+    cash_register?: {
+        id: number;
+        name: string;
+        branch?: { id: number; name: string } | null;
+        type?: { id: number; name: string; code: string };
+    };
+    transacted_at: string;
 }
 
 interface CashTransfer {
@@ -96,10 +105,11 @@ interface CashTransfer {
 
 interface PageProps {
     cashRegisters: CashRegister[];
-    payments: { data: Payment[]; links: any[]; total: number };
-    expenses: { data: Expense[]; links: any[]; total: number };
-    shifts: { data: CashShift[]; links: any[]; total: number };
-    transfers: { data: CashTransfer[]; links: any[]; total: number };
+    superadminRegisters: CashRegister[];
+    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number };
+    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number };
+    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number };
+    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number };
     branches: Array<{ id: number; name: string }>;
     expenseCategories: Array<{ id: number; name: string }>;
     registerTypes: Array<{ id: number; code: string; name: string }>;
@@ -112,28 +122,57 @@ interface PageProps {
         paid_amount: number | string;
         debt_amount: number | string;
     }>;
+    filters?: {
+        branch_id?: string | number;
+        history_register_id?: string | number;
+        history_category?: string;
+        history_from?: string;
+        history_to?: string;
+    };
 }
 
 export default function FinanceIndex({
     cashRegisters,
+    superadminRegisters = [],
     payments,
     expenses,
-    shifts,
+    transactions,
     transfers,
     branches,
     expenseCategories,
     registerTypes,
     contracts,
     students = [],
+    filters = {},
 }: PageProps) {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'registers' | 'payments' | 'expenses' | 'shifts' | 'transfers'>('registers');
+    const [activeTab, setActiveTab] = useState<'registers' | 'history' | 'payments' | 'expenses' | 'transfers'>('registers');
 
     // Modals
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
-    const [showShiftModal, setShowShiftModal] = useState(false);
+    const [showSweepModal, setShowSweepModal] = useState(false);
+
+    // Sweep Modal State
+    const [sweepItems, setSweepItems] = useState<Array<{
+        cash_register_id: number;
+        name: string;
+        branch_name: string;
+        type_name: string;
+        target_name: string;
+        balance: number;
+        amount: number;
+        selected: boolean;
+    }>>([]);
+    const [sweepNotes, setSweepNotes] = useState('');
+    const [isSweeping, setIsSweeping] = useState(false);
+
+    // History Filters State
+    const [historyRegId, setHistoryRegId] = useState<string | number>(filters.history_register_id || '');
+    const [historyCat, setHistoryCat] = useState<string>(filters.history_category || '');
+    const [historyFrom, setHistoryFrom] = useState<string>(filters.history_from || '');
+    const [historyTo, setHistoryTo] = useState<string>(filters.history_to || '');
 
     // Payment Form
     const paymentForm = useForm({
@@ -160,50 +199,101 @@ export default function FinanceIndex({
         notes: '',
     });
 
-    // Shift Form
-    const initialRegister = cashRegisters[0];
-    const initialHasOpen = Boolean(initialRegister?.open_shift);
-    const shiftForm = useForm({
-        cash_register_id: initialRegister?.id || '',
-        action: initialHasOpen ? 'close' : 'open',
-        opening_balance: initialHasOpen ? '' : String(initialRegister?.balance || 0),
-        closing_balance: initialHasOpen ? String(initialRegister?.balance || 0) : '',
-        note: '',
-    });
+    const openSweepModal = (specificRegId?: number) => {
+        // Collect all branch registers (branch_id != null)
+        const branchRegs = cashRegisters.filter((r) => r.branch_id !== null && r.branch_id !== undefined);
+        const mapped = branchRegs.map((reg) => {
+            const currentBal = Number(reg.balance) || 0;
+            const targetSuper = superadminRegisters.find((s) => s.type?.id === reg.type?.id || s.cash_register_type_id === reg.cash_register_type_id)
+                || superadminRegisters[0];
 
-    const openShiftForRegister = (register: CashRegister) => {
-        const hasOpen = Boolean(register.open_shift);
-        shiftForm.setData({
-            cash_register_id: register.id,
-            action: hasOpen ? 'close' : 'open',
-            opening_balance: hasOpen ? '' : String(register.balance || 0),
-            closing_balance: hasOpen ? String(register.balance || 0) : '',
-            note: '',
+            const isTarget = specificRegId ? reg.id === specificRegId : currentBal > 0;
+
+            return {
+                cash_register_id: reg.id,
+                name: reg.name,
+                branch_name: reg.branch?.name || t('branches.unknown', 'Filial'),
+                type_name: reg.type?.name || t('finance.cash_register', 'Kassa'),
+                target_name: targetSuper ? targetSuper.name : t('finance.superadmin_cash_register', 'Bosh kassa (Superadmin)'),
+                balance: currentBal,
+                amount: currentBal,
+                selected: isTarget,
+            };
         });
-        setShowShiftModal(true);
+
+        setSweepItems(mapped);
+        setSweepNotes('');
+        setShowSweepModal(true);
     };
 
-    const handleRegisterChange = (val: string | number) => {
-        const regId = Number(val);
-        const reg = cashRegisters.find((r) => r.id === regId);
-        const hasOpen = Boolean(reg?.open_shift);
-        shiftForm.setData({
-            ...shiftForm.data,
-            cash_register_id: regId,
-            action: hasOpen ? 'close' : 'open',
-            opening_balance: hasOpen ? '' : String(reg?.balance || 0),
-            closing_balance: hasOpen ? String(reg?.balance || 0) : '',
+    const handleSelectRegisterHistory = (registerId: number) => {
+        setHistoryRegId(registerId);
+        setActiveTab('history');
+        router.get('/admin/finance', {
+            ...filters,
+            history_register_id: registerId,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
         });
     };
 
-    const handleActionChange = (actionVal: string | number) => {
-        const action = String(actionVal);
-        const reg = cashRegisters.find((r) => r.id === Number(shiftForm.data.cash_register_id));
-        shiftForm.setData({
-            ...shiftForm.data,
-            action,
-            opening_balance: action === 'open' ? String(reg?.balance || 0) : '',
-            closing_balance: action === 'close' ? String(reg?.balance || 0) : '',
+    const handleFilterHistory = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get('/admin/finance', {
+            ...filters,
+            history_register_id: historyRegId || undefined,
+            history_category: historyCat || undefined,
+            history_from: historyFrom || undefined,
+            history_to: historyTo || undefined,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleResetHistory = () => {
+        setHistoryRegId('');
+        setHistoryCat('');
+        setHistoryFrom('');
+        setHistoryTo('');
+        router.get('/admin/finance', {
+            branch_id: filters.branch_id,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleSweepSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const selected = sweepItems
+            .filter((item) => item.selected && item.amount > 0)
+            .map((item) => ({
+                cash_register_id: item.cash_register_id,
+                amount: item.amount,
+            }));
+
+        if (selected.length === 0) {
+            toast.error(t('finance.no_registers_selected', 'Kamida bitta kassani tanlang'));
+            return;
+        }
+
+        setIsSweeping(true);
+        router.post('/admin/finance/sweep', {
+            registers: selected,
+            notes: sweepNotes,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowSweepModal(false);
+                setIsSweeping(false);
+                toast.success(t('finance.sweep_success', 'Kassalar muvaffaqiyatli bo\'shatildi!'));
+            },
+            onError: (err) => {
+                setIsSweeping(false);
+                toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
+            },
         });
     };
 
@@ -212,8 +302,8 @@ export default function FinanceIndex({
         paymentForm.post('/admin/finance/payment', {
             onSuccess: () => {
                 setShowPaymentModal(false);
-                paymentForm.reset();
-                toast.success(t('finance.payment_success', 'To\'lov muvaffaqiyatli qabul qilindi'));
+                paymentForm.reset('amount', 'notes');
+                toast.success(t('finance.payment_success', 'To\'lov qabul qilindi'));
             },
             onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
         });
@@ -224,8 +314,8 @@ export default function FinanceIndex({
         expenseForm.post('/admin/finance/expense', {
             onSuccess: () => {
                 setShowExpenseModal(false);
-                expenseForm.reset();
-                toast.success(t('finance.expense_success', 'Xarajat muvaffaqiyatli saqlandi'));
+                expenseForm.reset('amount', 'description');
+                toast.success(t('finance.expense_success', 'Xarajat kiritildi'));
             },
             onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
         });
@@ -236,7 +326,7 @@ export default function FinanceIndex({
         transferForm.post('/admin/finance/transfer', {
             onSuccess: () => {
                 setShowTransferModal(false);
-                transferForm.reset();
+                transferForm.reset('amount', 'notes');
                 toast.success(t('finance.transfer_success', 'Transfer so\'rovi yuborildi'));
             },
             onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
@@ -250,18 +340,6 @@ export default function FinanceIndex({
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         }
-    };
-
-    const handleShiftSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        shiftForm.post('/admin/finance/shift', {
-            onSuccess: () => {
-                setShowShiftModal(false);
-                shiftForm.reset();
-                toast.success(t('finance.shift_success', 'Kassa smenasi amali bajarildi'));
-            },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
-        });
     };
 
     const handleDeletePayment = (payment: Payment) => {
@@ -282,6 +360,69 @@ export default function FinanceIndex({
         }
     };
 
+    const totalSweepAmount = sweepItems
+        .filter((i) => i.selected)
+        .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+    const renderCategoryBadge = (category: string) => {
+        switch (category) {
+            case 'payment':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
+                        {t('finance.op_payment', 'Kirim: To\'lov')}
+                    </span>
+                );
+            case 'expense':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300">
+                        {t('finance.op_expense', 'Chiqim: Xarajat')}
+                    </span>
+                );
+            case 'transfer_in':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300">
+                        {t('finance.op_transfer_in', 'Transfer (Kirim)')}
+                    </span>
+                );
+            case 'transfer_out':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300">
+                        {t('finance.op_transfer_out', 'Transfer (Chiqim)')}
+                    </span>
+                );
+            case 'sweep_out':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300">
+                        {t('finance.op_sweep_out', 'Kassani bo\'shatish (Chiqim)')}
+                    </span>
+                );
+            case 'sweep_in':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
+                        {t('finance.op_sweep_in', 'Kassa bo\'shatishdan (Kirim)')}
+                    </span>
+                );
+            case 'refund':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300">
+                        {t('finance.op_refund', 'Bekor qilish / Qaytarish')}
+                    </span>
+                );
+            case 'initial':
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
+                        {t('finance.op_initial', 'Boshlang\'ich qoldiq')}
+                    </span>
+                );
+            default:
+                return (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        {category}
+                    </span>
+                );
+        }
+    };
+
     return (
         <div className="p-6">
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
@@ -290,7 +431,11 @@ export default function FinanceIndex({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
                 <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs">
+                    <Button onClick={() => openSweepModal()} variant="brand" className="text-xs">
+                        <ArrowDownToLine className="w-4 h-4 mr-1.5" />
+                        {t('finance.empty_registers', 'Kassalarni bo\'shatish')}
+                    </Button>
+                    <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white">
                         <ArrowDownRight className="w-4 h-4 mr-1.5" />
                         {t('finance.accept_payment', 'To\'lov Qabul Qilish')}
                     </Button>
@@ -302,69 +447,77 @@ export default function FinanceIndex({
                         <ArrowLeftRight className="w-4 h-4 mr-1.5" />
                         {t('finance.transfer', 'Transfer')}
                     </Button>
-                    <Button onClick={() => setShowShiftModal(true)} variant="outline" className="text-xs">
-                        <Clock className="w-4 h-4 mr-1.5" />
-                        {t('finance.shift_toggle', 'Smena')}
-                    </Button>
                 </div>
             </div>
 
             {/* Cash Registers Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {cashRegisters.map((reg) => (
-                    <div
-                        key={reg.id}
-                        className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
-                    >
-                        <div className="flex items-start justify-between">
+                {cashRegisters.map((reg) => {
+                    const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
+                    const canSweep = !isSuperadmin && Number(reg.balance) > 0;
+
+                    return (
+                        <div
+                            key={reg.id}
+                            className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
+                        >
                             <div>
-                                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                    {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
-                                    <span>{reg.type?.name || 'Kassa'}</span>
-                                    {reg.branch && <span>• {reg.branch.name}</span>}
+                                <div className="flex items-center justify-between gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                    <div className="flex items-center gap-1.5">
+                                        {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
+                                        <span className="font-medium">{reg.type?.name || 'Kassa'}</span>
+                                    </div>
+                                    {isSuperadmin ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
+                                            <ShieldCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                                            {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <Building2 className="w-3 h-3 text-gray-500" />
+                                            {reg.branch?.name || t('branches.unknown', 'Filial')}
+                                        </span>
+                                    )}
                                 </div>
                                 <h3 className="font-bold text-base text-gray-900 dark:text-white">{reg.name}</h3>
                                 <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
                                     {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
                                 </p>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center font-bold">
-                                <Wallet className="w-5 h-5" />
+
+                            {/* Card Footer Actions: Tarix and Bo'shatish */}
+                            <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleSelectRegisterHistory(reg.id)}
+                                    className="h-8 gap-1.5 text-xs"
+                                >
+                                    <History className="w-3.5 h-3.5 text-muted-foreground" />
+                                    <span>{t('finance.view_history', 'Tarix')}</span>
+                                </Button>
+
+                                {canSweep && (
+                                    <Button
+                                        type="button"
+                                        variant="brand"
+                                        size="sm"
+                                        onClick={() => openSweepModal(reg.id)}
+                                        className="h-8 gap-1.5 text-xs"
+                                    >
+                                        <ArrowDownToLine className="w-3.5 h-3.5" />
+                                        <span>{t('finance.empty_this_register', 'Bo\'shatish')}</span>
+                                    </Button>
+                                )}
                             </div>
                         </div>
-
-                        {/* Shift Status pill */}
-                        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700/60 text-xs">
-                            {reg.open_shift ? (
-                                <button
-                                    type="button"
-                                    onClick={() => openShiftForRegister(reg)}
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 transition-colors"
-                                >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    {t('finance.shift_status_open', 'Smena ochiq')}
-                                    <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">({t('finance.close_shift_button', 'Yopish')})</span>
-                                </button>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => openShiftForRegister(reg)}
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
-                                >
-                                    <Unlock className="w-3 h-3 text-gray-500" />
-                                    {t('finance.open_shift_button', 'Smena ochish')}
-                                </button>
-                            )}
-                            <span className="text-[11px] text-gray-400 dark:text-gray-500">
-                                {reg.open_shift?.opened_by?.name ? `👤 ${reg.open_shift.opened_by.name}` : ''}
-                            </span>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6 text-xs font-medium w-full md:w-max">
+            <div className="flex flex-wrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6 text-xs font-medium w-full md:w-max gap-1">
                 <button
                     onClick={() => setActiveTab('registers')}
                     className={`px-4 py-2 rounded-lg transition-all ${
@@ -372,6 +525,14 @@ export default function FinanceIndex({
                     }`}
                 >
                     {t('finance.tab_registers', 'Kassalar')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('history')}
+                    className={`px-4 py-2 rounded-lg transition-all ${
+                        activeTab === 'history' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                >
+                    {t('finance.tab_history', 'Kassa Tarixi')}
                 </button>
                 <button
                     onClick={() => setActiveTab('payments')}
@@ -390,14 +551,6 @@ export default function FinanceIndex({
                     {t('finance.tab_expenses', 'Chiqim Xarajatlar')}
                 </button>
                 <button
-                    onClick={() => setActiveTab('shifts')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
-                        activeTab === 'shifts' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_shifts', 'Kassa Smenalari')}
-                </button>
-                <button
                     onClick={() => setActiveTab('transfers')}
                     className={`px-4 py-2 rounded-lg transition-all ${
                         activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
@@ -407,7 +560,7 @@ export default function FinanceIndex({
                 </button>
             </div>
 
-            {/* Tab: Registers */}
+            {/* Tab: Registers Overview */}
             {activeTab === 'registers' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
                     <Table>
@@ -417,82 +570,227 @@ export default function FinanceIndex({
                                 <TableHead>{t('finance.type', 'Turi')}</TableHead>
                                 <TableHead>{t('finance.branch', 'Filial')}</TableHead>
                                 <TableHead>{t('finance.balance', 'Balans')}</TableHead>
-                                <TableHead>{t('finance.shift', 'Smena')}</TableHead>
-                                <TableHead>{t('finance.status', 'Holati')}</TableHead>
                                 <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {cashRegisters.length === 0 ? (
                                 <TableEmpty
-                                    colSpan={7}
+                                    colSpan={5}
                                     icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
                                     title={t('finance.no_registers', 'Kassalar topilmadi')}
                                 />
                             ) : (
-                                cashRegisters.map((reg) => (
-                                    <TableRow key={reg.id}>
-                                        <TableCell className="font-semibold text-gray-900 dark:text-white">
-                                            {reg.name}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
-                                                {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
-                                                {reg.type?.name || 'Kassa'}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">
-                                            {reg.branch?.name || '-'}
-                                        </TableCell>
-                                        <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
-                                            {Number(reg.balance).toLocaleString('uz-UZ')} UZS
-                                        </TableCell>
-                                        <TableCell>
-                                            {reg.open_shift ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                    {t('finance.shift_status_open', 'Smena ochiq')}
+                                cashRegisters.map((reg) => {
+                                    const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
+                                    const canSweep = !isSuperadmin && Number(reg.balance) > 0;
+
+                                    return (
+                                        <TableRow key={reg.id}>
+                                            <TableCell className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                                <Wallet className="w-4 h-4 text-emerald-600" />
+                                                <span>{reg.name}</span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                                    {reg.type?.name || '-'}
                                                 </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                                    {t('finance.shift_status_closed', 'Yopiq')}
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                                reg.is_active
-                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                                                    : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
-                                            }`}>
-                                                {reg.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => openShiftForRegister(reg)}
-                                                className="h-7 text-xs"
-                                            >
-                                                {reg.open_shift ? (
-                                                    <>
-                                                        <Lock className="w-3.5 h-3.5 mr-1" />
-                                                        {t('finance.close_shift_button', 'Yopish')}
-                                                    </>
+                                            </TableCell>
+                                            <TableCell>
+                                                {isSuperadmin ? (
+                                                    <span className="inline-flex items-center gap-1 font-semibold text-xs text-indigo-600 dark:text-indigo-400">
+                                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                                        {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                                    </span>
                                                 ) : (
-                                                    <>
-                                                        <Unlock className="w-3.5 h-3.5 mr-1" />
-                                                        {t('finance.open_shift_button', 'Smena ochish')}
-                                                    </>
+                                                    reg.branch?.name || '-'
                                                 )}
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                            </TableCell>
+                                            <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                                                {Number(reg.balance).toLocaleString('uz-UZ')} UZS
+                                            </TableCell>
+                                            <TableCell className="text-right space-x-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleSelectRegisterHistory(reg.id)}
+                                                    className="h-8 gap-1 text-xs"
+                                                >
+                                                    <History className="w-3.5 h-3.5" />
+                                                    {t('finance.view_history', 'Tarix')}
+                                                </Button>
+                                                {canSweep && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="brand"
+                                                        onClick={() => openSweepModal(reg.id)}
+                                                        className="h-8 gap-1 text-xs"
+                                                    >
+                                                        <ArrowDownToLine className="w-3.5 h-3.5" />
+                                                        {t('finance.empty_this_register', 'Bo\'shatish')}
+                                                    </Button>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
+                </div>
+            )}
+
+            {/* Tab: Kassa Tarixi (Ledger / Running Balance) */}
+            {activeTab === 'history' && (
+                <div className="space-y-4">
+                    {/* Filters Bar */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
+                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                            <div>
+                                <Label htmlFor="hist_reg" className="text-xs mb-1 block">
+                                    {t('finance.cash_register', 'Kassa')}
+                                </Label>
+                                <SearchableSelect
+                                    id="hist_reg"
+                                    value={historyRegId}
+                                    onChange={(val) => setHistoryRegId(val)}
+                                    options={[
+                                        { value: '', label: t('finance.all_registers', 'Barcha kassalar') },
+                                        ...cashRegisters.map((r) => ({
+                                            value: r.id,
+                                            label: r.name,
+                                            sublabel: r.branch?.name || t('finance.superadmin_cash_register', 'Superadmin Bosh kassa'),
+                                        })),
+                                    ]}
+                                    placeholder={t('finance.all_registers', 'Barcha kassalar')}
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="hist_cat" className="text-xs mb-1 block">
+                                    {t('finance.operation_type', 'Amal turi')}
+                                </Label>
+                                <SearchableSelect
+                                    id="hist_cat"
+                                    value={historyCat}
+                                    onChange={(val) => setHistoryCat(String(val))}
+                                    options={[
+                                        { value: '', label: t('finance.all_categories', 'Barcha amallar') },
+                                        { value: 'payment', label: t('finance.op_payment', 'Kirim: To\'lov') },
+                                        { value: 'expense', label: t('finance.op_expense', 'Chiqim: Xarajat') },
+                                        { value: 'sweep_out', label: t('finance.op_sweep_out', 'Kassani bo\'shatish (Chiqim)') },
+                                        { value: 'sweep_in', label: t('finance.op_sweep_in', 'Kassa bo\'shatishdan (Kirim)') },
+                                        { value: 'transfer_out', label: t('finance.op_transfer_out', 'Transfer (Chiqim)') },
+                                        { value: 'transfer_in', label: t('finance.op_transfer_in', 'Transfer (Kirim)') },
+                                        { value: 'refund', label: t('finance.op_refund', 'Bekor qilish / Qaytarish') },
+                                    ]}
+                                    placeholder={t('finance.all_categories', 'Barcha amallar')}
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="hist_from" className="text-xs mb-1 block">{t('common.from', 'Dan')}</Label>
+                                <Input
+                                    id="hist_from"
+                                    type="date"
+                                    value={historyFrom}
+                                    onChange={(e) => setHistoryFrom(e.target.value)}
+                                    className="h-9 text-xs"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="hist_to" className="text-xs mb-1 block">{t('common.to', 'Gacha')}</Label>
+                                <Input
+                                    id="hist_to"
+                                    type="date"
+                                    value={historyTo}
+                                    onChange={(e) => setHistoryTo(e.target.value)}
+                                    className="h-9 text-xs"
+                                />
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Button type="submit" variant="brand" size="sm" className="h-9 gap-1 flex-1">
+                                    <Search className="w-3.5 h-3.5" />
+                                    <span>{t('common.filter', 'Filtrlash')}</span>
+                                </Button>
+                                <Button type="button" variant="outline" size="sm" onClick={handleResetHistory} className="h-9" title={t('common.reset', 'Tozalash')}>
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Transactions Table */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-12">№</TableHead>
+                                    <TableHead>{t('finance.date', 'Sana va Vaqt')}</TableHead>
+                                    <TableHead>{t('finance.cash_register', 'Kassa')}</TableHead>
+                                    <TableHead>{t('finance.operation_type', 'Amal turi')}</TableHead>
+                                    <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">
+                                        {t('finance.balance_after', 'Amaldan keyingi balans')}
+                                    </TableHead>
+                                    <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
+                                    <TableHead>{t('finance.user', 'Xodim')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.data.length === 0 ? (
+                                    <TableEmpty
+                                        colSpan={8}
+                                        icon={<History className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                        title={t('finance.no_transactions', 'Kassa amallari tarixi topilmadi')}
+                                        description={t('finance.no_transactions_desc', 'Kassada kirim, chiqim yoki transfer amallari bajarilganda bu yerda aks etadi')}
+                                    />
+                                ) : (
+                                    transactions.data.map((tx, idx) => (
+                                        <TableRow key={tx.id}>
+                                            <TableCell className="text-gray-400 font-mono text-xs">{idx + 1}</TableCell>
+                                            <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-xs whitespace-nowrap">
+                                                {tx.transacted_at ? new Date(tx.transacted_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                <div>{tx.cash_register?.name}</div>
+                                                {tx.cash_register?.branch && (
+                                                    <div className="text-[10px] text-gray-400">{tx.cash_register.branch.name}</div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {renderCategoryBadge(tx.category)}
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap font-mono font-bold">
+                                                {tx.type === 'in' ? (
+                                                    <span className="text-emerald-600 dark:text-emerald-400">
+                                                        +{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-rose-600 dark:text-rose-400">
+                                                        -{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-bold bg-gray-100 dark:bg-gray-700/80 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600">
+                                                    {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-gray-700 dark:text-gray-300 text-xs max-w-xs truncate">
+                                                {tx.description || '-'}
+                                            </TableCell>
+                                            <TableCell className="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">
+                                                {tx.user?.name || '-'}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             )}
 
@@ -508,7 +806,7 @@ export default function FinanceIndex({
                                 <TableHead>{t('finance.amount', 'Summa')}</TableHead>
                                 <TableHead>{t('finance.method', 'Usul')}</TableHead>
                                 <TableHead>{t('finance.register', 'Kassa')}</TableHead>
-                                <TableHead>{t('finance.cashier', 'Qabul qildi')}</TableHead>
+                                <TableHead>{t('finance.receiver', 'Qabul qildi')}</TableHead>
                                 <TableHead>{t('finance.date', 'Sana')}</TableHead>
                                 <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
                             </TableRow>
@@ -517,20 +815,24 @@ export default function FinanceIndex({
                             {payments.data.length === 0 ? (
                                 <TableEmpty
                                     colSpan={9}
-                                    icon={<DollarSign className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_payments', "To'lovlar topilmadi")}
+                                    icon={<ArrowDownRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_payments', 'To\'lovlar topilmadi')}
                                 />
                             ) : (
                                 payments.data.map((p) => (
                                     <TableRow key={p.id}>
-                                        <TableCell className="font-semibold text-gray-900 dark:text-white">#{p.receipt_number}</TableCell>
-                                        <TableCell className="font-medium">{p.student?.full_name}</TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">#{p.contract?.contract_number}</TableCell>
+                                        <TableCell className="font-mono font-medium">{p.receipt_number}</TableCell>
+                                        <TableCell className="font-medium text-gray-900 dark:text-white">
+                                            {p.student?.full_name}
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">
+                                            {p.contract?.contract_number ? `#${p.contract.contract_number}` : '-'}
+                                        </TableCell>
                                         <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
                                             +{Number(p.amount).toLocaleString('uz-UZ')} UZS
                                         </TableCell>
                                         <TableCell>
-                                            <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                                 {p.payment_method}
                                             </span>
                                         </TableCell>
@@ -576,7 +878,7 @@ export default function FinanceIndex({
                                 <TableEmpty
                                     colSpan={7}
                                     icon={<ArrowUpRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_expenses', "Xarajatlar topilmadi")}
+                                    title={t('finance.no_expenses', 'Xarajatlar topilmadi')}
                                 />
                             ) : (
                                 expenses.data.map((e) => (
@@ -588,7 +890,7 @@ export default function FinanceIndex({
                                         </TableCell>
                                         <TableCell className="text-gray-500 dark:text-gray-400">{e.cash_register?.name}</TableCell>
                                         <TableCell className="text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{e.expense_date}</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{e.spent_at || e.expense_date || '-'}</TableCell>
                                         <TableCell className="text-right">
                                             <Button
                                                 size="sm"
@@ -608,52 +910,6 @@ export default function FinanceIndex({
                 </div>
             )}
 
-            {/* Tab: Shifts */}
-            {activeTab === 'shifts' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
-                                <TableHead>{t('finance.status', 'Holat')}</TableHead>
-                                <TableHead>{t('finance.opening_balance', 'Boshlang\'ich')}</TableHead>
-                                <TableHead>{t('finance.income', 'Jami Kirim')}</TableHead>
-                                <TableHead>{t('finance.expense', 'Jami Chiqim')}</TableHead>
-                                <TableHead>{t('finance.closing_balance', 'Yakuniy')}</TableHead>
-                                <TableHead>{t('finance.opened_at', 'Ochilgan')}</TableHead>
-                                <TableHead>{t('finance.closed_at', 'Yopilgan')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {shifts.data.length === 0 ? (
-                                <TableEmpty
-                                    colSpan={8}
-                                    icon={<Clock className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_shifts', "Smenalar topilmadi")}
-                                />
-                            ) : (
-                                shifts.data.map((sh) => (
-                                    <TableRow key={sh.id}>
-                                        <TableCell className="font-medium">{sh.cash_register?.name}</TableCell>
-                                        <TableCell>
-                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${sh.status === 'open' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                                                {sh.status === 'open' ? t('finance.open', 'Ochiq') : t('finance.closed', 'Yopiq')}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>{Number(sh.opening_balance).toLocaleString('uz-UZ')} UZS</TableCell>
-                                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-semibold">+{Number(sh.total_income).toLocaleString('uz-UZ')} UZS</TableCell>
-                                        <TableCell className="text-red-500 dark:text-red-400 font-semibold">-{Number(sh.total_expense).toLocaleString('uz-UZ')} UZS</TableCell>
-                                        <TableCell className="font-bold">{Number(sh.closing_balance || 0).toLocaleString('uz-UZ')} UZS</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{sh.opened_at}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{sh.closed_at || '-'}</TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            )}
-
             {/* Tab: Transfers */}
             {activeTab === 'transfers' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
@@ -664,44 +920,55 @@ export default function FinanceIndex({
                                 <TableHead>{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</TableHead>
                                 <TableHead>{t('finance.amount', 'Summa')}</TableHead>
                                 <TableHead>{t('finance.status', 'Holat')}</TableHead>
-                                <TableHead>{t('finance.initiator', 'Yuboruvchi')}</TableHead>
+                                <TableHead>{t('finance.sender', 'Yubordi')}</TableHead>
+                                <TableHead>{t('finance.approver', 'Tasdiqladi')}</TableHead>
+                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
                                 <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {transfers.data.length === 0 ? (
                                 <TableEmpty
-                                    colSpan={6}
+                                    colSpan={8}
                                     icon={<ArrowLeftRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_transfers', "Transferlar topilmadi")}
+                                    title={t('finance.no_transfers', 'Transferlar topilmadi')}
                                 />
                             ) : (
                                 transfers.data.map((tr) => (
                                     <TableRow key={tr.id}>
                                         <TableCell className="font-medium">{tr.from_cash_register?.name}</TableCell>
-                                        <TableCell className="font-medium">{tr.to_cash_register?.name}</TableCell>
-                                        <TableCell className="font-bold">{Number(tr.amount).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell className="font-medium text-blue-600 dark:text-blue-400">
+                                            {tr.to_cash_register?.name}
+                                        </TableCell>
+                                        <TableCell className="font-bold text-gray-900 dark:text-white">
+                                            {Number(tr.amount).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
                                         <TableCell>
-                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                                tr.status === 'approved'
-                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                                                    : tr.status === 'pending'
-                                                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                                                    : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
-                                            }`}>
-                                                {tr.status}
+                                            <span
+                                                className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                                    tr.status === 'approved'
+                                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                        : tr.status === 'pending'
+                                                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                                        : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
+                                                }`}
+                                            >
+                                                {tr.status === 'approved' ? t('finance.approved', 'Tasdiqlangan') : tr.status === 'pending' ? t('finance.pending', 'Kutilmoqda') : t('finance.rejected', 'Rad etilgan')}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-gray-500 dark:text-gray-400">{tr.transferred_by?.name || '-'}</TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{tr.approved_by?.name || '-'}</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{tr.created_at}</TableCell>
                                         <TableCell className="text-right">
                                             {tr.status === 'pending' && (
                                                 <Button
                                                     size="sm"
+                                                    variant="brand"
                                                     onClick={() => handleApproveTransfer(tr)}
-                                                    className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                    className="h-7 text-xs"
                                                 >
                                                     <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                                    {t('finance.approve', 'Tasdiqlash')}
+                                                    {t('common.confirm', 'Tasdiqlash')}
                                                 </Button>
                                             )}
                                         </TableCell>
@@ -713,7 +980,113 @@ export default function FinanceIndex({
                 </div>
             )}
 
-            {/* Accept Payment Modal */}
+            {/* Sweep Modal (Kassalarni bo'shatish) */}
+            <Dialog open={showSweepModal} onOpenChange={setShowSweepModal}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ArrowDownToLine className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            {t('finance.sweep_title', 'Kassalarni bo\'shatish va Superadminga o\'tkazish')}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-lg p-3 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                        {t('finance.sweep_desc', 'Filiallardagi kassalarning mablag\'lari o\'z turiga mos Superadmin kassasiga to\'liq yoki qisman transfer qilinadi.')}
+                    </div>
+
+                    <form onSubmit={handleSweepSubmit} className="space-y-4 text-xs">
+                        <div className="max-h-72 overflow-y-auto border rounded-xl divide-y dark:divide-gray-700">
+                            {sweepItems.length === 0 ? (
+                                <div className="p-6 text-center text-gray-500">
+                                    {t('finance.no_registers_to_sweep', 'Bo\'shatish uchun filial kassalari topilmadi')}
+                                </div>
+                            ) : (
+                                sweepItems.map((item, idx) => (
+                                    <div key={item.cash_register_id} className={`p-3 flex items-center justify-between gap-3 transition-colors ${item.selected ? 'bg-amber-50/30 dark:bg-amber-950/20' : 'bg-white dark:bg-gray-800'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="checkbox"
+                                                id={`sweep_item_${item.cash_register_id}`}
+                                                checked={item.selected}
+                                                onChange={(e) => {
+                                                    const updated = [...sweepItems];
+                                                    updated[idx].selected = e.target.checked;
+                                                    setSweepItems(updated);
+                                                }}
+                                                className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-gray-300"
+                                            />
+                                            <div>
+                                                <label htmlFor={`sweep_item_${item.cash_register_id}`} className="font-semibold text-gray-900 dark:text-white cursor-pointer block">
+                                                    {item.name}
+                                                </label>
+                                                <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <span>{item.branch_name}</span>
+                                                    <span>•</span>
+                                                    <span className="font-medium text-amber-700 dark:text-amber-400">
+                                                        {t('finance.target_superadmin_register', 'Qabul qiluvchi')}: {item.target_name}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">
+                                                {t('finance.balance', 'Balans')}: <span className="font-bold text-gray-900 dark:text-white font-mono">{Number(item.balance).toLocaleString('uz-UZ')} UZS</span>
+                                            </div>
+                                            {item.selected && (
+                                                <Input
+                                                    type="number"
+                                                    value={item.amount}
+                                                    onChange={(e) => {
+                                                        const updated = [...sweepItems];
+                                                        updated[idx].amount = Number(e.target.value);
+                                                        setSweepItems(updated);
+                                                    }}
+                                                    max={item.balance}
+                                                    min={0.01}
+                                                    className="w-36 h-8 text-xs font-mono font-bold text-right"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="sweep_notes">{t('finance.notes', 'Izoh')}</Label>
+                            <Input
+                                id="sweep_notes"
+                                value={sweepNotes}
+                                onChange={(e) => setSweepNotes(e.target.value)}
+                                placeholder={t('finance.sweep_notes_placeholder', 'Masalan: Hafta yakuni bo\'yicha tushumlarni topshirish...')}
+                                className="mt-1"
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t">
+                            <div>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{t('finance.sweep_total', 'Jami o\'tkazilayotgan mablag\'')}:</span>
+                                <div className="text-lg font-extrabold text-amber-600 dark:text-amber-400 font-mono">
+                                    {totalSweepAmount.toLocaleString('uz-UZ')} UZS
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Button type="button" variant="outline" onClick={() => setShowSweepModal(false)}>
+                                    {t('common.cancel', 'Bekor qilish')}
+                                </Button>
+                                <Button type="submit" variant="brand" disabled={isSweeping || totalSweepAmount <= 0}>
+                                    <ArrowDownToLine className="w-4 h-4 mr-1.5" />
+                                    {t('finance.confirm_sweep', 'Bo\'shatish va o\'tkazish')}
+                                </Button>
+                            </div>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Payment Modal */}
             <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
@@ -808,7 +1181,7 @@ export default function FinanceIndex({
                             <Button type="button" variant="outline" onClick={() => setShowPaymentModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700" disabled={paymentForm.processing}>
+                            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={paymentForm.processing}>
                                 {t('finance.confirm_payment', 'Chekni Chiqarish')}
                             </Button>
                         </div>
@@ -934,6 +1307,16 @@ export default function FinanceIndex({
                             />
                         </div>
 
+                        <div>
+                            <Label htmlFor="tr_notes">{t('finance.notes', 'Izoh')}</Label>
+                            <Input
+                                id="tr_notes"
+                                value={transferForm.data.notes}
+                                onChange={(e) => transferForm.setData('notes', e.target.value)}
+                                className="mt-1"
+                            />
+                        </div>
+
                         <div className="flex justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" onClick={() => setShowTransferModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
@@ -943,141 +1326,6 @@ export default function FinanceIndex({
                             </Button>
                         </div>
                     </form>
-                </DialogContent>
-            </Dialog>
-
-            {/* Shift Modal */}
-            <Dialog open={showShiftModal} onOpenChange={setShowShiftModal}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            {t('finance.shift_title', 'Kassa Smenasi (Ochish / Yopish)')}
-                        </DialogTitle>
-                    </DialogHeader>
-
-                    {/* Explanatory banner */}
-                    <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-lg p-3 text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
-                        <span className="font-semibold">{t('finance.shift_what_is', 'Kassa smenasi nima?')}:</span>{' '}
-                        {t('finance.shift_explanation', "Kassir ish kunini boshlaganda smena ochadi va kun yakunida smenani yopadi. Bu davrda qancha pul kirim va chiqim bo'lgani aniq hisoblab boriladi.")}
-                    </div>
-
-                    {(() => {
-                        const selectedRegister = cashRegisters.find((r) => r.id === Number(shiftForm.data.cash_register_id)) || cashRegisters[0];
-                        return (
-                            <form onSubmit={handleShiftSubmit} className="space-y-4 text-xs">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <Label required htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
-                                        <SearchableSelect
-                                            id="sh_register"
-                                            value={shiftForm.data.cash_register_id}
-                                            onChange={handleRegisterChange}
-                                            options={cashRegisters.map((r) => ({
-                                                value: r.id,
-                                                label: r.name,
-                                                sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
-                                            }))}
-                                            className="mt-1"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label required htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
-                                        <SearchableSelect
-                                            id="sh_action"
-                                            value={shiftForm.data.action}
-                                            onChange={handleActionChange}
-                                            options={[
-                                                { value: 'open', label: t('finance.shift_open_action', '🔓 Smenani Ochish') },
-                                                { value: 'close', label: t('finance.shift_close_action', '🔒 Smenani Yopish') },
-                                            ]}
-                                            className="mt-1"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Selected Register Status Info */}
-                                {selectedRegister && (
-                                    <div className="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-200 dark:border-gray-700 space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-500 dark:text-gray-400">{t('finance.current_register_balance', 'Hozirgi kassa balansi')}:</span>
-                                            <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">
-                                                {Number(selectedRegister.balance).toLocaleString('uz-UZ')} UZS
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-700/60">
-                                            <span className="text-gray-500 dark:text-gray-400">{t('finance.status', 'Holat')}:</span>
-                                            {selectedRegister.open_shift ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                    {t('finance.shift_status_open', 'Smena ochiq')}
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                                    {t('finance.shift_status_closed', 'Smena yopiq (ochilmagan)')}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {selectedRegister.open_shift && (
-                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                {t('finance.shift_opened_by_at', {
-                                                    time: selectedRegister.open_shift.opened_at,
-                                                    name: selectedRegister.open_shift.opened_by?.name || '-',
-                                                })}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div>
-                                    <Label required htmlFor="sh_balance">
-                                        {shiftForm.data.action === 'open'
-                                            ? t('finance.shift_opening_balance', "Boshlang'ich kassa qoldig'i (UZS)")
-                                            : t('finance.shift_closing_balance', "Yakuniy kassa qoldig'i (UZS)")}
-                                    </Label>
-                                    <Input
-                                        id="sh_balance"
-                                        type="number"
-                                        value={shiftForm.data.action === 'open' ? shiftForm.data.opening_balance : shiftForm.data.closing_balance}
-                                        onChange={(e) => {
-                                            if (shiftForm.data.action === 'open') {
-                                                shiftForm.setData('opening_balance', e.target.value);
-                                            } else {
-                                                shiftForm.setData('closing_balance', e.target.value);
-                                            }
-                                        }}
-                                        placeholder={String(selectedRegister?.balance || '0')}
-                                        className="mt-1"
-                                    />
-                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                        {shiftForm.data.action === 'open'
-                                            ? t('finance.shift_open_hint', "Kassani qabul qilgandagi naqd/hisob qoldig'ini kiriting.")
-                                            : t('finance.shift_close_hint', "Smena yakunida kassadagi haqiqiy qoldiqni kiriting. Kirim va chiqimlar avtomatik hisoblanadi.")}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="sh_note">{t('finance.notes', 'Izoh')}</Label>
-                                    <Input
-                                        id="sh_note"
-                                        value={shiftForm.data.note}
-                                        onChange={(e) => shiftForm.setData('note', e.target.value)}
-                                        placeholder={t('finance.notes_placeholder', 'Qo\'shimcha izoh yoki tafsilotlar...')}
-                                        className="mt-1"
-                                    />
-                                </div>
-
-                                <div className="flex justify-end gap-2 pt-2">
-                                    <Button type="button" variant="outline" onClick={() => setShowShiftModal(false)}>
-                                        {t('common.cancel', 'Bekor qilish')}
-                                    </Button>
-                                    <Button type="submit" variant="brand" disabled={shiftForm.processing}>
-                                        {t('common.confirm', 'Tasdiqlash')}
-                                    </Button>
-                                </div>
-                            </form>
-                        );
-                    })()}
                 </DialogContent>
             </Dialog>
         </div>

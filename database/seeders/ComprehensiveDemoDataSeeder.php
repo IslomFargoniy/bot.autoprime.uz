@@ -223,7 +223,48 @@ class ComprehensiveDemoDataSeeder extends Seeder
         $typeCash = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd pul kassasi', 'is_active' => true]);
         $typeCard = CashRegisterType::firstOrCreate(['code' => 'card_terminal'], ['name' => 'Terminal (Uzcard / Humo)', 'is_active' => true]);
         $typeBank = CashRegisterType::firstOrCreate(['code' => 'bank_transfer'], ['name' => 'Bank hisob raqami', 'is_active' => true]);
-        CashRegisterType::firstOrCreate(['code' => 'click_payme'], ['name' => 'Click & Payme', 'is_active' => true]);
+        $typeClick = CashRegisterType::firstOrCreate(['code' => 'click_payme'], ['name' => 'Click & Payme', 'is_active' => true]);
+
+        // Superadmin central registers for all 4 types
+        $regCashMain = CashRegister::firstOrCreate(
+            ['name' => 'Bosh Naqd pul kassasi (Superadmin)'],
+            [
+                'branch_id' => null,
+                'cash_register_type_id' => $typeCash->id,
+                'balance' => 0,
+                'is_active' => true,
+            ]
+        );
+
+        $regCardMain = CashRegister::firstOrCreate(
+            ['name' => 'Bosh Terminal kassasi (Superadmin)'],
+            [
+                'branch_id' => null,
+                'cash_register_type_id' => $typeCard->id,
+                'balance' => 0,
+                'is_active' => true,
+            ]
+        );
+
+        $regBankMain = CashRegister::firstOrCreate(
+            ['name' => 'Bosh Bank hisob raqami (AsakaBank)'],
+            [
+                'branch_id' => null,
+                'cash_register_type_id' => $typeBank->id,
+                'balance' => 45000000,
+                'is_active' => true,
+            ]
+        );
+
+        $regClickMain = CashRegister::firstOrCreate(
+            ['name' => 'Bosh Click & Payme (Superadmin)'],
+            [
+                'branch_id' => null,
+                'cash_register_type_id' => $typeClick->id,
+                'balance' => 0,
+                'is_active' => true,
+            ]
+        );
 
         $regChilonzorCash = CashRegister::firstOrCreate(
             ['name' => 'Chilonzor Naqd pul kassasi'],
@@ -241,16 +282,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'branch_id' => $branchChilonzor->id,
                 'cash_register_type_id' => $typeCard->id,
                 'balance' => 8200000,
-                'is_active' => true,
-            ]
-        );
-
-        $regBankMain = CashRegister::firstOrCreate(
-            ['name' => 'Bosh Bank hisob raqami (AsakaBank)'],
-            [
-                'branch_id' => null,
-                'cash_register_type_id' => $typeBank->id,
-                'balance' => 45000000,
                 'is_active' => true,
             ]
         );
