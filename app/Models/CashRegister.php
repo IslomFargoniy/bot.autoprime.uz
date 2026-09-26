@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -106,6 +107,176 @@ class CashRegister extends Model
             'balance' => 0,
             'is_active' => true,
         ]);
+    }
+
+    /**
+     * Atomically deposit funds into this cash register and record ledger transaction.
+     */
+    public function deposit(
+        float $amount,
+        string $category = 'payment',
+        ?string $description = null,
+        $reference = null,
+        ?int $userId = null
+    ): CashTransaction {
+        $amount = abs($amount);
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException("Kirim summasi 0 dan katta bo'lishi kerak.");
+        }
+
+        return DB::transaction(function () use ($amount, $category, $description, $reference, $userId) {
+            $locked = self::where('id', $this->id)->lockForUpdate()->firstOrFail();
+
+            $balBefore = (float) $locked->balance;
+            $balAfter = $balBefore + $amount;
+
+            $locked->update(['balance' => $balAfter]);
+            $this->balance = $balAfter;
+
+            return $locked->recordTransaction(
+                type: 'in',
+                category: $category,
+                amount: $amount,
+                balanceBefore: $balBefore,
+                balanceAfter: $balAfter,
+                description: $description,
+                reference: $reference,
+                userId: $userId ?? auth()->id()
+            );
+        });
+    }
+
+    /**
+     * Atomically withdraw funds from this cash register and record ledger transaction.
+     */
+    public function withdraw(
+        float $amount,
+        string $category = 'expense',
+        ?string $description = null,
+        $reference = null,
+        ?int $userId = null
+    ): CashTransaction {
+        $amount = abs($amount);
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException("Chiqim summasi 0 dan katta bo'lishi kerak.");
+        }
+
+        return DB::transaction(function () use ($amount, $category, $description, $reference, $userId) {
+            $locked = self::where('id', $this->id)->lockForUpdate()->firstOrFail();
+
+            if ((float) $locked->balance < $amount) {
+                throw new \InvalidArgumentException(
+                    "Tanlangan '{$locked->name}' kassasida yetarli mablag' mavjud emas (Mavjud: " . number_format((float) $locked->balance, 0, '', ' ') . " UZS, So'ralgan: " . number_format($amount, 0, '', ' ') . " UZS)."
+                );
+            }
+
+            $balBefore = (float) $locked->balance;
+            $balAfter = $balBefore - $amount;
+
+            $locked->update(['balance' => $balAfter]);
+            $this->balance = $balAfter;
+
+            return $locked->recordTransaction(
+                type: 'out',
+                category: $category,
+                amount: $amount,
+                balanceBefore: $balBefore,
+                balanceAfter: $balAfter,
+                description: $description,
+                reference: $reference,
+                userId: $userId ?? auth()->id()
+            );
+        });
+    }
+
+    /**
+     * Atomically transfer funds from this cash register to a target cash register.
+     *
+     * @return array{out: CashTransaction, in: CashTransaction}
+     */
+    public function transferTo(
+        CashRegister $targetRegister,
+        float $amount,
+        string $category = 'transfer',
+        ?string $description = null,
+        $reference = null,
+        ?int $userId = null
+    ): array {
+        $amount = abs($amount);
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException("Transfer summasi 0 dan katta bo'lishi kerak.");
+        }
+
+        if ($this->id === $targetRegister->id) {
+            throw new \InvalidArgumentException("Pulni bitta kassaning o'ziga o'tkazib bo'lmaydi.");
+        }
+
+        return DB::transaction(function () use ($targetRegister, $amount, $category, $description, $reference, $userId) {
+            // Prevent deadlock by locking in consistent ID order
+            $firstId = min($this->id, $targetRegister->id);
+            $secondId = max($this->id, $targetRegister->id);
+
+            $firstLocked = self::where('id', $firstId)->lockForUpdate()->firstOrFail();
+            $secondLocked = self::where('id', $secondId)->lockForUpdate()->firstOrFail();
+
+            $fromLocked = $this->id === $firstId ? $firstLocked : $secondLocked;
+            $toLocked = $targetRegister->id === $firstId ? $firstLocked : $secondLocked;
+
+            if ((float) $fromLocked->balance < $amount) {
+                throw new \InvalidArgumentException(
+                    "Chiqim kassasida ({$fromLocked->name}) yetarli mablag' mavjud emas (Mavjud: " . number_format((float) $fromLocked->balance, 0, '', ' ') . " UZS)."
+                );
+            }
+
+            $fromBalBefore = (float) $fromLocked->balance;
+            $fromBalAfter = $fromBalBefore - $amount;
+            $toBalBefore = (float) $toLocked->balance;
+            $toBalAfter = $toBalBefore + $amount;
+
+            $fromLocked->update(['balance' => $fromBalAfter]);
+            $toLocked->update(['balance' => $toBalAfter]);
+
+            $this->balance = $fromBalAfter;
+            $targetRegister->balance = $toBalAfter;
+
+            $outCategory = $category === 'sweep' ? 'sweep_out' : 'transfer_out';
+            $inCategory = $category === 'sweep' ? 'sweep_in' : 'transfer_in';
+
+            $outDesc = $description ?? ($category === 'sweep'
+                ? "Kassani bo'shatish: {$toLocked->name} ga o'tkazildi"
+                : "Transfer chiqim: {$toLocked->name} ga");
+
+            $inDesc = $description ?? ($category === 'sweep'
+                ? "Kassa bo'shatishdan qabul: {$fromLocked->name} dan"
+                : "Transfer kirim: {$fromLocked->name} dan");
+
+            $txOut = $fromLocked->recordTransaction(
+                type: 'out',
+                category: $outCategory,
+                amount: $amount,
+                balanceBefore: $fromBalBefore,
+                balanceAfter: $fromBalAfter,
+                description: $outDesc,
+                reference: $reference,
+                userId: $userId ?? auth()->id()
+            );
+
+            $txIn = $toLocked->recordTransaction(
+                type: 'in',
+                category: $inCategory,
+                amount: $amount,
+                balanceBefore: $toBalBefore,
+                balanceAfter: $toBalAfter,
+                description: $inDesc,
+                reference: $reference,
+                userId: $userId ?? auth()->id()
+            );
+
+            return [
+                'out' => $txOut,
+                'in' => $txIn,
+            ];
+        });
     }
 
     /**

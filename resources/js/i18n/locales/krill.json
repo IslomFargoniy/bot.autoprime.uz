@@ -664,6 +664,8 @@
         "operation_type": "Амал тури",
         "op_payment": "Кирим: Тўлов",
         "op_expense": "Чиқим: Харажат",
+        "op_salary": "Ойлик маош",
+        "op_maintenance": "Автотранспорт",
         "op_transfer_in": "Трансфер (Кирим)",
         "op_transfer_out": "Трансфер (Чиқим)",
         "op_sweep_out": "Кассани бўшатиш (Чиқим)",

@@ -664,6 +664,8 @@
         "operation_type": "Amal turi",
         "op_payment": "Kirim: To'lov",
         "op_expense": "Chiqim: Xarajat",
+        "op_salary": "Oylik maosh",
+        "op_maintenance": "Avtotransport",
         "op_transfer_in": "Transfer (Kirim)",
         "op_transfer_out": "Transfer (Chiqim)",
         "op_sweep_out": "Kassani bo'shatish (Chiqim)",
