@@ -502,7 +502,15 @@
         "select_tariff": "Shartnoma Tarifi",
         "select_group": "Guruh",
         "discount_amount": "Chegirma (UZS)",
-        "confirm_convert": "Shartnomani Rasmiylashtirish"
+        "confirm_convert": "Shartnomani Rasmiylashtirish",
+        "source_telegram_bot": "Telegram bot",
+        "source_instagram": "Instagram",
+        "source_website": "Vebsayt",
+        "source_recommendation": "Tavsiya",
+        "source_referral": "Tavsiya",
+        "source_walk_in": "O'zi kelgan (Ofis)",
+        "source_reception_manual": "Reception",
+        "source_other": "Boshqa"
     },
     "contracts": {
         "title": "Shartnomalar",

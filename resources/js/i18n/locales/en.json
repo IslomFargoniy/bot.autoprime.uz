@@ -502,7 +502,15 @@
         "select_tariff": "Tariff",
         "select_group": "Group",
         "discount_amount": "Discount (UZS)",
-        "confirm_convert": "Sign Contract"
+        "confirm_convert": "Sign Contract",
+        "source_telegram_bot": "Telegram Bot",
+        "source_instagram": "Instagram",
+        "source_website": "Website",
+        "source_recommendation": "Recommendation",
+        "source_referral": "Referral",
+        "source_walk_in": "Walk-in",
+        "source_reception_manual": "Reception",
+        "source_other": "Other"
     },
     "contracts": {
         "title": "Contracts",
