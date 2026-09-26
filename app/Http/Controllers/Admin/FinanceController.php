@@ -411,11 +411,6 @@ class FinanceController extends Controller
             }
         });
 
-                $transferredCount++;
-                $totalSweptAmount += $amountToTransfer;
-            }
-        });
-
         if ($transferredCount === 0) {
             return redirect()->back()->withErrors([
                 'sweep' => "Mablag' o'tkazilmadi. Kassalarda yetarli balans mavjud emas.",
