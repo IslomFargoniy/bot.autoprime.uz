@@ -148,7 +148,6 @@ Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt']
 Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
 Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats'])->name('tests.stats');
 
-
 Route::middleware(['auth.telegram'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
