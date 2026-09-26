@@ -5,6 +5,7 @@ import { Trash2, Edit2, Plus, MapPin, Navigation, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import { Branch, SharedData } from '@/types/auth';
 import {
@@ -310,16 +311,18 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                         {isSuperAdmin && (
                             <div>
                                 <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <select 
-                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    value={data.branch_id} 
-                                    onChange={e => setData('branch_id', e.target.value)}
-                                >
-                                    <option value="">{t('branches.branch_optional', 'Filial (Ixtiyoriy)')}</option>
-                                    {(branches || []).map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                <SearchableSelect
+                                    id="branch_id"
+                                    value={data.branch_id}
+                                    onChange={(val) => setData('branch_id', val ? String(val) : '')}
+                                    options={[
+                                        { value: '', label: t('branches.branch_optional', 'Filial (Ixtiyoriy)') },
+                                        ...(branches || []).map((b) => ({ value: b.id, label: b.name })),
+                                    ]}
+                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                    allowClear
+                                    triggerClassName="h-10 text-sm"
+                                />
                                 {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
                             </div>
                         )}

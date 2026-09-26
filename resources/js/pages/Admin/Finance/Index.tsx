@@ -501,39 +501,38 @@ export default function FinanceIndex({
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="payment_method">{t('finance.method', 'To\'lov Usuli')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="payment_method"
                                     value={paymentForm.data.payment_method}
-                                    onChange={(e) => {
-                                        const m = e.target.value;
+                                    onChange={(val) => {
+                                        const m = String(val);
                                         paymentForm.setData({
                                             ...paymentForm.data,
                                             payment_method: m,
                                             cash_register_id: cashRegisters.find((r) => r.type?.code === m)?.id || paymentForm.data.cash_register_id,
                                         });
                                     }}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="cash">💵 Naqd pul</option>
-                                    <option value="card_click">💳 Karta / Click / Payme</option>
-                                    <option value="bank_transfer">🏦 Bank o'tkazmasi</option>
-                                </select>
+                                    options={[
+                                        { value: 'cash', label: '💵 Naqd pul' },
+                                        { value: 'card_click', label: '💳 Karta / Click / Payme' },
+                                        { value: 'bank_transfer', label: '🏦 Bank o\'tkazmasi' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="pay_register_id">{t('finance.cash_register', 'Kassa')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="pay_register_id"
                                     value={paymentForm.data.cash_register_id}
-                                    onChange={(e) => paymentForm.setData('cash_register_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    required
-                                >
-                                    {cashRegisters.map((r) => (
-                                        <option key={r.id} value={r.id}>
-                                            {r.name} ({r.type?.code})
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => paymentForm.setData('cash_register_id', val)}
+                                    options={cashRegisters.map((r) => ({
+                                        value: r.id,
+                                        label: r.name,
+                                        sublabel: r.type?.code,
+                                    }))}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 
@@ -582,16 +581,17 @@ export default function FinanceIndex({
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="exp_register_id">{t('finance.register', 'Chiqim Kassasi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="exp_register_id"
                                     value={expenseForm.data.cash_register_id}
-                                    onChange={(e) => expenseForm.setData('cash_register_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {cashRegisters.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.name} ({Number(r.balance).toLocaleString('uz-UZ')} UZS)</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => expenseForm.setData('cash_register_id', val)}
+                                    options={cashRegisters.map((r) => ({
+                                        value: r.id,
+                                        label: r.name,
+                                        sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
+                                    }))}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="exp_category_id">{t('finance.category', 'Kategoriya')}</Label>
@@ -651,29 +651,23 @@ export default function FinanceIndex({
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="tr_from">{t('finance.from_register', 'Chiqim Kassasi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="tr_from"
                                     value={transferForm.data.from_cash_register_id}
-                                    onChange={(e) => transferForm.setData('from_cash_register_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {cashRegisters.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => transferForm.setData('from_cash_register_id', val)}
+                                    options={cashRegisters.map((r) => ({ value: r.id, label: r.name }))}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="tr_to">{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="tr_to"
                                     value={transferForm.data.to_cash_register_id}
-                                    onChange={(e) => transferForm.setData('to_cash_register_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {cashRegisters.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => transferForm.setData('to_cash_register_id', val)}
+                                    options={cashRegisters.map((r) => ({ value: r.id, label: r.name }))}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 
@@ -711,28 +705,26 @@ export default function FinanceIndex({
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="sh_register"
                                     value={shiftForm.data.cash_register_id}
-                                    onChange={(e) => shiftForm.setData('cash_register_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {cashRegisters.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => shiftForm.setData('cash_register_id', val)}
+                                    options={cashRegisters.map((r) => ({ value: r.id, label: r.name }))}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="sh_action"
                                     value={shiftForm.data.action}
-                                    onChange={(e) => shiftForm.setData('action', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="open">🔓 Smenani Ochish</option>
-                                    <option value="close">🔒 Smenani Yopish</option>
-                                </select>
+                                    onChange={(val) => shiftForm.setData('action', val)}
+                                    options={[
+                                        { value: 'open', label: '🔓 Smenani Ochish' },
+                                        { value: 'close', label: '🔒 Smenani Yopish' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 

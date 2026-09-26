@@ -22,6 +22,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Salary {
     id: number;
@@ -250,33 +251,35 @@ export default function SalariesIndex({
                     <form onSubmit={handleAdjustSubmit} className="space-y-4 text-xs">
                         <div>
                             <Label htmlFor="adj_user_id">{t('salaries.employee', 'Xodim')}</Label>
-                            <select
+                            <SearchableSelect
                                 id="adj_user_id"
                                 value={adjustForm.data.user_id}
-                                onChange={(e) => adjustForm.setData('user_id', e.target.value)}
-                                className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                required
-                            >
-                                {employees.map((emp) => (
-                                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
-                                ))}
-                            </select>
+                                onChange={(val) => adjustForm.setData('user_id', val)}
+                                options={employees.map((emp) => ({
+                                    value: emp.id,
+                                    label: emp.name,
+                                    sublabel: emp.role,
+                                }))}
+                                placeholder={t('salaries.select_employee', '-- Xodimni tanlang --')}
+                                className="mt-1"
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="adj_type">{t('salaries.adjust_type', 'Turi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="adj_type"
                                     value={adjustForm.data.type}
-                                    onChange={(e) => adjustForm.setData('type', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="bonus">🎁 Bonus</option>
-                                    <option value="kpi">⭐ KPI Ustama</option>
-                                    <option value="fine">⚠️ Jarima (Ushlab qolish)</option>
-                                    <option value="advance">💵 Avans (Oldindan to'lov)</option>
-                                </select>
+                                    onChange={(val) => adjustForm.setData('type', val)}
+                                    options={[
+                                        { value: 'bonus', label: '🎁 Bonus' },
+                                        { value: 'kpi', label: '⭐ KPI Ustama' },
+                                        { value: 'fine', label: '⚠️ Jarima (Ushlab qolish)' },
+                                        { value: 'advance', label: '💵 Avans (Oldindan to\'lov)' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="adj_amount">{t('salaries.amount', 'Summa (UZS)')}</Label>
@@ -330,29 +333,31 @@ export default function SalariesIndex({
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label htmlFor="pay_cash_reg">{t('finance.register', 'Kassa')}</Label>
-                                    <select
+                                    <SearchableSelect
                                         id="pay_cash_reg"
                                         value={payForm.data.cash_register_id}
-                                        onChange={(e) => payForm.setData('cash_register_id', e.target.value)}
-                                        className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    >
-                                        {cashRegisters.map((r) => (
-                                            <option key={r.id} value={r.id}>{r.name} ({Number(r.balance).toLocaleString('uz-UZ')} UZS)</option>
-                                        ))}
-                                    </select>
+                                        onChange={(val) => payForm.setData('cash_register_id', val)}
+                                        options={cashRegisters.map((r) => ({
+                                            value: r.id,
+                                            label: r.name,
+                                            sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
+                                        }))}
+                                        className="mt-1"
+                                    />
                                 </div>
                                 <div>
                                     <Label htmlFor="pay_method">{t('finance.method', 'Usul')}</Label>
-                                    <select
+                                    <SearchableSelect
                                         id="pay_method"
                                         value={payForm.data.payment_method}
-                                        onChange={(e) => payForm.setData('payment_method', e.target.value)}
-                                        className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    >
-                                        <option value="cash">Naqd pul</option>
-                                        <option value="card_click">Karta / Click</option>
-                                        <option value="bank_transfer">Bank hisobiga</option>
-                                    </select>
+                                        onChange={(val) => payForm.setData('payment_method', String(val))}
+                                        options={[
+                                            { value: 'cash', label: 'Naqd pul' },
+                                            { value: 'card_click', label: 'Karta / Click' },
+                                            { value: 'bank_transfer', label: 'Bank hisobiga' },
+                                        ]}
+                                        className="mt-1"
+                                    />
                                 </div>
                             </div>
 

@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface ContractType {
     id: number;
@@ -207,19 +208,20 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                             </div>
                             <div>
                                 <Label htmlFor="category">{t('contract_types.category', 'Toifa')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="category"
                                     value={form.data.category}
-                                    onChange={(e) => form.setData('category', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="B">B toifa</option>
-                                    <option value="A">A toifa</option>
-                                    <option value="C">C toifa</option>
-                                    <option value="BC">BC toifa</option>
-                                    <option value="D">D toifa</option>
-                                    <option value="E">E toifa</option>
-                                </select>
+                                    onChange={(val) => form.setData('category', String(val))}
+                                    options={[
+                                        { value: 'B', label: 'B toifa' },
+                                        { value: 'A', label: 'A toifa' },
+                                        { value: 'C', label: 'C toifa' },
+                                        { value: 'BC', label: 'BC toifa' },
+                                        { value: 'D', label: 'D toifa' },
+                                        { value: 'E', label: 'E toifa' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 

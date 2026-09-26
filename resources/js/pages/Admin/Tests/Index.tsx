@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import Pagination from '@/components/pagination';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -843,25 +844,33 @@ export default function TestsIndex({
                             />
                         </div>
 
-                        <select
+                        <SearchableSelect
                             value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-ring"
-                        >
-                            <option value="">{t('tests.filter_all_status', 'Barcha natijalar')}</option>
-                            <option value="passed">{t('tests.filter_passed', 'Faqat o\'tganlar')}</option>
-                            <option value="failed">{t('tests.filter_failed', 'O\'tolmaganlar')}</option>
-                        </select>
+                            onChange={(val) => setStatusFilter(val ? String(val) : '')}
+                            options={[
+                                { value: '', label: t('tests.filter_all_status', 'Barcha natijalar') },
+                                { value: 'passed', label: t('tests.filter_passed', 'Faqat o\'tganlar') },
+                                { value: 'failed', label: t('tests.filter_failed', 'O\'tolmaganlar') },
+                            ]}
+                            placeholder={t('tests.filter_all_status', 'Barcha natijalar')}
+                            className="w-44"
+                            size="sm"
+                            triggerClassName="h-9 text-xs"
+                        />
 
-                        <select
+                        <SearchableSelect
                             value={typeFilter}
-                            onChange={(e) => setTypeFilter(e.target.value)}
-                            className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-ring"
-                        >
-                            <option value="">{t('tests.filter_all_types', 'Barcha turlar')}</option>
-                            <option value="random_mock">{t('tests.type_mock', 'Ichki Nazorat Imtihoni')}</option>
-                            <option value="ticket_exam">{t('tests.type_ticket', 'Bilet Mashg\'uloti')}</option>
-                        </select>
+                            onChange={(val) => setTypeFilter(val ? String(val) : '')}
+                            options={[
+                                { value: '', label: t('tests.filter_all_types', 'Barcha turlar') },
+                                { value: 'random_mock', label: t('tests.type_mock', 'Ichki Nazorat Imtihoni') },
+                                { value: 'ticket_exam', label: t('tests.type_ticket', 'Bilet Mashg\'uloti') },
+                            ]}
+                            placeholder={t('tests.filter_all_types', 'Barcha turlar')}
+                            className="w-48"
+                            size="sm"
+                            triggerClassName="h-9 text-xs"
+                        />
 
                         <Button type="submit" size="sm" className="text-xs">
                             {t('common.filter', 'Filtrlash')}
@@ -1595,18 +1604,18 @@ export default function TestsIndex({
                     </DialogHeader>
                     <form onSubmit={handleSignSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs">{t('tests.sign_category', 'Toifa')}</Label>
-                            <select
+                            <Label className="text-xs mb-1.5 block">{t('tests.sign_category', 'Toifa')}</Label>
+                            <SearchableSelect
                                 value={signCategoryId}
-                                onChange={(e) => setSignCategoryId(Number(e.target.value))}
-                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
-                            >
-                                {signCategories.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name_uz}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => setSignCategoryId(Number(val))}
+                                options={signCategories.map((c) => ({
+                                    value: c.id,
+                                    label: c.name_uz,
+                                    sublabel: `${c.signs?.length || 0} ta belgi`,
+                                }))}
+                                placeholder={t('tests.select_category', '-- Toifani tanlang --')}
+                                triggerClassName="text-xs rounded-xl"
+                            />
                         </div>
                         <div>
                             <Label className="text-xs">{t('tests.sign_number', 'Belgi Raqami')}</Label>

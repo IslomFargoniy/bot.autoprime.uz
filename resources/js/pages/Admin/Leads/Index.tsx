@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Lead {
     id: number;
@@ -297,48 +298,48 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             </div>
                             <div>
                                 <Label htmlFor="category">{t('leads.category', 'Toifa')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="category"
                                     value={createForm.data.category}
-                                    onChange={(e) => createForm.setData('category', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="B">B toifa</option>
-                                    <option value="A">A toifa</option>
-                                    <option value="C">C toifa</option>
-                                    <option value="BC">BC toifa</option>
-                                    <option value="D">D toifa</option>
-                                </select>
+                                    onChange={(val) => createForm.setData('category', String(val))}
+                                    options={[
+                                        { value: 'B', label: 'B toifa' },
+                                        { value: 'A', label: 'A toifa' },
+                                        { value: 'C', label: 'C toifa' },
+                                        { value: 'BC', label: 'BC toifa' },
+                                        { value: 'D', label: 'D toifa' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="branch_id">{t('leads.branch', 'Filial')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="branch_id"
                                     value={createForm.data.branch_id}
-                                    onChange={(e) => createForm.setData('branch_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {branches.map((b) => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => createForm.setData('branch_id', val ? String(val) : '')}
+                                    options={branches.map((b) => ({ value: String(b.id), label: b.name }))}
+                                    placeholder={t('leads.branch', 'Filial')}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="source">{t('leads.source', 'Manba')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="source"
                                     value={createForm.data.source}
-                                    onChange={(e) => createForm.setData('source', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="reception_manual">Reception</option>
-                                    <option value="telegram_bot">Telegram Bot</option>
-                                    <option value="instagram">Instagram</option>
-                                    <option value="website">Vebsayt</option>
-                                    <option value="referral">Tavsiya</option>
-                                </select>
+                                    onChange={(val) => createForm.setData('source', String(val))}
+                                    options={[
+                                        { value: 'reception_manual', label: 'Reception' },
+                                        { value: 'telegram_bot', label: 'Telegram Bot' },
+                                        { value: 'instagram', label: 'Instagram' },
+                                        { value: 'website', label: 'Vebsayt' },
+                                        { value: 'referral', label: 'Tavsiya' },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
                         <div>
@@ -376,34 +377,32 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             </div>
                             <div>
                                 <Label htmlFor="contract_type_id">{t('leads.select_tariff', 'Shartnoma Tarifi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="contract_type_id"
                                     value={convertForm.data.contract_type_id}
-                                    onChange={(e) => convertForm.setData('contract_type_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    required
-                                >
-                                    {contractTypes.map((ct) => (
-                                        <option key={ct.id} value={ct.id}>
-                                            {ct.name} ({Number(ct.price).toLocaleString('uz-UZ')} UZS)
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => convertForm.setData('contract_type_id', val)}
+                                    options={contractTypes.map((ct) => ({
+                                        value: ct.id,
+                                        label: ct.name,
+                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS`,
+                                    }))}
+                                    className="mt-1"
+                                />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label htmlFor="conv_group_id">{t('leads.select_group', 'Guruh')}</Label>
-                                    <select
+                                    <SearchableSelect
                                         id="conv_group_id"
                                         value={convertForm.data.group_id}
-                                        onChange={(e) => convertForm.setData('group_id', e.target.value)}
-                                        className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    >
-                                        <option value="">{t('common.not_assigned', 'Biriktirilmagan')}</option>
-                                        {groups.map((g) => (
-                                            <option key={g.id} value={g.id}>{g.name}</option>
-                                        ))}
-                                    </select>
+                                        onChange={(val) => convertForm.setData('group_id', val)}
+                                        options={[
+                                            { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
+                                            ...groups.map((g) => ({ value: g.id, label: g.name })),
+                                        ]}
+                                        placeholder={t('common.not_assigned', 'Biriktirilmagan')}
+                                        className="mt-1"
+                                    />
                                 </div>
                                 <div>
                                     <Label htmlFor="discount_amount">{t('leads.discount_amount', 'Chegirma (UZS)')}</Label>

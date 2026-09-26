@@ -183,19 +183,21 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                         <option value="75">75</option>
                         <option value="all">{t('common.all', 'Barchasi')}</option>
                     </select>
-                    <select
-                        className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <SearchableSelect
                         value={instructorId}
-                        onChange={(e) => {
-                            setInstructorId(e.target.value);
-                            applyFilters(search, e.target.value, perPage);
+                        onChange={(val) => {
+                            const nextVal = val ? String(val) : '';
+                            setInstructorId(nextVal);
+                            applyFilters(search, nextVal, perPage);
                         }}
-                    >
-                        <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                        {instructors.map(inst => (
-                            <option key={inst.id} value={inst.id}>{inst.name}</option>
-                        ))}
-                    </select>
+                        options={[
+                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                        ]}
+                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                        className="w-52"
+                        triggerClassName="h-10 text-sm"
+                    />
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
@@ -226,19 +228,20 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                             <div className="grid gap-4 py-4 mt-2">
                                 <div className="space-y-2">
                                     <Label>{t('drivings.instructor', 'Instruktor')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    <SearchableSelect
                                         value={instructorId}
-                                        onChange={(e) => {
-                                            setInstructorId(e.target.value);
-                                            applyFilters(search, e.target.value, perPage);
+                                        onChange={(val) => {
+                                            const nextVal = val ? String(val) : '';
+                                            setInstructorId(nextVal);
+                                            applyFilters(search, nextVal, perPage);
                                         }}
-                                    >
-                                        <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                                        {instructors.map(inst => (
-                                            <option key={inst.id} value={inst.id}>{inst.name}</option>
-                                        ))}
-                                    </select>
+                                        options={[
+                                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                                        ]}
+                                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                                        triggerClassName="h-10 text-sm"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('common.pagination', 'Sahifalash')}</Label>

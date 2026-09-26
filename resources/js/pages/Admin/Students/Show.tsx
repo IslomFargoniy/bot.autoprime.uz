@@ -14,6 +14,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Student {
     id: number;
@@ -202,19 +203,22 @@ export default function StudentShow({ student, drivings, stats, filters = {} }: 
                 <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     {/* Desktop Filters */}
                     <div className="hidden md:flex items-center gap-2">
-                        <select
-                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <SearchableSelect
                             value={status}
-                            onChange={(e) => {
-                                setStatus(e.target.value);
-                                applyFilters(e.target.value, perPage);
+                            onChange={(val) => {
+                                const v = String(val ?? '');
+                                setStatus(v);
+                                applyFilters(v, perPage);
                             }}
-                        >
-                            <option value="">{t('status.all', 'Barcha holatlar')}</option>
-                            <option value="scheduled">{t('status.scheduled', 'Rejada')}</option>
-                            <option value="completed">{t('status.completed', 'Tugagan')}</option>
-                            <option value="cancelled">{t('status.cancelled', 'Bekor qilingan')}</option>
-                        </select>
+                            options={[
+                                { value: '', label: t('status.all', 'Barcha holatlar') },
+                                { value: 'scheduled', label: t('status.scheduled', 'Rejada') },
+                                { value: 'completed', label: t('status.completed', 'Tugagan') },
+                                { value: 'cancelled', label: t('status.cancelled', 'Bekor qilingan') },
+                            ]}
+                            className="w-44"
+                            triggerClassName="h-10 text-sm"
+                        />
 
                         <select
                             className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -246,19 +250,22 @@ export default function StudentShow({ student, drivings, stats, filters = {} }: 
                             <div className="grid gap-4 py-4 mt-2">
                                 <div className="space-y-2">
                                     <Label>{t('common.status', 'Holati')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    <SearchableSelect
                                         value={status}
-                                        onChange={(e) => {
-                                            setStatus(e.target.value);
-                                            applyFilters(e.target.value, perPage);
+                                        onChange={(val) => {
+                                            const v = String(val ?? '');
+                                            setStatus(v);
+                                            applyFilters(v, perPage);
                                         }}
-                                    >
-                                        <option value="">{t('status.all', 'Barcha holatlar')}</option>
-                                        <option value="scheduled">{t('status.scheduled', 'Rejada')}</option>
-                                        <option value="completed">{t('status.completed', 'Tugagan')}</option>
-                                        <option value="cancelled">{t('status.cancelled', 'Bekor qilingan')}</option>
-                                    </select>
+                                        options={[
+                                            { value: '', label: t('status.all', 'Barcha holatlar') },
+                                            { value: 'scheduled', label: t('status.scheduled', 'Rejada') },
+                                            { value: 'completed', label: t('status.completed', 'Tugagan') },
+                                            { value: 'cancelled', label: t('status.cancelled', 'Bekor qilingan') },
+                                        ]}
+                                        className="w-full"
+                                        triggerClassName="h-10 text-sm"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('common.pagination', 'Sahifalash')}</Label>
