@@ -6,7 +6,6 @@ use App\Models\CashRegisterType;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Course;
-use App\Models\Driving;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Group;
