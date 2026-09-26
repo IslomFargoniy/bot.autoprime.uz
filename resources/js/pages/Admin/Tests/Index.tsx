@@ -1033,7 +1033,7 @@ export default function TestsIndex({
                                         </div>
                                         <div>
                                             <span className="text-[10px] text-muted-foreground block">{t('tests.col_duration', 'Vaqt')}:</span>
-                                            <span className="font-mono text-muted-foreground">{formatDuration(att.duration_seconds)}</span>
+                                            <span className="font-mono text-muted-foreground">{formatSeconds(att.duration_seconds)}</span>
                                         </div>
                                     </div>
 
