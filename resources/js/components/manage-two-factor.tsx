@@ -61,7 +61,7 @@ export default function ManageTwoFactor(props: Props) {
                     </p>
 
                     <div className="relative inline">
-                        <Form {...disable.form()}>
+                        <Form {...(disable?.form ? disable.form() : { action: '/user/two-factor-authentication', method: 'delete' })}>
                             {({ processing }) => (
                                 <Button
                                     variant="destructive"
@@ -97,7 +97,7 @@ export default function ManageTwoFactor(props: Props) {
                             </Button>
                         ) : (
                             <Form
-                                {...enable.form()}
+                                {...(enable?.form ? enable.form() : { action: '/user/two-factor-authentication', method: 'post' })}
                                 onSuccess={() => setShowSetupModal(true)}
                             >
                                 {({ processing }) => (
