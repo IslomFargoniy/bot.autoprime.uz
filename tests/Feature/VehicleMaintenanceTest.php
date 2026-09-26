@@ -2,6 +2,7 @@
 
 use App\Models\Branch;
 use App\Models\CashRegister;
+use App\Models\CashRegisterType;
 use App\Models\Expense;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -56,9 +57,10 @@ test('admin can create vehicle maintenance without cash register', function () {
 test('admin can create vehicle maintenance with cash register which creates expense and decrements balance', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b3'], ['name' => 'Test Branch 3', 'status' => 'active']);
+    $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,
-        'cash_register_type_id' => 1,
+        'cash_register_type_id' => $type->id,
         'name' => 'Test Kassa',
         'balance' => 1000000,
         'is_active' => true,
@@ -97,9 +99,10 @@ test('admin can create vehicle maintenance with cash register which creates expe
 test('admin cannot create maintenance if cash register has insufficient balance', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b4'], ['name' => 'Test Branch 4', 'status' => 'active']);
+    $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,
-        'cash_register_id' => 1,
+        'cash_register_type_id' => $type->id,
         'name' => 'Kichik Kassa',
         'balance' => 50000,
         'is_active' => true,
@@ -126,9 +129,10 @@ test('admin cannot create maintenance if cash register has insufficient balance'
 test('admin can delete maintenance which refunds cash register and deletes expense', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b5'], ['name' => 'Test Branch 5', 'status' => 'active']);
+    $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,
-        'cash_register_id' => 1,
+        'cash_register_type_id' => $type->id,
         'name' => 'Qaytarish Kassasi',
         'balance' => 200000,
         'is_active' => true,
