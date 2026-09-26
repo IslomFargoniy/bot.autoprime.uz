@@ -18,6 +18,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -311,7 +320,7 @@ export default function AttendanceIndex({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('attendance.title', 'Davomat Jurnali')}</h1>
                 <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => setShowSessionModal(true)} className="bg-blue-600 hover:bg-blue-700 text-xs">
+                    <Button onClick={() => setShowSessionModal(true)} variant="brand" className="text-xs">
                         <Tv className="w-4 h-4 mr-1.5" />
                         {t('attendance.start_session_button', 'Dars Ochish (QR Doska)')}
                     </Button>
@@ -391,62 +400,61 @@ export default function AttendanceIndex({
 
             {/* Attendance Records Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('attendance.date', 'Sana')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.student', 'Talaba')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.group', 'Guruh')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.status', 'Holat')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.type', 'Turi')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.teacher', 'O\'qituvchi')}</th>
-                                <th className="p-3.5 font-semibold">{t('attendance.time', 'Vaqt')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {attendances.data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-400 dark:text-gray-500">
-                                        {t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
-                                    </td>
-                                </tr>
-                            ) : (
-                                attendances.data.map((att) => (
-                                    <tr key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                                        <td className="p-3.5 font-medium text-gray-900 dark:text-white">{att.date}</td>
-                                        <td className="p-3.5 font-medium">{att.student?.full_name}</td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{att.student?.group?.name || '-'}</td>
-                                        <td className="p-3.5">
-                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                                att.status === 'present'
-                                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                                    : att.status === 'late'
-                                                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                                                    : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                                            }`}>
-                                                {att.status === 'present'
-                                                    ? t('attendance.present', 'Bor')
-                                                    : att.status === 'late'
-                                                    ? t('attendance.late', 'Kechikkan')
-                                                    : t('attendance.absent', 'Yo\'q')}
-                                            </span>
-                                        </td>
-                                        <td className="p-3.5 text-gray-500">
-                                            {att.is_manual ? (
-                                                <span className="text-amber-600">✍️ {t('attendance.manual', 'Qo\'lda')} {att.manual_reason ? `(${att.manual_reason})` : ''}</span>
-                                            ) : (
-                                                <span className="text-blue-600">📷 {t('attendance.qr_scanned', 'Dinamik QR')}</span>
-                                            )}
-                                        </td>
-                                        <td className="p-3.5 text-gray-500">{att.session?.teacher?.name || att.marked_by?.name || '-'}</td>
-                                        <td className="p-3.5 text-gray-400">{att.scanned_at || '-'}</td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow className="bg-gray-50/80 dark:bg-gray-700/50">
+                            <TableHead className="font-semibold">{t('attendance.date', 'Sana')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.student', 'Talaba')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.group', 'Guruh')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.status', 'Holat')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.type', 'Turi')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.teacher', 'O\'qituvchi')}</TableHead>
+                            <TableHead className="font-semibold">{t('attendance.time', 'Vaqt')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {attendances.data.length === 0 ? (
+                            <TableEmpty
+                                colSpan={7}
+                                icon={QrCode}
+                                title={t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
+                                description={t('attendance.no_records_desc', 'Tanlangan sana yoki guruh bo\'yicha davomat yozuvi mavjud emas')}
+                            />
+                        ) : (
+                            attendances.data.map((att) => (
+                                <TableRow key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                                    <TableCell className="font-medium text-gray-900 dark:text-white">{att.date}</TableCell>
+                                    <TableCell className="font-medium">{att.student?.full_name}</TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">{att.student?.group?.name || '-'}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                            att.status === 'present'
+                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                                : att.status === 'late'
+                                                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                                                : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
+                                        }`}>
+                                            {att.status === 'present'
+                                                ? t('attendance.present', 'Bor')
+                                                : att.status === 'late'
+                                                ? t('attendance.late', 'Kechikkan')
+                                                : t('attendance.absent', 'Yo\'q')}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-500">
+                                        {att.is_manual ? (
+                                            <span className="text-amber-600">✍️ {t('attendance.manual', 'Qo\'lda')} {att.manual_reason ? `(${att.manual_reason})` : ''}</span>
+                                        ) : (
+                                            <span className="text-blue-600">📷 {t('attendance.qr_scanned', 'Dinamik QR')}</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-gray-500">{att.session?.teacher?.name || att.marked_by?.name || '-'}</TableCell>
+                                    <TableCell className="text-gray-400">{att.scanned_at || '-'}</TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             {/* Pagination */}
@@ -456,11 +464,14 @@ export default function AttendanceIndex({
             <Dialog open={showSessionModal} onOpenChange={setShowSessionModal}>
                 <DialogContent className="max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>{t('attendance.start_session_title', 'Dars Sessiyasini Boshlash')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Tv className="w-5 h-5 text-blue-600" />
+                            <span>{t('attendance.start_session_title', 'Dars Sessiyasini Boshlash')}</span>
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleStartSession} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="sess_group">{t('attendance.group', 'Guruhni Tanlang')}</Label>
+                            <Label htmlFor="sess_group" required>{t('attendance.group', 'Guruhni Tanlang')}</Label>
                             <SearchableSelect
                                 id="sess_group"
                                 value={sessionForm.data.group_id}
@@ -475,7 +486,7 @@ export default function AttendanceIndex({
                             <Button type="button" variant="outline" onClick={() => setShowSessionModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={sessionForm.processing}>
+                            <Button type="submit" variant="brand" disabled={sessionForm.processing}>
                                 {t('attendance.launch_qr', 'QR Doskani Ochish')}
                             </Button>
                         </div>
@@ -487,7 +498,10 @@ export default function AttendanceIndex({
             <Dialog open={showManualModal} onOpenChange={setShowManualModal}>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
-                        <DialogTitle>{t('attendance.group_journal_modal_title', 'Guruh Davomat Jurnali')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Users className="w-5 h-5 text-blue-600" />
+                            <span>{t('attendance.group_journal_modal_title', 'Guruh Davomat Jurnali')}</span>
+                        </DialogTitle>
                     </DialogHeader>
 
                     {/* Mode Tabs */}
@@ -524,7 +538,7 @@ export default function AttendanceIndex({
                             {/* Group, Date, Topic row */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
-                                    <Label htmlFor="roster_group" className="text-xs mb-1 block">
+                                    <Label htmlFor="roster_group" required className="text-xs mb-1 block">
                                         {t('attendance.select_group', 'Guruhni tanlang')}
                                     </Label>
                                     <SearchableSelect
@@ -537,7 +551,7 @@ export default function AttendanceIndex({
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="roster_date" className="text-xs mb-1 block">
+                                    <Label htmlFor="roster_date" required className="text-xs mb-1 block">
                                         {t('attendance.date', 'Sana')}
                                     </Label>
                                     <DatePicker
@@ -597,10 +611,10 @@ export default function AttendanceIndex({
 
                             {/* Roster Table */}
                             <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex-1 min-h-[220px] max-h-[360px] overflow-y-auto">
-                                <table className="w-full text-left text-xs">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
-                                        <tr>
-                                            <th className="p-2.5 w-10 text-center">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-gray-50 dark:bg-gray-700/60 sticky top-0 z-10">
+                                            <TableHead className="w-10 text-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={rosterList.length > 0 && rosterList.every((s) => s.is_attended)}
@@ -608,30 +622,30 @@ export default function AttendanceIndex({
                                                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                     title={t('attendance.check_all', 'Barchasini belgilash')}
                                                 />
-                                            </th>
-                                            <th className="p-2.5 w-8 font-semibold">№</th>
-                                            <th className="p-2.5 font-semibold">{t('attendance.student', 'Talaba')}</th>
-                                            <th className="p-2.5 font-semibold w-24">{t('attendance.status', 'Holat')}</th>
-                                            <th className="p-2.5 font-semibold">{t('attendance.notes_placeholder', 'Izoh (ixtiyoriy)')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                            </TableHead>
+                                            <TableHead className="w-8 font-semibold">№</TableHead>
+                                            <TableHead className="font-semibold">{t('attendance.student', 'Talaba')}</TableHead>
+                                            <TableHead className="font-semibold w-24">{t('attendance.status', 'Holat')}</TableHead>
+                                            <TableHead className="font-semibold">{t('attendance.notes_placeholder', 'Izoh (ixtiyoriy)')}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {isLoadingRoster ? (
-                                            <tr>
-                                                <td colSpan={5} className="p-8 text-center text-gray-400">
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="p-8 text-center text-gray-400">
                                                     <Loader2 className="w-5 h-5 mx-auto animate-spin mb-1 text-blue-600" />
                                                     {t('attendance.loading_roster', 'Guruh ro\'yxati yuklanmoqda...')}
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ) : rosterList.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="p-8 text-center text-gray-400">
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="p-8 text-center text-gray-400">
                                                     {t('attendance.no_students_in_group', 'Ushbu guruhda faol talabalar topilmadi')}
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ) : (
                                             rosterList.map((st, idx) => (
-                                                <tr
+                                                <TableRow
                                                     key={st.id}
                                                     className={`transition-colors ${
                                                         st.is_attended
@@ -639,20 +653,20 @@ export default function AttendanceIndex({
                                                             : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'
                                                     }`}
                                                 >
-                                                    <td className="p-2.5 text-center">
+                                                    <TableCell className="text-center">
                                                         <input
                                                             type="checkbox"
                                                             checked={st.is_attended}
                                                             onChange={() => handleToggleStudent(st.id)}
                                                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                         />
-                                                    </td>
-                                                    <td className="p-2.5 text-gray-400 font-mono">{idx + 1}</td>
-                                                    <td className="p-2.5">
+                                                    </TableCell>
+                                                    <TableCell className="text-gray-400 font-mono">{idx + 1}</TableCell>
+                                                    <TableCell>
                                                         <p className="font-semibold text-gray-900 dark:text-white">{st.full_name}</p>
                                                         <p className="text-[11px] text-gray-500">{st.phone}</p>
-                                                    </td>
-                                                    <td className="p-2.5">
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleToggleStudent(st.id)}
@@ -674,20 +688,20 @@ export default function AttendanceIndex({
                                                                 </>
                                                             )}
                                                         </button>
-                                                    </td>
-                                                    <td className="p-2.5">
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <Input
                                                             value={st.manual_reason || ''}
                                                             onChange={(e) => handleUpdateReason(st.id, e.target.value)}
                                                             placeholder={t('attendance.notes_placeholder', 'Izoh...')}
                                                             className="h-7 text-xs"
                                                         />
-                                                    </td>
-                                                </tr>
+                                                    </TableCell>
+                                                </TableRow>
                                             ))
                                         )}
-                                    </tbody>
-                                </table>
+                                    </TableBody>
+                                </Table>
                             </div>
 
                             {/* Actions */}
@@ -695,7 +709,7 @@ export default function AttendanceIndex({
                                 <Button type="button" variant="outline" onClick={() => setShowManualModal(false)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" disabled={isSubmittingRoster || rosterList.length === 0} className="bg-blue-600 hover:bg-blue-700">
+                                <Button type="submit" variant="brand" disabled={isSubmittingRoster || rosterList.length === 0}>
                                     {isSubmittingRoster ? (
                                         <>
                                             <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -714,7 +728,7 @@ export default function AttendanceIndex({
                         /* Single Student Manual Form */
                         <form onSubmit={handleManualSubmit} className="space-y-4 text-xs">
                             <div>
-                                <Label htmlFor="man_student">{t('attendance.student', 'Talaba')}</Label>
+                                <Label htmlFor="man_student" required>{t('attendance.student', 'Talaba')}</Label>
                                 <SearchableSelect
                                     id="man_student"
                                     value={manualForm.data.student_id}
@@ -733,7 +747,7 @@ export default function AttendanceIndex({
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="man_date">{t('attendance.date', 'Sana')}</Label>
+                                    <Label htmlFor="man_date" required>{t('attendance.date', 'Sana')}</Label>
                                     <DatePicker
                                         id="man_date"
                                         value={manualForm.data.date}
@@ -743,7 +757,7 @@ export default function AttendanceIndex({
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="man_status">{t('attendance.status', 'Holat')}</Label>
+                                    <Label htmlFor="man_status" required>{t('attendance.status', 'Holat')}</Label>
                                     <SearchableSelect
                                         id="man_status"
                                         value={manualForm.data.status}
@@ -759,7 +773,7 @@ export default function AttendanceIndex({
                             </div>
 
                             <div>
-                                <Label htmlFor="man_reason">{t('attendance.manual_reason', 'Qo\'lda belgilash sababi')}</Label>
+                                <Label htmlFor="man_reason" required>{t('attendance.manual_reason', 'Qo\'lda belgilash sababi')}</Label>
                                 <Input
                                     id="man_reason"
                                     value={manualForm.data.manual_reason}
@@ -774,7 +788,7 @@ export default function AttendanceIndex({
                                 <Button type="button" variant="outline" onClick={() => setShowManualModal(false)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" disabled={manualForm.processing} className="bg-blue-600 hover:bg-blue-700">
+                                <Button type="submit" variant="brand" disabled={manualForm.processing}>
                                     {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>

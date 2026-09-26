@@ -132,9 +132,9 @@ export default function CoursesIndex({ courses }: PageProps) {
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('courses.title', 'LMS Kurslar va Materiallar')}</h1>
-                <Button onClick={() => setShowCourseModal(true)} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                    <Plus className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('courses.add_course', 'Kurs Qo\'shish')}</span>
+                <Button onClick={() => setShowCourseModal(true)} variant="brand" className="text-xs">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    {t('courses.add_course', 'Kurs Qo\'shish')}
                 </Button>
             </div>
 
@@ -171,6 +171,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                         </div>
                         <Button
                             size="sm"
+                            variant="brand"
                             onClick={() => {
                                 topicForm.setData('order_number', (selectedCourse.topics?.length || 0) + 1);
                                 setShowTopicModal(true);
@@ -254,12 +255,15 @@ export default function CoursesIndex({ courses }: PageProps) {
             <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('courses.create_course_title', 'Yangi Kurs Yaratish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('courses.create_course_title', 'Yangi Kurs Yaratish')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateCourse} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="c_cat">{t('courses.category', 'Toifa')}</Label>
+                                <Label required htmlFor="c_cat">{t('courses.category', 'Toifa')}</Label>
                                 <SearchableSelect
                                     id="c_cat"
                                     value={courseForm.data.category}
@@ -276,7 +280,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="c_title">{t('courses.course_title', 'Kurs Nomi')}</Label>
+                                <Label required htmlFor="c_title">{t('courses.course_title', 'Kurs Nomi')}</Label>
                                 <Input
                                     id="c_title"
                                     value={courseForm.data.title}
@@ -302,7 +306,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                             <Button type="button" variant="outline" onClick={() => setShowCourseModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={courseForm.processing}>
+                            <Button type="submit" variant="brand" disabled={courseForm.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -314,11 +318,14 @@ export default function CoursesIndex({ courses }: PageProps) {
             <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('courses.create_topic_title', 'Yangi Mavzu Qo\'shish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('courses.create_topic_title', 'Yangi Mavzu Qo\'shish')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateTopic} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="top_title">{t('courses.topic_title', 'Mavzu Nomi')}</Label>
+                            <Label required htmlFor="top_title">{t('courses.topic_title', 'Mavzu Nomi')}</Label>
                             <Input
                                 id="top_title"
                                 value={topicForm.data.title}
@@ -368,7 +375,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                             <Button type="button" variant="outline" onClick={() => setShowTopicModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={topicForm.processing}>
+                            <Button type="submit" variant="brand" disabled={topicForm.processing}>
                                 {t('common.save', 'Mavzuni Saqlash')}
                             </Button>
                         </div>
@@ -380,12 +387,15 @@ export default function CoursesIndex({ courses }: PageProps) {
             <Dialog open={!!selectedTopicForMaterial} onOpenChange={(open) => !open && setSelectedTopicForMaterial(null)}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('courses.add_material_title', 'PDF Material Biriktirish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-red-500" />
+                            {t('courses.add_material_title', 'PDF Material Biriktirish')}
+                        </DialogTitle>
                     </DialogHeader>
                     {selectedTopicForMaterial && (
                         <form onSubmit={handleCreateMaterial} className="space-y-4 text-xs">
                             <div>
-                                <Label htmlFor="mat_title">{t('courses.material_title', 'Material Nomi')}</Label>
+                                <Label required htmlFor="mat_title">{t('courses.material_title', 'Material Nomi')}</Label>
                                 <Input
                                     id="mat_title"
                                     value={materialForm.data.title}
@@ -397,7 +407,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                             </div>
 
                             <div>
-                                <Label htmlFor="mat_url">{t('courses.file_url', 'PDF Fayl Havolasi (URL)')}</Label>
+                                <Label required htmlFor="mat_url">{t('courses.file_url', 'PDF Fayl Havolasi (URL)')}</Label>
                                 <Input
                                     id="mat_url"
                                     type="url"
@@ -413,7 +423,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                                 <Button type="button" variant="outline" onClick={() => setSelectedTopicForMaterial(null)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" disabled={materialForm.processing}>
+                                <Button type="submit" variant="brand" disabled={materialForm.processing}>
                                     {t('common.save', 'Biriktirish')}
                                 </Button>
                             </div>

@@ -5,6 +5,15 @@ import { SharedData } from '@/types';
 import { ArrowLeft, Calendar, Car, Star, User, Phone, Send, CheckCircle2, Clock, XCircle, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import {
     Sheet,
@@ -290,95 +299,98 @@ export default function StudentShow({ student, drivings, stats, filters = {} }: 
             </div>
 
             {/* Drivings Table / Mobile Cards */}
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
                 {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('drivings.date_time', 'Sana / Vaqt')}</th>
-                            <th className="px-4 py-3 font-medium">{t('drivings.instructor', 'Instruktor')}</th>
-                            <th className="px-4 py-3 font-medium">{t('common.status', 'Holati')}</th>
-                            {!isInstructor && <th className="px-4 py-3 font-medium text-center">{t('drivings.review', 'Baho va Fikr')}</th>}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {drivings.data.length > 0 ? (
-                            drivings.data.map((driving, index) => (
-                                <tr key={driving.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3">{(drivings.from || 1) + index}</td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="font-medium">
-                                            {(() => {
-                                                const d = new Date(driving.start_time);
-                                                const dd = String(d.getDate()).padStart(2, '0');
-                                                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                                                const yyyy = d.getFullYear();
-                                                return `${dd}-${mm}-${yyyy}`;
-                                            })()}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-                                            {' - '}
-                                            {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 font-medium">{driving.instructor?.name || '-'}</td>
-                                    <td className="px-4 py-3">
-                                        {driving.status === 'scheduled' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">{t('status.scheduled', 'Rejada')}</span>}
-                                        {driving.status === 'completed' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">{t('status.completed', 'Tugagan')}</span>}
-                                        {driving.status === 'cancelled' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">{t('status.cancelled', 'Bekor qilingan')}</span>}
-                                    </td>
-                                    {!isInstructor && (
-                                        <td className="px-4 py-3 text-center">
-                                            {driving.review ? (
-                                                <div className="flex flex-col items-center gap-1">
-                                                    <div className="flex items-center gap-1 text-yellow-500 font-bold">
-                                                        <span>{driving.review.rating}</span>
-                                                        <Star className="w-4 h-4 fill-current" />
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="bg-muted/50 border-b border-border">
+                                <TableHead className="font-semibold">{t('common.number', '№')}</TableHead>
+                                <TableHead className="font-semibold">{t('drivings.date_time', 'Sana / Vaqt')}</TableHead>
+                                <TableHead className="font-semibold">{t('drivings.instructor', 'Instruktor')}</TableHead>
+                                <TableHead className="font-semibold">{t('common.status', 'Holati')}</TableHead>
+                                {!isInstructor && <TableHead className="font-semibold text-center">{t('drivings.review', 'Baho va Fikr')}</TableHead>}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {drivings.data.length > 0 ? (
+                                drivings.data.map((driving, index) => (
+                                    <TableRow key={driving.id} className="hover:bg-muted/30">
+                                        <TableCell>{(drivings.from || 1) + index}</TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                            <div className="font-medium">
+                                                {(() => {
+                                                    const d = new Date(driving.start_time);
+                                                    const dd = String(d.getDate()).padStart(2, '0');
+                                                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                                    const yyyy = d.getFullYear();
+                                                    return `${dd}-${mm}-${yyyy}`;
+                                                })()}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                                {' - '}
+                                                {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium">{driving.instructor?.name || '-'}</TableCell>
+                                        <TableCell>
+                                            {driving.status === 'scheduled' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">{t('status.scheduled', 'Rejada')}</span>}
+                                            {driving.status === 'completed' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">{t('status.completed', 'Tugagan')}</span>}
+                                            {driving.status === 'cancelled' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">{t('status.cancelled', 'Bekor qilingan')}</span>}
+                                        </TableCell>
+                                        {!isInstructor && (
+                                            <TableCell className="text-center">
+                                                {driving.review ? (
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <div className="flex items-center gap-1 text-yellow-500 font-bold">
+                                                            <span>{driving.review.rating}</span>
+                                                            <Star className="w-4 h-4 fill-current" />
+                                                        </div>
+                                                        {driving.review.reason_tags && driving.review.reason_tags.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 justify-center max-w-[200px]">
+                                                                {driving.review.reason_tags.map((tag, i) => {
+                                                                    const isNeg = isNegativeTag(tag);
+                                                                    return (
+                                                                        <span
+                                                                            key={i}
+                                                                            className={`text-[10px] px-1.5 py-0.5 rounded border inline-flex items-center gap-1 font-medium whitespace-nowrap ${
+                                                                                isNeg
+                                                                                    ? 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50'
+                                                                                    : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                                            }`}
+                                                                        >
+                                                                            <span className={`w-1.5 h-1.5 rounded-full ${isNeg ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
+                                                                            {translateTag(tag)}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                        {driving.review.comment && (
+                                                            <div className="text-xs text-muted-foreground italic max-w-[200px] truncate">
+                                                                "{driving.review.comment}"
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {driving.review.reason_tags && driving.review.reason_tags.length > 0 && (
-                                                        <div className="flex flex-wrap gap-1 justify-center max-w-[200px]">
-                                                            {driving.review.reason_tags.map((tag, i) => {
-                                                                const isNeg = isNegativeTag(tag);
-                                                                return (
-                                                                    <span
-                                                                        key={i}
-                                                                        className={`text-[10px] px-1.5 py-0.5 rounded border inline-flex items-center gap-1 font-medium whitespace-nowrap ${
-                                                                            isNeg
-                                                                                ? 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50'
-                                                                                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
-                                                                        }`}
-                                                                    >
-                                                                        <span className={`w-1.5 h-1.5 rounded-full ${isNeg ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                                                                        {translateTag(tag)}
-                                                                    </span>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                    {driving.review.comment && (
-                                                        <div className="text-xs text-muted-foreground italic max-w-[200px] truncate">
-                                                            "{driving.review.comment}"
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <span className="text-muted-foreground text-xs">-</span>
-                                            )}
-                                        </td>
-                                    )}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={isInstructor ? 4 : 5} className="text-center py-8 text-muted-foreground text-sm">
-                                    {t('common.no_data', 'Ma\'lumot topilmadi')}
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                                                ) : (
+                                                    <span className="text-muted-foreground text-xs">-</span>
+                                                )}
+                                            </TableCell>
+                                        )}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableEmpty
+                                    colSpan={isInstructor ? 4 : 5}
+                                    icon={Car}
+                                    title={t('common.no_data', 'Ma\'lumot topilmadi')}
+                                    description={t('drivings.no_drivings_desc', 'Ushbu o\'quvchi uchun mashg\'ulotlar topilmadi')}
+                                />
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">

@@ -23,6 +23,15 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { Filter } from 'lucide-react';
 import type { Branch, SharedData } from '@/types/auth';
 
@@ -166,7 +175,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
             {/* Header section */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('admins.title', 'Adminlar')}</h1>
-                <Button onClick={openCreateForm} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
+                <Button onClick={openCreateForm} variant="brand" size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
                     <Plus className="w-4 h-4 md:mr-2" />
                     <span className="hidden md:inline">{t('admins.new', 'Yangi Admin')}</span>
                 </Button>
@@ -238,7 +247,8 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ShieldCheck className="w-5 h-5 text-blue-600" />
                             {editingAdmin ? t('admins.edit', 'Adminni tahrirlash') : t('admins.new', 'Yangi Admin')}
                         </DialogTitle>
                         <DialogDescription>
@@ -248,7 +258,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
 
                     <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                         <div className="space-y-2">
-                            <Label htmlFor="name">{t('admins.name', 'F.I.SH')}</Label>
+                            <Label htmlFor="name" required>{t('admins.name', 'F.I.SH')}</Label>
                             <Input
                                 id="name"
                                 value={data.name}
@@ -259,27 +269,29 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">{t('admins.phone', 'Telefon raqam')}</Label>
-                            <Input
-                                id="phone"
-                                value={data.phone}
-                                onChange={e => setData('phone', e.target.value)}
-                                placeholder="+998901234567"
-                                required
-                            />
-                            {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="phone" required>{t('admins.phone', 'Telefon raqam')}</Label>
+                                <Input
+                                    id="phone"
+                                    value={data.phone}
+                                    onChange={e => setData('phone', e.target.value)}
+                                    placeholder="+998901234567"
+                                    required
+                                />
+                                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                            </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="telegram_id">{t('admins.telegram_id', 'Telegram ID (ixtiyoriy)')}</Label>
-                            <Input
-                                id="telegram_id"
-                                value={data.telegram_id}
-                                onChange={e => setData('telegram_id', e.target.value)}
-                                placeholder="Masalan: 123456789"
-                            />
-                            {errors.telegram_id && <p className="text-sm text-destructive">{errors.telegram_id}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="telegram_id">{t('admins.telegram_id', 'Telegram ID')}</Label>
+                                <Input
+                                    id="telegram_id"
+                                    value={data.telegram_id}
+                                    onChange={e => setData('telegram_id', e.target.value)}
+                                    placeholder="123456789"
+                                />
+                                {errors.telegram_id && <p className="text-sm text-destructive">{errors.telegram_id}</p>}
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -300,7 +312,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password">
+                            <Label htmlFor="password" required={!editingAdmin}>
                                 {editingAdmin ? t('admins.password_edit', 'Parol (o\'zgartirish uchun)') : t('admins.password', 'Parol')}
                             </Label>
                             <Input
@@ -318,7 +330,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                             <Button type="button" variant="outline" onClick={closeForm}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={processing}>
+                            <Button type="submit" variant="brand" disabled={processing}>
                                 {processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -327,67 +339,65 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
             </Dialog>
 
             {/* Table / List Container */}
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
                 {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('admins.name', 'F.I.SH')}</th>
-                            <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
-                            <th className="px-4 py-3 font-medium">{t('admins.phone', 'Telefon raqam')}</th>
-                            <th className="px-4 py-3 font-medium">{t('admins.telegram_id', 'Telegram ID')}</th>
-                            <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {admins.data.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                                    {t('common.no_data', 'Ma\'lumot topilmadi')}
-                                </td>
-                            </tr>
-                        ) : (
-                            admins.data.map((admin, index) => (
-                                <tr key={admin.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3">{(admins.from || 1) + index}</td>
-                                    <td className="px-4 py-3 font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-                                            <span>{admin.name}</span>
-                                            {auth.user.id === admin.id && (
-                                                <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-normal">
-                                                    {t('admins.you', 'Siz')}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">{admin.branch?.name || '-'}</td>
-                                    <td className="px-4 py-3">{admin.phone}</td>
-                                    <td className="px-4 py-3 font-mono text-muted-foreground">{admin.telegram_id || '-'}</td>
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(admin)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            {auth.user.id !== admin.id && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive"
-                                                    onClick={() => handleDelete(admin)}
-                                                    disabled={isDeleting === admin.id}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-12">{t('common.number', '№')}</TableHead>
+                                <TableHead>{t('admins.name', 'F.I.SH')}</TableHead>
+                                <TableHead>{t('branches.branch', 'Filial')}</TableHead>
+                                <TableHead>{t('admins.phone', 'Telefon raqam')}</TableHead>
+                                <TableHead>{t('admins.telegram_id', 'Telegram ID')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {admins.data.length === 0 ? (
+                                <TableEmpty colSpan={6} title={t('common.no_data', 'Ma\'lumot topilmadi')} />
+                            ) : (
+                                admins.data.map((admin, index) => (
+                                    <TableRow key={admin.id}>
+                                        <TableCell className="text-muted-foreground font-mono">{(admins.from || 1) + index}</TableCell>
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+                                                <span>{admin.name}</span>
+                                                {auth.user.id === admin.id && (
+                                                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-normal">
+                                                        {t('admins.you', 'Siz')}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-xs">{admin.branch?.name || '-'}</TableCell>
+                                        <TableCell className="text-xs">{admin.phone}</TableCell>
+                                        <TableCell className="font-mono text-muted-foreground text-xs">{admin.telegram_id || '-'}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(admin)}>
+                                                    <Edit2 className="w-4 h-4" />
                                                 </Button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                                {auth.user.id !== admin.id && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDelete(admin)}
+                                                        disabled={isDeleting === admin.id}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">
@@ -401,7 +411,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                                             <span>{admin.name}</span>
                                             {auth.user.id === admin.id && (
                                                 <span className="text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 px-1.5 py-0.5 rounded font-medium">
-                                                    (Siz)
+                                                    ({t('admins.you', 'Siz')})
                                                 </span>
                                             )}
                                         </div>

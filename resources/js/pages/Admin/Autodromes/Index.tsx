@@ -15,6 +15,15 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -239,9 +248,9 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('autodromes.title', 'Avtodromlar')}</h1>
                 {!isInstructor && (
-                    <Button onClick={() => setShowForm(true)} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                        <Plus className="w-4 h-4 md:mr-2" />
-                        <span className="hidden md:inline">{t('common.add', "Qo'shish")}</span>
+                    <Button onClick={() => setShowForm(true)} variant="brand" className="text-xs">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        {t('common.add', "Qo'shish")}
                     </Button>
                 )}
             </div>
@@ -249,7 +258,10 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editing ? t('autodromes.edit', 'Avtodromni tahrirlash') : t('autodromes.new', 'Yangi Avtodrom')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {editing ? t('autodromes.edit', 'Avtodromni tahrirlash') : t('autodromes.new', 'Yangi Avtodrom')}
+                        </DialogTitle>
                         <DialogDescription className="sr-only">
                             {editing ? t('common.edit', 'Tahrirlash') : t('common.add', "Qo'shish")}
                         </DialogDescription>
@@ -257,13 +269,13 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="name">{t('autodromes.name', 'Nomi')}</Label>
-                                <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} placeholder="Masalan: Asosiy avtodrom" required />
+                                <Label required htmlFor="name">{t('autodromes.name', 'Nomi')}</Label>
+                                <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} placeholder="Masalan: Asosiy avtodrom" required className="mt-1" />
                                 {errors.name && <div className="text-destructive text-sm mt-1">{errors.name}</div>}
                             </div>
                             <div>
-                                <Label htmlFor="radius_meters">{t('autodromes.radius_label', 'Radius (metrda)')}</Label>
-                                <Input type="number" id="radius_meters" value={data.radius_meters} onChange={e => setData('radius_meters', e.target.value)} placeholder="Masalan: 100" required min="10" />
+                                <Label required htmlFor="radius_meters">{t('autodromes.radius_label', 'Radius (metrda)')}</Label>
+                                <Input type="number" id="radius_meters" value={data.radius_meters} onChange={e => setData('radius_meters', e.target.value)} placeholder="Masalan: 100" required min="10" className="mt-1" />
                                 {errors.radius_meters && <div className="text-destructive text-sm mt-1">{errors.radius_meters}</div>}
                             </div>
                         </div>
@@ -321,7 +333,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                                     ]}
                                     placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
                                     allowClear
-                                    triggerClassName="h-10 text-sm"
+                                    triggerClassName="h-10 text-sm mt-1"
                                 />
                                 {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
                             </div>
@@ -329,106 +341,64 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
 
                         <div className="flex justify-end gap-2 pt-4 border-t">
                             <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
-                            <Button type="submit" disabled={processing || !position}>{t('common.save', 'Saqlash')}</Button>
+                            <Button type="submit" variant="brand" disabled={processing || !position}>{t('common.save', 'Saqlash')}</Button>
                         </div>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('autodromes.name', 'Nomi')}</th>
-                            <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
-                            <th className="px-4 py-3 font-medium">{t('autodromes.coordinates', 'Kordinatalar')}</th>
-                            <th className="px-4 py-3 font-medium">{t('autodromes.radius', 'Radius (metr)')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('autodromes.completed_drivings', 'Tugagan darslar')}</th>
-                            {!isInstructor && <th className="px-4 py-3 text-right font-medium">{t('common.actions', 'Amallar')}</th>}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
+            <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-12">{t('common.number', '№')}</TableHead>
+                            <TableHead>{t('autodromes.name', 'Nomi')}</TableHead>
+                            <TableHead>{t('branches.branch', 'Filial')}</TableHead>
+                            <TableHead>{t('autodromes.coordinates', 'Kordinatalar')}</TableHead>
+                            <TableHead>{t('autodromes.radius', 'Radius (metr)')}</TableHead>
+                            <TableHead className="text-center">{t('autodromes.completed_drivings', 'Tugagan darslar')}</TableHead>
+                            {!isInstructor && <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {autodromes.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{t('common.no_data', "Ma'lumot topilmadi")}</td>
-                            </tr>
+                            <TableEmpty
+                                colSpan={isInstructor ? 6 : 7}
+                                icon={MapPin}
+                                title={t('common.no_data', "Ma'lumot topilmadi")}
+                            />
                         ) : (
                             autodromes.map((item, index) => (
-                                <tr key={item.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3">{index + 1}</td>
-                                    <td className="px-4 py-3 font-medium">{item.name}</td>
-                                    <td className="px-4 py-3 text-xs">{item.branch?.name || '-'}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                <TableRow key={item.id}>
+                                    <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
+                                    <TableCell className="font-medium text-gray-900 dark:text-white">{item.name}</TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">{item.branch?.name || '-'}</TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400 font-mono text-xs">
                                         {item.latitude}, {item.longitude}
-                                    </td>
-                                    <td className="px-4 py-3 font-medium text-blue-600">{item.radius_meters}m</td>
-                                    <td className="px-4 py-3 text-center">
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    </TableCell>
+                                    <TableCell className="font-semibold text-blue-600 dark:text-blue-400">{item.radius_meters}m</TableCell>
+                                    <TableCell className="text-center">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                                             {item.completed_drivings_count || 0}
                                         </span>
-                                    </td>
+                                    </TableCell>
                                     {!isInstructor && (
-                                        <td className="px-4 py-3 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                    <Edit2 className="w-4 h-4 text-blue-500" />
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="h-7 w-7 p-0">
+                                                    <Edit2 className="w-3.5 h-3.5 text-blue-500" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                    <Trash2 className="w-4 h-4" />
+                                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </Button>
                                             </div>
-                                        </td>
+                                        </TableCell>
                                     )}
-                                </tr>
+                                </TableRow>
                             ))
                         )}
-                    </tbody>
-                </table>
-
-                {/* Mobile Cards */}
-                <div className="md:hidden p-3 space-y-3 bg-muted/20">
-                    {autodromes.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground text-sm">
-                            {t('common.no_data', 'Ma\'lumot topilmadi')}
-                        </div>
-                    ) : (
-                        autodromes.map((item) => (
-                            <div key={item.id} className="p-4 space-y-3 bg-card border rounded-xl shadow-xs">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-semibold text-lg">{item.name}</div>
-                                        <div className="text-xs text-muted-foreground mt-0.5 font-mono">
-                                            {item.latitude}, {item.longitude}
-                                        </div>
-                                    </div>
-                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                        Radius: {item.radius_meters}m
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center text-sm pt-2 border-t">
-                                    <span className="text-muted-foreground text-xs">{t('autodromes.completed_drivings', 'Tugagan darslar')}:</span>
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                        {item.completed_drivings_count || 0}
-                                    </span>
-                                </div>
-
-                                {!isInstructor && (
-                                    <div className="flex gap-2 justify-end pt-1">
-                                        <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
-                                            <Edit2 className="w-4 h-4 text-blue-500" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        ))
-                    )}
-                </div>
+                    </TableBody>
+                </Table>
             </div>
         </div>
     );

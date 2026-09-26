@@ -2,6 +2,16 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
+import { Award, Star } from 'lucide-react';
 
 interface Instructor {
     id: number;
@@ -72,68 +82,71 @@ export default function KPI({ instructors = [], filters = {} }: PageProps) {
                 </div>
             </div>
 
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
                 {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('kpi.instructor', 'Instruktor')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('kpi.group_lesson', 'Guruh / Dars')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('kpi.average_rating', 'O\'rtacha Baho')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('kpi.kpi_percent', 'KPI (%)')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('kpi.status', 'Holat')}</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {instructors.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                                    {t('common.no_data', 'Ma\'lumot topilmadi')}
-                                </td>
-                            </tr>
-                        ) : (
-                            instructors.map((instructor) => (
-                                <tr key={instructor.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">
-                                        <div className="font-semibold text-primary">{instructor.name}</div>
-                                        <div className="text-xs text-muted-foreground">{instructor.phone}</div>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <div className="font-medium">{instructor.groups_count} {t('kpi.groups_count', 'ta guruh')}</div>
-                                        <div className="text-xs text-muted-foreground">{instructor.total_drivings} {t('kpi.drivings_count', 'ta mashg\'ulot')}</div>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <div className="inline-flex items-center gap-1 font-semibold">
-                                            <span>{instructor.average_rating}</span>
-                                            <span className="text-yellow-500">⭐</span>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">{instructor.total_reviews} {t('kpi.reviews_count', 'ta baho')}</div>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                                            instructor.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                            instructor.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                        }`}>
-                                            {instructor.kpi_percentage}%
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        {instructor.needs_attention ? (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
-                                                {t('kpi.warning_status', 'Xavotirli')} ({instructor.negative_tags_count} {t('kpi.complaints_count', 'shikoyat')})
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="bg-muted/50 border-b border-border">
+                                <TableHead className="font-semibold">{t('kpi.instructor', 'Instruktor')}</TableHead>
+                                <TableHead className="font-semibold text-center">{t('kpi.group_lesson', 'Guruh / Dars')}</TableHead>
+                                <TableHead className="font-semibold text-center">{t('kpi.average_rating', 'O\'rtacha Baho')}</TableHead>
+                                <TableHead className="font-semibold text-center">{t('kpi.kpi_percent', 'KPI (%)')}</TableHead>
+                                <TableHead className="font-semibold text-center">{t('kpi.status', 'Holat')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {instructors.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={5}
+                                    icon={Award}
+                                    title={t('common.no_data', 'Ma\'lumot topilmadi')}
+                                    description={t('kpi.no_data_desc', 'Tanlangan davr bo\'yicha KPI ma\'lumotlari mavjud emas')}
+                                />
+                            ) : (
+                                instructors.map((instructor) => (
+                                    <TableRow key={instructor.id} className="hover:bg-muted/30">
+                                        <TableCell className="font-medium">
+                                            <div className="font-semibold text-primary">{instructor.name}</div>
+                                            <div className="text-xs text-muted-foreground">{instructor.phone}</div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="font-medium">{instructor.groups_count} {t('kpi.groups_count', 'ta guruh')}</div>
+                                            <div className="text-xs text-muted-foreground">{instructor.total_drivings} {t('kpi.drivings_count', 'ta mashg\'ulot')}</div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="inline-flex items-center gap-1 font-semibold">
+                                                <span>{instructor.average_rating}</span>
+                                                <span className="text-yellow-500">⭐</span>
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">{instructor.total_reviews} {t('kpi.reviews_count', 'ta baho')}</div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                                                instructor.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                                instructor.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                            }`}>
+                                                {instructor.kpi_percentage}%
                                             </span>
-                                        ) : (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                                {t('kpi.excellent_status', 'A\'lo')}
-                                            </span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {instructor.needs_attention ? (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                                                    {t('kpi.warning_status', 'Xavotirli')} ({instructor.negative_tags_count} {t('kpi.complaints_count', 'shikoyat')})
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                                    {t('kpi.excellent_status', 'A\'lo')}
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">

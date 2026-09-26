@@ -22,6 +22,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Salary {
@@ -153,7 +162,7 @@ export default function SalariesIndex({
                         onChange={(e) => handlePeriodChange(e.target.value)}
                         className="w-36 h-9 text-xs"
                     />
-                    <Button onClick={handleGeneratePayroll} className="bg-blue-600 hover:bg-blue-700 text-xs">
+                    <Button onClick={handleGeneratePayroll} variant="brand" className="text-xs">
                         <Calculator className="w-4 h-4 mr-1.5" />
                         {t('salaries.generate_button', '1-Klikda Hisoblash')}
                     </Button>
@@ -166,91 +175,92 @@ export default function SalariesIndex({
 
             {/* Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('salaries.employee', 'Xodim')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.role', 'Lavozim')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.type', 'Turi')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.amount', 'Summa')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.balance', 'Hozirgi Balans')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.status', 'Holat')}</th>
-                                <th className="p-3.5 font-semibold">{t('salaries.details', 'Tafsilotlar')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {salaries.data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="p-8 text-center text-gray-400 dark:text-gray-500">
-                                        {t('salaries.no_salaries', 'Ushbu oy uchun hali oyliklar hisoblanmagan.')}
-                                    </td>
-                                </tr>
-                            ) : (
-                                salaries.data.map((sal) => (
-                                    <tr key={sal.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                        <td className="p-3.5 font-medium text-gray-900 dark:text-white">
-                                            {sal.user?.name}
-                                        </td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
-                                            {sal.user?.role}
-                                        </td>
-                                        <td className="p-3.5">
-                                            <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
-                                                {sal.type}
-                                            </span>
-                                        </td>
-                                        <td className={`p-3.5 font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                            {sal.is_deduction ? '-' : '+'}{Number(sal.amount).toLocaleString('uz-UZ')} UZS
-                                        </td>
-                                        <td className="p-3.5 font-semibold text-gray-800 dark:text-gray-200">
-                                            {Number(sal.user?.salary_balance || 0).toLocaleString('uz-UZ')} UZS
-                                        </td>
-                                        <td className="p-3.5">
-                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                                sal.status === 'paid'
-                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                                                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                                            }`}>
-                                                {sal.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                            {sal.description || '-'}
-                                        </td>
-                                        <td className="p-3.5 text-right">
-                                            {sal.status !== 'paid' && !sal.is_deduction && (
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setPayingSalary(sal);
-                                                        payForm.setData('amount', String(sal.amount));
-                                                    }}
-                                                    className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                >
-                                                    <Coins className="w-3.5 h-3.5 mr-1" />
-                                                    {t('salaries.pay_button', 'To\'lash')}
-                                                </Button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('salaries.employee', 'Xodim')}</TableHead>
+                            <TableHead>{t('salaries.role', 'Lavozim')}</TableHead>
+                            <TableHead>{t('salaries.type', 'Turi')}</TableHead>
+                            <TableHead>{t('salaries.amount', 'Summa')}</TableHead>
+                            <TableHead>{t('salaries.balance', 'Hozirgi Balans')}</TableHead>
+                            <TableHead>{t('salaries.status', 'Holat')}</TableHead>
+                            <TableHead>{t('salaries.details', 'Tafsilotlar')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {salaries.data.length === 0 ? (
+                            <TableEmpty
+                                colSpan={8}
+                                icon={Coins}
+                                title={t('salaries.no_salaries', 'Ushbu oy uchun hali oyliklar hisoblanmagan.')}
+                            />
+                        ) : (
+                            salaries.data.map((sal) => (
+                                <TableRow key={sal.id}>
+                                    <TableCell className="font-medium text-gray-900 dark:text-white">
+                                        {sal.user?.name}
+                                    </TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">
+                                        {sal.user?.role}
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
+                                            {sal.type}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className={`font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                        {sal.is_deduction ? '-' : '+'}{Number(sal.amount).toLocaleString('uz-UZ')} UZS
+                                    </TableCell>
+                                    <TableCell className="font-semibold text-gray-800 dark:text-gray-200">
+                                        {Number(sal.user?.salary_balance || 0).toLocaleString('uz-UZ')} UZS
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                            sal.status === 'paid'
+                                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                        }`}>
+                                            {sal.status}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                                        {sal.description || '-'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {sal.status !== 'paid' && !sal.is_deduction && (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setPayingSalary(sal);
+                                                    payForm.setData('amount', String(sal.amount));
+                                                }}
+                                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            >
+                                                <Coins className="w-3.5 h-3.5 mr-1" />
+                                                {t('salaries.pay_button', 'To\'lash')}
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             {/* Custom Adjustment Modal (Bonus, Fine, Advance) */}
             <Dialog open={showAdjustModal} onOpenChange={setShowAdjustModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('salaries.adjust_title', 'Bonus, Jarima yoki Avans Kiritish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('salaries.adjust_title', 'Bonus, Jarima yoki Avans Kiritish')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleAdjustSubmit} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="adj_user_id">{t('salaries.employee', 'Xodim')}</Label>
+                            <Label required htmlFor="adj_user_id">{t('salaries.employee', 'Xodim')}</Label>
                             <SearchableSelect
                                 id="adj_user_id"
                                 value={adjustForm.data.user_id}
@@ -267,7 +277,7 @@ export default function SalariesIndex({
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="adj_type">{t('salaries.adjust_type', 'Turi')}</Label>
+                                <Label required htmlFor="adj_type">{t('salaries.adjust_type', 'Turi')}</Label>
                                 <SearchableSelect
                                     id="adj_type"
                                     value={adjustForm.data.type}
@@ -282,7 +292,7 @@ export default function SalariesIndex({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="adj_amount">{t('salaries.amount', 'Summa (UZS)')}</Label>
+                                <Label required htmlFor="adj_amount">{t('salaries.amount', 'Summa (UZS)')}</Label>
                                 <Input
                                     id="adj_amount"
                                     type="number"
@@ -295,7 +305,7 @@ export default function SalariesIndex({
                         </div>
 
                         <div>
-                            <Label htmlFor="adj_desc">{t('salaries.description', 'Sabab / Tavsif')}</Label>
+                            <Label required htmlFor="adj_desc">{t('salaries.description', 'Sabab / Tavsif')}</Label>
                             <Input
                                 id="adj_desc"
                                 value={adjustForm.data.description}
@@ -309,7 +319,7 @@ export default function SalariesIndex({
                             <Button type="button" variant="outline" onClick={() => setShowAdjustModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={adjustForm.processing}>
+                            <Button type="submit" variant="brand" disabled={adjustForm.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -321,7 +331,10 @@ export default function SalariesIndex({
             <Dialog open={!!payingSalary} onOpenChange={(open) => !open && setPayingSalary(null)}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('salaries.pay_modal_title', 'Oylik To\'lovini Amalga Oshirish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Coins className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            {t('salaries.pay_modal_title', 'Oylik To\'lovini Amalga Oshirish')}
+                        </DialogTitle>
                     </DialogHeader>
                     {payingSalary && (
                         <form onSubmit={handlePaySubmit} className="space-y-4 text-xs">
@@ -332,7 +345,7 @@ export default function SalariesIndex({
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="pay_cash_reg">{t('finance.register', 'Kassa')}</Label>
+                                    <Label required htmlFor="pay_cash_reg">{t('finance.register', 'Kassa')}</Label>
                                     <SearchableSelect
                                         id="pay_cash_reg"
                                         value={payForm.data.cash_register_id}
@@ -346,7 +359,7 @@ export default function SalariesIndex({
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="pay_method">{t('finance.method', 'Usul')}</Label>
+                                    <Label required htmlFor="pay_method">{t('finance.method', 'Usul')}</Label>
                                     <SearchableSelect
                                         id="pay_method"
                                         value={payForm.data.payment_method}
@@ -362,7 +375,7 @@ export default function SalariesIndex({
                             </div>
 
                             <div>
-                                <Label htmlFor="pay_amt">{t('salaries.amount', 'To\'lanadigan Summa (UZS)')}</Label>
+                                <Label required htmlFor="pay_amt">{t('salaries.amount', 'To\'lanadigan Summa (UZS)')}</Label>
                                 <Input
                                     id="pay_amt"
                                     type="number"

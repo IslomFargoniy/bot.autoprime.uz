@@ -22,6 +22,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 
 interface Certificate {
     id: number;
@@ -103,7 +112,7 @@ export default function CertificatesIndex({
             {/* Page Title & Action */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('certificates.title', 'Bitiruv Guvohnomalari')}</h1>
-                <Button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-xs">
+                <Button onClick={() => setShowModal(true)} variant="brand" className="text-xs">
                     <Plus className="w-4 h-4 mr-1.5" />
                     {t('certificates.issue_button', 'Guvohnoma Berish')}
                 </Button>
@@ -111,76 +120,77 @@ export default function CertificatesIndex({
 
             {/* Certificates Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('certificates.number', 'Guvohnoma №')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.student', 'Bitiruvchi')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.category', 'Toifa')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.contract', 'Shartnoma')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.branch', 'Filial')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.issued_date', 'Berilgan sana')}</th>
-                                <th className="p-3.5 font-semibold">{t('certificates.issued_by', 'Rasmiylashtirdi')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {certificates.data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="p-8 text-center text-gray-400 dark:text-gray-500">
-                                        {t('certificates.no_certificates', 'Guvohnomalar topilmadi')}
-                                    </td>
-                                </tr>
-                            ) : (
-                                certificates.data.map((cert) => (
-                                    <tr key={cert.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                        <td className="p-3.5 font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                                            <Award className="w-4 h-4 text-amber-500" />
-                                            #{cert.certificate_number}
-                                        </td>
-                                        <td className="p-3.5 font-medium">{cert.student?.full_name}</td>
-                                        <td className="p-3.5">
-                                            <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold">
-                                                {cert.category}
-                                            </span>
-                                        </td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">#{cert.contract?.contract_number}</td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{cert.branch?.name || '-'}</td>
-                                        <td className="p-3.5 text-gray-600 dark:text-gray-300">{cert.issued_date}</td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">{cert.issued_by?.name || '-'}</td>
-                                        <td className="p-3.5 text-right space-x-1">
-                                            <a
-                                                href={`/admin/certificates/${cert.id}/download-pdf`}
-                                                className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                <Download className="w-3.5 h-3.5 mr-1" />
-                                                PDF
-                                            </a>
-                                            <a
-                                                href={`/certificates/verify/${cert.qr_verify_hash}`}
-                                                className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-xs"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                <QrCode className="w-3.5 h-3.5" />
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('certificates.number', 'Guvohnoma №')}</TableHead>
+                            <TableHead>{t('certificates.student', 'Bitiruvchi')}</TableHead>
+                            <TableHead>{t('certificates.category', 'Toifa')}</TableHead>
+                            <TableHead>{t('certificates.contract', 'Shartnoma')}</TableHead>
+                            <TableHead>{t('certificates.branch', 'Filial')}</TableHead>
+                            <TableHead>{t('certificates.issued_date', 'Berilgan sana')}</TableHead>
+                            <TableHead>{t('certificates.issued_by', 'Rasmiylashtirdi')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {certificates.data.length === 0 ? (
+                            <TableEmpty
+                                colSpan={8}
+                                icon={Award}
+                                title={t('certificates.no_certificates', 'Guvohnomalar topilmadi')}
+                            />
+                        ) : (
+                            certificates.data.map((cert) => (
+                                <TableRow key={cert.id}>
+                                    <TableCell className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                        <Award className="w-4 h-4 text-amber-500" />
+                                        #{cert.certificate_number}
+                                    </TableCell>
+                                    <TableCell className="font-medium">{cert.student?.full_name}</TableCell>
+                                    <TableCell>
+                                        <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold">
+                                            {cert.category}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">#{cert.contract?.contract_number}</TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">{cert.branch?.name || '-'}</TableCell>
+                                    <TableCell className="text-gray-600 dark:text-gray-300">{cert.issued_date}</TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">{cert.issued_by?.name || '-'}</TableCell>
+                                    <TableCell className="text-right space-x-1">
+                                        <a
+                                            href={`/admin/certificates/${cert.id}/download-pdf`}
+                                            className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <Download className="w-3.5 h-3.5 mr-1" />
+                                            PDF
+                                        </a>
+                                        <a
+                                            href={`/certificates/verify/${cert.qr_verify_hash}`}
+                                            className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-xs"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <QrCode className="w-3.5 h-3.5" />
+                                        </a>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             {/* Issue Certificate Modal with 4-Conditions Checklist */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{t('certificates.issue_modal_title', 'Bitiruv Guvohnomasini Rasmiylashtirish (4 Ta Shart)')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Award className="w-5 h-5 text-amber-500" />
+                            {t('certificates.issue_modal_title', 'Bitiruv Guvohnomasini Rasmiylashtirish (4 Ta Shart)')}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4 text-xs">
@@ -242,15 +252,14 @@ export default function CertificatesIndex({
                                         <div className="shrink-0">
                                             <Button
                                                 size="sm"
+                                                variant={cand.is_eligible ? 'brand' : 'outline'}
                                                 disabled={!cand.is_eligible}
                                                 onClick={() => {
                                                     setSelectedCandidate(cand);
                                                     form.setData('contract_id', String(cand.contract_id));
                                                 }}
                                                 className={`text-xs ${
-                                                    cand.is_eligible
-                                                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                        : 'opacity-50 cursor-not-allowed'
+                                                    !cand.is_eligible ? 'opacity-50 cursor-not-allowed' : ''
                                                 }`}
                                             >
                                                 <Award className="w-3.5 h-3.5 mr-1" />

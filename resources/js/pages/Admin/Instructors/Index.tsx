@@ -12,6 +12,15 @@ import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { SharedData, Branch } from '@/types/auth';
 import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
+import {
     Dialog,
     DialogContent,
     DialogHeader,
@@ -192,7 +201,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                         <span className="hidden sm:inline">{t('common.download_excel', 'Excel yuklab olish')}</span>
                     </Button>
                     {!isInstructor && (
-                        <Button onClick={() => setShowForm(true)} className="gap-2">
+                        <Button onClick={() => setShowForm(true)} variant="brand" className="gap-2">
                             <Plus className="w-4 h-4" /> 
                             <span>{t('common.add', 'Qo\'shish')}</span>
                         </Button>
@@ -313,7 +322,10 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editing ? t('common.edit', 'Tahrirlash') : t('instructors.new', 'Yangi Instruktor')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <span>{editing ? t('common.edit', 'Tahrirlash') : t('instructors.new', 'Yangi Instruktor')}</span>
+                        </DialogTitle>
                         <DialogDescription className="sr-only">
                             {editing ? t('common.edit', 'Tahrirlash') : t('common.add', 'Qo\'shish')}
                         </DialogDescription>
@@ -331,49 +343,55 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                 {t('instructors.upload_photo', 'Rasm yuklash')}
                             </Label>
                             <Input id="photo" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                            {errors.photo && <div className="text-destructive text-sm mt-1">{errors.photo}</div>}
+                            {errors.photo && <div className="text-destructive text-xs mt-1">{errors.photo}</div>}
                         </div>
 
-                        <div>
-                            <Label htmlFor="name">{t('instructors.name', 'F.I.SH')}</Label>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="name" required>{t('instructors.name', 'F.I.SH')}</Label>
                             <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} required />
-                            {errors.name && <div className="text-destructive text-sm mt-1">{errors.name}</div>}
+                            {errors.name && <div className="text-destructive text-xs mt-1">{errors.name}</div>}
                         </div>
-                        <div>
-                            <Label htmlFor="phone">{t('instructors.phone', 'Telefon')}</Label>
-                            <Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} placeholder="+998901234567" required />
-                            {errors.phone && <div className="text-destructive text-sm mt-1">{errors.phone}</div>}
-                        </div>
-                        <div>
-                            <Label htmlFor="car_name">{t('instructors.car_name', 'Biriktirilgan mashina')}</Label>
-                            <Input id="car_name" value={data.car_name} onChange={e => setData('car_name', e.target.value)} placeholder="Gentra 01 A 777 AA" />
-                            {errors.car_name && <div className="text-destructive text-sm mt-1">{errors.car_name}</div>}
-                        </div>
-                        {isSuperAdmin && (
-                            <div>
-                                <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <SearchableSelect
-                                    id="branch_id"
-                                    value={data.branch_id}
-                                    onChange={(val) => setData('branch_id', val ? String(val) : '')}
-                                    options={[
-                                        { value: '', label: t('branches.branch_optional', 'Filial (Ixtiyoriy)') },
-                                        ...branches.map((b) => ({ value: b.id, label: b.name })),
-                                    ]}
-                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
-                                    allowClear
-                                    triggerClassName="h-10 text-sm"
-                                />
-                                {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="phone" required>{t('instructors.phone', 'Telefon')}</Label>
+                                <Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} placeholder="+998901234567" required />
+                                {errors.phone && <div className="text-destructive text-xs mt-1">{errors.phone}</div>}
                             </div>
-                        )}
-                        <div>
-                            <Label htmlFor="telegram_id">{t('common.telegram_id', 'Telegram ID')}</Label>
-                            <Input id="telegram_id" value={data.telegram_id} onChange={e => setData('telegram_id', e.target.value)} placeholder="12345678" />
-                            {errors.telegram_id && <div className="text-destructive text-sm mt-1">{errors.telegram_id}</div>}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="telegram_id">{t('common.telegram_id', 'Telegram ID')}</Label>
+                                <Input id="telegram_id" value={data.telegram_id} onChange={e => setData('telegram_id', e.target.value)} placeholder="12345678" />
+                                {errors.telegram_id && <div className="text-destructive text-xs mt-1">{errors.telegram_id}</div>}
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">
+
+                        <div className={isSuperAdmin ? "grid grid-cols-2 gap-3" : "space-y-1.5"}>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="car_name">{t('instructors.car_name', 'Biriktirilgan mashina')}</Label>
+                                <Input id="car_name" value={data.car_name} onChange={e => setData('car_name', e.target.value)} placeholder="Gentra 01 A 777 AA" />
+                                {errors.car_name && <div className="text-destructive text-xs mt-1">{errors.car_name}</div>}
+                            </div>
+                            {isSuperAdmin && (
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
+                                    <SearchableSelect
+                                        id="branch_id"
+                                        value={data.branch_id}
+                                        onChange={(val) => setData('branch_id', val ? String(val) : '')}
+                                        options={[
+                                            { value: '', label: t('branches.branch_optional', 'Filial (Ixtiyoriy)') },
+                                            ...branches.map((b) => ({ value: b.id, label: b.name })),
+                                        ]}
+                                        placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                        allowClear
+                                    />
+                                    {errors.branch_id && <div className="text-destructive text-xs mt-1">{errors.branch_id}</div>}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label htmlFor="password" required={!editing}>
                                 {editing ? t('instructors.password_edit', 'Parol (o\'zgartirish uchun)') : t('instructors.password', 'Parol')}
                             </Label>
                             <PasswordInput
@@ -383,125 +401,135 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                 placeholder={editing ? "••••••••" : t('instructors.password_placeholder', 'Parolni kiriting')}
                                 required={!editing}
                             />
-                            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                            {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                         </div>
                         <div className="flex gap-2 justify-end pt-4">
                             <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
-                            <Button type="submit" disabled={processing}>{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
+                            <Button type="submit" disabled={processing} variant="brand">{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
                         </div>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('instructors.name', 'Instruktor')}</th>
-                            <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
-                            <th className="px-4 py-3 font-medium">{t('instructors.car', 'Mashina')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('instructors.groups_count', 'Guruhlar')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('instructors.students_count', 'O\'quvchilar')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('instructors.drivings_count', 'Darslar')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('instructors.rating', 'Reyting')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('instructors.kpi', 'KPI')}</th>
-                            <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {instructors.data.map((item, index) => (
-                            <tr key={item.id} className="hover:bg-muted/30">
-                                <td className="px-4 py-3">{(instructors.from || 1) + index}</td>
-                                <td className="px-4 py-3 font-medium">
-                                    <Link href={`/admin/instructors/${item.id}`} className="flex items-center gap-3 group">
-                                        <div className="w-10 h-10 rounded-full bg-muted shrink-0 overflow-hidden border">
-                                            {item.photo_url ? (
-                                                <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                                    <UserIcon className="w-5 h-5" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                                                {item.needs_attention && <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />}
-                                                <span className="font-semibold">{item.name}</span>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('common.number', '№')}</TableHead>
+                            <TableHead>{t('instructors.name', 'Instruktor')}</TableHead>
+                            <TableHead>{t('branches.branch', 'Filial')}</TableHead>
+                            <TableHead>{t('instructors.car', 'Mashina')}</TableHead>
+                            <TableHead className="text-center">{t('instructors.groups_count', 'Guruhlar')}</TableHead>
+                            <TableHead className="text-center">{t('instructors.students_count', 'O\'quvchilar')}</TableHead>
+                            <TableHead className="text-center">{t('instructors.drivings_count', 'Darslar')}</TableHead>
+                            <TableHead className="text-center">{t('instructors.rating', 'Reyting')}</TableHead>
+                            <TableHead className="text-center">{t('instructors.kpi', 'KPI')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {instructors.data.length === 0 ? (
+                            <TableEmpty
+                                icon={UserIcon}
+                                title={t('common.empty_state_title', 'Ma\'lumot topilmadi')}
+                                description={t('common.empty_state_desc', 'Qidiruv parametrlarini o\'zgartirib ko\'ring')}
+                                colSpan={10}
+                            />
+                        ) : (
+                            instructors.data.map((item, index) => (
+                                <TableRow key={item.id}>
+                                    <TableCell>{(instructors.from || 1) + index}</TableCell>
+                                    <TableCell className="font-semibold">
+                                        <Link href={`/admin/instructors/${item.id}`} className="flex items-center gap-3 group">
+                                            <div className="w-10 h-10 rounded-full bg-muted shrink-0 overflow-hidden border">
+                                                {item.photo_url ? (
+                                                    <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                                        <UserIcon className="w-5 h-5" />
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="text-xs text-muted-foreground font-mono">{item.phone}</div>
-                                        </div>
-                                    </Link>
-                                </td>
-                                <td className="px-4 py-3 text-xs">{item.branch?.name || '-'}</td>
-                                <td className="px-4 py-3">
-                                    {item.car_name ? (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium bg-muted/50 px-2.5 py-1 rounded-md border w-fit">
-                                            <Car className="w-3.5 h-3.5 text-muted-foreground" />
-                                            <span>{item.car_name}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-xs text-muted-foreground">{t('common.none', 'Yo\'q')}</span>
-                                    )}
-                                </td>
-                                <td className="px-4 py-3 text-center">{item.groups_count}</td>
-                                <td className="px-4 py-3 text-center">{item.students_count}</td>
-                                <td className="px-4 py-3 text-center">
-                                    <div className="text-xs space-y-0.5 font-medium whitespace-nowrap">
-                                        <div className="text-blue-600 dark:text-blue-400">{item.total_drivings} {t('instructors.scheduled_drivings', 'dars belgilangan')}</div>
-                                        <div className="text-green-600 dark:text-green-400">{item.completed_drivings} {t('instructors.completed_drivings', 'ta yakunlangan')}</div>
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className={`inline-flex items-center gap-1 text-xs font-semibold ${
-                                            item.reviewed_drivings > 0 && item.average_rating <= 3
-                                                ? 'text-red-600 dark:text-red-400'
-                                                : 'text-amber-600 dark:text-amber-400'
-                                        }`}>
-                                            {item.reviewed_drivings > 0 && item.average_rating <= 3 ? (
-                                                <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                                            ) : (
-                                                <Star className="w-3.5 h-3.5 fill-current shrink-0" />
-                                            )}
-                                            <span>{item.average_rating}</span>
-                                            <span className="text-[11px] text-muted-foreground font-normal">({item.reviewed_drivings})</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                        item.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                        item.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                    }`}>
-                                        {item.kpi_percentage}%
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                    <div className="flex justify-end gap-1">
-                                        <Link href={`/admin/instructors/${item.id}`}>
-                                            <Button variant="ghost" size="icon" title={t('common.view', 'Batafsil')}>
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
+                                            <div>
+                                                <div className="flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                                                    {item.needs_attention && <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />}
+                                                    <span className="font-semibold">{item.name}</span>
+                                                </div>
+                                                <div className="text-xs text-muted-foreground font-mono">{item.phone}</div>
+                                            </div>
                                         </Link>
-                                        {!isInstructor && (
-                                            <>
-                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                    <Edit2 className="w-4 h-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </>
+                                    </TableCell>
+                                    <TableCell className="text-xs">{item.branch?.name || '-'}</TableCell>
+                                    <TableCell>
+                                        {item.car_name ? (
+                                            <div className="flex items-center gap-1.5 text-xs font-medium bg-muted/50 px-2.5 py-1 rounded-md border w-fit">
+                                                <Car className="w-3.5 h-3.5 text-muted-foreground" />
+                                                <span>{item.car_name}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">{t('common.none', 'Yo\'q')}</span>
                                         )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    </TableCell>
+                                    <TableCell className="text-center">{item.groups_count}</TableCell>
+                                    <TableCell className="text-center">{item.students_count}</TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="text-xs space-y-0.5 font-medium whitespace-nowrap">
+                                            <div className="text-blue-600 dark:text-blue-400">{item.total_drivings} {t('instructors.scheduled_drivings', 'dars belgilangan')}</div>
+                                            <div className="text-green-600 dark:text-green-400">{item.completed_drivings} {t('instructors.completed_drivings', 'ta yakunlangan')}</div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex flex-col items-center gap-1">
+                                            <div className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                                                item.reviewed_drivings > 0 && item.average_rating <= 3
+                                                    ? 'text-red-600 dark:text-red-400'
+                                                    : 'text-amber-600 dark:text-amber-400'
+                                            }`}>
+                                                {item.reviewed_drivings > 0 && item.average_rating <= 3 ? (
+                                                    <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                                                ) : (
+                                                    <Star className="w-3.5 h-3.5 fill-current shrink-0" />
+                                                )}
+                                                <span>{item.average_rating}</span>
+                                                <span className="text-[11px] text-muted-foreground font-normal">({item.reviewed_drivings})</span>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                            item.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                            item.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                        }`}>
+                                            {item.kpi_percentage}%
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <Link href={`/admin/instructors/${item.id}`}>
+                                                <Button variant="ghost" size="icon" title={t('common.view', 'Batafsil')}>
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                            </Link>
+                                            {!isInstructor && (
+                                                <>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
                 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">
@@ -583,7 +611,6 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                         </div>
                     ))}
                 </div>
-            </div>
 
             <Pagination links={instructors.links} />
         </div>

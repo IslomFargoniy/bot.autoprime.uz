@@ -220,9 +220,9 @@ export default function VehiclesIndex({
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('vehicles.title', 'Avtopark (Mashinalar)')}</h1>
-                <Button onClick={openCreate} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                    <Plus className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('vehicles.add_vehicle', 'Mashina Qo\'shish')}</span>
+                <Button onClick={openCreate} variant="brand" className="text-xs">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    {t('vehicles.add_vehicle', 'Mashina Qo\'shish')}
                 </Button>
             </div>
 
@@ -352,14 +352,15 @@ export default function VehiclesIndex({
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Car className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             {editingVehicle ? t('vehicles.edit_title', 'Avtomobilni Tahrirlash') : t('vehicles.create_title', 'Yangi Avtomobil Qo\'shish')}
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleVehicleSubmit} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="v_plate">{t('vehicles.plate', 'Davlat Raqami')}</Label>
+                                <Label required htmlFor="v_plate">{t('vehicles.plate', 'Davlat Raqami')}</Label>
                                 <Input
                                     id="v_plate"
                                     value={vehicleForm.data.plate_number}
@@ -370,7 +371,7 @@ export default function VehiclesIndex({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="v_model">{t('vehicles.model', 'Model')}</Label>
+                                <Label required htmlFor="v_model">{t('vehicles.model', 'Model')}</Label>
                                 <Input
                                     id="v_model"
                                     value={vehicleForm.data.model}
@@ -447,7 +448,7 @@ export default function VehiclesIndex({
                             <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={vehicleForm.processing}>
+                            <Button type="submit" variant="brand" disabled={vehicleForm.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -459,7 +460,10 @@ export default function VehiclesIndex({
             <Dialog open={!!maintainingVehicle} onOpenChange={(open) => !open && setMaintainingVehicle(null)}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('vehicles.maintenance_title', 'Texnik Xizmat Kiritish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            {t('vehicles.maintenance_title', 'Texnik Xizmat Kiritish')}
+                        </DialogTitle>
                     </DialogHeader>
                     {maintainingVehicle && (
                         <form onSubmit={handleMaintenanceSubmit} className="space-y-4 text-xs">
@@ -468,7 +472,7 @@ export default function VehiclesIndex({
                             </div>
 
                             <div>
-                                <Label htmlFor="m_type">{t('vehicles.maintenance_type', 'Xizmat Turi')}</Label>
+                                <Label required htmlFor="m_type">{t('vehicles.maintenance_type', 'Xizmat Turi')}</Label>
                                 <SearchableSelect
                                     id="m_type"
                                     value={maintenanceForm.data.maintenance_type}
@@ -518,7 +522,7 @@ export default function VehiclesIndex({
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="m_cost">{t('vehicles.cost', 'Xarajat (UZS)')}</Label>
+                                    <Label required htmlFor="m_cost">{t('vehicles.cost', 'Xarajat (UZS)')}</Label>
                                     <Input
                                         id="m_cost"
                                         type="number"
@@ -542,7 +546,7 @@ export default function VehiclesIndex({
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="m_date">{t('vehicles.performed_date', 'Bajarilgan sana')}</Label>
+                                    <Label required htmlFor="m_date">{t('vehicles.performed_date', 'Bajarilgan sana')}</Label>
                                     <DatePicker
                                         id="m_date"
                                         value={maintenanceForm.data.performed_date}
@@ -579,7 +583,7 @@ export default function VehiclesIndex({
                                 <Button type="button" variant="outline" onClick={() => setMaintainingVehicle(null)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" disabled={maintenanceForm.processing}>
+                                <Button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white" disabled={maintenanceForm.processing}>
                                     {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>

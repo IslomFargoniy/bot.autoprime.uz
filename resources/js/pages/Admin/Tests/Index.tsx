@@ -21,6 +21,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -703,20 +712,20 @@ export default function TestsIndex({
 
                 <div className="flex items-center gap-2 flex-wrap">
                     {activeTab === 'tickets' && (
-                        <Button onClick={openCreateTicketModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
+                        <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_ticket', '+ Bilet Qo\'shish')}
                         </Button>
                     )}
                     {activeTab === 'signs' && selectedSignCategory === 'lines' && (
-                        <Button onClick={openCreateRoadLineModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
+                        <Button onClick={openCreateRoadLineModal} size="sm" variant="brand" className="text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_road_line', '+ Chiziq Qo\'shish')}
                         </Button>
                     )}
                     {activeTab === 'signs' && selectedSignCategory !== 'lines' && (
                         <>
-                            <Button onClick={openCreateSignModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
+                            <Button onClick={openCreateSignModal} size="sm" variant="brand" className="text-xs">
                                 <Plus className="w-4 h-4 mr-1.5" />
                                 {t('tests.add_sign', '+ Belgi Qo\'shish')}
                             </Button>
@@ -872,7 +881,7 @@ export default function TestsIndex({
                             triggerClassName="h-9 text-xs"
                         />
 
-                        <Button type="submit" size="sm" className="text-xs">
+                        <Button type="submit" size="sm" variant="brand" className="text-xs">
                             {t('common.filter', 'Filtrlash')}
                         </Button>
                         <Button type="button" variant="outline" size="sm" onClick={handleResetFilters} className="text-xs">
@@ -883,90 +892,89 @@ export default function TestsIndex({
 
                     {/* Attempts Table */}
                     <div className="bg-card text-card-foreground rounded-xl border border-border overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs">
-                                <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border">
-                                    <tr>
-                                        <th className="py-3 px-4">{t('tests.col_student', 'Talaba')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_branch', 'Filial')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_type', 'Imtihon Turi')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_score', 'Natija')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_duration', 'Vaqt')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_status', 'Holat')}</th>
-                                        <th className="py-3 px-4">{t('tests.col_date', 'Sana')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {attempts.data.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                                                {t('tests.no_attempts', 'Hech qanday imtihon natijalari topilmadi')}
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        attempts.data.map((att) => (
-                                            <tr key={att.id} className="hover:bg-muted/40 transition-colors">
-                                                <td className="py-3 px-4">
-                                                    <p className="font-semibold text-foreground">
-                                                        {att.student?.full_name || t('tests.guest_student', 'Mehmon O\'quvchi')}
-                                                    </p>
-                                                    <p className="text-[11px] text-muted-foreground">
-                                                        {att.student?.phone || '—'}
-                                                    </p>
-                                                </td>
-                                                <td className="py-3 px-4 text-muted-foreground">
-                                                    {att.student?.branch?.name || '—'}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    {att.attempt_type === 'random_mock' ? (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                                                            🎓 {t('tests.type_mock', 'Ichki Nazorat Imtihoni')}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                                            📄 {att.ticket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${att.ticket_id}`}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="font-bold text-foreground">
-                                                        {att.correct_answers} / {att.total_questions} ({Number(att.score_percentage).toFixed(0)}%)
-                                                    </div>
-                                                    <div className="text-[10px] text-muted-foreground">
-                                                        {att.wrong_answers} {t('tests.wrong_count', 'ta xato')}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4 text-muted-foreground">
-                                                    {formatSeconds(att.duration_seconds)}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    {att.is_passed ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                                            <CheckCircle2 className="w-3 h-3" />
-                                                            {t('tests.status_passed', 'O\'tdi')}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-800">
-                                                            <XCircle className="w-3 h-3" />
-                                                            {t('tests.status_failed', 'O\'tmadi')}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="py-3 px-4 text-muted-foreground text-[11px]">
-                                                    {new Date(att.created_at).toLocaleString('uz-UZ', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                    })}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-muted/50 border-b border-border">
+                                    <TableHead className="font-semibold">{t('tests.col_student', 'Talaba')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_branch', 'Filial')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_type', 'Imtihon Turi')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_score', 'Natija')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_duration', 'Vaqt')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_status', 'Holat')}</TableHead>
+                                    <TableHead className="font-semibold">{t('tests.col_date', 'Sana')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {attempts.data.length === 0 ? (
+                                    <TableEmpty
+                                        colSpan={7}
+                                        icon={HelpCircle}
+                                        title={t('tests.no_attempts', 'Hech qanday imtihon natijalari topilmadi')}
+                                        description={t('tests.no_attempts_desc', 'Qidiruv parametrlarini o\'zgartirib ko\'ring')}
+                                    />
+                                ) : (
+                                    attempts.data.map((att) => (
+                                        <TableRow key={att.id} className="hover:bg-muted/40 transition-colors">
+                                            <TableCell>
+                                                <p className="font-semibold text-foreground">
+                                                    {att.student?.full_name || t('tests.guest_student', 'Mehmon O\'quvchi')}
+                                                </p>
+                                                <p className="text-[11px] text-muted-foreground">
+                                                    {att.student?.phone || '—'}
+                                                </p>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {att.student?.branch?.name || '—'}
+                                            </TableCell>
+                                            <TableCell>
+                                                {att.attempt_type === 'random_mock' ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                                        🎓 {t('tests.type_mock', 'Ichki Nazorat Imtihoni')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                                        📄 {att.ticket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${att.ticket_id}`}
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="font-bold text-foreground">
+                                                    {att.correct_answers} / {att.total_questions} ({Number(att.score_percentage).toFixed(0)}%)
+                                                </div>
+                                                <div className="text-[10px] text-muted-foreground">
+                                                    {att.wrong_answers} {t('tests.wrong_count', 'ta xato')}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {formatSeconds(att.duration_seconds)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {att.is_passed ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        {t('tests.status_passed', 'O\'tdi')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-800">
+                                                        <XCircle className="w-3 h-3" />
+                                                        {t('tests.status_failed', 'O\'tmadi')}
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-[11px]">
+                                                {new Date(att.created_at).toLocaleString('uz-UZ', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
                     </div>
 
                     <Pagination links={attempts.links} />
@@ -990,7 +998,7 @@ export default function TestsIndex({
                             <span className="text-xs text-muted-foreground">
                                 {filteredTickets.length} / {tickets.length} {t('tests.tickets_count', 'ta bilet')}
                             </span>
-                            <Button onClick={openCreateTicketModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
+                            <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
                                 <Plus className="w-4 h-4 mr-1.5" />
                                 {t('tests.add_ticket', '+ Bilet Qo\'shish')}
                             </Button>
@@ -1247,7 +1255,8 @@ export default function TestsIndex({
                                 <Button
                                     size="sm"
                                     onClick={openCreateQuestionModal}
-                                    className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                                    variant="brand"
+                                    className="h-8 text-xs"
                                 >
                                     <Plus className="w-3.5 h-3.5 mr-1" />
                                     {t('tests.add_question', '+ Savol Qo\'shish')}
@@ -1376,14 +1385,17 @@ export default function TestsIndex({
             <Dialog open={showTicketModal} onOpenChange={setShowTicketModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingTicket ? t('tests.edit_ticket', 'Biletni Tahrirlash') : t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <Layers className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingTicket ? t('tests.edit_ticket', 'Biletni Tahrirlash') : t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">Bilet parametrlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleTicketSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs">{t('tests.ticket_num_label', 'Bilet Raqami')}</Label>
+                            <Label required className="text-xs">{t('tests.ticket_num_label', 'Bilet Raqami')}</Label>
                             <Input
                                 type="number"
                                 required
@@ -1393,7 +1405,7 @@ export default function TestsIndex({
                             />
                         </div>
                         <div>
-                            <Label className="text-xs">{t('tests.ticket_title_label', 'Bilet Nomi')}</Label>
+                            <Label required className="text-xs">{t('tests.ticket_title_label', 'Bilet Nomi')}</Label>
                             <Input
                                 required
                                 value={ticketTitle}
@@ -1415,7 +1427,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowTicketModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button type="submit" size="sm" variant="brand">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1427,14 +1439,17 @@ export default function TestsIndex({
             <Dialog open={showQuestionModal} onOpenChange={setShowQuestionModal}>
                 <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingQuestion ? t('tests.edit_question', 'Savolni Tahrirlash') : t('tests.add_question', '+ Savol Qo\'shish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <HelpCircle className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingQuestion ? t('tests.edit_question', 'Savolni Tahrirlash') : t('tests.add_question', '+ Savol Qo\'shish')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">Savol va javob variantlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleQuestionSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs font-semibold">{t('tests.question_text_label', 'Savol Matni')}</Label>
+                            <Label required className="text-xs font-semibold">{t('tests.question_text_label', 'Savol Matni')}</Label>
                             <textarea
                                 required
                                 rows={3}
@@ -1585,7 +1600,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowQuestionModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button type="submit" size="sm" variant="brand">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1597,14 +1612,17 @@ export default function TestsIndex({
             <Dialog open={showSignModal} onOpenChange={setShowSignModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingSign ? t('tests.edit_sign', 'Belgini Tahrirlash') : t('tests.add_sign', '+ Belgi Qo\'shish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <ImageIcon className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingSign ? t('tests.edit_sign', 'Belgini Tahrirlash') : t('tests.add_sign', '+ Belgi Qo\'shish')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">Yo'l belgisi parametrlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSignSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs mb-1.5 block">{t('tests.sign_category', 'Toifa')}</Label>
+                            <Label required className="text-xs mb-1.5 block">{t('tests.sign_category', 'Toifa')}</Label>
                             <SearchableSelect
                                 value={signCategoryId}
                                 onChange={(val) => setSignCategoryId(Number(val))}
@@ -1618,7 +1636,7 @@ export default function TestsIndex({
                             />
                         </div>
                         <div>
-                            <Label className="text-xs">{t('tests.sign_number', 'Belgi Raqami')}</Label>
+                            <Label required className="text-xs">{t('tests.sign_number', 'Belgi Raqami')}</Label>
                             <Input
                                 required
                                 value={signNumber}
@@ -1628,7 +1646,7 @@ export default function TestsIndex({
                             />
                         </div>
                         <div>
-                            <Label className="text-xs">{t('tests.sign_name', 'Belgi Nomi')}</Label>
+                            <Label required className="text-xs">{t('tests.sign_name', 'Belgi Nomi')}</Label>
                             <Input
                                 required
                                 value={signName}
@@ -1721,7 +1739,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowSignModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button type="submit" size="sm" variant="brand">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1733,14 +1751,17 @@ export default function TestsIndex({
             <Dialog open={showRoadLineModal} onOpenChange={setShowRoadLineModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingRoadLine ? t('tests.edit_road_line', 'Chiziqni Tahrirlash') : t('tests.add_road_line', '+ Chiziq Qo\'shish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <Layers className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingRoadLine ? t('tests.edit_road_line', 'Chiziqni Tahrirlash') : t('tests.add_road_line', '+ Chiziq Qo\'shish')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">Yo'l chizig'i parametrlarini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleRoadLineSubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs">{t('tests.line_number', 'Chiziq Raqami')}</Label>
+                            <Label required className="text-xs">{t('tests.line_number', 'Chiziq Raqami')}</Label>
                             <Input
                                 required
                                 value={roadLineNumber}
@@ -1750,7 +1771,7 @@ export default function TestsIndex({
                             />
                         </div>
                         <div>
-                            <Label className="text-xs">{t('tests.line_name', 'Chiziq Nomi')}</Label>
+                            <Label required className="text-xs">{t('tests.line_name', 'Chiziq Nomi')}</Label>
                             <Input
                                 required
                                 value={roadLineName}
@@ -1843,7 +1864,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowRoadLineModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button type="submit" size="sm" variant="brand">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1855,14 +1876,17 @@ export default function TestsIndex({
             <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
                 <DialogContent className="max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingCategory ? t('tests.edit_category', 'Toifani Tahrirlash') : t('tests.add_category', '+ Toifa Qo\'shish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <FolderPlus className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingCategory ? t('tests.edit_category', 'Toifani Tahrirlash') : t('tests.add_category', '+ Toifa Qo\'shish')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">Yo'l belgisi toifasi nomini kiriting</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleCategorySubmit} className="space-y-3.5 pt-2">
                         <div>
-                            <Label className="text-xs">{t('tests.category_name', 'Toifa Nomi')}</Label>
+                            <Label required className="text-xs">{t('tests.category_name', 'Toifa Nomi')}</Label>
                             <Input
                                 required
                                 value={categoryName}
@@ -1875,7 +1899,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowCategoryModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button type="submit" size="sm" variant="brand">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
