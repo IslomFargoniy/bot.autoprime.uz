@@ -214,15 +214,15 @@ export default function VehiclesIndex({
     };
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6">
             <Head title={t('vehicles.title', 'Avtopark (Mashinalar)')} />
 
             {/* Page Title & Add Button */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('vehicles.title', 'Avtopark (Mashinalar)')}</h1>
-                <Button onClick={openCreate} variant="brand" className="text-xs">
+            <div className="flex items-center justify-between gap-3 mb-5 md:mb-6">
+                <h1 className="text-xl sm:text-2xl font-bold">{t('vehicles.title', 'Avtopark (Mashinalar)')}</h1>
+                <Button onClick={openCreate} variant="brand" size="sm" className="text-xs shrink-0">
                     <Plus className="w-4 h-4 mr-1.5" />
-                    {t('vehicles.add_vehicle', 'Mashina Qo\'shish')}
+                    <span>{t('vehicles.add_vehicle', 'Mashina Qo\'shish')}</span>
                 </Button>
             </div>
 
@@ -350,7 +350,7 @@ export default function VehiclesIndex({
 
             {/* Vehicle Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Car className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -458,7 +458,7 @@ export default function VehiclesIndex({
 
             {/* Maintenance Modal */}
             <Dialog open={!!maintainingVehicle} onOpenChange={(open) => !open && setMaintainingVehicle(null)}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -594,7 +594,7 @@ export default function VehiclesIndex({
 
             {/* Maintenance History Modal */}
             <Dialog open={!!historyVehicle} onOpenChange={(open) => !open && setHistoryVehicle(null)}>
-                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <History className="w-5 h-5 text-blue-600 dark:text-blue-400" />

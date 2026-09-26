@@ -170,7 +170,7 @@ export default function ProfileEdit({ user }: PageProps) {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" disabled={processing} className="min-w-[140px]">
+                        <Button type="submit" disabled={processing} className="w-full sm:w-auto min-w-[140px]">
                             <Save className="w-4 h-4 mr-2" />
                             {processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}
                         </Button>

@@ -320,7 +320,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
             </div>
 
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />

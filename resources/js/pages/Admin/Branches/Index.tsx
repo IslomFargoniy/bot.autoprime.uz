@@ -272,7 +272,7 @@ export default function Index({ branches, filters }: Props) {
 
                 {/* Create / Edit Dialog */}
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />

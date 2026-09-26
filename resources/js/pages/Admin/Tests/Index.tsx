@@ -805,10 +805,10 @@ export default function TestsIndex({
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-border">
+            <div className="flex border-b border-border overflow-x-auto no-scrollbar whitespace-nowrap">
                 <button
                     onClick={() => setActiveTab('attempts')}
-                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all shrink-0 ${
                         activeTab === 'attempts'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
                             : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -818,7 +818,7 @@ export default function TestsIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('tickets')}
-                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all shrink-0 ${
                         activeTab === 'tickets'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
                             : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -828,7 +828,7 @@ export default function TestsIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('signs')}
-                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+                    className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all shrink-0 ${
                         activeTab === 'signs'
                             ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
                             : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -890,8 +890,9 @@ export default function TestsIndex({
                         </Button>
                     </form>
 
-                    {/* Attempts Table */}
-                    <div className="bg-card text-card-foreground rounded-xl border border-border overflow-hidden shadow-xs">
+                    {/* Attempts Table / Desktop & Tablet */}
+                    <div className="hidden md:block bg-card text-card-foreground rounded-xl border border-border overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-muted/50 border-b border-border">
@@ -975,6 +976,75 @@ export default function TestsIndex({
                                 )}
                             </TableBody>
                         </Table>
+                        </div>
+                    </div>
+
+                    {/* Attempts Mobile Cards Feed */}
+                    <div className="md:hidden space-y-3">
+                        {attempts.data.length === 0 ? (
+                            <div className="bg-card border rounded-xl p-8 text-center text-sm text-muted-foreground shadow-xs">
+                                {t('tests.no_attempts', 'Hech qanday imtihon natijalari topilmadi')}
+                            </div>
+                        ) : (
+                            attempts.data.map((att) => (
+                                <div key={att.id} className="bg-card border rounded-xl p-4 space-y-2.5 shadow-xs">
+                                    {/* Header: Student Name + Pass/Fail Badge */}
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                            <div className="font-semibold text-sm text-foreground">
+                                                {att.student?.full_name || t('tests.guest_student', 'Mehmon O\'quvchi')}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-0.5">{att.student?.phone || '—'}</div>
+                                        </div>
+                                        {att.is_passed ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 shrink-0">
+                                                <CheckCircle2 className="w-3 h-3" />
+                                                {t('tests.status_passed', 'O\'tdi')}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300 shrink-0">
+                                                <XCircle className="w-3 h-3" />
+                                                {t('tests.status_failed', 'O\'tmadi')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Exam Type & Branch */}
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                                        <span className="px-2 py-0.5 bg-muted rounded">
+                                            {att.attempt_type === 'random_mock' 
+                                                ? t('tests.type_mock', 'Ichki Nazorat Imtihoni') 
+                                                : `${t('tests.type_ticket', 'Bilet')} #${att.ticket_id || ''}`}
+                                        </span>
+                                        {att.student?.branch?.name && (
+                                            <span className="px-2 py-0.5 bg-muted rounded">
+                                                {att.student.branch.name}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Score & Duration Grid */}
+                                    <div className="grid grid-cols-2 gap-2 p-2 bg-muted/40 rounded-lg text-xs">
+                                        <div>
+                                            <span className="text-[10px] text-muted-foreground block">{t('tests.col_score', 'Natija')}:</span>
+                                            <span className="font-bold text-foreground">
+                                                {att.correct_answers} / {att.total_questions} ({att.score_percentage}%)
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] text-muted-foreground block">{t('tests.col_duration', 'Vaqt')}:</span>
+                                            <span className="font-mono text-muted-foreground">{formatDuration(att.duration_seconds)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Date */}
+                                    <div className="flex justify-between items-center pt-2 border-t text-[11px] text-muted-foreground">
+                                        <span>{t('tests.col_date', 'Sana')}:</span>
+                                        <span>{new Date(att.created_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     <Pagination links={attempts.links} />
@@ -1213,7 +1283,7 @@ export default function TestsIndex({
 
             {/* Ticket Questions Modal Dialog */}
             <Dialog open={!!inspectingTicket} onOpenChange={(open) => !open && setInspectingTicket(null)}>
-                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background text-foreground border-border">
+                <DialogContent className="w-[95vw] max-w-3xl max-h-[85vh] overflow-y-auto bg-background text-foreground border-border">
                     <DialogHeader className="border-b border-border pb-4">
                         <div className="flex items-center justify-between pr-6 flex-wrap gap-3">
                             <div className="flex items-center gap-2.5">
@@ -1383,7 +1453,7 @@ export default function TestsIndex({
 
             {/* Create/Edit Ticket Modal */}
             <Dialog open={showTicketModal} onOpenChange={setShowTicketModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Layers className="w-5 h-5 text-blue-600" />
@@ -1437,7 +1507,7 @@ export default function TestsIndex({
 
             {/* Create/Edit Question Modal */}
             <Dialog open={showQuestionModal} onOpenChange={setShowQuestionModal}>
-                <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] max-w-xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <HelpCircle className="w-5 h-5 text-blue-600" />
@@ -1610,7 +1680,7 @@ export default function TestsIndex({
 
             {/* Create/Edit Sign Modal */}
             <Dialog open={showSignModal} onOpenChange={setShowSignModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <ImageIcon className="w-5 h-5 text-blue-600" />
@@ -1749,7 +1819,7 @@ export default function TestsIndex({
 
             {/* Create/Edit Road Line Modal */}
             <Dialog open={showRoadLineModal} onOpenChange={setShowRoadLineModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Layers className="w-5 h-5 text-blue-600" />
@@ -1874,7 +1944,7 @@ export default function TestsIndex({
 
             {/* Create/Edit Category Modal */}
             <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
-                <DialogContent className="max-w-sm">
+                <DialogContent className="w-[95vw] max-w-sm max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FolderPlus className="w-5 h-5 text-blue-600" />

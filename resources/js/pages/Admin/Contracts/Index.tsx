@@ -207,12 +207,12 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
             {/* Filters Bar */}
             <div className="bg-card border rounded-xl p-4 shadow-xs mb-6 flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0 flex-nowrap md:flex-wrap">
                     {['all', 'unpaid', 'partial', 'paid'].map((st) => (
                         <button
                             key={st}
                             onClick={() => handleFilterStatus(st)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors shrink-0 ${
                                 (filters.payment_status || 'all') === st
                                     ? 'bg-blue-600 text-white border-blue-600'
                                     : 'bg-muted/50 text-foreground border-input hover:bg-muted'
@@ -223,7 +223,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                     ))}
                     <button
                         onClick={() => router.get('/admin/contracts', { ...filters, has_debt: !filters.has_debt }, { preserveState: true })}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors shrink-0 ${
                             filters.has_debt
                                 ? 'bg-red-600 text-white border-red-600'
                                 : 'bg-muted/50 text-foreground border-input hover:bg-muted'
@@ -249,8 +249,9 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                 </form>
             </div>
 
-            {/* Table */}
-            <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
+            {/* Desktop & Tablet Table */}
+            <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -351,11 +352,133 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                         )}
                     </TableBody>
                 </Table>
+                </div>
+            </div>
+
+            {/* Mobile Cards Feed */}
+            <div className="md:hidden space-y-3">
+                {contracts.data.length === 0 ? (
+                    <div className="bg-card border rounded-xl p-8 text-center text-sm text-muted-foreground shadow-xs">
+                        {t('contracts.no_contracts', 'Shartnomalar topilmadi')}
+                    </div>
+                ) : (
+                    contracts.data.map((c) => (
+                        <div key={c.id} className="bg-card border rounded-xl p-4 space-y-3 shadow-xs">
+                            {/* Header: Contract Number + Student + Badge */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <div className="font-semibold text-sm flex items-center gap-1.5">
+                                        <span className="font-mono text-primary font-bold">#{c.contract_number}</span>
+                                        <span>{c.student?.full_name}</span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground font-mono mt-0.5">{c.student?.phone}</div>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold shrink-0 border ${getBadgeStyle(c.payment_badge_color)}`}>
+                                    {c.payment_percentage}%
+                                </span>
+                            </div>
+
+                            {/* Tariff & Group Badges */}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                                <span className="px-2 py-0.5 bg-muted rounded">
+                                    {c.contract_type?.name || '-'} ({c.contract_type?.category || 'B'})
+                                </span>
+                                {c.group?.name && (
+                                    <span className="px-2 py-0.5 bg-muted rounded">
+                                        {c.group.name}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Financial Summary */}
+                            <div className="grid grid-cols-3 gap-2 p-2.5 bg-muted/40 rounded-lg text-xs">
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('contracts.final_amount', 'Summa')}</span>
+                                    <span className="font-semibold">{Number(c.final_amount).toLocaleString('uz-UZ')}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('contracts.paid_amount', "To'langan")}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewingPaymentsContract(c)}
+                                        className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                                        title={t('contracts.payments_history', "To'lovlar tarixi")}
+                                    >
+                                        <ReceiptText className="w-3 h-3" />
+                                        {Number(c.paid_amount).toLocaleString('uz-UZ')}
+                                    </button>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('contracts.debt_amount', 'Qarz')}</span>
+                                    <span className={`font-semibold ${Number(c.debt_amount) > 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                        {Number(c.debt_amount).toLocaleString('uz-UZ')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-300 ${
+                                        c.payment_badge_color === 'green'
+                                            ? 'bg-emerald-500'
+                                            : c.payment_badge_color === 'yellow'
+                                            ? 'bg-amber-500'
+                                            : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${Math.min(100, Math.max(0, c.payment_percentage))}%` }}
+                                />
+                            </div>
+
+                            {/* Actions Footer */}
+                            <div className="flex items-center justify-between pt-2 border-t text-xs">
+                                <button
+                                    type="button"
+                                    onClick={() => setViewingPaymentsContract(c)}
+                                    className="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center gap-1 hover:underline"
+                                >
+                                    <ReceiptText className="w-3.5 h-3.5" />
+                                    {t('contracts.payments_history', "To'lovlar")}
+                                </button>
+                                <div className="flex items-center gap-1.5">
+                                    <a
+                                        href={`/admin/contracts/${c.id}/download-pdf`}
+                                        className="inline-flex items-center px-2 py-1 rounded bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Download className="w-3.5 h-3.5 mr-1" />
+                                        PDF
+                                    </a>
+                                    {Number(c.paid_amount) > 0 && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => openRefund(c)}
+                                            className="h-7 text-xs text-amber-600 hover:text-amber-700 border-amber-300 dark:border-amber-800"
+                                        >
+                                            <RotateCcw className="w-3 h-3 mr-1" />
+                                            {t('contracts.refund', 'Qaytarish')}
+                                        </Button>
+                                    )}
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleDelete(c)}
+                                        className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Create Contract Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5 text-blue-600" />
@@ -466,7 +589,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
             {/* Refund Modal */}
             <Dialog open={!!refundingContract} onOpenChange={(open) => !open && setRefundingContract(null)}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
                             <RotateCcw className="w-5 h-5" />
@@ -587,7 +710,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
             {/* Contract Payments History Modal */}
             <Dialog open={!!viewingPaymentsContract} onOpenChange={(open) => !open && setViewingPaymentsContract(null)}>
-                <DialogContent className="max-w-xl">
+                <DialogContent className="w-[95vw] max-w-xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                             <ReceiptText className="w-5 h-5" />
@@ -619,7 +742,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     {t('contracts.no_payments', "Ushbu shartnoma bo'yicha to'lovlar mavjud emas")}
                                 </div>
                             ) : (
-                                <div className="border rounded-lg overflow-hidden">
+                                <div className="border rounded-lg overflow-x-auto">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>

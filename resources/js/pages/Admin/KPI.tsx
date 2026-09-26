@@ -57,26 +57,26 @@ export default function KPI({ instructors = [], filters = {} }: PageProps) {
     };
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
             <Head title={t('kpi.title', 'KPI Tizimi')} />
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('kpi.title', 'Avtomaktab KPI Tizimi')}</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold">{t('kpi.title', 'Avtomaktab KPI Tizimi')}</h1>
                 
-                <div className="flex gap-2 w-full md:w-auto">
+                <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
                     <DatePicker 
-                        placeholder={t('common.date_from', 'Dan') + ' YYYY-MM-DD'}
+                        placeholder={t('common.date_from', 'Dan')}
                         value={fromDate}
                         onChange={(val) => handleFilterDateChange('from', val)}
-                        className="w-full md:w-36"
+                        className="w-full sm:w-36"
                         title={t('common.from', 'Dan')}
                     />
                     
                     <DatePicker 
-                        placeholder={t('common.date_to', 'Gacha') + ' YYYY-MM-DD'}
+                        placeholder={t('common.date_to', 'Gacha')}
                         value={toDate}
                         onChange={(val) => handleFilterDateChange('to', val)}
-                        className="w-full md:w-36"
+                        className="w-full sm:w-36"
                         title={t('common.to', 'Gacha')}
                     />
                 </div>

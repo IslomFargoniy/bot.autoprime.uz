@@ -118,8 +118,9 @@ export default function CertificatesIndex({
                 </Button>
             </div>
 
-            {/* Certificates Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+            {/* Certificates Table / Desktop & Tablet */}
+            <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
+                <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -181,11 +182,76 @@ export default function CertificatesIndex({
                         )}
                     </TableBody>
                 </Table>
+                </div>
+            </div>
+
+            {/* Certificates Mobile Cards Feed */}
+            <div className="md:hidden space-y-3 mb-4">
+                {certificates.data.length === 0 ? (
+                    <div className="bg-card border rounded-xl p-8 text-center text-sm text-muted-foreground shadow-xs">
+                        {t('certificates.no_certificates', 'Guvohnomalar topilmadi')}
+                    </div>
+                ) : (
+                    certificates.data.map((cert) => (
+                        <div key={cert.id} className="bg-card border rounded-xl p-4 space-y-3 shadow-xs">
+                            {/* Header: Cert # + Category */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <div className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                                        <Award className="w-4 h-4 text-amber-500 shrink-0" />
+                                        <span>#{cert.certificate_number}</span>
+                                    </div>
+                                    <div className="font-medium text-xs mt-0.5">{cert.student?.full_name}</div>
+                                </div>
+                                <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-xs shrink-0">
+                                    {cert.category} {t('contract_types.category_suffix', 'toifa')}
+                                </span>
+                            </div>
+
+                            {/* Contract & Branch */}
+                            <div className="grid grid-cols-2 gap-2 p-2 bg-muted/40 rounded-lg text-xs">
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('certificates.contract', 'Shartnoma')}:</span>
+                                    <span className="font-mono text-muted-foreground">#{cert.contract?.contract_number}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-muted-foreground block">{t('certificates.branch', 'Filial')}:</span>
+                                    <span>{cert.branch?.name || '-'}</span>
+                                </div>
+                            </div>
+
+                            {/* Footer: Date & Download Actions */}
+                            <div className="flex items-center justify-between pt-2 border-t text-xs">
+                                <span className="text-muted-foreground text-[11px]">{cert.issued_date}</span>
+                                <div className="flex items-center gap-2">
+                                    <a
+                                        href={`/admin/certificates/${cert.id}/download-pdf`}
+                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 font-medium text-xs"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Download className="w-3.5 h-3.5 mr-1" />
+                                        PDF
+                                    </a>
+                                    <a
+                                        href={`/certificates/verify/${cert.qr_verify_hash}`}
+                                        className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground font-medium text-xs"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <QrCode className="w-3.5 h-3.5 mr-1" />
+                                        QR
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Issue Certificate Modal with 4-Conditions Checklist */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Award className="w-5 h-5 text-amber-500" />
