@@ -145,10 +145,11 @@ test('admin can delete maintenance which refunds cash register and deletes expen
         'status' => 'active',
     ]);
 
+    $category = \App\Models\ExpenseCategory::firstOrCreate(['name' => "Ta'mir"], ['is_active' => true]);
     $expense = Expense::create([
         'branch_id' => $branch->id,
         'cash_register_id' => $register->id,
-        'expense_category_id' => 1,
+        'expense_category_id' => $category->id,
         'user_id' => $admin->id,
         'amount' => 150000,
         'recipient' => 'Tracker',
