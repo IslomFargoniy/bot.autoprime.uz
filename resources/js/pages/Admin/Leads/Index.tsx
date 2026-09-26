@@ -144,6 +144,28 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
         }
     };
 
+    const getSourceLabel = (source: string) => {
+        switch (source) {
+            case 'telegram_bot':
+                return t('leads.source_telegram_bot', 'Telegram bot');
+            case 'instagram':
+                return t('leads.source_instagram', 'Instagram');
+            case 'website':
+                return t('leads.source_website', 'Vebsayt');
+            case 'recommendation':
+            case 'referral':
+                return t('leads.source_recommendation', 'Tavsiya');
+            case 'walk_in':
+                return t('leads.source_walk_in', "O'zi kelgan (Ofis)");
+            case 'reception_manual':
+                return t('leads.source_reception_manual', 'Reception');
+            case 'other':
+                return t('leads.source_other', 'Boshqa');
+            default:
+                return t(`leads.source_${source}`, source);
+        }
+    };
+
     return (
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
             <Head title={t('leads.title', 'CRM Lidlar')} />
@@ -229,8 +251,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                             {lead.category || 'B'}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="text-gray-500 dark:text-gray-400">
-                                        {lead.source}
+                                    <TableCell className="text-gray-600 dark:text-gray-300">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-xs font-medium text-foreground">
+                                            {getSourceLabel(lead.source)}
+                                        </span>
                                     </TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${getStageBadge(lead.stage)}`}>
@@ -307,7 +331,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t text-muted-foreground">
                                 <div className="truncate">
                                     <span className="text-[10px] block opacity-70">{t('leads.source', 'Manba')}:</span>
-                                    <span className="truncate">{lead.source}</span>
+                                    <span className="truncate font-medium text-foreground">{getSourceLabel(lead.source)}</span>
                                 </div>
                                 <div className="truncate text-right">
                                     <span className="text-[10px] block opacity-70">{t('leads.branch', 'Filial')}:</span>
@@ -417,11 +441,12 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     value={createForm.data.source}
                                     onChange={(val) => createForm.setData('source', String(val))}
                                     options={[
-                                        { value: 'reception_manual', label: 'Reception' },
-                                        { value: 'telegram_bot', label: 'Telegram Bot' },
-                                        { value: 'instagram', label: 'Instagram' },
-                                        { value: 'website', label: 'Vebsayt' },
-                                        { value: 'referral', label: 'Tavsiya' },
+                                        { value: 'telegram_bot', label: t('leads.source_telegram_bot', 'Telegram bot') },
+                                        { value: 'instagram', label: t('leads.source_instagram', 'Instagram') },
+                                        { value: 'website', label: t('leads.source_website', 'Vebsayt') },
+                                        { value: 'recommendation', label: t('leads.source_recommendation', 'Tavsiya') },
+                                        { value: 'walk_in', label: t('leads.source_walk_in', "O'zi kelgan (Ofis)") },
+                                        { value: 'reception_manual', label: t('leads.source_reception_manual', 'Reception') },
                                     ]}
                                     className="mt-1"
                                 />

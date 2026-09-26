@@ -502,7 +502,15 @@
         "select_tariff": "Шартнома Тарифи",
         "select_group": "Гуруҳ",
         "discount_amount": "Чегирма (UZS)",
-        "confirm_convert": "Шартномани Расмийлаштириш"
+        "confirm_convert": "Шартномани Расмийлаштириш",
+        "source_telegram_bot": "Телеграм бот",
+        "source_instagram": "Инстаграм",
+        "source_website": "Вебсайт",
+        "source_recommendation": "Тавсия",
+        "source_referral": "Тавсия",
+        "source_walk_in": "Ўзи келган (Офис)",
+        "source_reception_manual": "Ресепшн",
+        "source_other": "Бошқа"
     },
     "contracts": {
         "title": "Шартномалар",

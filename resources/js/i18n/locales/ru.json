@@ -502,7 +502,15 @@
         "select_tariff": "Тариф договора",
         "select_group": "Группа",
         "discount_amount": "Скидка (UZS)",
-        "confirm_convert": "Оформить договор"
+        "confirm_convert": "Оформить договор",
+        "source_telegram_bot": "Telegram бот",
+        "source_instagram": "Instagram",
+        "source_website": "Веб-сайт",
+        "source_recommendation": "Рекомендация",
+        "source_referral": "Рекомендация",
+        "source_walk_in": "Визит в офис",
+        "source_reception_manual": "Ресепшн",
+        "source_other": "Другое"
     },
     "contracts": {
         "title": "Договоры",
