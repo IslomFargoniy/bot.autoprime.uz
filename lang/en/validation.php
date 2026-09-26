@@ -197,6 +197,35 @@ return [
     |
     */
 
-    'attributes' => [],
-
+    'attributes' => [
+        'phone' => 'phone number',
+        'password' => 'password',
+        'email' => 'email',
+        'name' => 'name',
+        'full_name' => 'full name',
+        'amount' => 'amount',
+        'branch_id' => 'branch',
+        'group_id' => 'group',
+        'student_id' => 'student',
+        'instructor_id' => 'instructor',
+        'default_instructor_id' => 'default instructor',
+        'start_time' => 'start time',
+        'end_time' => 'end time',
+        'fuel_type' => 'fuel type',
+        'plate_number' => 'license plate',
+        'model' => 'model',
+        'year' => 'year',
+        'status' => 'status',
+        'notes' => 'notes',
+        'maintenance_type' => 'maintenance type',
+        'cost' => 'cost',
+        'performed_date' => 'performed date',
+        'next_due_date' => 'next due date',
+        'odometer' => 'mileage',
+        'category' => 'category',
+        'source' => 'source',
+        'contract_type_id' => 'tariff',
+        'cash_register_id' => 'cash register',
+        'payment_method' => 'payment method',
+    ],
 ];

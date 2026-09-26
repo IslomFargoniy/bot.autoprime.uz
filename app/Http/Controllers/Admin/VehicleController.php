@@ -63,23 +63,32 @@ class VehicleController extends Controller
             'plate_number' => 'required|string|max:50|unique:vehicles,plate_number',
             'model' => 'required|string|max:100',
             'year' => 'nullable|integer|min:1990|max:'.(date('Y') + 1),
-            'fuel_type' => 'required|in:petrol,methane,propane,diesel,electric',
-            'status' => 'required|in:active,maintenance,retired',
+            'fuel_type' => 'required|in:petrol,gas_methane,gas_propane,diesel,electric,methane,propane',
+            'status' => 'required|in:active,maintenance,out_of_service,retired',
             'notes' => 'nullable|string',
         ]);
 
         $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()?->id ?? 1;
+
+        $fuelType = $validated['fuel_type'];
+        if ($fuelType === 'methane') {
+            $fuelType = 'gas_methane';
+        } elseif ($fuelType === 'propane') {
+            $fuelType = 'gas_propane';
+        }
+
+        $status = $validated['status'] === 'retired' ? 'out_of_service' : $validated['status'];
 
         Vehicle::create([
             'branch_id' => $branchId,
             'instructor_id' => $validated['default_instructor_id'] ?? null,
             'plate_number' => strtoupper($validated['plate_number']),
             'make_model' => $validated['model'],
-            'fuel_type' => $validated['fuel_type'],
-            'status' => $validated['status'],
+            'fuel_type' => $fuelType,
+            'status' => $status,
         ]);
 
-        return redirect()->back()->with('success', 'Avtomobil muvaffaqiyatli qo\'shildi.');
+        return redirect()->back()->with('success', __('vehicles.created_success', [], $request->getPreferredLanguage() ?? 'uz'));
     }
 
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
@@ -90,28 +99,37 @@ class VehicleController extends Controller
             'plate_number' => 'required|string|max:50|unique:vehicles,plate_number,'.$vehicle->id,
             'model' => 'required|string|max:100',
             'year' => 'nullable|integer|min:1990|max:'.(date('Y') + 1),
-            'fuel_type' => 'required|in:petrol,methane,propane,diesel,electric',
-            'status' => 'required|in:active,maintenance,retired',
+            'fuel_type' => 'required|in:petrol,gas_methane,gas_propane,diesel,electric,methane,propane',
+            'status' => 'required|in:active,maintenance,out_of_service,retired',
             'notes' => 'nullable|string',
         ]);
+
+        $fuelType = $validated['fuel_type'];
+        if ($fuelType === 'methane') {
+            $fuelType = 'gas_methane';
+        } elseif ($fuelType === 'propane') {
+            $fuelType = 'gas_propane';
+        }
+
+        $status = $validated['status'] === 'retired' ? 'out_of_service' : $validated['status'];
 
         $vehicle->update([
             'branch_id' => $validated['branch_id'] ?? $vehicle->branch_id,
             'instructor_id' => $validated['default_instructor_id'] ?? null,
             'plate_number' => strtoupper($validated['plate_number']),
             'make_model' => $validated['model'],
-            'fuel_type' => $validated['fuel_type'],
-            'status' => $validated['status'],
+            'fuel_type' => $fuelType,
+            'status' => $status,
         ]);
 
-        return redirect()->back()->with('success', 'Avtomobil ma\'lumotlari yangilandi.');
+        return redirect()->back()->with('success', __('vehicles.updated_success', [], $request->getPreferredLanguage() ?? 'uz'));
     }
 
     public function destroy(Vehicle $vehicle): RedirectResponse
     {
         $vehicle->delete();
 
-        return redirect()->back()->with('success', 'Avtomobil o\'chirildi.');
+        return redirect()->back()->with('success', __('vehicles.deleted_success', [], app()->getLocale()));
     }
 
     public function storeMaintenance(Request $request, Vehicle $vehicle): RedirectResponse
@@ -120,20 +138,27 @@ class VehicleController extends Controller
             'maintenance_type' => 'required|string|max:100',
             'cost' => 'required|numeric|min:0',
             'performed_date' => 'required|date',
-            'next_due_date' => 'nullable|date|after_or_equal:performed_date',
-            'odometer' => 'nullable|integer|min:0',
+            'next_due_date' => 'nullable|date',
+            'odometer' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
+
+        $mileage = !empty($validated['odometer']) ? (int) $validated['odometer'] : ($vehicle->current_mileage ?? 0);
 
         VehicleMaintenance::create([
             'vehicle_id' => $vehicle->id,
             'maintenance_type' => $validated['maintenance_type'],
             'cost' => $validated['cost'],
             'performed_at' => $validated['performed_date'],
-            'mileage' => $validated['odometer'] ?? null,
+            'next_due_date' => $validated['next_due_date'] ?? null,
+            'mileage' => $mileage,
             'description' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->back()->with('success', 'Texnik xizmat yozuvi kiritildi.');
+        if (!empty($validated['odometer']) && (int) $validated['odometer'] > (int) $vehicle->current_mileage) {
+            $vehicle->update(['current_mileage' => (int) $validated['odometer']]);
+        }
+
+        return redirect()->back()->with('success', __('vehicles.maintenance_success', [], app()->getLocale()));
     }
 }

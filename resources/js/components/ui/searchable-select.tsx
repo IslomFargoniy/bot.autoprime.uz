@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -47,97 +46,62 @@ export function SearchableSelect({
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [highlightIndex, setHighlightIndex] = useState(0);
+    const [openUpward, setOpenUpward] = useState(false);
 
+    const containerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
-
-    const [coords, setCoords] = useState<{
-        top?: number;
-        bottom?: number;
-        left: number;
-        width: number;
-    }>({
-        left: 0,
-        width: 0,
-    });
 
     const selectedOption = useMemo(() => {
         return options.find((opt) => String(opt.value) === String(value));
     }, [options, value]);
 
+    const normalize = (text: string) =>
+        text
+            .toLowerCase()
+            .replace(/[`'ʻʼʹ]/g, "'")
+            .trim();
+
     const filteredOptions = useMemo(() => {
         if (!searchQuery.trim()) return options;
-        const q = searchQuery.toLowerCase().trim();
-        return options.filter(
-            (opt) =>
-                opt.label.toLowerCase().includes(q) ||
-                (opt.sublabel && opt.sublabel.toLowerCase().includes(q))
-        );
+        const q = normalize(searchQuery);
+        return options.filter((opt) => {
+            const labelStr = normalize(String(opt.label ?? ''));
+            const sublabelStr = opt.sublabel ? normalize(String(opt.sublabel)) : '';
+            const valStr = normalize(String(opt.value ?? ''));
+            return labelStr.includes(q) || sublabelStr.includes(q) || valStr.includes(q);
+        });
     }, [options, searchQuery]);
 
-    // Update position of dropdown
-    const updatePosition = () => {
+    // Check position (upward or downward)
+    const checkOrientation = () => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
-        const dropdownMaxHeight = 260;
         const spaceBelow = window.innerHeight - rect.bottom;
-        const openUpward = spaceBelow < dropdownMaxHeight && rect.top > dropdownMaxHeight;
-
-        const safeWidth = Math.min(rect.width, window.innerWidth - 16);
-        const safeLeft = Math.max(8, Math.min(rect.left, window.innerWidth - safeWidth - 8));
-
-        if (openUpward) {
-            setCoords({
-                bottom: window.innerHeight - rect.top + 4,
-                top: undefined,
-                left: safeLeft,
-                width: safeWidth,
-            });
-        } else {
-            setCoords({
-                top: rect.bottom + 4,
-                bottom: undefined,
-                left: safeLeft,
-                width: safeWidth,
-            });
-        }
+        const dropdownHeight = 260;
+        setOpenUpward(spaceBelow < dropdownHeight && rect.top > dropdownHeight);
     };
 
-    // Open & calculate coords
     const handleOpen = () => {
         if (disabled) return;
-        updatePosition();
+        checkOrientation();
         setIsOpen(true);
         setSearchQuery('');
         setHighlightIndex(0);
     };
 
-    // Focus search input when open
+    // Auto-focus search input when opened
     useEffect(() => {
         if (isOpen) {
-            updatePosition();
+            checkOrientation();
             const timer = setTimeout(() => {
-                searchInputRef.current?.focus();
+                if (searchInputRef.current) {
+                    searchInputRef.current.focus();
+                }
             }, 30);
             return () => clearTimeout(timer);
         }
-    }, [isOpen]);
-
-    // Update position on scroll/resize
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const handleScrollOrResize = () => {
-            updatePosition();
-        };
-
-        window.addEventListener('resize', handleScrollOrResize);
-        window.addEventListener('scroll', handleScrollOrResize, true);
-        return () => {
-            window.removeEventListener('resize', handleScrollOrResize);
-            window.removeEventListener('scroll', handleScrollOrResize, true);
-        };
     }, [isOpen]);
 
     // Handle outside click
@@ -146,12 +110,7 @@ export function SearchableSelect({
 
         const handleClickOutside = (e: MouseEvent | TouchEvent) => {
             const target = e.target as Node;
-            if (
-                triggerRef.current &&
-                !triggerRef.current.contains(target) &&
-                dropdownRef.current &&
-                !dropdownRef.current.contains(target)
-            ) {
+            if (containerRef.current && !containerRef.current.contains(target)) {
                 setIsOpen(false);
                 setSearchQuery('');
             }
@@ -207,7 +166,7 @@ export function SearchableSelect({
     };
 
     return (
-        <div className={cn('relative w-full', className)}>
+        <div ref={containerRef} className={cn('relative w-full', isOpen ? 'z-40' : 'z-auto', className)}>
             {/* Trigger Button */}
             <button
                 type="button"
@@ -219,7 +178,7 @@ export function SearchableSelect({
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
                 className={cn(
-                    'flex w-full items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-left text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50',
+                    'flex w-full items-center justify-between rounded-lg border border-input bg-background text-left text-xs transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50',
                     size === 'sm' ? 'h-8 px-2.5' : 'h-9 px-3',
                     triggerClassName
                 )}
@@ -227,17 +186,17 @@ export function SearchableSelect({
                 <div className="flex-1 truncate pr-2">
                     {selectedOption ? (
                         <div className="flex items-center gap-1.5 truncate">
-                            <span className="truncate font-medium text-gray-900 dark:text-white">
+                            <span className="truncate font-medium text-foreground">
                                 {selectedOption.label}
                             </span>
                             {selectedOption.sublabel && (
-                                <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
+                                <span className="text-[11px] text-muted-foreground truncate">
                                     ({selectedOption.sublabel})
                                 </span>
                             )}
                         </div>
                     ) : (
-                        <span className="text-gray-400 dark:text-gray-500">
+                        <span className="text-muted-foreground">
                             {placeholder || t('common.select', '-- Tanlang --')}
                         </span>
                     )}
@@ -249,107 +208,116 @@ export function SearchableSelect({
                             role="button"
                             tabIndex={-1}
                             onClick={handleClear}
-                            className="rounded p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <X className="w-3.5 h-3.5" />
                         </span>
                     )}
                     <ChevronDown
                         className={cn(
-                            'w-3.5 h-3.5 text-gray-400 transition-transform duration-200',
-                            isOpen && 'rotate-180 text-blue-500'
+                            'w-3.5 h-3.5 text-muted-foreground transition-transform duration-200',
+                            isOpen && 'rotate-180 text-primary'
                         )}
                     />
                 </div>
             </button>
 
-            {/* Portal Dropdown Menu */}
-            {isOpen &&
-                createPortal(
-                    <div
-                        ref={dropdownRef}
-                        style={{
-                            top: coords.top !== undefined ? `${coords.top}px` : undefined,
-                            bottom: coords.bottom !== undefined ? `${coords.bottom}px` : undefined,
-                            left: `${coords.left}px`,
-                            width: `${coords.width}px`,
-                        }}
-                        className="fixed z-[99999] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100"
-                    >
-                        {/* Search Input */}
-                        <div className="flex items-center gap-2 p-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/80">
-                            <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    setHighlightIndex(0);
+            {/* Dropdown Menu (Inline within container for seamless Dialog focus & positioning) */}
+            {isOpen && (
+                <div
+                    ref={dropdownRef}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    className={cn(
+                        'absolute left-0 z-50 w-full min-w-[200px] rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100',
+                        openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+                    )}
+                >
+                    {/* Search Input */}
+                    <div className="flex items-center gap-2 p-2 border-b border-border bg-muted/30">
+                        <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setHighlightIndex(0);
+                            }}
+                            onKeyDown={handleKeyDown}
+                            onClick={(e) => e.stopPropagation()}
+                            onFocus={(e) => e.stopPropagation()}
+                            placeholder={searchPlaceholder || t('common.search', 'Qidirish...')}
+                            className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none border-none p-0 focus:ring-0"
+                            autoComplete="off"
+                        />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSearchQuery('');
+                                    searchInputRef.current?.focus();
                                 }}
-                                onKeyDown={handleKeyDown}
-                                placeholder={searchPlaceholder || t('common.search', 'Qidirish...')}
-                                className="w-full bg-transparent text-xs text-gray-900 dark:text-white placeholder:text-gray-400 outline-none"
-                            />
-                            {searchQuery && (
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchQuery('')}
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                >
-                                    <X className="w-3 h-3" />
-                                </button>
-                            )}
-                        </div>
+                                className="text-muted-foreground hover:text-foreground p-0.5"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        )}
+                    </div>
 
-                        {/* Options List */}
-                        <div className="max-h-56 overflow-y-auto p-1 text-xs">
-                            {filteredOptions.length === 0 ? (
-                                <div className="p-4 text-center text-xs text-gray-400">
-                                    {emptyMessage || t('common.no_data', 'Ma\'lumot topilmadi')}
-                                </div>
-                            ) : (
-                                filteredOptions.map((opt, index) => {
-                                    const isSelected = String(opt.value) === String(value);
-                                    const isHighlighted = index === highlightIndex;
+                    {/* Options List */}
+                    <div className="max-h-56 overflow-y-auto p-1 text-xs">
+                        {filteredOptions.length === 0 ? (
+                            <div className="p-4 text-center text-xs text-muted-foreground">
+                                {emptyMessage || t('common.no_data', 'Ma\'lumot topilmadi')}
+                            </div>
+                        ) : (
+                            filteredOptions.map((opt, index) => {
+                                const isSelected = String(opt.value) === String(value);
+                                const isHighlighted = index === highlightIndex;
 
-                                    return (
-                                        <button
-                                            key={opt.value}
-                                            type="button"
-                                            disabled={opt.disabled}
-                                            onClick={() => handleSelect(opt.value)}
-                                            onMouseEnter={() => setHighlightIndex(index)}
-                                            className={cn(
-                                                'flex w-full items-center justify-between px-2.5 py-2 rounded-md text-left transition-colors cursor-pointer',
-                                                isSelected &&
-                                                    'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-medium',
-                                                isHighlighted && !isSelected && 'bg-gray-100 dark:bg-gray-700/60',
-                                                opt.disabled && 'opacity-40 cursor-not-allowed'
-                                            )}
-                                        >
-                                            <div className="truncate pr-2">
-                                                <div className="truncate font-medium text-gray-900 dark:text-white">
-                                                    {opt.label}
-                                                </div>
-                                                {opt.sublabel && (
-                                                    <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                                                        {opt.sublabel}
-                                                    </div>
-                                                )}
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        disabled={opt.disabled}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelect(opt.value);
+                                        }}
+                                        onMouseEnter={() => setHighlightIndex(index)}
+                                        className={cn(
+                                            'flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer',
+                                            isSelected &&
+                                                'bg-primary/10 text-primary font-semibold',
+                                            isHighlighted && !isSelected && 'bg-accent text-accent-foreground',
+                                            !isSelected && !isHighlighted && 'text-foreground hover:bg-accent hover:text-accent-foreground',
+                                            opt.disabled && 'opacity-40 cursor-not-allowed'
+                                        )}
+                                    >
+                                        <div className="truncate pr-2">
+                                            <div className="truncate font-medium">
+                                                {opt.label}
                                             </div>
-
-                                            {isSelected && (
-                                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0 ml-auto" />
+                                            {opt.sublabel && (
+                                                <div className="text-[11px] text-muted-foreground truncate">
+                                                    {opt.sublabel}
+                                                </div>
                                             )}
-                                        </button>
-                                    );
-                                })
-                            )}
-                        </div>
-                    </div>,
-                    document.body
-                )}
+                                        </div>
+
+                                        {isSelected && (
+                                            <Check className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />
+                                        )}
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

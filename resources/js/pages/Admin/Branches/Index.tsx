@@ -11,6 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import type { Branch } from '@/types/auth';
 
@@ -302,14 +303,14 @@ export default function Index({ branches, filters }: Props) {
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-medium text-foreground">{t('branches.status', 'Holati')}</label>
-                                    <select
+                                    <SearchableSelect
                                         value={data.status}
-                                        onChange={(e) => setData('status', e.target.value as 'active' | 'inactive')}
-                                        className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    >
-                                        <option value="active">{t('branches.active', 'Faol')}</option>
-                                        <option value="inactive">{t('branches.inactive', 'Nofaol')}</option>
-                                    </select>
+                                        onChange={(val) => setData('status', val as 'active' | 'inactive')}
+                                        options={[
+                                            { value: 'active', label: t('branches.active', 'Faol') },
+                                            { value: 'inactive', label: t('branches.inactive', 'Nofaol') },
+                                        ]}
+                                    />
                                     {errors.status && <p className="text-xs text-destructive">{errors.status}</p>}
                                 </div>
                             </div>

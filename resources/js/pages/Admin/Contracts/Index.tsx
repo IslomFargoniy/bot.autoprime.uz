@@ -284,19 +284,18 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="contract_type_id">{t('contracts.select_tariff', 'Tarif')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="contract_type_id"
                                     value={form.data.contract_type_id}
-                                    onChange={(e) => form.setData('contract_type_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    required
-                                >
-                                    {contractTypes.map((ct) => (
-                                        <option key={ct.id} value={ct.id}>
-                                            {ct.name} ({Number(ct.price).toLocaleString('uz-UZ')} UZS)
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => form.setData('contract_type_id', val)}
+                                    options={contractTypes.map((ct) => ({
+                                        value: ct.id,
+                                        label: ct.name,
+                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS`,
+                                    }))}
+                                    placeholder={t('contracts.select_tariff', 'Tarif')}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="group_id">{t('contracts.select_group', 'Guruh')}</Label>

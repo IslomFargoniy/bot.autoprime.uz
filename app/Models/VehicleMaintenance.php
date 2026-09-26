@@ -16,6 +16,7 @@ class VehicleMaintenance extends Model
         'cost',
         'mileage',
         'performed_at',
+        'next_due_date',
         'description',
         'invoice_photo_url',
     ];
@@ -24,6 +25,7 @@ class VehicleMaintenance extends Model
         'cost' => 'decimal:2',
         'mileage' => 'integer',
         'performed_at' => 'date',
+        'next_due_date' => 'date',
     ];
 
     protected $appends = ['notes', 'performed_date', 'odometer'];

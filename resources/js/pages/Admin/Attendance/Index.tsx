@@ -744,16 +744,17 @@ export default function AttendanceIndex({
                                 </div>
                                 <div>
                                     <Label htmlFor="man_status">{t('attendance.status', 'Holat')}</Label>
-                                    <select
+                                    <SearchableSelect
                                         id="man_status"
                                         value={manualForm.data.status}
-                                        onChange={(e) => manualForm.setData('status', e.target.value as any)}
-                                        className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                    >
-                                        <option value="present">✅ Darsda Bor</option>
-                                        <option value="absent">❌ Kelmagan</option>
-                                        <option value="late">🟡 Kechikkan</option>
-                                    </select>
+                                        onChange={(val) => manualForm.setData('status', val as any)}
+                                        options={[
+                                            { value: 'present', label: '✅ Darsda Bor' },
+                                            { value: 'absent', label: '❌ Kelmagan' },
+                                            { value: 'late', label: '🟡 Kechikkan' },
+                                        ]}
+                                        className="mt-1"
+                                    />
                                 </div>
                             </div>
 

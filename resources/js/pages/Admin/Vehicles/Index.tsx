@@ -24,6 +24,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface VehicleMaintenance {
     id: number;
@@ -40,11 +41,12 @@ interface Vehicle {
     plate_number: string;
     model: string;
     year?: number;
-    fuel_type: 'petrol' | 'methane' | 'propane' | 'diesel' | 'electric';
-    status: 'active' | 'maintenance' | 'retired';
+    fuel_type: string;
+    status: string;
     default_instructor_id?: number;
     default_instructor?: { id: number; name: string };
     branch?: { id: number; name: string };
+    current_mileage?: number;
     maintenances?: VehicleMaintenance[];
 }
 
@@ -99,16 +101,34 @@ export default function VehiclesIndex({
         setShowModal(true);
     };
 
+    const openMaintenance = (v: Vehicle) => {
+        setMaintainingVehicle(v);
+        maintenanceForm.setData({
+            maintenance_type: 'Moy almashtirish (Oil change)',
+            cost: '',
+            performed_date: new Date().toISOString().split('T')[0],
+            next_due_date: '',
+            odometer: v.current_mileage ? String(v.current_mileage) : '',
+            notes: '',
+        });
+    };
+
     const openEdit = (v: Vehicle) => {
         setEditingVehicle(v);
+        let fuel = v.fuel_type;
+        if (fuel === 'methane') fuel = 'gas_methane';
+        if (fuel === 'propane') fuel = 'gas_propane';
+        let status = v.status;
+        if (status === 'retired') status = 'out_of_service';
+
         vehicleForm.setData({
             branch_id: v.branch?.id || branches[0]?.id || '',
             default_instructor_id: v.default_instructor_id ? String(v.default_instructor_id) : '',
             plate_number: v.plate_number,
             model: v.model,
             year: v.year || 2024,
-            fuel_type: v.fuel_type,
-            status: v.status,
+            fuel_type: fuel,
+            status: status,
             notes: '',
         });
         setShowModal(true);
@@ -205,7 +225,17 @@ export default function VehiclesIndex({
                                 </div>
                                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                                     <span>{t('vehicles.fuel', 'Yoqilg\'i')}:</span>
-                                    <span className="font-semibold uppercase">{v.fuel_type}</span>
+                                    <span className="font-semibold">
+                                        {v.fuel_type === 'gas_methane' || v.fuel_type === 'methane'
+                                            ? 'Metan Gaz (Methane)'
+                                            : v.fuel_type === 'gas_propane' || v.fuel_type === 'propane'
+                                            ? 'Propan Gaz (Propane)'
+                                            : v.fuel_type === 'diesel'
+                                            ? 'Dizel'
+                                            : v.fuel_type === 'electric'
+                                            ? 'Elektromobil'
+                                            : 'Benzin (Petrol)'}
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                                     <span>{t('vehicles.branch', 'Filial')}:</span>
@@ -230,7 +260,7 @@ export default function VehiclesIndex({
                             <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setMaintainingVehicle(v)}
+                                onClick={() => openMaintenance(v)}
                                 className="h-8 text-xs text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/60 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                             >
                                 <Wrench className="w-3.5 h-3.5 mr-1" />
@@ -286,61 +316,61 @@ export default function VehiclesIndex({
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="v_fuel">{t('vehicles.fuel', 'Yoqilg\'i turi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="v_fuel"
                                     value={vehicleForm.data.fuel_type}
-                                    onChange={(e) => vehicleForm.setData('fuel_type', e.target.value as any)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="petrol">Benzin (Petrol)</option>
-                                    <option value="methane">Metan Gaz (Methane)</option>
-                                    <option value="propane">Propan Gaz (Propane)</option>
-                                    <option value="diesel">Dizel (Diesel)</option>
-                                    <option value="electric">Elektromobil</option>
-                                </select>
+                                    onChange={(val) => vehicleForm.setData('fuel_type', val)}
+                                    options={[
+                                        { value: 'petrol', label: t('vehicles.fuel_petrol', 'Benzin (Petrol)') },
+                                        { value: 'gas_methane', label: t('vehicles.fuel_methane', 'Metan Gaz (Methane)') },
+                                        { value: 'gas_propane', label: t('vehicles.fuel_propane', 'Propan Gaz (Propane)') },
+                                        { value: 'diesel', label: t('vehicles.fuel_diesel', 'Dizel (Diesel)') },
+                                        { value: 'electric', label: t('vehicles.fuel_electric', 'Elektromobil') },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="v_inst">{t('vehicles.instructor', 'Asosiy Instruktor')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="v_inst"
                                     value={vehicleForm.data.default_instructor_id}
-                                    onChange={(e) => vehicleForm.setData('default_instructor_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="">{t('common.not_assigned', 'Biriktirilmagan')}</option>
-                                    {instructors.map((ins) => (
-                                        <option key={ins.id} value={ins.id}>{ins.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => vehicleForm.setData('default_instructor_id', val ? String(val) : '')}
+                                    options={[
+                                        { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
+                                        ...instructors.map((ins) => ({ value: String(ins.id), label: ins.name })),
+                                    ]}
+                                    placeholder={t('common.not_assigned', 'Biriktirilmagan')}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="v_branch">{t('vehicles.branch', 'Filial')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="v_branch"
                                     value={vehicleForm.data.branch_id}
-                                    onChange={(e) => vehicleForm.setData('branch_id', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    {branches.map((b) => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => vehicleForm.setData('branch_id', val ? String(val) : '')}
+                                    options={branches.map((b) => ({ value: String(b.id), label: b.name }))}
+                                    placeholder={t('branches.branch', 'Filial')}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="v_status">{t('vehicles.status', 'Holat')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="v_status"
                                     value={vehicleForm.data.status}
-                                    onChange={(e) => vehicleForm.setData('status', e.target.value as any)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="active">Faol</option>
-                                    <option value="maintenance">Ta'mirda / Texnik ko'rikda</option>
-                                    <option value="retired">Hisobdan chiqarilgan</option>
-                                </select>
+                                    onChange={(val) => vehicleForm.setData('status', val)}
+                                    options={[
+                                        { value: 'active', label: t('vehicles.status_active', 'Faol') },
+                                        { value: 'maintenance', label: t('vehicles.status_maintenance', "Ta'mirda / Texnik ko'rikda") },
+                                        { value: 'out_of_service', label: t('vehicles.status_retired', 'Hisobdan chiqarilgan') },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 
@@ -370,20 +400,21 @@ export default function VehiclesIndex({
 
                             <div>
                                 <Label htmlFor="m_type">{t('vehicles.maintenance_type', 'Xizmat Turi')}</Label>
-                                <select
+                                <SearchableSelect
                                     id="m_type"
                                     value={maintenanceForm.data.maintenance_type}
-                                    onChange={(e) => maintenanceForm.setData('maintenance_type', e.target.value)}
-                                    className="w-full h-9 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-xs mt-1"
-                                >
-                                    <option value="Moy almashtirish (Oil change)">Moy almashtirish (Oil change)</option>
-                                    <option value="Gaz baloni tekshiruvi (Methane inspection)">Gaz baloni tekshiruvi</option>
-                                    <option value="Sug'urta (Insurance)">Sug'urta rasmiylashtirish</option>
-                                    <option value="Texnik ko'rik (Vehicle inspection)">Davlat texnik ko'rigi</option>
-                                    <option value="Shina almashtirish (Tire change)">Shina almashtirish</option>
-                                    <option value="Tormoz tizimi ta'miri (Brakes)">Tormoz tizimi ta'miri</option>
-                                    <option value="Boshqa ta'mir">Boshqa ta'mir</option>
-                                </select>
+                                    onChange={(val) => maintenanceForm.setData('maintenance_type', String(val))}
+                                    options={[
+                                        { value: 'Moy almashtirish (Oil change)', label: 'Moy almashtirish (Oil change)' },
+                                        { value: 'Gaz baloni tekshiruvi (Methane inspection)', label: 'Gaz baloni tekshiruvi' },
+                                        { value: "Sug'urta (Insurance)", label: "Sug'urta rasmiylashtirish" },
+                                        { value: "Texnik ko'rik (Vehicle inspection)", label: "Davlat texnik ko'rigi" },
+                                        { value: 'Shina almashtirish (Tire change)', label: 'Shina almashtirish' },
+                                        { value: "Tormoz tizimi ta'miri (Brakes)", label: "Tormoz tizimi ta'miri" },
+                                        { value: "Boshqa ta'mir", label: "Boshqa ta'mir" },
+                                    ]}
+                                    className="mt-1"
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">

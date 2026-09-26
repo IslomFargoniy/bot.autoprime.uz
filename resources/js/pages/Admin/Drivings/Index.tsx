@@ -469,19 +469,22 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                 <div className="grid gap-4 py-4 mt-2">
                                     <div className="space-y-2">
                                         <Label>{t('common.status', 'Holati')}</Label>
-                                        <select
-                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                        <SearchableSelect
                                             value={status}
-                                            onChange={(e) => {
-                                                setStatus(e.target.value);
-                                                applyFilters(search, e.target.value, instructorId, fromDate, toDate, perPage);
+                                            onChange={(val) => {
+                                                const nextVal = val ? String(val) : '';
+                                                setStatus(nextVal);
+                                                applyFilters(search, nextVal, instructorId, fromDate, toDate, perPage);
                                             }}
-                                        >
-                                            <option value="">{t('common.all_statuses', 'Barcha holatlar')}</option>
-                                            <option value="scheduled">{t('status.scheduled', 'Rejada')}</option>
-                                            <option value="completed">{t('status.completed', 'Tugagan')}</option>
-                                            <option value="cancelled">{t('status.cancelled', 'Bekor qilingan')}</option>
-                                        </select>
+                                            options={[
+                                                { value: '', label: t('common.all_statuses', 'Barcha holatlar') },
+                                                { value: 'scheduled', label: t('status.scheduled', 'Rejada') },
+                                                { value: 'completed', label: t('status.completed', 'Tugagan') },
+                                                { value: 'cancelled', label: t('status.cancelled', 'Bekor qilingan') },
+                                            ]}
+                                            placeholder={t('common.all_statuses', 'Barcha holatlar')}
+                                            triggerClassName="h-10 text-sm"
+                                        />
                                     </div>
 
                                     {!isInstructor && (
@@ -547,34 +550,40 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
                     {/* Filters (Desktop Only) */}
                     <div className="hidden md:flex flex-wrap items-center gap-2">
-                        <select
-                            className="flex h-10 w-full md:w-36 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <SearchableSelect
                             value={status}
-                            onChange={(e) => {
-                                setStatus(e.target.value);
-                                applyFilters(search, e.target.value, instructorId, fromDate, toDate, perPage);
+                            onChange={(val) => {
+                                const nextVal = val ? String(val) : '';
+                                setStatus(nextVal);
+                                applyFilters(search, nextVal, instructorId, fromDate, toDate, perPage);
                             }}
-                        >
-                            <option value="">{t('common.all_statuses', 'Barcha holatlar')}</option>
-                            <option value="scheduled">{t('status.scheduled', 'Rejada')}</option>
-                            <option value="completed">{t('status.completed', 'Tugagan')}</option>
-                            <option value="cancelled">{t('status.cancelled', 'Bekor qilingan')}</option>
-                        </select>
+                            options={[
+                                { value: '', label: t('common.all_statuses', 'Barcha holatlar') },
+                                { value: 'scheduled', label: t('status.scheduled', 'Rejada') },
+                                { value: 'completed', label: t('status.completed', 'Tugagan') },
+                                { value: 'cancelled', label: t('status.cancelled', 'Bekor qilingan') },
+                            ]}
+                            placeholder={t('common.all_statuses', 'Barcha holatlar')}
+                            className="w-44"
+                            triggerClassName="h-10 text-sm"
+                        />
 
                         {!isInstructor && (
-                            <select
-                                className="flex h-10 w-full md:w-44 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            <SearchableSelect
                                 value={instructorId}
-                                onChange={(e) => {
-                                    setInstructorId(e.target.value);
-                                    applyFilters(search, status, e.target.value, fromDate, toDate, perPage);
+                                onChange={(val) => {
+                                    const nextVal = val ? String(val) : '';
+                                    setInstructorId(nextVal);
+                                    applyFilters(search, status, nextVal, fromDate, toDate, perPage);
                                 }}
-                            >
-                                <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                                {instructors.map((ins) => (
-                                    <option key={ins.id} value={ins.id}>{ins.name}</option>
-                                ))}
-                            </select>
+                                options={[
+                                    { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                    ...instructors.map((ins) => ({ value: ins.id, label: ins.name })),
+                                ]}
+                                placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                                className="w-52"
+                                triggerClassName="h-10 text-sm"
+                            />
                         )}
 
                         <DatePicker
