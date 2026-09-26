@@ -55,12 +55,17 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        tabIndex={-1}
         onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          onOpenAutoFocus?.(e);
+          if (onOpenAutoFocus) {
+            onOpenAutoFocus(e);
+          } else {
+            e.preventDefault();
+            (e.currentTarget as HTMLElement)?.focus();
+          }
         }}
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-[92vw] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl border p-5 sm:p-6 shadow-xl duration-200 max-h-[85vh] overflow-y-auto",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-[92vw] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl border p-5 sm:p-6 shadow-xl duration-200 max-h-[85vh] overflow-y-auto outline-none",
           className
         )}
         {...props}
