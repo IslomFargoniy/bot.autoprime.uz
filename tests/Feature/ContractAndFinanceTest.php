@@ -6,6 +6,7 @@ use App\Models\CashRegisterType;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Course;
+use App\Models\Expense;
 use App\Models\Group;
 use App\Models\LessonSession;
 use App\Models\Payment;
@@ -217,7 +218,7 @@ test('paying salary creates finance expense and deducts cash register balance', 
     $cashRegister->refresh();
     expect((float) $cashRegister->balance)->toEqual(7000000.0);
 
-    $expense = \App\Models\Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
+    $expense = Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
     expect($expense)->not->toBeNull()
         ->and((float) $expense->amount)->toEqual(3000000.0)
         ->and($expense->recipient)->toContain($employee->full_name);
@@ -296,7 +297,7 @@ test('contract refund creates refund payment, expense, decrements balance, and u
     expect($refundPayment)->not->toBeNull()
         ->and((float) $refundPayment->amount)->toEqual(1500000.0);
 
-    $expense = \App\Models\Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
+    $expense = Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
     expect($expense)->not->toBeNull()
         ->and((float) $expense->amount)->toEqual(1500000.0)
         ->and($expense->recipient)->toContain($student->full_name);
