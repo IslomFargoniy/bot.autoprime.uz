@@ -35,6 +35,7 @@ interface CashRegister {
     type?: { id: number; code: string; name: string };
     branch?: { id: number; name: string };
     is_active: boolean;
+    open_shift?: CashShift | null;
 }
 
 interface Payment {
@@ -151,12 +152,51 @@ export default function FinanceIndex({
     });
 
     // Shift Form
+    const initialRegister = cashRegisters[0];
+    const initialHasOpen = Boolean(initialRegister?.open_shift);
     const shiftForm = useForm({
-        cash_register_id: cashRegisters[0]?.id || '',
-        action: 'open',
-        opening_balance: '',
-        closing_balance: '',
+        cash_register_id: initialRegister?.id || '',
+        action: initialHasOpen ? 'close' : 'open',
+        opening_balance: initialHasOpen ? '' : String(initialRegister?.balance || 0),
+        closing_balance: initialHasOpen ? String(initialRegister?.balance || 0) : '',
+        note: '',
     });
+
+    const openShiftForRegister = (register: CashRegister) => {
+        const hasOpen = Boolean(register.open_shift);
+        shiftForm.setData({
+            cash_register_id: register.id,
+            action: hasOpen ? 'close' : 'open',
+            opening_balance: hasOpen ? '' : String(register.balance || 0),
+            closing_balance: hasOpen ? String(register.balance || 0) : '',
+            note: '',
+        });
+        setShowShiftModal(true);
+    };
+
+    const handleRegisterChange = (val: string | number) => {
+        const regId = Number(val);
+        const reg = cashRegisters.find((r) => r.id === regId);
+        const hasOpen = Boolean(reg?.open_shift);
+        shiftForm.setData({
+            ...shiftForm.data,
+            cash_register_id: regId,
+            action: hasOpen ? 'close' : 'open',
+            opening_balance: hasOpen ? '' : String(reg?.balance || 0),
+            closing_balance: hasOpen ? String(reg?.balance || 0) : '',
+        });
+    };
+
+    const handleActionChange = (actionVal: string | number) => {
+        const action = String(actionVal);
+        const reg = cashRegisters.find((r) => r.id === Number(shiftForm.data.cash_register_id));
+        shiftForm.setData({
+            ...shiftForm.data,
+            action,
+            opening_balance: action === 'open' ? String(reg?.balance || 0) : '',
+            closing_balance: action === 'close' ? String(reg?.balance || 0) : '',
+        });
+    };
 
     const handlePaymentSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -265,21 +305,50 @@ export default function FinanceIndex({
                 {cashRegisters.map((reg) => (
                     <div
                         key={reg.id}
-                        className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex items-center justify-between"
+                        className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
                     >
-                        <div>
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
-                                <span>{reg.type?.name || 'Kassa'}</span>
-                                {reg.branch && <span>• {reg.branch.name}</span>}
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                    {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
+                                    <span>{reg.type?.name || 'Kassa'}</span>
+                                    {reg.branch && <span>• {reg.branch.name}</span>}
+                                </div>
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{reg.name}</h3>
+                                <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                                    {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
+                                </p>
                             </div>
-                            <h3 className="font-bold text-base text-gray-900 dark:text-white">{reg.name}</h3>
-                            <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                                {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
-                            </p>
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center font-bold">
+                                <Wallet className="w-5 h-5" />
+                            </div>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center font-bold">
-                            <Wallet className="w-5 h-5" />
+
+                        {/* Shift Status pill */}
+                        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700/60 text-xs">
+                            {reg.open_shift ? (
+                                <button
+                                    type="button"
+                                    onClick={() => openShiftForRegister(reg)}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 transition-colors"
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    {t('finance.shift_status_open', 'Smena ochiq')}
+                                    <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">({t('finance.close_shift_button', 'Yopish')})</span>
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => openShiftForRegister(reg)}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
+                                >
+                                    <Unlock className="w-3 h-3 text-gray-500" />
+                                    {t('finance.open_shift_button', 'Smena ochish')}
+                                </button>
+                            )}
+                            <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                                {reg.open_shift?.opened_by?.name ? `👤 ${reg.open_shift.opened_by.name}` : ''}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -742,63 +811,134 @@ export default function FinanceIndex({
             <Dialog open={showShiftModal} onOpenChange={setShowShiftModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('finance.shift_title', 'Kassa Smenasi (Ochish / Yopish)')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('finance.shift_title', 'Kassa Smenasi (Ochish / Yopish)')}
+                        </DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleShiftSubmit} className="space-y-4 text-xs">
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <Label htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
-                                <SearchableSelect
-                                    id="sh_register"
-                                    value={shiftForm.data.cash_register_id}
-                                    onChange={(val) => shiftForm.setData('cash_register_id', val)}
-                                    options={cashRegisters.map((r) => ({ value: r.id, label: r.name }))}
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
-                                <SearchableSelect
-                                    id="sh_action"
-                                    value={shiftForm.data.action}
-                                    onChange={(val) => shiftForm.setData('action', val)}
-                                    options={[
-                                        { value: 'open', label: '🔓 Smenani Ochish' },
-                                        { value: 'close', label: '🔒 Smenani Yopish' },
-                                    ]}
-                                    className="mt-1"
-                                />
-                            </div>
-                        </div>
 
-                        <div>
-                            <Label htmlFor="sh_balance">
-                                {shiftForm.data.action === 'open' ? t('finance.opening_balance', 'Boshlang\'ich qoldiq (UZS)') : t('finance.closing_balance', 'Yopilish qoldig\'i (UZS)')}
-                            </Label>
-                            <Input
-                                id="sh_balance"
-                                type="number"
-                                value={shiftForm.data.action === 'open' ? shiftForm.data.opening_balance : shiftForm.data.closing_balance}
-                                onChange={(e) => {
-                                    if (shiftForm.data.action === 'open') {
-                                        shiftForm.setData('opening_balance', e.target.value);
-                                    } else {
-                                        shiftForm.setData('closing_balance', e.target.value);
-                                    }
-                                }}
-                                className="mt-1"
-                            />
-                        </div>
+                    {/* Explanatory banner */}
+                    <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-lg p-3 text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
+                        <span className="font-semibold">{t('finance.shift_what_is', 'Kassa smenasi nima?')}:</span>{' '}
+                        {t('finance.shift_explanation', "Kassir ish kunini boshlaganda smena ochadi va kun yakunida smenani yopadi. Bu davrda qancha pul kirim va chiqim bo'lgani aniq hisoblab boriladi.")}
+                    </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
-                            <Button type="button" variant="outline" onClick={() => setShowShiftModal(false)}>
-                                {t('common.cancel', 'Bekor qilish')}
-                            </Button>
-                            <Button type="submit" disabled={shiftForm.processing}>
-                                {t('common.confirm', 'Tasdiqlash')}
-                            </Button>
-                        </div>
-                    </form>
+                    {(() => {
+                        const selectedRegister = cashRegisters.find((r) => r.id === Number(shiftForm.data.cash_register_id)) || cashRegisters[0];
+                        return (
+                            <form onSubmit={handleShiftSubmit} className="space-y-4 text-xs">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
+                                        <SearchableSelect
+                                            id="sh_register"
+                                            value={shiftForm.data.cash_register_id}
+                                            onChange={handleRegisterChange}
+                                            options={cashRegisters.map((r) => ({
+                                                value: r.id,
+                                                label: r.name,
+                                                sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
+                                            }))}
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
+                                        <SearchableSelect
+                                            id="sh_action"
+                                            value={shiftForm.data.action}
+                                            onChange={handleActionChange}
+                                            options={[
+                                                { value: 'open', label: t('finance.shift_open_action', '🔓 Smenani Ochish') },
+                                                { value: 'close', label: t('finance.shift_close_action', '🔒 Smenani Yopish') },
+                                            ]}
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Selected Register Status Info */}
+                                {selectedRegister && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-200 dark:border-gray-700 space-y-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-500 dark:text-gray-400">{t('finance.current_register_balance', 'Hozirgi kassa balansi')}:</span>
+                                            <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                                                {Number(selectedRegister.balance).toLocaleString('uz-UZ')} UZS
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-700/60">
+                                            <span className="text-gray-500 dark:text-gray-400">{t('finance.status', 'Holat')}:</span>
+                                            {selectedRegister.open_shift ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                    {t('finance.shift_status_open', 'Smena ochiq')}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                    {t('finance.shift_status_closed', 'Smena yopiq (ochilmagan)')}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {selectedRegister.open_shift && (
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                                {t('finance.shift_opened_by_at', {
+                                                    time: selectedRegister.open_shift.opened_at,
+                                                    name: selectedRegister.open_shift.opened_by?.name || '-',
+                                                })}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div>
+                                    <Label htmlFor="sh_balance">
+                                        {shiftForm.data.action === 'open'
+                                            ? t('finance.shift_opening_balance', "Boshlang'ich kassa qoldig'i (UZS)")
+                                            : t('finance.shift_closing_balance', "Yakuniy kassa qoldig'i (UZS)")}
+                                    </Label>
+                                    <Input
+                                        id="sh_balance"
+                                        type="number"
+                                        value={shiftForm.data.action === 'open' ? shiftForm.data.opening_balance : shiftForm.data.closing_balance}
+                                        onChange={(e) => {
+                                            if (shiftForm.data.action === 'open') {
+                                                shiftForm.setData('opening_balance', e.target.value);
+                                            } else {
+                                                shiftForm.setData('closing_balance', e.target.value);
+                                            }
+                                        }}
+                                        placeholder={String(selectedRegister?.balance || '0')}
+                                        className="mt-1"
+                                    />
+                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                                        {shiftForm.data.action === 'open'
+                                            ? t('finance.shift_open_hint', "Kassani qabul qilgandagi naqd/hisob qoldig'ini kiriting.")
+                                            : t('finance.shift_close_hint', "Smena yakunida kassadagi haqiqiy qoldiqni kiriting. Kirim va chiqimlar avtomatik hisoblanadi.")}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="sh_note">{t('finance.notes', 'Izoh')}</Label>
+                                    <Input
+                                        id="sh_note"
+                                        value={shiftForm.data.note}
+                                        onChange={(e) => shiftForm.setData('note', e.target.value)}
+                                        placeholder={t('finance.notes_placeholder', 'Qo\'shimcha izoh yoki tafsilotlar...')}
+                                        className="mt-1"
+                                    />
+                                </div>
+
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button type="button" variant="outline" onClick={() => setShowShiftModal(false)}>
+                                        {t('common.cancel', 'Bekor qilish')}
+                                    </Button>
+                                    <Button type="submit" disabled={shiftForm.processing}>
+                                        {t('common.confirm', 'Tasdiqlash')}
+                                    </Button>
+                                </div>
+                            </form>
+                        );
+                    })()}
                 </DialogContent>
             </Dialog>
         </div>

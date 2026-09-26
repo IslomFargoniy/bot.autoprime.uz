@@ -29,7 +29,7 @@ class FinanceController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
         // 1. Cash Registers
-        $registersQuery = CashRegister::with(['branch', 'type'])->orderBy('name');
+        $registersQuery = CashRegister::with(['branch', 'type', 'openShift.openedBy'])->orderBy('name');
         if ($targetBranchId) {
             $registersQuery->where(function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId)->orWhereNull('branch_id');
@@ -281,26 +281,37 @@ class FinanceController extends Controller
             'action' => 'required|in:open,close',
             'opening_balance' => 'nullable|numeric|min:0',
             'closing_balance' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string|max:500',
         ]);
 
         $reg = CashRegister::findOrFail($validated['cash_register_id']);
 
         if ($validated['action'] === 'open') {
+            $existingShift = CashShift::where('cash_register_id', $reg->id)->where('status', 'open')->first();
+            if ($existingShift) {
+                return redirect()->back()->withErrors([
+                    'shift' => 'Ushbu kassa uchun smena allaqachon ochilgan. Yangi smena ochishdan oldin amaldagi smenani yoping.',
+                ]);
+            }
+
             CashShift::create([
                 'cash_register_id' => $reg->id,
                 'user_id' => $request->user()->id,
                 'opening_balance' => $validated['opening_balance'] ?? $reg->balance,
                 'opened_at' => now(),
                 'status' => 'open',
+                'note' => $validated['note'] ?? null,
             ]);
 
-            return redirect()->back()->with('success', 'Kassa smenasi ochildi.');
+            return redirect()->back()->with('success', 'Kassa smenasi muvaffaqiyatli ochildi.');
         }
 
         // Close
         $openShift = CashShift::where('cash_register_id', $reg->id)->where('status', 'open')->latest()->first();
         if (! $openShift) {
-            return redirect()->back()->withErrors(['shift' => 'Ochiq smena topilmadi.']);
+            return redirect()->back()->withErrors([
+                'shift' => 'Ushbu kassa uchun ochiq smena topilmadi. Avval smenani oching.',
+            ]);
         }
 
         $totalIncome = Payment::where('cash_register_id', $reg->id)
@@ -317,9 +328,10 @@ class FinanceController extends Controller
             'total_expense' => $totalExpense,
             'closed_at' => now(),
             'status' => 'closed',
+            'note' => $validated['note'] ?? $openShift->note,
         ]);
 
-        return redirect()->back()->with('success', 'Kassa smenasi yopildi.');
+        return redirect()->back()->with('success', 'Kassa smenasi muvaffaqiyatli yopildi.');
     }
 
     /**
