@@ -148,6 +148,62 @@ export default function SalariesIndex({
         });
     };
 
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case 'base_salary':
+                return t('salaries.type_base_salary', 'Oklad (Asosiy oylik)');
+            case 'driving_hourly':
+            case 'driving_hourly_rate':
+                return t('salaries.type_driving_hourly_rate', 'Amaliy haydash (Soatbay)');
+            case 'lesson_rate':
+                return t('salaries.type_lesson_rate', 'Nazariya darsi (Darsbay)');
+            case 'bonus_kpi':
+            case 'kpi':
+                return t('salaries.type_bonus_kpi', 'KPI Ustama');
+            case 'bonus':
+                return t('salaries.type_bonus', 'Bonus');
+            case 'penalty':
+            case 'fine':
+                return t('salaries.type_penalty', 'Jarima');
+            case 'advance':
+                return t('salaries.type_advance', 'Avans');
+            default:
+                return t(`salaries.type_${type}`, type);
+        }
+    };
+
+    const getRoleLabel = (role?: string) => {
+        if (!role) return '-';
+        switch (role) {
+            case 'instructor':
+                return t('salaries.role_instructor', 'Instruktor');
+            case 'teacher':
+                return t('salaries.role_teacher', "O'qituvchi");
+            case 'admin':
+                return t('salaries.role_admin', 'Administrator');
+            case 'superadmin':
+                return t('salaries.role_superadmin', 'Superadmin');
+            case 'accountant':
+                return t('salaries.role_accountant', 'Hisobchi');
+            default:
+                return t(`salaries.role_${role}`, role);
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'paid':
+                return t('salaries.status_paid', "To'langan");
+            case 'calculated':
+            case 'pending':
+            case 'accrued':
+            case 'draft':
+                return t('salaries.status_calculated', 'Hisoblangan');
+            default:
+                return t(`salaries.status_${status}`, status);
+        }
+    };
+
     return (
         <div className="p-6">
             <Head title={t('salaries.title', 'Xodimlar Oylik Hisob-kitobi')} />
@@ -203,11 +259,11 @@ export default function SalariesIndex({
                                         {sal.user?.name}
                                     </TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">
-                                        {sal.user?.role}
+                                        {getRoleLabel(sal.user?.role)}
                                     </TableCell>
                                     <TableCell>
                                         <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
-                                            {sal.type}
+                                            {getTypeLabel(sal.type)}
                                         </span>
                                     </TableCell>
                                     <TableCell className={`font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
@@ -222,7 +278,7 @@ export default function SalariesIndex({
                                                 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                                                 : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                                         }`}>
-                                            {sal.status}
+                                            {getStatusLabel(sal.status)}
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400 max-w-xs truncate">
@@ -264,21 +320,21 @@ export default function SalariesIndex({
                             <div className="flex items-start justify-between gap-2">
                                 <div>
                                     <div className="font-semibold text-sm text-foreground">{sal.user?.name}</div>
-                                    <div className="text-xs text-muted-foreground">{sal.user?.role}</div>
+                                    <div className="text-xs text-muted-foreground">{getRoleLabel(sal.user?.role)}</div>
                                 </div>
                                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${
                                     sal.status === 'paid'
                                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                                         : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                                 }`}>
-                                    {sal.status}
+                                    {getStatusLabel(sal.status)}
                                 </span>
                             </div>
 
                             {/* Type & Details */}
                             <div className="flex items-center gap-2 text-xs flex-wrap">
                                 <span className="px-2 py-0.5 rounded bg-muted font-medium">
-                                    {sal.type}
+                                    {getTypeLabel(sal.type)}
                                 </span>
                                 {sal.description && (
                                     <span className="text-muted-foreground line-clamp-1">
@@ -343,7 +399,7 @@ export default function SalariesIndex({
                                 options={employees.map((emp) => ({
                                     value: emp.id,
                                     label: emp.name,
-                                    sublabel: emp.role,
+                                    sublabel: getRoleLabel(emp.role),
                                 }))}
                                 placeholder={t('salaries.select_employee', '-- Xodimni tanlang --')}
                                 className="mt-1"
@@ -358,10 +414,10 @@ export default function SalariesIndex({
                                     value={adjustForm.data.type}
                                     onChange={(val) => adjustForm.setData('type', val)}
                                     options={[
-                                        { value: 'bonus', label: '🎁 Bonus' },
-                                        { value: 'kpi', label: '⭐ KPI Ustama' },
-                                        { value: 'fine', label: '⚠️ Jarima (Ushlab qolish)' },
-                                        { value: 'advance', label: '💵 Avans (Oldindan to\'lov)' },
+                                        { value: 'bonus', label: `🎁 ${t('salaries.type_bonus', 'Bonus')}` },
+                                        { value: 'kpi', label: `⭐ ${t('salaries.type_bonus_kpi', 'KPI Ustama')}` },
+                                        { value: 'fine', label: `⚠️ ${t('salaries.type_penalty', 'Jarima (Ushlab qolish)')}` },
+                                        { value: 'advance', label: `💵 ${t('salaries.type_advance', 'Avans (Oldindan to\'lov)')}` },
                                     ]}
                                     className="mt-1"
                                 />
@@ -440,9 +496,9 @@ export default function SalariesIndex({
                                         value={payForm.data.payment_method}
                                         onChange={(val) => payForm.setData('payment_method', String(val))}
                                         options={[
-                                            { value: 'cash', label: 'Naqd pul' },
-                                            { value: 'card_click', label: 'Karta / Click' },
-                                            { value: 'bank_transfer', label: 'Bank hisobiga' },
+                                            { value: 'cash', label: `💵 ${t('finance.method_cash', 'Naqd pul')}` },
+                                            { value: 'card_click', label: `💳 ${t('finance.method_card_click', 'Karta / Click')}` },
+                                            { value: 'bank_transfer', label: `🏦 ${t('finance.method_bank_transfer', "Bank hisobiga")}` },
                                         ]}
                                         className="mt-1"
                                     />

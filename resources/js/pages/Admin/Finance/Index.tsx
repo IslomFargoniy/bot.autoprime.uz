@@ -201,6 +201,27 @@ export default function FinanceIndex({
         notes: '',
     });
 
+    const getMethodLabel = (method: string) => {
+        switch (method) {
+            case 'cash':
+                return t('finance.method_cash', 'Naqd pul');
+            case 'card_terminal':
+                return t('finance.method_card_terminal', 'Terminal / Karta');
+            case 'card_click':
+                return t('finance.method_card_click', 'Karta / Click / Payme');
+            case 'bank_transfer':
+                return t('finance.method_bank_transfer', "Bank o'tkazmasi");
+            case 'click':
+                return t('finance.method_click', 'Click');
+            case 'payme':
+                return t('finance.method_payme', 'Payme');
+            case 'other':
+                return t('finance.method_other', 'Boshqa');
+            default:
+                return t(`finance.method_${method}`, method);
+        }
+    };
+
     const openSweepModal = (specificRegId?: number) => {
         // Collect all branch registers (branch_id != null)
         const branchRegs = cashRegisters.filter((r) => r.branch_id !== null && r.branch_id !== undefined);
@@ -919,7 +940,7 @@ export default function FinanceIndex({
                                                 </TableCell>
                                                 <TableCell className="whitespace-nowrap">
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                                        {p.payment_method}
+                                                        {getMethodLabel(p.payment_method)}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.cash_register?.name}</TableCell>
@@ -975,7 +996,7 @@ export default function FinanceIndex({
                                                 +{Number(p.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
                                             </div>
                                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
-                                                {p.payment_method}
+                                                {getMethodLabel(p.payment_method)}
                                             </span>
                                         </div>
                                     </div>
@@ -1406,9 +1427,9 @@ export default function FinanceIndex({
                                         });
                                     }}
                                     options={[
-                                        { value: 'cash', label: '💵 Naqd pul' },
-                                        { value: 'card_click', label: '💳 Karta / Click / Payme' },
-                                        { value: 'bank_transfer', label: '🏦 Bank o\'tkazmasi' },
+                                        { value: 'cash', label: `💵 ${t('finance.method_cash', 'Naqd pul')}` },
+                                        { value: 'card_click', label: `💳 ${t('finance.method_card_click', 'Karta / Click / Payme')}` },
+                                        { value: 'bank_transfer', label: `🏦 ${t('finance.method_bank_transfer', "Bank o'tkazmasi")}` },
                                     ]}
                                     className="mt-1"
                                 />
