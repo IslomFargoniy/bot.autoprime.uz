@@ -71,7 +71,7 @@ class CertificateController extends Controller
             $drivingOk = $completedDrivings >= $requiredDriving;
 
             // Internal exam pass
-            $passedExam = $student->attempts()->where('is_passed', true)->exists();
+            $passedExam = $student->hasPassedMockExam();
 
             $isEligible = $debtOk && $attendanceOk && $drivingOk && $passedExam;
 
@@ -149,7 +149,7 @@ class CertificateController extends Controller
             ]);
         }
 
-        $passedExam = $student->attempts()->where('is_passed', true)->exists();
+        $passedExam = $student->hasPassedMockExam();
         if (! $passedExam) {
             return redirect()->back()->withErrors([
                 'contract_id' => "O'quvchi ichki imtihondan (LMS test) muvaffaqiyatli o'tmagan.",

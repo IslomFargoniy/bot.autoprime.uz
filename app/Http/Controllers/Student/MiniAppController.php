@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\LessonSession;
 use App\Models\Student;
 use App\Models\Topic;
+use App\Services\MiniAppStudentResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,44 +15,11 @@ use Inertia\Response;
 
 class MiniAppController extends Controller
 {
-    /**
-     * Resolve student from Telegram initData, session, or request param.
-     */
     protected function resolveStudent(Request $request): ?Student
     {
-        $telegramId = null;
+        $student = MiniAppStudentResolver::resolve($request);
 
-        // 1. Check initData header, query or post body
-        $initData = $request->header('X-Telegram-Init-Data')
-            ?? $request->input('initData')
-            ?? $request->query('_auth')
-            ?? $request->session()->get('tg_init_data');
-
-        if ($initData) {
-            parse_str($initData, $parsedData);
-            if (isset($parsedData['user'])) {
-                $tgUser = json_decode($parsedData['user'], true);
-                $telegramId = $tgUser['id'] ?? null;
-            }
-        }
-
-        // 2. Check query param for local dev
-        if (! $telegramId && (app()->environment('local') || config('app.debug'))) {
-            $telegramId = $request->query('test_telegram_id');
-        }
-
-        // 3. Fallback to auth user if linked
-        if (! $telegramId && $request->user()) {
-            $telegramId = $request->user()->telegram_id;
-        }
-
-        if (! $telegramId) {
-            return null;
-        }
-
-        return Student::where('telegram_id', (string) $telegramId)
-            ->with(['branch', 'group.teacher', 'activeContract.contractType'])
-            ->first();
+        return $student?->load(['branch', 'group.teacher', 'activeContract.contractType']);
     }
 
     /**
@@ -98,7 +66,13 @@ class MiniAppController extends Controller
         }
 
         return Inertia::render('Student/MiniApp', [
-            'student' => $student,
+            'student' => $student ? [
+                'id' => $student->id,
+                'full_name' => $student->full_name,
+                'phone' => $student->phone,
+                'photo_url' => $student->photo_url,
+                'branch' => $student->branch ? ['name' => $student->branch->name] : null,
+            ] : null,
             'contract' => $contract,
             'group' => $group ? [
                 'id' => $group->id,
@@ -148,11 +122,6 @@ class MiniAppController extends Controller
         }
 
         $student = $this->resolveStudent($request);
-
-        // Fallback for direct student_id if authorized in test or web
-        if (! $student && $request->filled('student_id')) {
-            $student = Student::find($request->input('student_id'));
-        }
 
         if (! $student) {
             return response()->json([

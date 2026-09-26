@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { router } from '@inertiajs/react';
 import TMALayout from '@/layouts/tma-layout';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +20,7 @@ import {
     Car,
 } from 'lucide-react';
 import { TestQuiz } from '@/components/test-quiz';
+import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 
 
 interface StudentProps {
@@ -97,6 +99,20 @@ export default function MiniApp({
     const [scanStatus, setScanStatus] = useState<{ loading: boolean; message?: string; success?: boolean } | null>(null);
     const [manualToken, setManualToken] = useState('');
     const [showManualModal, setShowManualModal] = useState(false);
+    const hasRequestedIdentity = useRef(false);
+
+    // The bot opens /mini-app without identity; initData only exists client-side,
+    // so reload once with the signed header to let the server recognise the student.
+    useEffect(() => {
+        const headers = telegramInitDataHeaders();
+
+        if (student || hasRequestedIdentity.current || !headers['X-Telegram-Init-Data']) {
+            return;
+        }
+
+        hasRequestedIdentity.current = true;
+        router.reload({ headers });
+    }, [student]);
 
     const handleQrScan = () => {
         const tgWindow = window as any;
@@ -130,7 +146,6 @@ export default function MiniApp({
                 },
                 body: JSON.stringify({
                     qr_token: token.trim(),
-                    student_id: student?.id,
                     initData: tgInitData,
                 }),
             });
@@ -503,7 +518,7 @@ export default function MiniApp({
             {/* Tab: Tests */}
             {activeTab === 'tests' && (
                 <div className="space-y-4">
-                    <TestQuiz studentId={student?.id} />
+                    <TestQuiz />
                 </div>
             )}
 

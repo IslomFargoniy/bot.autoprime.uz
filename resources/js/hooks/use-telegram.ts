@@ -10,6 +10,16 @@ export function isTelegramWebApp(): boolean {
 }
 
 /**
+ * Headers carrying the Telegram-signed initData, which the server verifies to
+ * identify the Mini App user. Empty outside Telegram.
+ */
+export function telegramInitDataHeaders(): Record<string, string> {
+    const initData = (window as any).Telegram?.WebApp?.initData;
+
+    return initData ? { 'X-Telegram-Init-Data': initData } : {};
+}
+
+/**
  * Telegram BackButton — ichki sahifalarda orqaga tugmasini ko'rsatish
  */
 export function useTelegramBackButton(backUrl?: string) {

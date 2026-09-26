@@ -188,6 +188,19 @@ class Student extends Model
         return $this->hasMany(Attempt::class);
     }
 
+    /**
+     * Whether the student passed the server-graded internal mock exam, which is
+     * the only attempt type that counts toward certificate eligibility.
+     */
+    public function hasPassedMockExam(): bool
+    {
+        return $this->attempts()
+            ->where('attempt_type', 'random_mock')
+            ->where('is_passed', true)
+            ->whereNotNull('finished_at')
+            ->exists();
+    }
+
     public function certificates(): HasMany
     {
         return $this->hasMany(Certificate::class);

@@ -441,14 +441,6 @@ class FinanceController extends Controller
     }
 
     /**
-     * Legacy toggleShift stub (no-op redirect).
-     */
-    public function toggleShift(): RedirectResponse
-    {
-        return redirect()->back()->with('success', 'Smenalar tizimi bekor qilingan.');
-    }
-
-    /**
      * Delete an expense and refund the money back to the cash register.
      */
     public function destroyExpense(Expense $expense): RedirectResponse

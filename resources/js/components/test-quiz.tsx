@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 import {
     Award,
     CheckCircle2,
@@ -85,11 +86,7 @@ interface RoadLine {
     description_uz?: string;
 }
 
-interface TestQuizProps {
-    studentId?: number;
-}
-
-export function TestQuiz({ studentId }: TestQuizProps) {
+export function TestQuiz() {
     const { t, i18n } = useTranslation();
     const currentLang = i18n.language || 'uz';
 
@@ -109,6 +106,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
     const [revealedQuestions, setRevealedQuestions] = useState<Record<number, boolean>>({});
     const [optimisticAnswerId, setOptimisticAnswerId] = useState<number | null>(null);
     const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
+    const [examAttemptId, setExamAttemptId] = useState<number | null>(null);
 
     // Settings inside Quiz
     const [fontSize, setFontSize] = useState<number>(15);
@@ -175,7 +173,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
 
     const fetchTickets = async () => {
         try {
-            const res = await fetch('/api/tests/tickets');
+            const res = await fetch('/api/tests/tickets', { headers: telegramInitDataHeaders() });
             const data = await res.json();
             if (data.success && data.tickets) {
                 setTickets(data.tickets);
@@ -187,7 +185,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
 
     const fetchSigns = async () => {
         try {
-            const res = await fetch('/api/tests/signs');
+            const res = await fetch('/api/tests/signs', { headers: telegramInitDataHeaders() });
             const data = await res.json();
             if (data.success) {
                 setSignCategories(data.categories || []);
@@ -200,7 +198,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch(`/api/tests/stats${studentId ? `?student_id=${studentId}` : ''}`);
+            const res = await fetch('/api/tests/stats', { headers: telegramInitDataHeaders() });
             const data = await res.json();
             if (data.success) {
                 setStats({
@@ -251,7 +249,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
     const startTicketExam = async (tkt: Ticket) => {
         setSelectedTicketForModal(null);
         try {
-            const res = await fetch(`/api/tests/ticket/${tkt.id}`);
+            const res = await fetch(`/api/tests/ticket/${tkt.id}`, { headers: telegramInitDataHeaders() });
             const data = await res.json();
             if (data.success && data.ticket?.questions?.length > 0) {
                 setQuestions(data.ticket.questions);
@@ -272,9 +270,10 @@ export function TestQuiz({ studentId }: TestQuizProps) {
     // Start Random Mock Exam (20 questions)
     const startMockExam = async () => {
         try {
-            const res = await fetch('/api/tests/exam');
+            const res = await fetch('/api/tests/exam', { headers: telegramInitDataHeaders() });
             const data = await res.json();
             if (data.success && data.questions?.length > 0) {
+                setExamAttemptId(data.attempt_id ?? null);
                 setQuestions(data.questions);
                 setActiveTicket(null);
                 setActiveQuizMode('exam');
@@ -415,7 +414,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
         const durationSeconds = 25 * 60 - timeLeft;
 
         const payload = {
-            student_id: studentId,
+            attempt_id: activeQuizMode === 'exam' ? examAttemptId : undefined,
             ticket_id: activeTicket?.id,
             attempt_type: activeQuizMode === 'exam' ? 'random_mock' : 'ticket_exam',
             duration_seconds: durationSeconds,
@@ -431,6 +430,7 @@ export function TestQuiz({ studentId }: TestQuizProps) {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
+                    ...telegramInitDataHeaders(),
                 },
                 body: JSON.stringify(payload),
             });

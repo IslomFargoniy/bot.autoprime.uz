@@ -8,47 +8,25 @@ use App\Models\AttemptAnswer;
 use App\Models\Question;
 use App\Models\RoadLine;
 use App\Models\SignCategory;
-use App\Models\Student;
 use App\Models\Ticket;
+use App\Services\MiniAppStudentResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StudentTestController extends Controller
 {
+    public const MOCK_EXAM_QUESTIONS = 20;
+
+    public const MOCK_EXAM_PASSING_SCORE = 18;
+
+    public const MOCK_EXAM_DURATION_MINUTES = 25;
+
     /**
-     * Resolve the current student from Telegram WebApp initData or Auth session.
+     * Seconds accepted after the exam time limit to absorb network latency.
      */
-    protected function resolveStudent(Request $request): ?Student
-    {
-        $telegramId = null;
-
-        $initData = $request->header('X-Telegram-Init-Data') ?: $request->input('initData');
-        if ($initData) {
-            parse_str($initData, $parsedData);
-            if (isset($parsedData['user'])) {
-                $tgUser = json_decode($parsedData['user'], true);
-                $telegramId = $tgUser['id'] ?? null;
-            }
-        }
-
-        if (! $telegramId && $request->user()) {
-            $telegramId = $request->user()->telegram_id;
-        }
-
-        if ($telegramId) {
-            $student = Student::where('telegram_id', $telegramId)->first();
-            if ($student) {
-                return $student;
-            }
-        }
-
-        $studentId = $request->input('student_id');
-        if ($studentId) {
-            return Student::find($studentId);
-        }
-
-        return null;
-    }
+    public const MOCK_EXAM_GRACE_SECONDS = 60;
 
     /**
      * Get all active tickets with question counts.
@@ -88,24 +66,47 @@ class StudentTestController extends Controller
     }
 
     /**
-     * Generate 20 random questions for internal mock exam.
+     * Start an internal mock exam: pick random questions and record them on a
+     * new attempt so the submission can only be graded against these questions.
      */
-    public function getMockExam(): JsonResponse
+    public function getMockExam(Request $request): JsonResponse
     {
+        $student = MiniAppStudentResolver::resolve($request);
+
         $questions = Question::where('is_active', true)
             ->with(['answers' => function ($ans) {
                 $ans->orderBy('order');
             }])
             ->inRandomOrder()
-            ->limit(20)
+            ->limit(self::MOCK_EXAM_QUESTIONS)
             ->get();
+
+        $attempt = DB::transaction(function () use ($student, $request, $questions) {
+            $attempt = Attempt::create([
+                'student_id' => $student?->id,
+                'user_id' => $request->user()?->id,
+                'attempt_type' => 'random_mock',
+                'total_questions' => $questions->count(),
+                'started_at' => now(),
+            ]);
+
+            foreach ($questions as $question) {
+                AttemptAnswer::create([
+                    'attempt_id' => $attempt->id,
+                    'question_id' => $question->id,
+                ]);
+            }
+
+            return $attempt;
+        });
 
         return response()->json([
             'success' => true,
+            'attempt_id' => $attempt->id,
             'exam_title' => 'Ichki Nazorat Imtihoni',
-            'duration_minutes' => 25,
-            'total_questions' => 20,
-            'passing_score' => 18,
+            'duration_minutes' => self::MOCK_EXAM_DURATION_MINUTES,
+            'total_questions' => self::MOCK_EXAM_QUESTIONS,
+            'passing_score' => self::MOCK_EXAM_PASSING_SCORE,
             'questions' => $questions,
         ]);
     }
@@ -116,103 +117,187 @@ class StudentTestController extends Controller
     public function submitAttempt(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'student_id' => 'nullable|integer',
-            'ticket_id' => 'nullable|exists:tickets,id',
+            'attempt_id' => 'required_if:attempt_type,random_mock,exam|nullable|integer',
+            'ticket_id' => 'required_if:attempt_type,ticket_exam,ticket|nullable|exists:tickets,id',
             'attempt_type' => 'required|in:ticket_exam,random_mock,marathon,mistakes,exam,ticket',
-            'duration_seconds' => 'nullable|integer',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.answer_id' => 'nullable|exists:answers,id',
+            'duration_seconds' => 'nullable|integer|min:0',
+            'answers' => 'required|array|max:200',
+            'answers.*.question_id' => 'required|integer',
+            'answers.*.answer_id' => 'nullable|integer',
         ]);
 
-        $student = $this->resolveStudent($request);
-        $studentId = $student?->id ?? $validated['student_id'] ?? null;
-        $userId = $request->user()?->id ?? null;
+        $attemptType = match ($validated['attempt_type']) {
+            'exam' => 'random_mock',
+            'ticket' => 'ticket_exam',
+            default => $validated['attempt_type'],
+        };
 
-        $userAnswers = $validated['answers'];
-        $totalQuestions = count($userAnswers);
-        $correctCount = 0;
-        $wrongCount = 0;
+        $student = MiniAppStudentResolver::resolve($request);
+
+        // First submitted answer per question wins; later duplicates are ignored.
+        $submittedAnswers = collect($validated['answers'])
+            ->unique('question_id')
+            ->mapWithKeys(fn (array $item) => [(int) $item['question_id'] => isset($item['answer_id']) ? (int) $item['answer_id'] : null]);
+
+        if ($attemptType === 'random_mock') {
+            return $this->submitMockExam($request, (int) $validated['attempt_id'], $student?->id, $submittedAnswers);
+        }
+
+        $questionIds = $attemptType === 'ticket_exam'
+            ? Question::where('ticket_id', $validated['ticket_id'])->where('is_active', true)->pluck('id')
+            : $submittedAnswers->keys();
+
+        $questions = Question::with('answers')->whereIn('id', $questionIds)->get();
+        $graded = $this->grade($questions, $submittedAnswers);
+        $duration = (int) ($validated['duration_seconds'] ?? 0);
+
+        $attempt = DB::transaction(function () use ($student, $request, $validated, $attemptType, $graded, $duration) {
+            $attempt = Attempt::create([
+                'student_id' => $student?->id,
+                'user_id' => $request->user()?->id,
+                'ticket_id' => $validated['ticket_id'] ?? null,
+                'attempt_type' => $attemptType,
+                'total_questions' => $graded['total'],
+                'correct_answers' => $graded['correct'],
+                'wrong_answers' => $graded['wrong'],
+                'score_percentage' => $graded['score'],
+                'is_passed' => $graded['score'] >= 90.0,
+                'started_at' => now()->subSeconds($duration),
+                'finished_at' => now(),
+                'duration_seconds' => $duration,
+            ]);
+
+            foreach ($graded['details'] as $detail) {
+                AttemptAnswer::create([
+                    'attempt_id' => $attempt->id,
+                    'question_id' => $detail['question_id'],
+                    'answer_id' => $detail['selected_answer_id'],
+                    'is_correct' => $detail['is_correct'],
+                    'answered_at' => now(),
+                ]);
+            }
+
+            return $attempt;
+        });
+
+        return $this->attemptResponse($attempt, $graded['details']);
+    }
+
+    /**
+     * Grade a served mock exam exactly once, against the questions stored on it.
+     *
+     * @param  Collection<int, int|null>  $submittedAnswers
+     */
+    private function submitMockExam(Request $request, int $attemptId, ?int $studentId, Collection $submittedAnswers): JsonResponse
+    {
+        $result = DB::transaction(function () use ($attemptId, $studentId, $submittedAnswers) {
+            $attempt = Attempt::where('id', $attemptId)
+                ->where('attempt_type', 'random_mock')
+                ->whereNull('finished_at')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $attempt || (int) $attempt->student_id !== (int) $studentId) {
+                return null;
+            }
+
+            $servedRows = $attempt->answers()->get();
+            $questions = Question::with('answers')->whereIn('id', $servedRows->pluck('question_id'))->get();
+            $graded = $this->grade($questions, $submittedAnswers);
+
+            $duration = (int) $attempt->started_at->diffInSeconds(now());
+            $withinTimeLimit = $duration <= self::MOCK_EXAM_DURATION_MINUTES * 60 + self::MOCK_EXAM_GRACE_SECONDS;
+
+            foreach ($graded['details'] as $detail) {
+                $servedRows->firstWhere('question_id', $detail['question_id'])?->update([
+                    'answer_id' => $detail['selected_answer_id'],
+                    'is_correct' => $detail['is_correct'],
+                    'answered_at' => $detail['selected_answer_id'] ? now() : null,
+                ]);
+            }
+
+            $attempt->update([
+                'total_questions' => $graded['total'],
+                'correct_answers' => $graded['correct'],
+                'wrong_answers' => $graded['wrong'],
+                'score_percentage' => $graded['score'],
+                'is_passed' => $withinTimeLimit && $graded['correct'] >= self::MOCK_EXAM_PASSING_SCORE,
+                'finished_at' => now(),
+                'duration_seconds' => $duration,
+            ]);
+
+            return ['attempt' => $attempt, 'details' => $graded['details']];
+        });
+
+        if (! $result) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Imtihon topilmadi yoki allaqachon topshirilgan.',
+            ], 422);
+        }
+
+        return $this->attemptResponse($result['attempt'], $result['details']);
+    }
+
+    /**
+     * Grade submitted answers against the given questions. A selected answer
+     * only counts when it belongs to its question; unanswered questions are wrong.
+     *
+     * @param  Collection<int, Question>  $questions
+     * @param  Collection<int, int|null>  $submittedAnswers
+     * @return array{total: int, correct: int, wrong: int, score: float, details: array<int, array<string, mixed>>}
+     */
+    private function grade(Collection $questions, Collection $submittedAnswers): array
+    {
         $details = [];
+        $correctCount = 0;
 
-        foreach ($userAnswers as $item) {
-            $questionId = $item['question_id'];
-            $selectedAnswerId = $item['answer_id'] ?? null;
+        foreach ($questions as $question) {
+            $selectedAnswerId = $submittedAnswers->get($question->id);
+            if ($selectedAnswerId && ! $question->answers->contains('id', $selectedAnswerId)) {
+                $selectedAnswerId = null;
+            }
 
-            $question = Question::with('answers')->find($questionId);
-            $correctAnswer = $question?->answers->firstWhere('is_correct', true);
-
-            $isCorrect = false;
-            if ($selectedAnswerId && $correctAnswer && $selectedAnswerId == $correctAnswer->id) {
-                $isCorrect = true;
+            $correctAnswer = $question->answers->firstWhere('is_correct', true);
+            $isCorrect = $selectedAnswerId !== null && $correctAnswer && $selectedAnswerId === $correctAnswer->id;
+            if ($isCorrect) {
                 $correctCount++;
-            } else {
-                $wrongCount++;
             }
 
             $details[] = [
-                'question_id' => $questionId,
+                'question_id' => $question->id,
                 'selected_answer_id' => $selectedAnswerId,
                 'correct_answer_id' => $correctAnswer?->id,
                 'is_correct' => $isCorrect,
-                'description_uz' => $question?->description_uz,
+                'description_uz' => $question->description_uz,
             ];
         }
 
-        $scorePercentage = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
+        $total = count($details);
 
-        // Passing condition: 18 out of 20 for mock exam, or >= 90%
-        $isPassed = false;
-        if (in_array($validated['attempt_type'], ['random_mock', 'exam'])) {
-            $isPassed = ($correctCount >= 18 && $totalQuestions >= 20) || ($scorePercentage >= 90.0);
-        } else {
-            $isPassed = $scorePercentage >= 90.0;
-        }
+        return [
+            'total' => $total,
+            'correct' => $correctCount,
+            'wrong' => $total - $correctCount,
+            'score' => $total > 0 ? round(($correctCount / $total) * 100, 2) : 0.0,
+            'details' => $details,
+        ];
+    }
 
-        $duration = (int) ($validated['duration_seconds'] ?? 0);
-
-        $attemptType = $validated['attempt_type'];
-        if ($attemptType === 'exam') {
-            $attemptType = 'random_mock';
-        } elseif ($attemptType === 'ticket') {
-            $attemptType = 'ticket_exam';
-        }
-
-        $attempt = Attempt::create([
-            'student_id' => $studentId,
-            'user_id' => $userId,
-            'ticket_id' => $validated['ticket_id'] ?? null,
-            'attempt_type' => $attemptType,
-            'total_questions' => $totalQuestions,
-            'correct_answers' => $correctCount,
-            'wrong_answers' => $wrongCount,
-            'score_percentage' => $scorePercentage,
-            'is_passed' => $isPassed,
-            'started_at' => now()->subSeconds($duration),
-            'finished_at' => now(),
-            'duration_seconds' => $duration,
-        ]);
-
-        foreach ($details as $d) {
-            AttemptAnswer::create([
-                'attempt_id' => $attempt->id,
-                'question_id' => $d['question_id'],
-                'answer_id' => $d['selected_answer_id'],
-                'is_correct' => $d['is_correct'],
-                'answered_at' => now(),
-                'duration_seconds' => 0,
-            ]);
-        }
-
+    /**
+     * @param  array<int, array<string, mixed>>  $details
+     */
+    private function attemptResponse(Attempt $attempt, array $details): JsonResponse
+    {
         return response()->json([
             'success' => true,
             'attempt_id' => $attempt->id,
-            'is_passed' => $isPassed,
-            'score_percentage' => $scorePercentage,
-            'correct_answers' => $correctCount,
-            'wrong_answers' => $wrongCount,
-            'total_questions' => $totalQuestions,
-            'duration_seconds' => $duration,
+            'is_passed' => $attempt->is_passed,
+            'score_percentage' => (float) $attempt->score_percentage,
+            'correct_answers' => $attempt->correct_answers,
+            'wrong_answers' => $attempt->wrong_answers,
+            'total_questions' => $attempt->total_questions,
+            'duration_seconds' => $attempt->duration_seconds,
             'details' => $details,
         ]);
     }
@@ -242,7 +327,7 @@ class StudentTestController extends Controller
      */
     public function getStudentStats(Request $request): JsonResponse
     {
-        $student = $this->resolveStudent($request);
+        $student = MiniAppStudentResolver::resolve($request);
 
         if (! $student) {
             return response()->json([
@@ -255,19 +340,16 @@ class StudentTestController extends Controller
         }
 
         $attempts = Attempt::where('student_id', $student->id)
+            ->whereNotNull('finished_at')
             ->with('ticket')
             ->latest('id')
             ->limit(30)
             ->get();
 
-        $passedMock = Attempt::where('student_id', $student->id)
-            ->where('is_passed', true)
-            ->exists();
-
         return response()->json([
             'success' => true,
             'has_student' => true,
-            'passed_exam' => $passedMock,
+            'passed_exam' => $student->hasPassedMockExam(),
             'total_attempts' => $attempts->count(),
             'attempts' => $attempts,
         ]);

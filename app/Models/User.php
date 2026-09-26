@@ -73,6 +73,14 @@ class User extends Authenticatable implements PasskeyUser
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * Whether the account may sign in (deactivated staff are locked out).
+     */
+    public function isActive(): bool
+    {
+        return $this->status !== 'inactive';
+    }
+
     public function getPhotoUrlAttribute(): ?string
     {
         if (! $this->photo_path) {

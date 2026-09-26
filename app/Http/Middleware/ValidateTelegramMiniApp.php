@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Services\TelegramInitDataValidator;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,10 @@ class ValidateTelegramMiniApp
         // If already authenticated via session, allow the request to proceed.
         // This is necessary for Inertia AJAX requests to work without sending the token every time.
         if (Auth::check()) {
+            if (! $request->user()->isActive()) {
+                return $this->rejectInactiveUser($request);
+            }
+
             return $next($request);
         }
 
@@ -27,11 +32,9 @@ class ValidateTelegramMiniApp
         $initData = $request->header('X-Telegram-Init-Data') ?? $request->query('_auth');
 
         if (! $initData) {
-            // For local development without Telegram, we might want to bypass or mock,
-            // but for now, we enforce it if the middleware is applied.
             if (app()->environment('local') && $request->has('test_telegram_id')) {
                 $user = User::where('telegram_id', $request->query('test_telegram_id'))->first();
-                if ($user) {
+                if ($user && $user->isActive()) {
                     Auth::login($user);
 
                     return $next($request);
@@ -45,23 +48,10 @@ class ValidateTelegramMiniApp
             return redirect()->route('login');
         }
 
-        $botToken = (string) (config('services.telegram.bot_token') ?? config('nutgram.token', ''));
-
-        if (! $this->validateInitData($initData, $botToken)) {
-            return response()->json(['error' => 'Unauthorized. Invalid Signature.'], 401);
-        }
-
-        // Parse user data from initData
-        parse_str($initData, $parsedData);
-        if (! isset($parsedData['user'])) {
-            return response()->json(['error' => 'Unauthorized. No user data.'], 401);
-        }
-
-        $tgUser = json_decode($parsedData['user'], true);
-        $telegramId = $tgUser['id'] ?? null;
+        $telegramId = TelegramInitDataValidator::telegramUserId($initData);
 
         if (! $telegramId) {
-            return response()->json(['error' => 'Unauthorized. Invalid user data.'], 401);
+            return response()->json(['error' => 'Unauthorized. Invalid or expired signature.'], 401);
         }
 
         $user = User::where('telegram_id', $telegramId)->first();
@@ -70,41 +60,25 @@ class ValidateTelegramMiniApp
             return response()->json(['error' => 'Unauthorized. User not found.'], 401);
         }
 
+        if (! $user->isActive()) {
+            return response()->json(['error' => 'Account is deactivated.'], 403);
+        }
+
         Auth::login($user);
 
         return $next($request);
     }
 
-    private function validateInitData(string $initData, string $botToken): bool
+    private function rejectInactiveUser(Request $request): Response
     {
-        if (empty($botToken)) {
-            return false;
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($request->wantsJson()) {
+            return response()->json(['error' => 'Account is deactivated.'], 403);
         }
 
-        // Parse the query string into an array
-        parse_str($initData, $parsedData);
-
-        if (! isset($parsedData['hash'])) {
-            return false;
-        }
-
-        $hash = $parsedData['hash'];
-        unset($parsedData['hash']);
-
-        // Sort keys alphabetically
-        ksort($parsedData);
-
-        // Build data-check-string
-        $dataCheckArr = [];
-        foreach ($parsedData as $key => $value) {
-            $dataCheckArr[] = $key.'='.$value;
-        }
-        $dataCheckString = implode("\n", $dataCheckArr);
-
-        // Calculate HMAC-SHA256 signature
-        $secretKey = hash_hmac('sha256', $botToken, 'WebAppData', true);
-        $calculatedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
-
-        return hash_equals($hash, $calculatedHash);
+        return redirect()->route('login')->withErrors(['phone' => 'Hisobingiz faolsizlantirilgan.']);
     }
 }

@@ -24,6 +24,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\MiniAppController;
 use App\Http\Controllers\Student\StudentTestController;
 use App\Models\User;
+use App\Services\TelegramInitDataValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -40,68 +41,19 @@ Route::post('/api/telegram-auth', function (Request $request) {
         return response()->json(['success' => false, 'message' => 'InitData topilmadi.'], 400);
     }
 
-    $botToken = (string) (config('services.telegram.bot_token') ?? config('nutgram.token', ''));
-
-    if (! $botToken) {
-        return response()->json(['success' => false, 'message' => 'Bot Token sozlanmagan.'], 500);
-    }
-
-    parse_str($initData, $parsedData);
-    if (! isset($parsedData['hash']) || ! isset($parsedData['user'])) {
-        return response()->json(['success' => false, 'message' => 'Yaroqsiz Telegram ma\'lumotlari.'], 400);
-    }
-
-    $hash = $parsedData['hash'];
-
-    // Build dataCheckArr by parsing initData parts
-    $parts = explode('&', $initData);
-    $dataCheckArr = [];
-    foreach ($parts as $part) {
-        if (str_contains($part, '=')) {
-            [$key, $val] = explode('=', $part, 2);
-            if ($key !== 'hash') {
-                $dataCheckArr[urldecode($key)] = urldecode($key).'='.urldecode($val);
-            }
-        }
-    }
-    ksort($dataCheckArr);
-    $dataCheckString = implode("\n", array_values($dataCheckArr));
-
-    $secretKey = hash_hmac('sha256', $botToken, 'WebAppData', true);
-    $calculatedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
-
-    $isValid = hash_equals($hash, $calculatedHash);
-
-    if (! $isValid) {
-        // Alternative calculation without urldecode if any special char diff
-        $dataCheckArrAlt = [];
-        unset($parsedData['hash']);
-        ksort($parsedData);
-        foreach ($parsedData as $k => $v) {
-            $dataCheckArrAlt[] = $k.'='.$v;
-        }
-        $altCheckString = implode("\n", $dataCheckArrAlt);
-        $altHash = bin2hex(hash_hmac('sha256', $altCheckString, $secretKey, true));
-
-        if (hash_equals($hash, $altHash)) {
-            $isValid = true;
-        }
-    }
-
-    if (! $isValid) {
-        return response()->json(['success' => false, 'message' => 'Telegram signaturasi noto\'g\'ri.'], 401);
-    }
-
-    $tgUser = json_decode($parsedData['user'], true);
-    $telegramId = $tgUser['id'] ?? null;
+    $telegramId = TelegramInitDataValidator::telegramUserId($initData);
 
     if (! $telegramId) {
-        return response()->json(['success' => false, 'message' => 'Telegram ID topilmadi.'], 400);
+        return response()->json(['success' => false, 'message' => 'Telegram signaturasi noto\'g\'ri yoki muddati o\'tgan.'], 401);
     }
 
     $user = User::where('telegram_id', $telegramId)->first();
     if (! $user) {
         return response()->json(['success' => false, 'message' => 'Tizimda ushbu Telegram hisobiga biriktirilgan foydalanuvchi topilmadi.'], 404);
+    }
+
+    if (! $user->isActive()) {
+        return response()->json(['success' => false, 'message' => 'Hisobingiz faolsizlantirilgan.'], 403);
     }
 
     Auth::login($user, true);
@@ -144,8 +96,8 @@ Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify
 // Student Tests & Mock Exam Endpoints
 Route::get('/api/tests/tickets', [StudentTestController::class, 'getTickets'])->name('tests.tickets');
 Route::get('/api/tests/ticket/{ticket}', [StudentTestController::class, 'getTicketQuestions'])->name('tests.ticket.questions');
-Route::get('/api/tests/exam', [StudentTestController::class, 'getMockExam'])->name('tests.exam');
-Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt'])->name('tests.submit');
+Route::get('/api/tests/exam', [StudentTestController::class, 'getMockExam'])->middleware('throttle:20,1')->name('tests.exam');
+Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt'])->middleware('throttle:30,1')->name('tests.submit');
 Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
 Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats'])->name('tests.stats');
 
@@ -207,7 +159,6 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::post('admin/finance/transfer', [FinanceController::class, 'createTransfer'])->name('finance.create-transfer');
     Route::post('admin/finance/transfer/{transfer}/approve', [FinanceController::class, 'approveTransfer'])->name('finance.approve-transfer');
     Route::post('admin/finance/sweep', [FinanceController::class, 'sweepRegisters'])->name('finance.sweep');
-    Route::post('admin/finance/shift', [FinanceController::class, 'toggleShift'])->name('finance.toggle-shift');
 
     // Payroll & Salaries
     Route::get('admin/salaries', [SalaryController::class, 'index'])->name('salaries.index');

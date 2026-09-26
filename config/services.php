@@ -37,6 +37,7 @@ return [
 
     'telegram' => [
         'bot_token' => env('TELEGRAM_TOKEN'),
+        'init_data_ttl' => (int) env('TELEGRAM_INIT_DATA_TTL', 86400),
     ],
 
 ];
