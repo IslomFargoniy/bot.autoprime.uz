@@ -189,7 +189,21 @@ class VehicleController extends Controller
                         'spent_at' => $validated['performed_date'],
                     ]);
 
+                    $balBefore = (float) $lockedRegister->balance;
+                    $balAfter = $balBefore - (float) $validated['cost'];
                     $lockedRegister->decrement('balance', (float) $validated['cost']);
+
+                    $lockedRegister->recordTransaction(
+                        type: 'out',
+                        category: 'expense',
+                        amount: (float) $validated['cost'],
+                        balanceBefore: $balBefore,
+                        balanceAfter: $balAfter,
+                        description: "Avtotransport xarajati: {$vehicle->plate_number} ({$validated['maintenance_type']})",
+                        reference: $expense,
+                        userId: $request->user()->id
+                    );
+
                     $expenseId = $expense->id;
                 }
             }
@@ -222,7 +236,22 @@ class VehicleController extends Controller
             if ($maintenance->expense_id) {
                 $expense = Expense::find($maintenance->expense_id);
                 if ($expense && $expense->cash_register_id) {
-                    CashRegister::where('id', $expense->cash_register_id)->increment('balance', (float) $expense->amount);
+                    $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->lockForUpdate()->first();
+                    if ($lockedRegister) {
+                        $balBefore = (float) $lockedRegister->balance;
+                        $balAfter = $balBefore + (float) $expense->amount;
+                        $lockedRegister->increment('balance', (float) $expense->amount);
+                        $lockedRegister->recordTransaction(
+                            type: 'in',
+                            category: 'refund',
+                            amount: (float) $expense->amount,
+                            balanceBefore: $balBefore,
+                            balanceAfter: $balAfter,
+                            description: "O'chirilgan transport xarajati qaytarildi: {$expense->description}",
+                            reference: $expense,
+                            userId: auth()->id()
+                        );
+                    }
                     $expense->delete();
                 }
             }

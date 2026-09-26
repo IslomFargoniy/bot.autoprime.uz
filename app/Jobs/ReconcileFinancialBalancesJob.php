@@ -32,7 +32,13 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
         // 1. Reconcile Contracts finances
         $contracts = Contract::all();
         foreach ($contracts as $contract) {
-            $expectedPaid = (float) Payment::where('contract_id', $contract->id)->sum('amount');
+            $tuitionPaid = (float) Payment::where('contract_id', $contract->id)
+                ->where('payment_type', '!=', 'refund')
+                ->sum('amount');
+            $refunded = (float) Payment::where('contract_id', $contract->id)
+                ->where('payment_type', 'refund')
+                ->sum('amount');
+            $expectedPaid = max(0, $tuitionPaid - $refunded);
             $final = (float) $contract->final_amount;
             $expectedDebt = max(0, $final - $expectedPaid);
             $expectedOverpaid = max(0, $expectedPaid - $final);
@@ -47,15 +53,19 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
         // 2. Reconcile Cash Register Balances
         $registers = CashRegister::all();
         foreach ($registers as $register) {
-            $incomes = (float) Payment::where('cash_register_id', $register->id)->sum('amount');
+            // Tuition payments received (excluding refund records)
+            $incomes = (float) Payment::where('cash_register_id', $register->id)
+                ->where('payment_type', '!=', 'refund')
+                ->sum('amount');
+
+            // All expenses from this register (salaries, vehicle maintenance, direct expenses, and refunds are all in expenses)
             $expenses = (float) Expense::where('cash_register_id', $register->id)->sum('amount');
-            $salaryPayments = (float) SalaryPayment::where('cash_register_id', $register->id)->sum('amount');
 
             // Transfers: received vs sent
             $transfersIn = (float) CashTransfer::where('to_cash_register_id', $register->id)->where('status', 'approved')->sum('amount');
             $transfersOut = (float) CashTransfer::where('from_cash_register_id', $register->id)->where('status', 'approved')->sum('amount');
 
-            $expectedBalance = max(0, $incomes + $transfersIn - $expenses - $salaryPayments - $transfersOut);
+            $expectedBalance = max(0, $incomes + $transfersIn - $expenses - $transfersOut);
 
             if (abs((float) $register->balance - $expectedBalance) > 0.01) {
                 Log::warning("[Reconciliation Drift] Register #{$register->name} (ID: {$register->id}) cached: {$register->balance}, calculated: {$expectedBalance}. Updating.");
