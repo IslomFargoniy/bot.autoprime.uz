@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import Pagination from '@/components/pagination';
 import { toast } from 'sonner';
 import {
@@ -267,6 +268,14 @@ export default function TestsIndex({
                 {
                     onSuccess: () => {
                         setShowTicketModal(false);
+                        if (inspectingTicket && editingTicket && inspectingTicket.id === editingTicket.id) {
+                            setInspectingTicket({
+                                ...inspectingTicket,
+                                ticket_number: Number(ticketNumber),
+                                title_uz: ticketTitle,
+                                description: ticketDesc,
+                            });
+                        }
                         toast.success(t('tests.ticket_updated', 'Bilet yangilandi'));
                     },
                     onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
@@ -693,20 +702,20 @@ export default function TestsIndex({
 
                 <div className="flex items-center gap-2 flex-wrap">
                     {activeTab === 'tickets' && (
-                        <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                        <Button onClick={openCreateTicketModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_ticket', '+ Bilet Qo\'shish')}
                         </Button>
                     )}
                     {activeTab === 'signs' && selectedSignCategory === 'lines' && (
-                        <Button onClick={openCreateRoadLineModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                        <Button onClick={openCreateRoadLineModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_road_line', '+ Chiziq Qo\'shish')}
                         </Button>
                     )}
                     {activeTab === 'signs' && selectedSignCategory !== 'lines' && (
                         <>
-                            <Button onClick={openCreateSignModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                            <Button onClick={openCreateSignModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
                                 <Plus className="w-4 h-4 mr-1.5" />
                                 {t('tests.add_sign', '+ Belgi Qo\'shish')}
                             </Button>
@@ -969,10 +978,10 @@ export default function TestsIndex({
                             />
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                                 {filteredTickets.length} / {tickets.length} {t('tests.tickets_count', 'ta bilet')}
                             </span>
-                            <Button onClick={openCreateTicketModal} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs text-white">
+                            <Button onClick={openCreateTicketModal} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
                                 <Plus className="w-4 h-4 mr-1.5" />
                                 {t('tests.add_ticket', '+ Bilet Qo\'shish')}
                             </Button>
@@ -984,10 +993,10 @@ export default function TestsIndex({
                             <div
                                 key={tkt.id}
                                 onClick={() => openTicketDetails(tkt)}
-                                className="bg-white dark:bg-gray-800 border-2 border-emerald-500/40 hover:border-emerald-500 dark:border-emerald-500/30 dark:hover:border-emerald-500 p-3.5 rounded-2xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group relative"
+                                className="bg-card text-card-foreground border-2 border-emerald-500/40 hover:border-emerald-500 dark:border-emerald-500/30 dark:hover:border-emerald-500 p-3.5 rounded-2xl cursor-pointer transition-all hover:shadow-md flex flex-col justify-between group relative"
                             >
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase">
                                         <Layers className="w-3.5 h-3.5" />
                                         #{tkt.ticket_number}
                                     </div>
@@ -995,14 +1004,14 @@ export default function TestsIndex({
                                     <div className="flex items-center gap-1">
                                         <button
                                             onClick={(e) => openEditTicketModal(tkt, e)}
-                                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/40 text-gray-600 hover:text-blue-600 dark:text-gray-300 transition-colors"
+                                            className="p-1.5 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                                             title={t('common.edit', 'Tahrirlash')}
                                         >
                                             <Pencil className="w-3 h-3" />
                                         </button>
                                         <button
                                             onClick={(e) => handleDeleteTicket(tkt, e)}
-                                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/40 text-gray-600 hover:text-red-600 dark:text-gray-300 transition-colors"
+                                            className="p-1.5 rounded-lg bg-muted hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition-colors"
                                             title={t('common.delete', 'O\'chirish')}
                                         >
                                             <Trash2 className="w-3 h-3" />
@@ -1011,16 +1020,16 @@ export default function TestsIndex({
                                 </div>
 
                                 <div className="my-2">
-                                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
+                                    <p className="text-xs font-semibold text-foreground line-clamp-1">
                                         {tkt.title_uz}
                                     </p>
                                 </div>
 
-                                <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700/60 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                                    <span className="font-medium text-slate-600 dark:text-slate-300">
+                                <div className="mt-auto pt-2 border-t border-border text-[11px] text-muted-foreground flex items-center justify-between">
+                                    <span className="font-medium text-foreground/80">
                                         {tkt.questions_count || 10} {t('tests.questions_unit', 'savol')}
                                     </span>
-                                    <Eye className="w-3.5 h-3.5 text-blue-500" />
+                                    <Eye className="w-3.5 h-3.5 text-primary" />
                                 </div>
                             </div>
                         ))}
@@ -1037,8 +1046,8 @@ export default function TestsIndex({
                             onClick={() => setSelectedSignCategory('all')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'all'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                             }`}
                         >
                             {t('tests.all_signs', 'Barchasi')} ({stats.total_signs + roadLines.length})
@@ -1050,8 +1059,8 @@ export default function TestsIndex({
                                     onClick={() => setSelectedSignCategory(cat.id)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                         selectedSignCategory === cat.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                                     }`}
                                 >
                                     {cat.name_uz} ({cat.signs?.length || 0})
@@ -1059,7 +1068,7 @@ export default function TestsIndex({
                                 {selectedSignCategory === cat.id && (
                                     <button
                                         onClick={() => handleDeleteCategory(cat)}
-                                        className="ml-1 text-red-500 hover:text-red-700 p-1"
+                                        className="ml-1 text-rose-500 hover:text-rose-700 p-1"
                                         title={t('tests.delete_category', 'Toifani o\'chirish')}
                                     >
                                         <Trash2 className="w-3 h-3" />
@@ -1072,14 +1081,14 @@ export default function TestsIndex({
                             onClick={() => setSelectedSignCategory('lines')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 selectedSignCategory === 'lines'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                             }`}
                         >
                             {t('tests.road_lines_category', 'Yo\'l chiziqlari')} ({roadLines.length})
                         </button>
 
-                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-blue-600 dark:text-blue-400">
+                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/10">
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             {t('tests.add_category', '+ Toifa')}
                         </Button>
@@ -1183,39 +1192,50 @@ export default function TestsIndex({
 
             {/* Ticket Questions Modal Dialog */}
             <Dialog open={!!inspectingTicket} onOpenChange={(open) => !open && setInspectingTicket(null)}>
-                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-                    <DialogHeader>
-                        <div className="flex items-center justify-between pr-6 flex-wrap gap-2">
-                            <div className="flex items-center gap-2">
-                                <BookOpen className="w-5 h-5 text-blue-600" />
-                                <DialogTitle className="text-base font-bold">
-                                    {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`}
-                                </DialogTitle>
+                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background text-foreground border-border">
+                    <DialogHeader className="border-b border-border pb-4">
+                        <div className="flex items-center justify-between pr-6 flex-wrap gap-3">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                                    <BookOpen className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-base font-bold text-foreground">
+                                        {inspectingTicket?.title_uz || `${t('tests.ticket_prefix', 'Bilet')} #${inspectingTicket?.ticket_number}`}
+                                    </DialogTitle>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                        {ticketQuestions.length} {t('tests.questions_unit', 'savol')}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 {inspectingTicket && (
                                     <>
                                         <Button
                                             size="sm"
                                             variant="outline"
                                             onClick={() => openEditTicketModal(inspectingTicket)}
-                                            className="text-xs"
+                                            className="h-8 text-xs border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                                         >
-                                            <Pencil className="w-3.5 h-3.5 mr-1" />
+                                            <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
                                             {t('tests.edit_ticket', 'Tahrirlash')}
                                         </Button>
                                         <Button
                                             size="sm"
-                                            variant="destructive"
+                                            variant="outline"
                                             onClick={() => handleDeleteTicket(inspectingTicket)}
-                                            className="text-xs"
+                                            className="h-8 text-xs border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                                         >
                                             <Trash2 className="w-3.5 h-3.5 mr-1" />
                                             {t('tests.delete_ticket', 'O\'chirish')}
                                         </Button>
                                     </>
                                 )}
-                                <Button size="sm" onClick={openCreateQuestionModal} className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button
+                                    size="sm"
+                                    onClick={openCreateQuestionModal}
+                                    className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                                >
                                     <Plus className="w-3.5 h-3.5 mr-1" />
                                     {t('tests.add_question', '+ Savol Qo\'shish')}
                                 </Button>
@@ -1225,11 +1245,11 @@ export default function TestsIndex({
                     </DialogHeader>
 
                     {loadingTicketQuestions ? (
-                        <div className="py-12 text-center text-gray-400">
+                        <div className="py-12 text-center text-muted-foreground text-xs">
                             {t('common.loading', 'Yuklanmoqda...')}
                         </div>
                     ) : ticketQuestions.length === 0 ? (
-                        <div className="py-8 text-center text-gray-400">
+                        <div className="py-10 text-center text-muted-foreground text-xs">
                             {t('tests.no_questions_in_ticket', 'Ushbu biletda savollar topilmadi')}
                         </div>
                     ) : (
@@ -1237,43 +1257,51 @@ export default function TestsIndex({
                             {ticketQuestions.map((q, idx) => (
                                 <div
                                     key={q.id}
-                                    className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-850 space-y-3 relative group"
+                                    className="p-4 sm:p-5 rounded-2xl border border-border bg-card dark:bg-card/90 shadow-2xs space-y-3.5 transition-colors"
                                 >
                                     <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-2 flex-1">
-                                            <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                        <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                            <span className="w-7 h-7 rounded-xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20 mt-0.5">
                                                 {idx + 1}
                                             </span>
-                                            <h4 className="font-semibold text-xs text-gray-900 dark:text-white">
+                                            <h4 className="font-semibold text-sm text-foreground leading-snug">
                                                 {q.question_uz}
                                             </h4>
                                         </div>
 
                                         <div className="flex items-center gap-1.5 shrink-0">
-                                            <button
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
                                                 onClick={() => openEditQuestionModal(q)}
-                                                className="p-1.5 rounded-lg bg-gray-200/80 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-900/50 text-gray-700 hover:text-blue-600 dark:text-gray-300 transition-colors"
+                                                className="h-7.5 px-2.5 text-xs text-foreground border-border hover:bg-accent hover:text-accent-foreground"
                                                 title={t('common.edit', 'Tahrirlash')}
                                             >
-                                                <Pencil className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
+                                                <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                                                <span>{t('common.edit', 'Tahrirlash')}</span>
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
                                                 onClick={() => handleDeleteQuestion(q)}
-                                                className="p-1.5 rounded-lg bg-gray-200/80 hover:bg-red-100 dark:bg-gray-700 dark:hover:bg-red-900/50 text-gray-700 hover:text-red-600 dark:text-gray-300 transition-colors"
+                                                className="h-7.5 px-2.5 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                                                 title={t('common.delete', 'O\'chirish')}
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
+                                                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                                <span>{t('common.delete', 'O\'chirish')}</span>
+                                            </Button>
                                         </div>
                                     </div>
 
                                     {/* Question Image if present */}
                                     {q.image_url && (
-                                        <div className="flex justify-center bg-white dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                                        <div className="flex justify-center bg-muted/30 dark:bg-muted/20 p-2.5 rounded-xl border border-border overflow-hidden">
                                             <img
                                                 src={formatImageUrl(q.image_url) || ''}
                                                 alt={`Savol ${idx + 1}`}
-                                                className="max-h-52 max-w-full rounded object-contain"
+                                                className="max-h-56 max-w-full rounded-lg object-contain shadow-2xs"
                                                 loading="lazy"
                                             />
                                         </div>
@@ -1284,20 +1312,29 @@ export default function TestsIndex({
                                         {q.answers?.map((ans: any, aIdx: number) => (
                                             <div
                                                 key={ans.id}
-                                                className={`p-2.5 rounded-lg text-xs flex items-center justify-between border ${
+                                                className={cn(
+                                                    "p-3 rounded-xl text-xs flex items-center justify-between border transition-colors",
                                                     ans.is_correct
-                                                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 font-semibold'
-                                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
-                                                }`}
+                                                        ? "bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold"
+                                                        : "bg-muted/40 dark:bg-muted/20 border-border text-foreground hover:bg-muted/60"
+                                                )}
                                             >
-                                                <span>
-                                                    <strong className="mr-2 font-mono">
-                                                        {String.fromCharCode(65 + aIdx)}.
-                                                    </strong>
-                                                    {ans.answer_uz}
-                                                </span>
+                                                <div className="flex items-center gap-2.5">
+                                                    <span
+                                                        className={cn(
+                                                            "w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 font-mono",
+                                                            ans.is_correct
+                                                                ? "bg-emerald-600 text-white"
+                                                                : "bg-muted text-muted-foreground border border-border"
+                                                        )}
+                                                    >
+                                                        {String.fromCharCode(65 + aIdx)}
+                                                    </span>
+                                                    <span className="leading-snug">{ans.answer_uz}</span>
+                                                </div>
                                                 {ans.is_correct && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-600 text-white ml-2 shrink-0">
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-600 text-white ml-2 shrink-0 flex items-center gap-1">
+                                                        <CheckCircle2 className="w-3 h-3" />
                                                         {t('tests.correct_answer_badge', 'To\'g\'ri javob')}
                                                     </span>
                                                 )}
@@ -1307,9 +1344,12 @@ export default function TestsIndex({
 
                                     {/* Explanation */}
                                     {q.description_uz && (
-                                        <div className="text-[11px] p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 border border-blue-100 dark:border-blue-900/50">
-                                            <span className="font-bold mr-1">💡 {t('tests.explanation', 'Qoidalar bo\'yicha izoh')}:</span>
-                                            {q.description_uz}
+                                        <div className="text-xs p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/10 text-amber-900 dark:text-amber-200 border border-amber-500/20 flex items-start gap-2 leading-relaxed">
+                                            <span className="text-base shrink-0 select-none">💡</span>
+                                            <div>
+                                                <span className="font-semibold">{t('tests.explanation', 'Qoidalar bo\'yicha izoh')}: </span>
+                                                <span>{q.description_uz}</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -1362,7 +1402,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowTicketModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1388,7 +1428,7 @@ export default function TestsIndex({
                                 value={questionText}
                                 onChange={(e) => setQuestionText(e.target.value)}
                                 placeholder="Savol matnini kiriting..."
-                                className="w-full mt-1 p-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
                             />
                         </div>
 
@@ -1524,7 +1564,7 @@ export default function TestsIndex({
                                 value={questionDesc}
                                 onChange={(e) => setQuestionDesc(e.target.value)}
                                 placeholder={t('tests.explanation_placeholder', 'Yo\'l harakati qoidasi bo\'yicha tushuntirish...')}
-                                className="w-full mt-1 p-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
                             />
                         </div>
 
@@ -1532,7 +1572,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowQuestionModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1555,7 +1595,7 @@ export default function TestsIndex({
                             <select
                                 value={signCategoryId}
                                 onChange={(e) => setSignCategoryId(Number(e.target.value))}
-                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
                             >
                                 {signCategories.map((c) => (
                                     <option key={c.id} value={c.id}>
@@ -1661,14 +1701,14 @@ export default function TestsIndex({
                                 value={signDesc}
                                 onChange={(e) => setSignDesc(e.target.value)}
                                 placeholder="Belgi qoidasi va talabi..."
-                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
                             />
                         </div>
                         <DialogFooter className="pt-2">
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowSignModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1783,14 +1823,14 @@ export default function TestsIndex({
                                 value={roadLineDesc}
                                 onChange={(e) => setRoadLineDesc(e.target.value)}
                                 placeholder="Yo'l chizig'i qoidasi..."
-                                className="w-full mt-1 p-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                className="w-full mt-1.5 p-2.5 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
                             />
                         </div>
                         <DialogFooter className="pt-2">
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowRoadLineModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
@@ -1822,7 +1862,7 @@ export default function TestsIndex({
                             <Button type="button" variant="outline" size="sm" onClick={() => setShowCategoryModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </DialogFooter>
