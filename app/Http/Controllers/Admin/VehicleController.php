@@ -143,7 +143,7 @@ class VehicleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $mileage = !empty($validated['odometer']) ? (int) $validated['odometer'] : ($vehicle->current_mileage ?? 0);
+        $mileage = ! empty($validated['odometer']) ? (int) $validated['odometer'] : ($vehicle->current_mileage ?? 0);
 
         VehicleMaintenance::create([
             'vehicle_id' => $vehicle->id,
@@ -155,7 +155,7 @@ class VehicleController extends Controller
             'description' => $validated['notes'] ?? null,
         ]);
 
-        if (!empty($validated['odometer']) && (int) $validated['odometer'] > (int) $vehicle->current_mileage) {
+        if (! empty($validated['odometer']) && (int) $validated['odometer'] > (int) $vehicle->current_mileage) {
             $vehicle->update(['current_mileage' => (int) $validated['odometer']]);
         }
 

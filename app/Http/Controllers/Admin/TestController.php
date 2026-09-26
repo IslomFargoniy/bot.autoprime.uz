@@ -13,6 +13,7 @@ use App\Models\Ticket;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -423,7 +424,7 @@ class TestController extends Controller
             'name_ru' => $validated['name_uz'],
             'name_krill' => $validated['name_uz'],
             'name_en' => $validated['name_uz'],
-            'slug' => \Illuminate\Support\Str::slug($validated['name_uz']),
+            'slug' => Str::slug($validated['name_uz']),
             'order' => $order,
         ]);
 

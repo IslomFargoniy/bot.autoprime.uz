@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('vehicle_maintenances', function (Blueprint $table) {
             $table->integer('mileage')->nullable()->default(0)->change();
-            if (!Schema::hasColumn('vehicle_maintenances', 'next_due_date')) {
+            if (! Schema::hasColumn('vehicle_maintenances', 'next_due_date')) {
                 $table->date('next_due_date')->nullable()->after('performed_at');
             }
         });
