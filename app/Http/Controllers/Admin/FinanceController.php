@@ -320,4 +320,66 @@ class FinanceController extends Controller
 
         return redirect()->back()->with('success', 'Kassa smenasi yopildi.');
     }
+
+    /**
+     * Delete an expense and refund the money back to the cash register.
+     */
+    public function destroyExpense(Expense $expense): RedirectResponse
+    {
+        DB::transaction(function () use ($expense) {
+            if ($expense->cash_register_id) {
+                $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->lockForUpdate()->first();
+                if ($lockedRegister) {
+                    $lockedRegister->increment('balance', (float) $expense->amount);
+                }
+            }
+
+            // If this expense is attached to vehicle maintenance, reset expense_id on maintenance
+            \App\Models\VehicleMaintenance::where('expense_id', $expense->id)->update(['expense_id' => null]);
+
+            $expense->delete();
+        });
+
+        return redirect()->back()->with('success', "Xarajat o'chirildi va mablag' kassaga qaytarildi.");
+    }
+
+    /**
+     * Delete a payment, adjust the cash register balance, and recalculate contract finances.
+     */
+    public function destroyPayment(Payment $payment): RedirectResponse
+    {
+        try {
+            DB::transaction(function () use ($payment) {
+                $lockedRegister = $payment->cash_register_id
+                    ? CashRegister::where('id', $payment->cash_register_id)->lockForUpdate()->first()
+                    : null;
+
+                if ($payment->payment_type === 'refund') {
+                    // Deleting a refund payment returns the money to the register
+                    if ($lockedRegister) {
+                        $lockedRegister->increment('balance', (float) $payment->amount);
+                    }
+                } else {
+                    // Deleting an income payment deducts the money from the register
+                    if ($lockedRegister) {
+                        if ((float) $lockedRegister->balance < (float) $payment->amount) {
+                            throw new \Exception("Kassada yetarli mablag' mavjud emas. To'lovni bekor qilish uchun kamida ".number_format((float) $payment->amount, 0, '', ' ')." UZS bo'lishi kerak.");
+                        }
+                        $lockedRegister->decrement('balance', (float) $payment->amount);
+                    }
+                }
+
+                $contract = $payment->contract;
+                $payment->delete();
+
+                if ($contract) {
+                    $contract->recalculateFinances();
+                }
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['payment' => $e->getMessage()]);
+        }
+
+        return redirect()->back()->with('success', "To'lov o'chirildi, kassa va shartnoma hisoblari qayta yangilandi.");
+    }
 }

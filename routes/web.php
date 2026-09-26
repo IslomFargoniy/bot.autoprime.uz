@@ -199,7 +199,9 @@ Route::middleware(['auth.telegram'])->group(function () {
     // Finance & Cash Registers
     Route::get('admin/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::post('admin/finance/payment', [FinanceController::class, 'storePayment'])->name('finance.store-payment');
+    Route::delete('admin/finance/payment/{payment}', [FinanceController::class, 'destroyPayment'])->name('finance.destroy-payment');
     Route::post('admin/finance/expense', [FinanceController::class, 'storeExpense'])->name('finance.store-expense');
+    Route::delete('admin/finance/expense/{expense}', [FinanceController::class, 'destroyExpense'])->name('finance.destroy-expense');
     Route::post('admin/finance/transfer', [FinanceController::class, 'createTransfer'])->name('finance.create-transfer');
     Route::post('admin/finance/transfer/{transfer}/approve', [FinanceController::class, 'approveTransfer'])->name('finance.approve-transfer');
     Route::post('admin/finance/shift', [FinanceController::class, 'toggleShift'])->name('finance.toggle-shift');

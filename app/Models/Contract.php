@@ -228,4 +228,38 @@ class Contract extends Model
 
         return $this->payment_percentage >= 75.0;
     }
+
+    /**
+     * Get count of scheduled or completed drivings under this contract
+     */
+    public function getScheduledOrCompletedDrivingsCount(): int
+    {
+        return $this->drivings()->whereIn('status', ['scheduled', 'completed'])->count();
+    }
+
+    /**
+     * Check if the student has reached their allocated driving lesson limit
+     */
+    public function hasReachedDrivingLimit(): bool
+    {
+        $limit = $this->required_driving_lessons ?: ($this->contractType?->required_driving_lessons ?? 0);
+        if ($limit <= 0) {
+            return false;
+        }
+
+        return $this->getScheduledOrCompletedDrivingsCount() >= $limit;
+    }
+
+    /**
+     * Get remaining available driving lessons for this contract
+     */
+    public function getRemainingDrivingLessonsCount(): int
+    {
+        $limit = $this->required_driving_lessons ?: ($this->contractType?->required_driving_lessons ?? 0);
+        if ($limit <= 0) {
+            return 999;
+        }
+
+        return max(0, $limit - $this->getScheduledOrCompletedDrivingsCount());
+    }
 }
