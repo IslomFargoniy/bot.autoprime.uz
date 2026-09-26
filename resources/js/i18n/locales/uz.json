@@ -751,6 +751,14 @@
     "start_attempt": "Boshlash",
     "retake_exam": "Qayta topshirish",
     "all_tickets": "Barcha biletlar",
-    "time_left": "Qolgan vaqt"
+    "time_left": "Qolgan vaqt",
+    "no_image": "Rasm yo'q",
+    "remove_image": "Rasmni olib tashlash",
+    "upload_image": "Rasm yuklash",
+    "change_image": "Rasmni almashtirish",
+    "image_file": "Rasm",
+    "upload_image_hint": "Rasm yuklash uchun bosing",
+    "current_image": "Joriy rasm",
+    "image_ready": "Rasm biriktirilgan"
   }
 }

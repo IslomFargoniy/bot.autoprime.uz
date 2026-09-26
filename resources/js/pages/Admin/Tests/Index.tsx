@@ -16,6 +16,7 @@ import {
     ImageIcon,
     Layers,
     FolderPlus,
+    UploadCloud,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -144,9 +145,9 @@ export default function TestsIndex({
     const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
     const [questionText, setQuestionText] = useState('');
     const [questionDesc, setQuestionDesc] = useState('');
-    const [questionImage, setQuestionImage] = useState('');
     const [questionFile, setQuestionFile] = useState<File | null>(null);
     const [questionPreview, setQuestionPreview] = useState<string | null>(null);
+    const [removeQuestionImage, setRemoveQuestionImage] = useState(false);
     const [questionAnswers, setQuestionAnswers] = useState<Array<{ text: string; is_correct: boolean }>>([
         { text: '', is_correct: true },
         { text: '', is_correct: false },
@@ -161,9 +162,9 @@ export default function TestsIndex({
     const [signNumber, setSignNumber] = useState('');
     const [signName, setSignName] = useState('');
     const [signDesc, setSignDesc] = useState('');
-    const [signImage, setSignImage] = useState('');
     const [signFile, setSignFile] = useState<File | null>(null);
     const [signPreview, setSignPreview] = useState<string | null>(null);
+    const [removeSignImage, setRemoveSignImage] = useState(false);
 
     // Management Modals: Road Line
     const [showRoadLineModal, setShowRoadLineModal] = useState(false);
@@ -171,9 +172,9 @@ export default function TestsIndex({
     const [roadLineNumber, setRoadLineNumber] = useState('');
     const [roadLineName, setRoadLineName] = useState('');
     const [roadLineDesc, setRoadLineDesc] = useState('');
-    const [roadLineImage, setRoadLineImage] = useState('');
     const [roadLineFile, setRoadLineFile] = useState<File | null>(null);
     const [roadLinePreview, setRoadLinePreview] = useState<string | null>(null);
+    const [removeRoadLineImage, setRemoveRoadLineImage] = useState(false);
 
     // Management Modals: Category
     const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -311,9 +312,10 @@ export default function TestsIndex({
         setEditingQuestion(null);
         setQuestionText('');
         setQuestionDesc('');
-        setQuestionImage('');
         setQuestionFile(null);
         setQuestionPreview(null);
+        setRemoveQuestionImage(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         setQuestionAnswers([
             { text: '', is_correct: true },
             { text: '', is_correct: false },
@@ -327,9 +329,10 @@ export default function TestsIndex({
         setEditingQuestion(q);
         setQuestionText(q.question_uz);
         setQuestionDesc(q.description_uz || '');
-        setQuestionImage(q.image_url || '');
         setQuestionFile(null);
         setQuestionPreview(formatImageUrl(q.image_url));
+        setRemoveQuestionImage(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         if (q.answers && q.answers.length > 0) {
             setQuestionAnswers(q.answers.map((a: any) => ({ text: a.answer_uz, is_correct: !!a.is_correct })));
         } else {
@@ -348,7 +351,15 @@ export default function TestsIndex({
         if (file) {
             setQuestionFile(file);
             setQuestionPreview(URL.createObjectURL(file));
+            setRemoveQuestionImage(false);
         }
+    };
+
+    const handleRemoveQuestionImage = () => {
+        setQuestionFile(null);
+        setQuestionPreview(null);
+        setRemoveQuestionImage(true);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const addQuestionAnswerOption = () => {
@@ -389,8 +400,8 @@ export default function TestsIndex({
 
         if (questionFile) {
             formData.append('image', questionFile);
-        } else if (questionImage) {
-            formData.append('image_url', questionImage);
+        } else if (removeQuestionImage) {
+            formData.append('remove_image', '1');
         }
 
         validAnswers.forEach((ans, idx) => {
@@ -440,9 +451,10 @@ export default function TestsIndex({
         setSignNumber('');
         setSignName('');
         setSignDesc('');
-        setSignImage('');
         setSignFile(null);
         setSignPreview(null);
+        setRemoveSignImage(false);
+        if (signFileInputRef.current) signFileInputRef.current.value = '';
         setShowSignModal(true);
     };
 
@@ -452,10 +464,27 @@ export default function TestsIndex({
         setSignNumber(sign.sign_number);
         setSignName(sign.name_uz);
         setSignDesc(sign.description_uz || '');
-        setSignImage(sign.image_url || '');
         setSignFile(null);
         setSignPreview(formatImageUrl(sign.image_url));
+        setRemoveSignImage(false);
+        if (signFileInputRef.current) signFileInputRef.current.value = '';
         setShowSignModal(true);
+    };
+
+    const handleSignImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSignFile(file);
+            setSignPreview(URL.createObjectURL(file));
+            setRemoveSignImage(false);
+        }
+    };
+
+    const handleRemoveSignImage = () => {
+        setSignFile(null);
+        setSignPreview(null);
+        setRemoveSignImage(true);
+        if (signFileInputRef.current) signFileInputRef.current.value = '';
     };
 
     const handleSignSubmit = (e: React.FormEvent) => {
@@ -468,8 +497,8 @@ export default function TestsIndex({
 
         if (signFile) {
             formData.append('image', signFile);
-        } else if (signImage) {
-            formData.append('image_url', signImage);
+        } else if (removeSignImage) {
+            formData.append('remove_image', '1');
         }
 
         if (editingSign) {
@@ -508,9 +537,10 @@ export default function TestsIndex({
         setRoadLineNumber('');
         setRoadLineName('');
         setRoadLineDesc('');
-        setRoadLineImage('');
         setRoadLineFile(null);
         setRoadLinePreview(null);
+        setRemoveRoadLineImage(false);
+        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
         setShowRoadLineModal(true);
     };
 
@@ -519,10 +549,27 @@ export default function TestsIndex({
         setRoadLineNumber(line.line_number || (line as any).number || '');
         setRoadLineName(line.name_uz);
         setRoadLineDesc(line.description_uz || '');
-        setRoadLineImage(line.image_url || '');
         setRoadLineFile(null);
         setRoadLinePreview(formatImageUrl(line.image_url));
+        setRemoveRoadLineImage(false);
+        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
         setShowRoadLineModal(true);
+    };
+
+    const handleRoadLineImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setRoadLineFile(file);
+            setRoadLinePreview(URL.createObjectURL(file));
+            setRemoveRoadLineImage(false);
+        }
+    };
+
+    const handleRemoveRoadLineImage = () => {
+        setRoadLineFile(null);
+        setRoadLinePreview(null);
+        setRemoveRoadLineImage(true);
+        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
     };
 
     const handleRoadLineSubmit = (e: React.FormEvent) => {
@@ -534,8 +581,8 @@ export default function TestsIndex({
 
         if (roadLineFile) {
             formData.append('image', roadLineFile);
-        } else if (roadLineImage) {
-            formData.append('image_url', roadLineImage);
+        } else if (removeRoadLineImage) {
+            formData.append('remove_image', '1');
         }
 
         if (editingRoadLine) {
@@ -1345,36 +1392,73 @@ export default function TestsIndex({
                             />
                         </div>
 
-                        {/* Image: Upload File or URL */}
+                        {/* Image file upload only */}
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
-                            <div className="flex items-center gap-3">
-                                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
-                                    {questionPreview ? (
-                                        <img src={questionPreview} alt="Preview" className="w-full h-full object-contain" />
-                                    ) : (
-                                        <ImageIcon className="w-6 h-6 text-gray-400" />
-                                    )}
+                            <Label className="text-xs font-semibold">{t('tests.image_file', 'Rasm')}</Label>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleQuestionImageChange}
+                                className="hidden"
+                            />
+                            {questionPreview ? (
+                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                            <img
+                                                src={questionPreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {questionFile ? questionFile.name : t('tests.current_image', 'Joriy rasm')}
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                                {questionFile ? `${(questionFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="h-8 px-2.5 text-xs"
+                                        >
+                                            {t('tests.change_image', 'Almashtirish')}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleRemoveQuestionImage}
+                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                            {t('tests.remove_image', 'O\'chirish')}
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleQuestionImageChange}
-                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
-                                    />
-                                    <Input
-                                        value={questionImage}
-                                        onChange={(e) => {
-                                            setQuestionImage(e.target.value);
-                                            if (e.target.value) setQuestionPreview(e.target.value);
-                                        }}
-                                        placeholder={t('tests.or_image_url', 'Yoki rasm havolasi (URL)...')}
-                                        className="text-xs"
-                                    />
+                            ) : (
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="group cursor-pointer rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary p-4 flex flex-col items-center justify-center gap-1.5 bg-gray-50/50 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-800/80 transition-all text-center"
+                                >
+                                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                                        <UploadCloud className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                        {t('tests.upload_image_hint', 'Rasm yuklash uchun bosing')}
+                                    </span>
+                                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                                        PNG, JPG, WEBP (maks. 5MB)
+                                    </span>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Answers List */}
@@ -1501,42 +1585,73 @@ export default function TestsIndex({
                             />
                         </div>
 
-                        {/* Image file or URL */}
+                        {/* Image file upload only */}
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
-                            <div className="flex items-center gap-3">
-                                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
-                                    {signPreview ? (
-                                        <img src={signPreview} alt="Preview" className="w-full h-full object-contain" />
-                                    ) : (
-                                        <ImageIcon className="w-5 h-5 text-gray-400" />
-                                    )}
+                            <Label className="text-xs font-semibold">{t('tests.image_file', 'Rasm')}</Label>
+                            <input
+                                ref={signFileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleSignImageChange}
+                                className="hidden"
+                            />
+                            {signPreview ? (
+                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                            <img
+                                                src={signPreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {signFile ? signFile.name : t('tests.current_image', 'Joriy rasm')}
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                                {signFile ? `${(signFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => signFileInputRef.current?.click()}
+                                            className="h-8 px-2.5 text-xs"
+                                        >
+                                            {t('tests.change_image', 'Almashtirish')}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleRemoveSignImage}
+                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                            {t('tests.remove_image', 'O\'chirish')}
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <input
-                                        ref={signFileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const f = e.target.files?.[0];
-                                            if (f) {
-                                                setSignFile(f);
-                                                setSignPreview(URL.createObjectURL(f));
-                                            }
-                                        }}
-                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
-                                    />
-                                    <Input
-                                        value={signImage}
-                                        onChange={(e) => {
-                                            setSignImage(e.target.value);
-                                            if (e.target.value) setSignPreview(e.target.value);
-                                        }}
-                                        placeholder="/storage/signs/... yoki URL"
-                                        className="text-xs"
-                                    />
+                            ) : (
+                                <div
+                                    onClick={() => signFileInputRef.current?.click()}
+                                    className="group cursor-pointer rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary p-4 flex flex-col items-center justify-center gap-1.5 bg-gray-50/50 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-800/80 transition-all text-center"
+                                >
+                                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                                        <UploadCloud className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                        {t('tests.upload_image_hint', 'Rasm yuklash uchun bosing')}
+                                    </span>
+                                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                                        PNG, JPG, WEBP (maks. 5MB)
+                                    </span>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         <div>
@@ -1592,42 +1707,73 @@ export default function TestsIndex({
                             />
                         </div>
 
-                        {/* Image file or URL */}
+                        {/* Image file upload only */}
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-semibold">{t('tests.image_file_or_url', 'Rasm (Fayl yoki Havola)')}</Label>
-                            <div className="flex items-center gap-3">
-                                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 shrink-0">
-                                    {roadLinePreview ? (
-                                        <img src={roadLinePreview} alt="Preview" className="w-full h-full object-contain" />
-                                    ) : (
-                                        <ImageIcon className="w-5 h-5 text-gray-400" />
-                                    )}
+                            <Label className="text-xs font-semibold">{t('tests.image_file', 'Rasm')}</Label>
+                            <input
+                                ref={lineFileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleRoadLineImageChange}
+                                className="hidden"
+                            />
+                            {roadLinePreview ? (
+                                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-2.5 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
+                                            <img
+                                                src={roadLinePreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {roadLineFile ? roadLineFile.name : t('tests.current_image', 'Joriy rasm')}
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                                {roadLineFile ? `${(roadLineFile.size / 1024).toFixed(0)} KB` : t('tests.image_ready', 'Rasm biriktirilgan')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => lineFileInputRef.current?.click()}
+                                            className="h-8 px-2.5 text-xs"
+                                        >
+                                            {t('tests.change_image', 'Almashtirish')}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleRemoveRoadLineImage}
+                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                            {t('tests.remove_image', 'O\'chirish')}
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <input
-                                        ref={lineFileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const f = e.target.files?.[0];
-                                            if (f) {
-                                                setRoadLineFile(f);
-                                                setRoadLinePreview(URL.createObjectURL(f));
-                                            }
-                                        }}
-                                        className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
-                                    />
-                                    <Input
-                                        value={roadLineImage}
-                                        onChange={(e) => {
-                                            setRoadLineImage(e.target.value);
-                                            if (e.target.value) setRoadLinePreview(e.target.value);
-                                        }}
-                                        placeholder="/storage/road_lines/... yoki URL"
-                                        className="text-xs"
-                                    />
+                            ) : (
+                                <div
+                                    onClick={() => lineFileInputRef.current?.click()}
+                                    className="group cursor-pointer rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary p-4 flex flex-col items-center justify-center gap-1.5 bg-gray-50/50 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-800/80 transition-all text-center"
+                                >
+                                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                                        <UploadCloud className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                        {t('tests.upload_image_hint', 'Rasm yuklash uchun bosing')}
+                                    </span>
+                                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                                        PNG, JPG, WEBP (maks. 5MB)
+                                    </span>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         <div>

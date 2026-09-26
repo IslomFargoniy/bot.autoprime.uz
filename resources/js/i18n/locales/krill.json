@@ -748,6 +748,14 @@
     "start_attempt": "Бошлаш",
     "retake_exam": "Қайта топшириш",
     "all_tickets": "Барча билетлар",
-    "time_left": "Қолган вақт"
+    "time_left": "Қолган вақт",
+    "no_image": "Расм йўқ",
+    "remove_image": "Расмни олиб ташлаш",
+    "upload_image": "Расм юклаш",
+    "change_image": "Расмни алмаштириш",
+    "image_file": "Расм",
+    "upload_image_hint": "Расм юклаш учун босинг",
+    "current_image": "Жорий расм",
+    "image_ready": "Расм бириктирилган"
   }
 }

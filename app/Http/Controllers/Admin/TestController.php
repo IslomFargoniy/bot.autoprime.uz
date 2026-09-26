@@ -209,8 +209,8 @@ class TestController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('questions', 'public');
             $imageUrl = '/storage/'.$path;
-        } elseif ($request->filled('image_url')) {
-            $imageUrl = $validated['image_url'];
+        } elseif ($request->boolean('remove_image')) {
+            $imageUrl = null;
         }
 
         DB::transaction(function () use ($question, $validated, $imageUrl) {
@@ -305,8 +305,8 @@ class TestController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('signs', 'public');
             $imageUrl = '/storage/'.$path;
-        } elseif ($request->filled('image_url')) {
-            $imageUrl = $validated['image_url'];
+        } elseif ($request->boolean('remove_image')) {
+            $imageUrl = null;
         }
 
         $sign->update([
@@ -382,8 +382,8 @@ class TestController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('road_lines', 'public');
             $imageUrl = '/storage/'.$path;
-        } elseif ($request->filled('image_url')) {
-            $imageUrl = $validated['image_url'];
+        } elseif ($request->boolean('remove_image')) {
+            $imageUrl = null;
         }
 
         $roadLine->update([
