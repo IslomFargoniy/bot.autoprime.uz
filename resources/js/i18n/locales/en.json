@@ -748,6 +748,14 @@
     "start_attempt": "Start",
     "retake_exam": "Retake Exam",
     "all_tickets": "All Tickets",
-    "time_left": "Time Left"
+    "time_left": "Time Left",
+    "no_image": "No Image",
+    "remove_image": "Remove Image",
+    "upload_image": "Upload Image",
+    "change_image": "Change Image",
+    "image_file": "Image",
+    "upload_image_hint": "Click to upload an image",
+    "current_image": "Current image",
+    "image_ready": "Image attached"
   }
 }
