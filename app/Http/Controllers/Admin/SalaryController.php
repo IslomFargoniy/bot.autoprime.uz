@@ -250,7 +250,7 @@ class SalaryController extends Controller
                 ['is_active' => true]
             );
 
-            Expense::create([
+            $expense = Expense::create([
                 'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
                 'cash_register_id' => $lockedRegister->id,
                 'expense_category_id' => $category->id,

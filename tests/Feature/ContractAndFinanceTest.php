@@ -526,3 +526,27 @@ test('cash shift can be opened, closed and prevents duplicate active shifts', fu
     ]);
     $closeAgainResponse->assertSessionHasErrors('shift');
 });
+
+test('salary adjustments of every supported type can be stored', function (string $type, bool $isDeduction) {
+    $branch = Branch::firstOrCreate(['code' => 'adjust-branch'], ['name' => 'Tuzatma Filial', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+    $employee = User::factory()->create(['role' => 'instructor', 'branch_id' => $branch->id, 'salary_balance' => 1000000]);
+
+    $this->actingAs($admin)->post(route('salaries.store-adjustment'), [
+        'user_id' => $employee->id,
+        'period' => '2026-09',
+        'type' => $type,
+        'amount' => 100000,
+        'description' => 'Tuzatma',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $salary = Salary::where('user_id', $employee->id)->first();
+    expect($salary)->not->toBeNull()
+        ->and($salary->salary_type)->toBe($type)
+        ->and((bool) $salary->is_deduction)->toBe($isDeduction);
+})->with([
+    'bonus' => ['bonus', false],
+    'kpi' => ['kpi', false],
+    'fine' => ['fine', true],
+    'advance' => ['advance', true],
+]);

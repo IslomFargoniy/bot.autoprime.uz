@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\Lead;
 use App\Models\Student;
 use App\Services\BranchSessionService;
+use App\Services\DocumentNumberService;
 use App\Services\TelegramService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -85,7 +86,7 @@ class LeadController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
             'category' => 'nullable|string|in:A,B,C,BC,D,E',
-            'source' => 'nullable|string|max:50',
+            'source' => 'nullable|string|in:telegram_bot,website,instagram,recommendation,walk_in,reception_manual',
             'notes' => 'nullable|string',
         ]);
 
@@ -93,7 +94,6 @@ class LeadController extends Controller
 
         Lead::create([
             'branch_id' => $targetBranchId,
-            'created_by_user_id' => $request->user()->id,
             'full_name' => $validated['full_name'],
             'phone' => $validated['phone'],
             'category' => $validated['category'] ?? 'B',
@@ -131,6 +131,18 @@ class LeadController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
         ]);
 
+        if ($lead->stage === 'contract_signed' || $lead->student_id) {
+            return redirect()->back()->withErrors([
+                'lead' => "Bu lid allaqachon o'quvchiga aylantirilgan.",
+            ]);
+        }
+
+        if (Student::where('phone', $lead->phone)->exists()) {
+            return redirect()->back()->withErrors([
+                'phone' => "Bu telefon raqami ({$lead->phone}) bilan o'quvchi allaqachon mavjud.",
+            ]);
+        }
+
         $contractType = ContractType::findOrFail($validated['contract_type_id']);
         $branchId = $validated['branch_id'] ?? $lead->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
         $discount = (float) ($validated['discount_amount'] ?? 0);
@@ -163,8 +175,7 @@ class LeadController extends Controller
             ]);
 
             // Generate Contract number
-            $contractCount = Contract::count() + 1;
-            $contractNumber = 'AP-'.date('Y').'-'.str_pad((string) $contractCount, 4, '0', STR_PAD_LEFT);
+            $contractNumber = DocumentNumberService::nextContractNumber();
 
             // Create Contract
             $contract = Contract::create([
@@ -193,8 +204,8 @@ class LeadController extends Controller
             // Update Lead
             $lead->update([
                 'stage' => 'contract_signed',
-                'converted_student_id' => $student->id,
-                'converted_at' => now(),
+                'student_id' => $student->id,
+                'contract_id' => $contract->id,
             ]);
         });
 

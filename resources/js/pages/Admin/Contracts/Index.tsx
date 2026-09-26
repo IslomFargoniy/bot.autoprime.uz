@@ -57,7 +57,7 @@ interface Contract {
     debt_amount: number | string;
     payment_percentage: number;
     payment_badge_color: 'white' | 'red' | 'yellow' | 'green';
-    status: 'draft' | 'active' | 'completed' | 'cancelled';
+    status: 'active' | 'completed' | 'cancelled' | 'frozen';
     payment_status: 'unpaid' | 'partial' | 'paid';
     contract_date: string;
     payments?: ContractPayment[];

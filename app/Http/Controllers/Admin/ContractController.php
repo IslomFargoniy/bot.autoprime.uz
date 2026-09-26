@@ -14,6 +14,7 @@ use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Services\BranchSessionService;
+use App\Services\DocumentNumberService;
 use App\Services\TelegramService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -130,38 +131,41 @@ class ContractController extends Controller
         $total = (float) $contractType->price;
         $final = max(0, $total - $discount);
 
-        $contractCount = Contract::count() + 1;
-        $contractNumber = 'AP-'.date('Y').'-'.str_pad((string) $contractCount, 4, '0', STR_PAD_LEFT);
+        $groupId = $validated['group_id'] ?? null;
 
-        $contract = Contract::create([
-            'branch_id' => $branchId,
-            'student_id' => $student->id,
-            'contract_type_id' => $contractType->id,
-            'group_id' => $validated['group_id'] ?? $student->group_id,
-            'created_by_user_id' => $request->user()->id,
-            'contract_number' => $contractNumber,
-            'contract_date' => now()->toDateString(),
-            'start_date' => $validated['start_date'] ?? null,
-            'end_date' => $validated['end_date'] ?? null,
-            'has_theory' => $contractType->has_theory,
-            'has_driving' => $contractType->has_driving,
-            'has_lms' => $contractType->has_lms,
-            'required_driving_lessons' => $contractType->required_driving_lessons,
-            'required_theory_lessons' => $contractType->required_theory_lessons,
-            'total_amount' => $total,
-            'discount_amount' => $discount,
-            'final_amount' => $final,
-            'paid_amount' => 0,
-            'debt_amount' => $final,
-            'overpaid_amount' => 0,
-            'status' => 'active',
-            'payment_status' => 'unpaid',
-            'terms' => $validated['terms'] ?? null,
-        ]);
+        $contract = DB::transaction(function () use ($validated, $request, $student, $contractType, $branchId, $groupId, $total, $discount, $final) {
+            $contract = Contract::create([
+                'branch_id' => $branchId,
+                'student_id' => $student->id,
+                'contract_type_id' => $contractType->id,
+                'group_id' => $groupId ?? $student->group_id,
+                'created_by_user_id' => $request->user()->id,
+                'contract_number' => DocumentNumberService::nextContractNumber(),
+                'contract_date' => now()->toDateString(),
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
+                'has_theory' => $contractType->has_theory,
+                'has_driving' => $contractType->has_driving,
+                'has_lms' => $contractType->has_lms,
+                'required_driving_lessons' => $contractType->required_driving_lessons,
+                'required_theory_lessons' => $contractType->required_theory_lessons,
+                'total_amount' => $total,
+                'discount_amount' => $discount,
+                'final_amount' => $final,
+                'paid_amount' => 0,
+                'debt_amount' => $final,
+                'overpaid_amount' => 0,
+                'status' => 'active',
+                'payment_status' => 'unpaid',
+                'terms' => $validated['terms'] ?? null,
+            ]);
 
-        if ($validated['group_id'] && ! $student->group_id) {
-            $student->update(['group_id' => $validated['group_id']]);
-        }
+            if ($groupId && ! $student->group_id) {
+                $student->update(['group_id' => $groupId]);
+            }
+
+            return $contract;
+        });
 
         $telegramService->sendContractSignedNotification($contract);
 
@@ -185,7 +189,7 @@ class ContractController extends Controller
     public function update(Request $request, Contract $contract): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => 'sometimes|required|in:draft,active,completed,cancelled',
+            'status' => 'sometimes|required|in:active,completed,cancelled,frozen',
             'terms' => 'nullable|string',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
@@ -237,7 +241,7 @@ class ContractController extends Controller
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
             $lockedContract = Contract::with('student')->where('id', $contract->id)->lockForUpdate()->first();
 
-            $receiptNumber = 'REF-'.date('Ymd').'-'.str_pad((string) (Payment::where('payment_type', 'refund')->count() + 1), 4, '0', STR_PAD_LEFT);
+            $receiptNumber = DocumentNumberService::nextRefundNumber();
 
             // 1. Create refund payment
             Payment::create([
@@ -260,7 +264,7 @@ class ContractController extends Controller
                 ['is_active' => true]
             );
 
-            Expense::create([
+            $expense = Expense::create([
                 'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
                 'cash_register_id' => $lockedRegister->id,
                 'expense_category_id' => $category->id,

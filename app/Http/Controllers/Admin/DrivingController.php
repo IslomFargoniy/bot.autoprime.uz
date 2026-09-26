@@ -187,7 +187,7 @@ class DrivingController extends Controller
         if (! empty($validated['vehicle_id'])) {
             $vehicle = Vehicle::find($validated['vehicle_id']);
         } else {
-            $vehicle = Vehicle::where('default_instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+            $vehicle = Vehicle::where('instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
         }
 
         if ($vehicle) {

@@ -16,6 +16,7 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\VehicleMaintenance;
 use App\Services\BranchSessionService;
+use App\Services\DocumentNumberService;
 use App\Services\TelegramService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -174,7 +175,7 @@ class FinanceController extends Controller
         DB::transaction(function () use ($validated, $cashRegister, $contract, $request, &$payment) {
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
 
-            $receiptNumber = 'REC-'.date('Ymd').'-'.str_pad((string) (Payment::count() + 1), 4, '0', STR_PAD_LEFT);
+            $receiptNumber = DocumentNumberService::nextReceiptNumber();
 
             $payment = Payment::create([
                 'branch_id' => $contract->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
@@ -435,6 +436,7 @@ class FinanceController extends Controller
         }
 
         $formattedSum = number_format($totalSweptAmount, 0, '', ' ');
+
         return redirect()->back()->with('success', "Kassalar muvaffaqiyatli bo'shatildi! Jami {$formattedSum} UZS Superadmin kassalariga o'tkazildi.");
     }
 

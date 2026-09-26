@@ -9,6 +9,7 @@ use App\Models\Certificate;
 use App\Models\Contract;
 use App\Models\Driving;
 use App\Services\BranchSessionService;
+use App\Services\DocumentNumberService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -156,8 +157,7 @@ class CertificateController extends Controller
         }
 
         // Generate Certificate
-        $certCount = Certificate::count() + 1;
-        $certNumber = 'CERT-'.date('Y').'-'.str_pad((string) $certCount, 4, '0', STR_PAD_LEFT);
+        $certNumber = DocumentNumberService::nextCertificateNumber();
         $verifyHash = hash('sha256', $student->id.$contract->id.uniqid().config('app.key'));
 
         Certificate::create([
