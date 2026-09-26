@@ -17,6 +17,7 @@ import {
     ShieldCheck,
     Search,
     RotateCcw,
+    ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 
 interface CashRegister {
     id: number;
@@ -436,34 +438,34 @@ export default function FinanceIndex({
     };
 
     return (
-        <div className="p-6">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
 
             {/* Page Title & Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
-                <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => openSweepModal()} variant="brand" className="text-xs">
-                        <ArrowDownToLine className="w-4 h-4 mr-1.5" />
-                        {t('finance.empty_registers', 'Kassalarni bo\'shatish')}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                    <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
+                        <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
+                        <span className="truncate">{t('finance.empty_registers', 'Kassalarni bo\'shatish')}</span>
                     </Button>
-                    <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white">
-                        <ArrowDownRight className="w-4 h-4 mr-1.5" />
-                        {t('finance.accept_payment', 'To\'lov Qabul Qilish')}
+                    <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-9 justify-center">
+                        <ArrowDownRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <span className="truncate">{t('finance.accept_payment', 'To\'lov Qabul Qilish')}</span>
                     </Button>
-                    <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40">
-                        <ArrowUpRight className="w-4 h-4 mr-1.5" />
-                        {t('finance.add_expense', 'Chiqim Qilish')}
+                    <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-9 justify-center">
+                        <ArrowUpRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <span className="truncate">{t('finance.add_expense', 'Chiqim Qilish')}</span>
                     </Button>
-                    <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs">
-                        <ArrowLeftRight className="w-4 h-4 mr-1.5" />
-                        {t('finance.transfer', 'Transfer')}
+                    <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs h-9 justify-center">
+                        <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <span className="truncate">{t('finance.transfer', 'Transfer')}</span>
                     </Button>
                 </div>
             </div>
 
             {/* Cash Registers Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 {cashRegisters.map((reg) => {
                     const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
                     const canSweep = !isSuperadmin && Number(reg.balance) > 0;
@@ -471,40 +473,40 @@ export default function FinanceIndex({
                     return (
                         <div
                             key={reg.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
+                            className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
                         >
                             <div>
                                 <div className="flex items-center justify-between gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                    <div className="flex items-center gap-1.5">
-                                        {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
-                                        <span className="font-medium">{reg.type?.name || 'Kassa'}</span>
+                                    <div className="flex items-center gap-1.5 truncate">
+                                        {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500 shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
+                                        <span className="font-medium truncate">{reg.type?.name || 'Kassa'}</span>
                                     </div>
                                     {isSuperadmin ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 shrink-0">
                                             <ShieldCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-                                            {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                            {t('finance.superadmin_cash_register', 'Superadmin')}
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">
                                             <Building2 className="w-3 h-3 text-gray-500" />
                                             {reg.branch?.name || t('branches.unknown', 'Filial')}
                                         </span>
                                     )}
                                 </div>
-                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{reg.name}</h3>
-                                <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                                <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">{reg.name}</h3>
+                                <p className="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
                                     {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
                                 </p>
                             </div>
 
                             {/* Card Footer Actions: Tarix and Bo'shatish */}
-                            <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60">
+                            <div className={`mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 ${canSweep ? 'grid grid-cols-2 gap-2' : 'flex justify-end'}`}>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleSelectRegisterHistory(reg.id)}
-                                    className="h-8 gap-1.5 text-xs"
+                                    className="h-8 gap-1.5 text-xs justify-center"
                                 >
                                     <History className="w-3.5 h-3.5 text-muted-foreground" />
                                     <span>{t('finance.view_history', 'Tarix')}</span>
@@ -516,7 +518,7 @@ export default function FinanceIndex({
                                         variant="brand"
                                         size="sm"
                                         onClick={() => openSweepModal(reg.id)}
-                                        className="h-8 gap-1.5 text-xs"
+                                        className="h-8 gap-1.5 text-xs justify-center"
                                     >
                                         <ArrowDownToLine className="w-3.5 h-3.5" />
                                         <span>{t('finance.empty_this_register', 'Bo\'shatish')}</span>
@@ -529,10 +531,10 @@ export default function FinanceIndex({
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex flex-wrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6 text-xs font-medium w-full md:w-max gap-1">
+            <div className="flex items-center overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-medium w-full sm:w-max gap-1">
                 <button
                     onClick={() => setActiveTab('registers')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
                         activeTab === 'registers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
@@ -540,7 +542,7 @@ export default function FinanceIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
                         activeTab === 'history' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
@@ -548,7 +550,7 @@ export default function FinanceIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('payments')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
                         activeTab === 'payments' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
@@ -556,7 +558,7 @@ export default function FinanceIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('expenses')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
                         activeTab === 'expenses' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
@@ -564,7 +566,7 @@ export default function FinanceIndex({
                 </button>
                 <button
                     onClick={() => setActiveTab('transfers')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
                         activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                 >
@@ -575,80 +577,82 @@ export default function FinanceIndex({
             {/* Tab: Registers Overview */}
             {activeTab === 'registers' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('finance.register_name', 'Kassa Nomi')}</TableHead>
-                                <TableHead>{t('finance.type', 'Turi')}</TableHead>
-                                <TableHead>{t('finance.branch', 'Filial')}</TableHead>
-                                <TableHead>{t('finance.balance', 'Balans')}</TableHead>
-                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {cashRegisters.length === 0 ? (
-                                <TableEmpty
-                                    colSpan={5}
-                                    icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_registers', 'Kassalar topilmadi')}
-                                />
-                            ) : (
-                                cashRegisters.map((reg) => {
-                                    const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
-                                    const canSweep = !isSuperadmin && Number(reg.balance) > 0;
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t('finance.register_name', 'Kassa Nomi')}</TableHead>
+                                    <TableHead>{t('finance.type', 'Turi')}</TableHead>
+                                    <TableHead>{t('finance.branch', 'Filial')}</TableHead>
+                                    <TableHead>{t('finance.balance', 'Balans')}</TableHead>
+                                    <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {cashRegisters.length === 0 ? (
+                                    <TableEmpty
+                                        colSpan={5}
+                                        icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                        title={t('finance.no_registers', 'Kassalar topilmadi')}
+                                    />
+                                ) : (
+                                    cashRegisters.map((reg) => {
+                                        const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
+                                        const canSweep = !isSuperadmin && Number(reg.balance) > 0;
 
-                                    return (
-                                        <TableRow key={reg.id}>
-                                            <TableCell className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                                <Wallet className="w-4 h-4 text-emerald-600" />
-                                                <span>{reg.name}</span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                                    {reg.type?.name || '-'}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                {isSuperadmin ? (
-                                                    <span className="inline-flex items-center gap-1 font-semibold text-xs text-indigo-600 dark:text-indigo-400">
-                                                        <ShieldCheck className="w-3.5 h-3.5" />
-                                                        {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                        return (
+                                            <TableRow key={reg.id}>
+                                                <TableCell className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
+                                                    <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                                                    <span>{reg.name}</span>
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                                        {reg.type?.name || '-'}
                                                     </span>
-                                                ) : (
-                                                    reg.branch?.name || '-'
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
-                                                {Number(reg.balance).toLocaleString('uz-UZ')} UZS
-                                            </TableCell>
-                                            <TableCell className="text-right space-x-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleSelectRegisterHistory(reg.id)}
-                                                    className="h-8 gap-1 text-xs"
-                                                >
-                                                    <History className="w-3.5 h-3.5" />
-                                                    {t('finance.view_history', 'Tarix')}
-                                                </Button>
-                                                {canSweep && (
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    {isSuperadmin ? (
+                                                        <span className="inline-flex items-center gap-1 font-semibold text-xs text-indigo-600 dark:text-indigo-400">
+                                                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                                            {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                                        </span>
+                                                    ) : (
+                                                        reg.branch?.name || '-'
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
+                                                    {Number(reg.balance).toLocaleString('uz-UZ')} UZS
+                                                </TableCell>
+                                                <TableCell className="text-right space-x-2 whitespace-nowrap">
                                                     <Button
                                                         size="sm"
-                                                        variant="brand"
-                                                        onClick={() => openSweepModal(reg.id)}
+                                                        variant="outline"
+                                                        onClick={() => handleSelectRegisterHistory(reg.id)}
                                                         className="h-8 gap-1 text-xs"
                                                     >
-                                                        <ArrowDownToLine className="w-3.5 h-3.5" />
-                                                        {t('finance.empty_this_register', 'Bo\'shatish')}
+                                                        <History className="w-3.5 h-3.5" />
+                                                        {t('finance.view_history', 'Tarix')}
                                                     </Button>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })
-                            )}
-                        </TableBody>
-                    </Table>
+                                                    {canSweep && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="brand"
+                                                            onClick={() => openSweepModal(reg.id)}
+                                                            className="h-8 gap-1 text-xs"
+                                                        >
+                                                            <ArrowDownToLine className="w-3.5 h-3.5" />
+                                                            {t('finance.empty_this_register', 'Bo\'shatish')}
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             )}
 
@@ -656,8 +660,8 @@ export default function FinanceIndex({
             {activeTab === 'history' && (
                 <div className="space-y-4">
                     {/* Filters Bar */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
+                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                             <div>
                                 <Label htmlFor="hist_reg" className="text-xs mb-1 block">
                                     {t('finance.cash_register', 'Kassa')}
@@ -725,135 +729,264 @@ export default function FinanceIndex({
                             </div>
 
                             <div className="flex gap-2">
-                                <Button type="submit" variant="brand" size="sm" className="h-9 gap-1 flex-1">
+                                <Button type="submit" variant="brand" size="sm" className="h-9 gap-1 flex-1 justify-center">
                                     <Search className="w-3.5 h-3.5" />
                                     <span>{t('common.filter', 'Filtrlash')}</span>
                                 </Button>
-                                <Button type="button" variant="outline" size="sm" onClick={handleResetHistory} className="h-9" title={t('common.reset', 'Tozalash')}>
+                                <Button type="button" variant="outline" size="sm" onClick={handleResetHistory} className="h-9 px-3" title={t('common.reset', 'Tozalash')}>
                                     <RotateCcw className="w-3.5 h-3.5" />
                                 </Button>
                             </div>
                         </form>
                     </div>
 
-                    {/* Transactions Table */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-12">№</TableHead>
-                                    <TableHead>{t('finance.date', 'Sana va Vaqt')}</TableHead>
-                                    <TableHead>{t('finance.cash_register', 'Kassa')}</TableHead>
-                                    <TableHead>{t('finance.operation_type', 'Amal turi')}</TableHead>
-                                    <TableHead>{t('finance.amount', 'Summa')}</TableHead>
-                                    <TableHead className="font-semibold text-gray-900 dark:text-white">
-                                        {t('finance.balance_after', 'Amaldan keyingi balans')}
-                                    </TableHead>
-                                    <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
-                                    <TableHead>{t('finance.user', 'Xodim')}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {transactions.data.length === 0 ? (
-                                    <TableEmpty
-                                        colSpan={8}
-                                        icon={<History className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                        title={t('finance.no_transactions', 'Kassa amallari tarixi topilmadi')}
-                                        description={t('finance.no_transactions_desc', 'Kassada kirim, chiqim yoki transfer amallari bajarilganda bu yerda aks etadi')}
-                                    />
-                                ) : (
-                                    transactions.data.map((tx, idx) => (
-                                        <TableRow key={tx.id}>
-                                            <TableCell className="text-gray-400 font-mono text-xs">{idx + 1}</TableCell>
-                                            <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-xs whitespace-nowrap">
-                                                {tx.transacted_at ? new Date(tx.transacted_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                <div>{tx.cash_register?.name}</div>
-                                                {tx.cash_register?.branch && (
-                                                    <div className="text-[10px] text-gray-400">{tx.cash_register.branch.name}</div>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {renderCategoryBadge(tx.category)}
-                                            </TableCell>
-                                            <TableCell className="whitespace-nowrap font-mono font-bold">
-                                                {tx.type === 'in' ? (
-                                                    <span className="text-emerald-600 dark:text-emerald-400">
-                                                        +{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                    {/* Desktop & Tablet Transactions Table */}
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-12">№</TableHead>
+                                        <TableHead>{t('finance.date', 'Sana va Vaqt')}</TableHead>
+                                        <TableHead>{t('finance.cash_register', 'Kassa')}</TableHead>
+                                        <TableHead>{t('finance.operation_type', 'Amal turi')}</TableHead>
+                                        <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                        <TableHead className="font-semibold text-gray-900 dark:text-white">
+                                            {t('finance.balance_after', 'Amaldan keyingi balans')}
+                                        </TableHead>
+                                        <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
+                                        <TableHead>{t('finance.user', 'Xodim')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {transactions.data.length === 0 ? (
+                                        <TableEmpty
+                                            colSpan={8}
+                                            icon={<History className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                            title={t('finance.no_transactions', 'Kassa amallari tarixi topilmadi')}
+                                            description={t('finance.no_transactions_desc', 'Kassada kirim, chiqim yoki transfer amallari bajarilganda bu yerda aks etadi')}
+                                        />
+                                    ) : (
+                                        transactions.data.map((tx, idx) => (
+                                            <TableRow key={tx.id}>
+                                                <TableCell className="text-gray-400 font-mono text-xs">{idx + 1}</TableCell>
+                                                <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-xs whitespace-nowrap">
+                                                    {tx.transacted_at ? new Date(tx.transacted_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                </TableCell>
+                                                <TableCell className="font-medium whitespace-nowrap">
+                                                    <div>{tx.cash_register?.name}</div>
+                                                    {tx.cash_register?.branch && (
+                                                        <div className="text-[10px] text-gray-400">{tx.cash_register.branch.name}</div>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    {renderCategoryBadge(tx.category)}
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap font-mono font-bold">
+                                                    {tx.type === 'in' ? (
+                                                        <span className="text-emerald-600 dark:text-emerald-400">
+                                                            +{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-rose-600 dark:text-rose-400">
+                                                            -{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-bold bg-gray-100 dark:bg-gray-700/80 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600">
+                                                        {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
                                                     </span>
-                                                ) : (
-                                                    <span className="text-rose-600 dark:text-rose-400">
-                                                        -{Number(tx.amount).toLocaleString('uz-UZ')} UZS
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="whitespace-nowrap">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-bold bg-gray-100 dark:bg-gray-700/80 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600">
-                                                    {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-gray-700 dark:text-gray-300 text-xs max-w-xs truncate">
-                                                {tx.description || '-'}
-                                            </TableCell>
-                                            <TableCell className="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">
-                                                {tx.user?.name || '-'}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
+                                                </TableCell>
+                                                <TableCell className="text-gray-700 dark:text-gray-300 text-xs max-w-xs truncate">
+                                                    {tx.description || '-'}
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">
+                                                    {tx.user?.name || '-'}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
+
+                    {/* Mobile Transactions Card Feed */}
+                    <div className="md:hidden space-y-3">
+                        {transactions.data.length === 0 ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                                <History className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_transactions', 'Kassa amallari tarixi topilmadi')}</p>
+                                <p className="text-xs text-gray-400 mt-1">{t('finance.no_transactions_desc', 'Kassada kirim, chiqim yoki transfer amallari bajarilganda bu yerda aks etadi')}</p>
+                            </div>
+                        ) : (
+                            transactions.data.map((tx) => (
+                                <div
+                                    key={tx.id}
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            {renderCategoryBadge(tx.category)}
+                                            <span className="text-[11px] text-gray-400 font-mono">
+                                                {tx.transacted_at ? new Date(tx.transacted_at).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                            </span>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            {tx.type === 'in' ? (
+                                                <span className="font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
+                                                    +{Number(tx.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                </span>
+                                            ) : (
+                                                <span className="font-mono font-bold text-sm sm:text-base text-rose-600 dark:text-rose-400">
+                                                    -{Number(tx.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50">
+                                        <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium truncate">
+                                            <Wallet className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                            <span className="truncate">{tx.cash_register?.name}</span>
+                                            {tx.cash_register?.branch && (
+                                                <span className="text-[10px] text-gray-400">({tx.cash_register.branch.name})</span>
+                                            )}
+                                        </div>
+                                        <div className="text-[11px] shrink-0 text-gray-500 dark:text-gray-400">
+                                            <span>{t('finance.balance_after', 'Balans')}: </span>
+                                            <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
+                                                {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {(tx.description || tx.user?.name) && (
+                                        <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg gap-2">
+                                            <span className="truncate">{tx.description || '-'}</span>
+                                            {tx.user?.name && <span className="shrink-0 font-medium text-gray-600 dark:text-gray-300">{tx.user.name}</span>}
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <Pagination links={transactions.links} />
                 </div>
             )}
 
             {/* Tab: Payments */}
             {activeTab === 'payments' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('finance.receipt', 'Chek №')}</TableHead>
-                                <TableHead>{t('finance.student', 'Talaba')}</TableHead>
-                                <TableHead>{t('finance.contract', 'Shartnoma')}</TableHead>
-                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
-                                <TableHead>{t('finance.method', 'Usul')}</TableHead>
-                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
-                                <TableHead>{t('finance.receiver', 'Qabul qildi')}</TableHead>
-                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
-                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {payments.data.length === 0 ? (
-                                <TableEmpty
-                                    colSpan={9}
-                                    icon={<ArrowDownRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_payments', 'To\'lovlar topilmadi')}
-                                />
-                            ) : (
-                                payments.data.map((p) => (
-                                    <TableRow key={p.id}>
-                                        <TableCell className="font-mono font-medium">{p.receipt_number}</TableCell>
-                                        <TableCell className="font-medium text-gray-900 dark:text-white">
-                                            {p.student?.full_name}
-                                        </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">
-                                            {p.contract?.contract_number ? `#${p.contract.contract_number}` : '-'}
-                                        </TableCell>
-                                        <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
-                                            +{Number(p.amount).toLocaleString('uz-UZ')} UZS
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                <div className="space-y-4">
+                    {/* Desktop & Tablet Table */}
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t('finance.receipt', 'Chek №')}</TableHead>
+                                        <TableHead>{t('finance.student', 'Talaba')}</TableHead>
+                                        <TableHead>{t('finance.contract', 'Shartnoma')}</TableHead>
+                                        <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                        <TableHead>{t('finance.method', 'Usul')}</TableHead>
+                                        <TableHead>{t('finance.register', 'Kassa')}</TableHead>
+                                        <TableHead>{t('finance.receiver', 'Qabul qildi')}</TableHead>
+                                        <TableHead>{t('finance.date', 'Sana')}</TableHead>
+                                        <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {payments.data.length === 0 ? (
+                                        <TableEmpty
+                                            colSpan={9}
+                                            icon={<ArrowDownRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                            title={t('finance.no_payments', 'To\'lovlar topilmadi')}
+                                        />
+                                    ) : (
+                                        payments.data.map((p) => (
+                                            <TableRow key={p.id}>
+                                                <TableCell className="font-mono font-medium whitespace-nowrap">{p.receipt_number}</TableCell>
+                                                <TableCell className="font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                                    {p.student?.full_name}
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                                    {p.contract?.contract_number ? `#${p.contract.contract_number}` : '-'}
+                                                </TableCell>
+                                                <TableCell className="font-bold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
+                                                    +{Number(p.amount).toLocaleString('uz-UZ')} UZS
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                        {p.payment_method}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.cash_register?.name}</TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.received_by?.name || '-'}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{p.paid_at}</TableCell>
+                                                <TableCell className="text-right whitespace-nowrap">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleDeletePayment(p)}
+                                                        className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                        title={t('common.delete', "O'chirish")}
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Mobile Payments Card Feed */}
+                    <div className="md:hidden space-y-3">
+                        {payments.data.length === 0 ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                                <ArrowDownRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_payments', 'To\'lovlar topilmadi')}</p>
+                            </div>
+                        ) : (
+                            payments.data.map((p) => (
+                                <div
+                                    key={p.id}
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                            <div className="font-bold text-sm text-gray-900 dark:text-white">{p.student?.full_name || '-'}</div>
+                                            <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5">
+                                                <span>#{p.receipt_number}</span>
+                                                {p.contract?.contract_number && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <span>#{p.contract.contract_number}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <div className="font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
+                                                +{Number(p.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                            </div>
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
                                                 {p.payment_method}
                                             </span>
-                                        </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{p.cash_register?.name}</TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{p.received_by?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{p.paid_at}</TableCell>
-                                        <TableCell className="text-right">
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
+                                        <div className="truncate">
+                                            <span>{p.cash_register?.name}</span>
+                                            {p.received_by?.name && <span className="text-[11px] text-gray-400"> ({p.received_by.name})</span>}
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-[11px] font-mono">{p.paid_at}</span>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -863,49 +996,106 @@ export default function FinanceIndex({
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <Pagination links={payments.links} />
                 </div>
             )}
 
             {/* Tab: Expenses */}
             {activeTab === 'expenses' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('finance.category', 'Kategoriya')}</TableHead>
-                                <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
-                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
-                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
-                                <TableHead>{t('finance.user', 'Xodim')}</TableHead>
-                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
-                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {expenses.data.length === 0 ? (
-                                <TableEmpty
-                                    colSpan={7}
-                                    icon={<ArrowUpRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_expenses', 'Xarajatlar topilmadi')}
-                                />
-                            ) : (
-                                expenses.data.map((e) => (
-                                    <TableRow key={e.id}>
-                                        <TableCell className="font-medium">{e.category?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-700 dark:text-gray-300">{e.description}</TableCell>
-                                        <TableCell className="font-bold text-red-500 dark:text-red-400">
-                                            -{Number(e.amount).toLocaleString('uz-UZ')} UZS
-                                        </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{e.cash_register?.name}</TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{e.spent_at || e.expense_date || '-'}</TableCell>
-                                        <TableCell className="text-right">
+                <div className="space-y-4">
+                    {/* Desktop & Tablet Table */}
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t('finance.category', 'Kategoriya')}</TableHead>
+                                        <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
+                                        <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                        <TableHead>{t('finance.register', 'Kassa')}</TableHead>
+                                        <TableHead>{t('finance.user', 'Xodim')}</TableHead>
+                                        <TableHead>{t('finance.date', 'Sana')}</TableHead>
+                                        <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {expenses.data.length === 0 ? (
+                                        <TableEmpty
+                                            colSpan={7}
+                                            icon={<ArrowUpRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                            title={t('finance.no_expenses', 'Xarajatlar topilmadi')}
+                                        />
+                                    ) : (
+                                        expenses.data.map((e) => (
+                                            <TableRow key={e.id}>
+                                                <TableCell className="font-medium whitespace-nowrap">{e.category?.name || '-'}</TableCell>
+                                                <TableCell className="text-gray-700 dark:text-gray-300">{e.description}</TableCell>
+                                                <TableCell className="font-bold text-red-500 dark:text-red-400 font-mono whitespace-nowrap">
+                                                    -{Number(e.amount).toLocaleString('uz-UZ')} UZS
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.cash_register?.name}</TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.user?.name || '-'}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{e.spent_at || e.expense_date || '-'}</TableCell>
+                                                <TableCell className="text-right whitespace-nowrap">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleDeleteExpense(e)}
+                                                        className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                        title={t('common.delete', "O'chirish")}
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Mobile Expenses Card Feed */}
+                    <div className="md:hidden space-y-3">
+                        {expenses.data.length === 0 ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                                <ArrowUpRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_expenses', 'Xarajatlar topilmadi')}</p>
+                            </div>
+                        ) : (
+                            expenses.data.map((e) => (
+                                <div
+                                    key={e.id}
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
+                                                {e.category?.name || '-'}
+                                            </span>
+                                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mt-1">{e.description}</p>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <div className="font-mono font-bold text-sm sm:text-base text-rose-600 dark:text-rose-400">
+                                                -{Number(e.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
+                                        <div className="truncate">
+                                            <span>{e.cash_register?.name}</span>
+                                            {e.user?.name && <span className="text-[11px] text-gray-400"> ({e.user.name})</span>}
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-[11px] font-mono">{e.spent_at || e.expense_date || '-'}</span>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -915,51 +1105,107 @@ export default function FinanceIndex({
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <Pagination links={expenses.links} />
                 </div>
             )}
 
             {/* Tab: Transfers */}
             {activeTab === 'transfers' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('finance.from_register', 'Chiqim Kassasi')}</TableHead>
-                                <TableHead>{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</TableHead>
-                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
-                                <TableHead>{t('finance.status', 'Holat')}</TableHead>
-                                <TableHead>{t('finance.sender', 'Yubordi')}</TableHead>
-                                <TableHead>{t('finance.approver', 'Tasdiqladi')}</TableHead>
-                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
-                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transfers.data.length === 0 ? (
-                                <TableEmpty
-                                    colSpan={8}
-                                    icon={<ArrowLeftRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_transfers', 'Transferlar topilmadi')}
-                                />
-                            ) : (
-                                transfers.data.map((tr) => (
-                                    <TableRow key={tr.id}>
-                                        <TableCell className="font-medium">{tr.from_cash_register?.name}</TableCell>
-                                        <TableCell className="font-medium text-blue-600 dark:text-blue-400">
-                                            {tr.to_cash_register?.name}
-                                        </TableCell>
-                                        <TableCell className="font-bold text-gray-900 dark:text-white">
-                                            {Number(tr.amount).toLocaleString('uz-UZ')} UZS
-                                        </TableCell>
-                                        <TableCell>
+                <div className="space-y-4">
+                    {/* Desktop & Tablet Table */}
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t('finance.from_register', 'Chiqim Kassasi')}</TableHead>
+                                        <TableHead>{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</TableHead>
+                                        <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                        <TableHead>{t('finance.status', 'Holat')}</TableHead>
+                                        <TableHead>{t('finance.sender', 'Yubordi')}</TableHead>
+                                        <TableHead>{t('finance.approver', 'Tasdiqladi')}</TableHead>
+                                        <TableHead>{t('finance.date', 'Sana')}</TableHead>
+                                        <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {transfers.data.length === 0 ? (
+                                        <TableEmpty
+                                            colSpan={8}
+                                            icon={<ArrowLeftRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                            title={t('finance.no_transfers', 'Transferlar topilmadi')}
+                                        />
+                                    ) : (
+                                        transfers.data.map((tr) => (
+                                            <TableRow key={tr.id}>
+                                                <TableCell className="font-medium whitespace-nowrap">{tr.from_cash_register?.name}</TableCell>
+                                                <TableCell className="font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                                                    {tr.to_cash_register?.name}
+                                                </TableCell>
+                                                <TableCell className="font-bold text-gray-900 dark:text-white font-mono whitespace-nowrap">
+                                                    {Number(tr.amount).toLocaleString('uz-UZ')} UZS
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap">
+                                                    <span
+                                                        className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                                            tr.status === 'approved'
+                                                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                                : tr.status === 'pending'
+                                                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                                                : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
+                                                        }`}
+                                                    >
+                                                        {tr.status === 'approved' ? t('finance.approved', 'Tasdiqlangan') : tr.status === 'pending' ? t('finance.pending', 'Kutilmoqda') : t('finance.rejected', 'Rad etilgan')}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.transferred_by?.name || '-'}</TableCell>
+                                                <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.approved_by?.name || '-'}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{tr.created_at}</TableCell>
+                                                <TableCell className="text-right whitespace-nowrap">
+                                                    {tr.status === 'pending' && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="brand"
+                                                            onClick={() => handleApproveTransfer(tr)}
+                                                            className="h-7 text-xs"
+                                                        >
+                                                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                                            {t('common.confirm', 'Tasdiqlash')}
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Mobile Transfers Card Feed */}
+                    <div className="md:hidden space-y-3">
+                        {transfers.data.length === 0 ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                                <ArrowLeftRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_transfers', 'Transferlar topilmadi')}</p>
+                            </div>
+                        ) : (
+                            transfers.data.map((tr) => (
+                                <div
+                                    key={tr.id}
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
                                             <span
-                                                className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                                     tr.status === 'approved'
                                                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                                                         : tr.status === 'pending'
@@ -969,38 +1215,52 @@ export default function FinanceIndex({
                                             >
                                                 {tr.status === 'approved' ? t('finance.approved', 'Tasdiqlangan') : tr.status === 'pending' ? t('finance.pending', 'Kutilmoqda') : t('finance.rejected', 'Rad etilgan')}
                                             </span>
-                                        </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{tr.transferred_by?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400">{tr.approved_by?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500">{tr.created_at}</TableCell>
-                                        <TableCell className="text-right">
-                                            {tr.status === 'pending' && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="brand"
-                                                    onClick={() => handleApproveTransfer(tr)}
-                                                    className="h-7 text-xs"
-                                                >
-                                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                                    {t('common.confirm', 'Tasdiqlash')}
-                                                </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                            <span className="text-[11px] text-gray-400 font-mono">{tr.created_at}</span>
+                                        </div>
+                                        <div className="font-mono font-bold text-sm sm:text-base text-gray-900 dark:text-white shrink-0">
+                                            {Number(tr.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg">
+                                        <span className="truncate">{tr.from_cash_register?.name}</span>
+                                        <ArrowRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                        <span className="text-blue-600 dark:text-blue-400 truncate">{tr.to_cash_register?.name}</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
+                                        <div className="text-[11px] truncate">
+                                            <span>{tr.transferred_by?.name || '-'}</span>
+                                            {tr.approved_by?.name && <span> → {tr.approved_by.name}</span>}
+                                        </div>
+                                        {tr.status === 'pending' && (
+                                            <Button
+                                                size="sm"
+                                                variant="brand"
+                                                onClick={() => handleApproveTransfer(tr)}
+                                                className="h-7 text-xs px-2.5"
+                                            >
+                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                                {t('common.confirm', 'Tasdiqlash')}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <Pagination links={transfers.links} />
                 </div>
             )}
 
             {/* Sweep Modal (Kassalarni bo'shatish) */}
             <Dialog open={showSweepModal} onOpenChange={setShowSweepModal}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <ArrowDownToLine className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                            {t('finance.sweep_title', 'Kassalarni bo\'shatish va Superadminga o\'tkazish')}
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <ArrowDownToLine className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>{t('finance.sweep_title', 'Kassalarni bo\'shatish va Superadminga o\'tkazish')}</span>
                         </DialogTitle>
                     </DialogHeader>
 
@@ -1016,8 +1276,8 @@ export default function FinanceIndex({
                                 </div>
                             ) : (
                                 sweepItems.map((item, idx) => (
-                                    <div key={item.cash_register_id} className={`p-3 flex items-center justify-between gap-3 transition-colors ${item.selected ? 'bg-amber-50/30 dark:bg-amber-950/20' : 'bg-white dark:bg-gray-800'}`}>
-                                        <div className="flex items-center gap-3">
+                                    <div key={item.cash_register_id} className={`p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 transition-colors ${item.selected ? 'bg-amber-50/40 dark:bg-amber-950/20' : 'bg-white dark:bg-gray-800'}`}>
+                                        <div className="flex items-start sm:items-center gap-2.5">
                                             <input
                                                 type="checkbox"
                                                 id={`sweep_item_${item.cash_register_id}`}
@@ -1027,13 +1287,13 @@ export default function FinanceIndex({
                                                     updated[idx].selected = e.target.checked;
                                                     setSweepItems(updated);
                                                 }}
-                                                className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-gray-300"
+                                                className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-gray-300 mt-1 sm:mt-0 shrink-0"
                                             />
                                             <div>
-                                                <label htmlFor={`sweep_item_${item.cash_register_id}`} className="font-semibold text-gray-900 dark:text-white cursor-pointer block">
+                                                <label htmlFor={`sweep_item_${item.cash_register_id}`} className="font-semibold text-gray-900 dark:text-white cursor-pointer block text-xs sm:text-sm">
                                                     {item.name}
                                                 </label>
-                                                <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 flex-wrap">
                                                     <span>{item.branch_name}</span>
                                                     <span>•</span>
                                                     <span className="font-medium text-amber-700 dark:text-amber-400">
@@ -1043,9 +1303,10 @@ export default function FinanceIndex({
                                             </div>
                                         </div>
 
-                                        <div className="text-right">
-                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">
-                                                {t('finance.balance', 'Balans')}: <span className="font-bold text-gray-900 dark:text-white font-mono">{Number(item.balance).toLocaleString('uz-UZ')} UZS</span>
+                                        <div className="flex items-center justify-between sm:justify-end gap-3 pl-6 sm:pl-0">
+                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 sm:text-right">
+                                                <span className="sm:hidden">{t('finance.balance', 'Balans')}: </span>
+                                                <span className="font-bold text-gray-900 dark:text-white font-mono">{Number(item.balance).toLocaleString('uz-UZ')} UZS</span>
                                             </div>
                                             {item.selected && (
                                                 <Input
@@ -1058,7 +1319,7 @@ export default function FinanceIndex({
                                                     }}
                                                     max={item.balance}
                                                     min={0.01}
-                                                    className="w-36 h-8 text-xs font-mono font-bold text-right"
+                                                    className="w-32 sm:w-36 h-8 text-xs font-mono font-bold text-right"
                                                 />
                                             )}
                                         </div>
@@ -1078,21 +1339,21 @@ export default function FinanceIndex({
                             />
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t">
                             <div>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">{t('finance.sweep_total', 'Jami o\'tkazilayotgan mablag\'')}:</span>
-                                <div className="text-lg font-extrabold text-amber-600 dark:text-amber-400 font-mono">
+                                <div className="text-base sm:text-lg font-extrabold text-amber-600 dark:text-amber-400 font-mono">
                                     {totalSweepAmount.toLocaleString('uz-UZ')} UZS
                                 </div>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2">
                                 <Button type="button" variant="outline" onClick={() => setShowSweepModal(false)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
                                 <Button type="submit" variant="brand" disabled={isSweeping || totalSweepAmount <= 0}>
-                                    <ArrowDownToLine className="w-4 h-4 mr-1.5" />
-                                    {t('finance.confirm_sweep', 'Bo\'shatish va o\'tkazish')}
+                                    <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('finance.confirm_sweep', 'Bo\'shatish va o\'tkazish')}</span>
                                 </Button>
                             </div>
                         </div>
@@ -1102,11 +1363,11 @@ export default function FinanceIndex({
 
             {/* Payment Modal */}
             <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <ArrowDownRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            {t('finance.accept_payment_title', 'To\'lov Qabul Qilish (Rasmiy Chek)')}
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <ArrowDownRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <span>{t('finance.accept_payment_title', 'To\'lov Qabul Qilish (Rasmiy Chek)')}</span>
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handlePaymentSubmit} className="space-y-4 text-xs">
@@ -1191,7 +1452,7 @@ export default function FinanceIndex({
                             />
                         </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
+                        <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" onClick={() => setShowPaymentModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
@@ -1205,11 +1466,11 @@ export default function FinanceIndex({
 
             {/* Expense Modal */}
             <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <ArrowUpRight className="w-5 h-5 text-red-600 dark:text-red-400" />
-                            {t('finance.add_expense_title', 'Yangi Xarajat (Chiqim)')}
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <ArrowUpRight className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
+                            <span>{t('finance.add_expense_title', 'Yangi Xarajat (Chiqim)')}</span>
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleExpenseSubmit} className="space-y-4 text-xs">
@@ -1264,7 +1525,7 @@ export default function FinanceIndex({
                             />
                         </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
+                        <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" onClick={() => setShowExpenseModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
@@ -1278,11 +1539,11 @@ export default function FinanceIndex({
 
             {/* Transfer Modal */}
             <Dialog open={showTransferModal} onOpenChange={setShowTransferModal}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <ArrowLeftRight className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            {t('finance.transfer_title', 'Kassalararo Pul O\'tkazmasi')}
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <ArrowLeftRight className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+                            <span>{t('finance.transfer_title', 'Kassalararo Pul O\'tkazmasi')}</span>
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleTransferSubmit} className="space-y-4 text-xs">
@@ -1331,7 +1592,7 @@ export default function FinanceIndex({
                             />
                         </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
+                        <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" onClick={() => setShowTransferModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
