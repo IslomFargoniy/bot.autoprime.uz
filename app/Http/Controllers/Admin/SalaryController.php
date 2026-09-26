@@ -290,7 +290,7 @@ class SalaryController extends Controller
         );
 
         $expense = Expense::create([
-            'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+            'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
             'cash_register_id' => $lockedRegister->id,
             'expense_category_id' => $category->id,
             'user_id' => $request->user()->id,

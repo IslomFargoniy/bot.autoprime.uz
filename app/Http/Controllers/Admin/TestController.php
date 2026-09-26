@@ -151,6 +151,10 @@ class TestController extends Controller
             'answers.*.is_correct' => 'required|boolean',
         ]);
 
+        if (collect($validated['answers'])->filter(fn (array $answer) => (bool) $answer['is_correct'])->count() !== 1) {
+            return back()->withErrors(['answers' => 'Savolda aynan bitta to\'g\'ri javob bo\'lishi kerak.']);
+        }
+
         $imageUrl = $validated['image_url'] ?? null;
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('questions', 'public');
@@ -206,6 +210,10 @@ class TestController extends Controller
             'answers.*.is_correct' => 'required|boolean',
         ]);
 
+        if (collect($validated['answers'])->filter(fn (array $answer) => (bool) $answer['is_correct'])->count() !== 1) {
+            return back()->withErrors(['answers' => 'Savolda aynan bitta to\'g\'ri javob bo\'lishi kerak.']);
+        }
+
         $imageUrl = $question->image_url;
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('questions', 'public');
@@ -221,9 +229,21 @@ class TestController extends Controller
                 'image_url' => $imageUrl,
             ]);
 
-            // Re-sync answers
-            $question->answers()->delete();
+            // Update answers in place (by position) so attempt history keeps pointing
+            // at the same answer rows and other-language translations survive.
+            $existingAnswers = $question->answers()->orderBy('order')->orderBy('id')->get()->values();
             foreach ($validated['answers'] as $idx => $ans) {
+                $existing = $existingAnswers->get($idx);
+                if ($existing) {
+                    $existing->update([
+                        'answer_uz' => $ans['text'],
+                        'is_correct' => (bool) $ans['is_correct'],
+                        'order' => $idx + 1,
+                    ]);
+
+                    continue;
+                }
+
                 Answer::create([
                     'question_id' => $question->id,
                     'answer_uz' => $ans['text'],
@@ -234,6 +254,9 @@ class TestController extends Controller
                     'order' => $idx + 1,
                 ]);
             }
+
+            // Only answers that were removed from the question are deleted.
+            $existingAnswers->slice(count($validated['answers']))->each->delete();
         });
 
         return back()->with('success', 'Savol yangilandi');

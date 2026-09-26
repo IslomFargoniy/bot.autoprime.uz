@@ -40,6 +40,9 @@ class Question extends Model
         return $this->belongsTo(Ticket::class);
     }
 
+    /**
+     * @return HasMany<Answer, $this>
+     */
     public function answers(): HasMany
     {
         return $this->hasMany(Answer::class)->orderBy('order');

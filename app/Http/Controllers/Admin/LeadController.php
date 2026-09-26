@@ -140,7 +140,7 @@ class LeadController extends Controller
             ]);
         }
 
-        if (Student::where('phone', $lead->phone)->exists()) {
+        if (Student::where('phone', Student::normalizePhone($lead->phone))->exists()) {
             return redirect()->back()->withErrors([
                 'phone' => "Bu telefon raqami ({$lead->phone}) bilan o'quvchi allaqachon mavjud.",
             ]);

@@ -87,7 +87,7 @@ class VehicleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()?->id ?? 1;
+        $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
 
         $fuelType = $validated['fuel_type'];
         if ($fuelType === 'methane') {
@@ -202,7 +202,7 @@ class VehicleController extends Controller
                 );
 
                 $expense = Expense::create([
-                    'branch_id' => $vehicle->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+                    'branch_id' => $vehicle->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
                     'cash_register_id' => $lockedRegister->id,
                     'expense_category_id' => $category->id,
                     'user_id' => $request->user()->id,

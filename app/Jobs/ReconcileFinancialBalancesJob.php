@@ -46,7 +46,7 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
             ->withSum(['payments as refund_sum' => fn ($q) => $q->where('payment_type', 'refund')], 'amount')
             ->chunkById(200, function ($contracts) use (&$driftCount) {
                 foreach ($contracts as $contract) {
-                    $expectedPaid = max(0, (float) $contract->tuition_sum - (float) $contract->refund_sum);
+                    $expectedPaid = max(0, (float) $contract->getAttribute('tuition_sum') - (float) $contract->getAttribute('refund_sum'));
 
                     if (abs((float) $contract->paid_amount - $expectedPaid) <= 0.01) {
                         continue;
@@ -119,7 +119,7 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
             ->withSum('salaryPayments as paid_sum', 'amount')
             ->chunkById(200, function ($users) use (&$driftCount) {
                 foreach ($users as $user) {
-                    $expected = round((float) $user->accrued_sum - (float) $user->deduction_sum - (float) $user->paid_sum, 2);
+                    $expected = round((float) $user->getAttribute('accrued_sum') - (float) $user->getAttribute('deduction_sum') - (float) $user->getAttribute('paid_sum'), 2);
 
                     if (abs((float) $user->salary_balance - $expected) <= 0.01) {
                         continue;

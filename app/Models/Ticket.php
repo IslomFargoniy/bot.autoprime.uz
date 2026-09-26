@@ -25,6 +25,9 @@ class Ticket extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * @return HasMany<Question, $this>
+     */
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class)->orderBy('question_number');

@@ -38,12 +38,7 @@ class StudentController extends Controller
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
-            $query->where(function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)
-                    ->orWhereHas('group', function ($gQ) use ($targetBranchId) {
-                        $gQ->where('branch_id', $targetBranchId);
-                    });
-            });
+            $query->inBranch($targetBranchId);
         }
 
         $search = $request->get('q');
@@ -96,12 +91,7 @@ class StudentController extends Controller
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
-            $query->where(function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)
-                    ->orWhereHas('group', function ($gQ) use ($targetBranchId) {
-                        $gQ->where('branch_id', $targetBranchId);
-                    });
-            });
+            $query->inBranch($targetBranchId);
         }
 
         if ($isInstructor) {
@@ -157,6 +147,9 @@ class StudentController extends Controller
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
+        // Normalize before the unique check so +998/no-prefix variants are one number.
+        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
+
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students',
@@ -182,6 +175,8 @@ class StudentController extends Controller
         if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
+
+        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',

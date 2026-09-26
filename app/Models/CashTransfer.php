@@ -35,6 +35,9 @@ class CashTransfer extends Model
         $this->attributes['sent_by_user_id'] = $value;
     }
 
+    /**
+     * @return BelongsTo<CashRegister, $this>
+     */
     public function fromCashRegister(): BelongsTo
     {
         return $this->belongsTo(CashRegister::class, 'from_cash_register_id');

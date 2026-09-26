@@ -343,22 +343,19 @@ class LeadWizardService
                     return;
                 }
 
-                if ($state['step'] === 'photo') {
-                    $state['photo_url'] = $filename;
-                    $state['step'] = 'birth_date_address';
-                    Cache::put(self::CACHE_PREFIX.$telegramId, $state, self::TTL);
+                // Remaining step is "photo" (guarded at the top of the method).
+                $state['photo_url'] = $filename;
+                $state['step'] = 'birth_date_address';
+                Cache::put(self::CACHE_PREFIX.$telegramId, $state, self::TTL);
 
-                    $keyboard = InlineKeyboardMarkup::make()
-                        ->addRow(InlineKeyboardButton::make("➡️ O'tkazib yuborish", callback_data: 'wizard_skip:birth_date_address'));
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make("➡️ O'tkazib yuborish", callback_data: 'wizard_skip:birth_date_address'));
 
-                    $bot->sendMessage(
-                        "✅ 3x4 rasm qabul qilindi.\n\nIltimos, <b>tug'ilgan sanangiz va yashash manzilingizni</b> yozing:\n<i>(Masalan: 12.08.2002, Toshkent sh., Chilonzor t., 12-uy)</i>",
-                        parse_mode: 'HTML',
-                        reply_markup: $keyboard
-                    );
-
-                    return;
-                }
+                $bot->sendMessage(
+                    "✅ 3x4 rasm qabul qilindi.\n\nIltimos, <b>tug'ilgan sanangiz va yashash manzilingizni</b> yozing:\n<i>(Masalan: 12.08.2002, Toshkent sh., Chilonzor t., 12-uy)</i>",
+                    parse_mode: 'HTML',
+                    reply_markup: $keyboard
+                );
             }
         } catch (\Throwable $e) {
             Log::error('Failed to download Telegram photo in wizard: '.$e->getMessage());

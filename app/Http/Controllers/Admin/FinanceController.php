@@ -204,7 +204,7 @@ class FinanceController extends Controller
             $receiptNumber = DocumentNumberService::nextReceiptNumber();
 
             $payment = Payment::create([
-                'branch_id' => $contract->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+                'branch_id' => $contract->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
                 'contract_id' => $contract->id,
                 'student_id' => $contract->student_id,
                 'cash_register_id' => $lockedRegister->id,
@@ -277,7 +277,7 @@ class FinanceController extends Controller
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
 
             $expense = Expense::create([
-                'branch_id' => $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+                'branch_id' => $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
                 'cash_register_id' => $lockedRegister->id,
                 'expense_category_id' => $validated['expense_category_id'],
                 'user_id' => $request->user()->id,

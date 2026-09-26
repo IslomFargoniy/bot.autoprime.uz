@@ -197,6 +197,11 @@ class GroupController extends Controller
         $import = new StudentsImport($group->id, $branchId);
         Excel::import($import, $request->file('file'));
 
-        return redirect()->back()->with('success', "{$import->importedCount} ta o'quvchi muvaffaqiyatli yuklandi");
+        $message = "{$import->importedCount} ta o'quvchi muvaffaqiyatli yuklandi";
+        if ($import->skippedCount > 0) {
+            $message .= " ({$import->skippedCount} ta qator o'tkazib yuborildi: telefon yo'q yoki o'quvchi boshqa filialda)";
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 }

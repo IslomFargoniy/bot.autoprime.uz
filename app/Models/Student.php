@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\StudentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -72,6 +73,42 @@ class Student extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Canonical phone format (+998XXXXXXXXX) so manual entry, imports and lead
+     * conversion all match the same student instead of creating duplicates.
+     */
+    /**
+     * Students of a branch: assigned directly or through a group of that branch.
+     * Every list and counter must use this so the numbers agree.
+     *
+     * @param  Builder<Student>  $query
+     */
+    public function scopeInBranch(Builder $query, int|string $branchId): void
+    {
+        $query->where(fn (Builder $q) => $q
+            ->where('branch_id', $branchId)
+            ->orWhereHas('group', fn (Builder $group) => $group->where('branch_id', $branchId)));
+    }
+
+    public static function normalizePhone(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $phone);
+        if ($digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) === 9) {
+            $digits = '998'.$digits;
+        }
+
+        return '+'.$digits;
+    }
+
+    public function setPhoneAttribute(?string $value): void
+    {
+        $this->attributes['phone'] = self::normalizePhone($value);
+    }
+
     public function setPassportSeriesAttribute(?string $value): void
     {
         $this->attributes['passport_series'] = ! empty($value) ? Crypt::encryptString($value) : null;
@@ -132,6 +169,9 @@ class Student extends Model
         }
     }
 
+    /**
+     * @return BelongsTo<Branch, $this>
+     */
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);

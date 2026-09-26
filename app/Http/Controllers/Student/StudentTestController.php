@@ -137,7 +137,8 @@ class StudentTestController extends Controller
         // First submitted answer per question wins; later duplicates are ignored.
         $submittedAnswers = collect($validated['answers'])
             ->unique('question_id')
-            ->mapWithKeys(fn (array $item) => [(int) $item['question_id'] => isset($item['answer_id']) ? (int) $item['answer_id'] : null]);
+            ->mapWithKeys(fn (array $item) => [(int) $item['question_id'] => isset($item['answer_id']) ? (int) $item['answer_id'] : null])
+            ->all();
 
         if ($attemptType === 'random_mock') {
             return $this->submitMockExam($request, (int) $validated['attempt_id'], $student?->id, $submittedAnswers);
@@ -145,7 +146,7 @@ class StudentTestController extends Controller
 
         $questionIds = $attemptType === 'ticket_exam'
             ? Question::where('ticket_id', $validated['ticket_id'])->where('is_active', true)->pluck('id')
-            : $submittedAnswers->keys();
+            : array_keys($submittedAnswers);
 
         $questions = Question::with('answers')->whereIn('id', $questionIds)->get();
         $graded = $this->grade($questions, $submittedAnswers);
@@ -186,9 +187,9 @@ class StudentTestController extends Controller
     /**
      * Grade a served mock exam exactly once, against the questions stored on it.
      *
-     * @param  Collection<int, int|null>  $submittedAnswers
+     * @param  array<int, int|null>  $submittedAnswers  selected answer id per question id
      */
-    private function submitMockExam(Request $request, int $attemptId, ?int $studentId, Collection $submittedAnswers): JsonResponse
+    private function submitMockExam(Request $request, int $attemptId, ?int $studentId, array $submittedAnswers): JsonResponse
     {
         $result = DB::transaction(function () use ($attemptId, $studentId, $submittedAnswers) {
             $attempt = Attempt::where('id', $attemptId)
@@ -244,16 +245,16 @@ class StudentTestController extends Controller
      * only counts when it belongs to its question; unanswered questions are wrong.
      *
      * @param  Collection<int, Question>  $questions
-     * @param  Collection<int, int|null>  $submittedAnswers
+     * @param  array<int, int|null>  $submittedAnswers  selected answer id per question id
      * @return array{total: int, correct: int, wrong: int, score: float, details: array<int, array<string, mixed>>}
      */
-    private function grade(Collection $questions, Collection $submittedAnswers): array
+    private function grade(Collection $questions, array $submittedAnswers): array
     {
         $details = [];
         $correctCount = 0;
 
         foreach ($questions as $question) {
-            $selectedAnswerId = $submittedAnswers->get($question->id);
+            $selectedAnswerId = $submittedAnswers[$question->id] ?? null;
             if ($selectedAnswerId && ! $question->answers->contains('id', $selectedAnswerId)) {
                 $selectedAnswerId = null;
             }

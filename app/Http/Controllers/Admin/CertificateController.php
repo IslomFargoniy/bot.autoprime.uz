@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Certificate;
 use App\Models\Contract;
-use App\Models\Driving;
 use App\Services\BranchSessionService;
+use App\Services\CertificateEligibilityService;
 use App\Services\DocumentNumberService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,31 +52,14 @@ class CertificateController extends Controller
             })
             ->get();
 
+        $eligibility = app(CertificateEligibilityService::class)->evaluate($activeContracts);
+
         $candidates = [];
         foreach ($activeContracts as $c) {
             $student = $c->student;
             if (! $student) {
                 continue;
             }
-
-            // Check 4 conditions
-            $debtOk = (float) $c->debt_amount <= 0;
-
-            // Attendance rate
-            $totalAttendances = Attendance::where('student_id', $student->id)->count();
-            $requiredTheory = $c->required_theory_lessons ?: 24;
-            $attendanceRate = $requiredTheory > 0 ? round(($totalAttendances / $requiredTheory) * 100, 1) : 100;
-            $attendanceOk = $attendanceRate >= 70.0;
-
-            // Drivings count
-            $completedDrivings = Driving::where('student_id', $student->id)->where('status', 'completed')->count();
-            $requiredDriving = $c->required_driving_lessons ?: 10;
-            $drivingOk = $completedDrivings >= $requiredDriving;
-
-            // Internal exam pass
-            $passedExam = $student->hasPassedMockExam();
-
-            $isEligible = $debtOk && $attendanceOk && $drivingOk && $passedExam;
 
             $candidates[] = [
                 'student_id' => $student->id,
@@ -86,14 +69,7 @@ class CertificateController extends Controller
                 'contract_number' => $c->contract_number,
                 'category' => $c->contractType ? $c->contractType->category : 'B',
                 'debt_amount' => $c->debt_amount,
-                'debt_ok' => $debtOk,
-                'attendance_rate' => $attendanceRate,
-                'attendance_ok' => $attendanceOk,
-                'completed_drivings' => $completedDrivings,
-                'required_drivings' => $requiredDriving,
-                'driving_ok' => $drivingOk,
-                'passed_exam' => $passedExam,
-                'is_eligible' => $isEligible,
+                ...$eligibility[$c->id],
             ];
         }
 
@@ -128,55 +104,71 @@ class CertificateController extends Controller
             ]);
         }
 
+        if ($contract->status !== 'active') {
+            return redirect()->back()->withErrors([
+                'contract_id' => 'Guvohnoma faqat faol shartnoma uchun beriladi.',
+            ]);
+        }
+
         // Verify 4 conditions strictly
-        if ((float) $contract->debt_amount > 0) {
+        $conditions = app(CertificateEligibilityService::class)->evaluateOne($contract);
+
+        if (! $conditions['debt_ok']) {
             return redirect()->back()->withErrors([
                 'contract_id' => "O'quvchining shartnoma bo'yicha qoldiq qarzdorligi mavjud: {$contract->debt_amount} UZS. Guvohnoma berish taqiqlanadi.",
             ]);
         }
 
-        $requiredTheory = $contract->required_theory_lessons ?: 24;
-        $totalAttendances = Attendance::where('student_id', $student->id)->count();
-        $attendanceRate = $requiredTheory > 0 ? ($totalAttendances / $requiredTheory) * 100 : 100;
-        if ($attendanceRate < 70.0) {
+        if (! $conditions['attendance_ok']) {
             return redirect()->back()->withErrors([
-                'contract_id' => "O'quvchining nazariy davomati 70% dan kam ({$attendanceRate}%).",
+                'contract_id' => "O'quvchining nazariy davomati 70% dan kam ({$conditions['attendance_rate']}%).",
             ]);
         }
 
-        $completedDrivings = Driving::where('student_id', $student->id)->where('status', 'completed')->count();
-        $requiredDriving = $contract->required_driving_lessons ?: 10;
-        if ($completedDrivings < $requiredDriving) {
+        if (! $conditions['driving_ok']) {
             return redirect()->back()->withErrors([
-                'contract_id' => "Amaliy haydash darslari to'liq o'tilmagan ({$completedDrivings}/{$requiredDriving}).",
+                'contract_id' => "Amaliy haydash darslari to'liq o'tilmagan ({$conditions['completed_drivings']}/{$conditions['required_drivings']}).",
             ]);
         }
 
-        $passedExam = $student->hasPassedMockExam();
-        if (! $passedExam) {
+        if (! $conditions['passed_exam']) {
             return redirect()->back()->withErrors([
                 'contract_id' => "O'quvchi ichki imtihondan (LMS test) muvaffaqiyatli o'tmagan.",
             ]);
         }
 
-        // Generate Certificate
-        $certNumber = DocumentNumberService::nextCertificateNumber();
-        $verifyHash = hash('sha256', $student->id.$contract->id.uniqid().config('app.key'));
+        $certNumber = DB::transaction(function () use ($contract, $student, $request, $validated) {
+            // Lock the contract so a double click cannot issue two certificates.
+            $lockedContract = Contract::whereKey($contract->id)->lockForUpdate()->first();
+            if ($lockedContract->status !== 'active' || Certificate::where('contract_id', $contract->id)->exists()) {
+                return null;
+            }
 
-        Certificate::create([
-            'branch_id' => $contract->branch_id ?? $student->branch_id ?? Branch::first()?->id ?? 1,
-            'student_id' => $student->id,
-            'contract_id' => $contract->id,
-            'issued_by_user_id' => $request->user()->id,
-            'certificate_number' => $certNumber,
-            'qr_verify_hash' => $verifyHash,
-            'category' => $contract->contractType ? $contract->contractType->category : 'B',
-            'issued_date' => now()->toDateString(),
-            'status' => 'issued',
-            'notes' => $validated['notes'] ?? null,
-        ]);
+            $certNumber = DocumentNumberService::nextCertificateNumber();
 
-        $contract->update(['status' => 'completed']);
+            Certificate::create([
+                'branch_id' => $contract->branch_id ?? $student->branch_id ?? Branch::first()->id ?? 1,
+                'student_id' => $student->id,
+                'contract_id' => $contract->id,
+                'issued_by_user_id' => $request->user()->id,
+                'certificate_number' => $certNumber,
+                'qr_verify_hash' => hash('sha256', $student->id.$contract->id.uniqid().config('app.key')),
+                'category' => $contract->contractType ? $contract->contractType->category : 'B',
+                'issued_date' => now()->toDateString(),
+                'status' => 'issued',
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            $lockedContract->update(['status' => 'completed']);
+
+            return $certNumber;
+        });
+
+        if (! $certNumber) {
+            return redirect()->back()->withErrors([
+                'contract_id' => 'Ushbu shartnoma uchun guvohnoma allaqachon berilgan.',
+            ]);
+        }
 
         return redirect()->back()->with('success', "Bitiruv Guvohnomasi rasmiylashtirildi: #{$certNumber}");
     }

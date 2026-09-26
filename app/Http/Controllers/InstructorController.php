@@ -6,6 +6,8 @@ use App\Jobs\SendDrivingCreatedNotificationJob;
 use App\Models\Driving;
 use App\Models\Group;
 use App\Models\Student;
+use App\Models\Vehicle;
+use App\Services\DrivingScheduler;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -62,7 +64,7 @@ class InstructorController extends Controller
      */
     public function storeDriving(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'group_id' => 'required|exists:groups,id',
             'student_id' => 'required|exists:students,id',
             'start_time' => 'required|date',
@@ -70,16 +72,30 @@ class InstructorController extends Controller
         ]);
 
         $user = $request->user();
-        $student = Student::find($request->student_id);
-        $groupId = $student ? $student->group_id : $request->group_id;
+        $student = Student::with('activeContract.contractType', 'group')->findOrFail($validated['student_id']);
+
+        if ($student->group?->instructor_id !== $user->id) {
+            throw ValidationException::withMessages(['student_id' => 'Siz faqat o\'z guruhingiz o\'quvchilariga dars belgilay olasiz.']);
+        }
+
+        // Same rules as the admin scheduler: no double booking, 75% payment, valid contract.
+        $scheduler = app(DrivingScheduler::class);
+        $vehicle = Vehicle::where('instructor_id', $user->id)->where('status', 'active')->first();
+        $problem = $scheduler->conflictMessage($user->id, $vehicle, [$student->id], $validated['start_time'], $validated['end_time'])
+            ?? $scheduler->studentRestrictionMessage($student, $validated['start_time']);
+        if ($problem) {
+            throw ValidationException::withMessages(['start_time' => $problem]);
+        }
 
         $driving = Driving::create([
-            'branch_id' => $user->branch_id ?? ($student ? $student->branch_id : null),
+            'branch_id' => $user->branch_id ?? $student->branch_id,
             'instructor_id' => $user->id,
-            'group_id' => $groupId,
-            'student_id' => $request->student_id,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'group_id' => $student->group_id,
+            'student_id' => $student->id,
+            'contract_id' => $student->activeContract?->id,
+            'vehicle_id' => $vehicle?->id,
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
             'status' => 'scheduled',
         ]);
 

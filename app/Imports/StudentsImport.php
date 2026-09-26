@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Group;
 use App\Models\Student;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -15,6 +16,11 @@ class StudentsImport implements ToCollection, WithHeadingRow
     protected $branchId;
 
     public $importedCount = 0;
+
+    /**
+     * Rows skipped because the phone is missing/invalid or the student belongs to another branch.
+     */
+    public $skippedCount = 0;
 
     public function __construct($groupId, $branchId = null)
     {
@@ -32,48 +38,48 @@ class StudentsImport implements ToCollection, WithHeadingRow
             }
         }
 
-        foreach ($rows as $row) {
-            // Maatwebsite/Excel uses snake_case keys for headers by default
-            $fullName = $row['full_name'] ?? $row['ism'] ?? $row['f_i_sh'] ?? $row['name'] ?? null;
-            $phone = $row['phone'] ?? $row['telefon'] ?? $row['tel'] ?? null;
+        // All-or-nothing: a failing row must not leave half of the file imported.
+        DB::transaction(function () use ($rows, $targetBranchId) {
+            foreach ($rows as $row) {
+                // Maatwebsite/Excel uses snake_case keys for headers by default
+                $fullName = $row['full_name'] ?? $row['ism'] ?? $row['f_i_sh'] ?? $row['name'] ?? null;
+                $phone = Student::normalizePhone((string) ($row['phone'] ?? $row['telefon'] ?? $row['tel'] ?? ''));
 
-            if (! $fullName) {
-                continue;
-            }
-
-            if ($phone) {
-                $digits = preg_replace('/\D/', '', (string) $phone);
-                if (strlen($digits) === 9) {
-                    $digits = '998'.$digits;
+                if (! $fullName) {
+                    continue;
                 }
-                if ($digits !== '') {
-                    $phone = '+'.$digits;
-                } else {
-                    $phone = null;
-                }
-            }
 
-            $student = null;
-            if ($phone) {
+                // Phone is required and is how students are matched.
+                if (! $phone) {
+                    $this->skippedCount++;
+
+                    continue;
+                }
+
                 $student = Student::where('phone', $phone)->first();
-            }
 
-            if ($student) {
-                $student->group_id = $this->groupId;
-                $student->full_name = $fullName;
-                if ($targetBranchId && ! $student->branch_id) {
-                    $student->branch_id = $targetBranchId;
+                if ($student) {
+                    // Never silently pull a student out of another branch.
+                    if ($targetBranchId && $student->branch_id && (int) $student->branch_id !== (int) $targetBranchId) {
+                        $this->skippedCount++;
+
+                        continue;
+                    }
+
+                    $student->group_id = $this->groupId;
+                    $student->full_name = $fullName;
+                    $student->branch_id = $student->branch_id ?: $targetBranchId;
+                    $student->save();
+                } else {
+                    Student::create([
+                        'full_name' => $fullName,
+                        'phone' => $phone,
+                        'group_id' => $this->groupId,
+                        'branch_id' => $targetBranchId,
+                    ]);
                 }
-                $student->save();
-            } else {
-                Student::create([
-                    'full_name' => $fullName,
-                    'phone' => $phone,
-                    'group_id' => $this->groupId,
-                    'branch_id' => $targetBranchId,
-                ]);
+                $this->importedCount++;
             }
-            $this->importedCount++;
-        }
+        });
     }
 }

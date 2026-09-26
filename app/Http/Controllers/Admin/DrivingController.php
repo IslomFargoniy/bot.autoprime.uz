@@ -14,9 +14,11 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\BranchSessionService;
+use App\Services\DrivingScheduler;
 use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -168,96 +170,52 @@ class DrivingController extends Controller
             'end_time' => 'required|date|after:start_time',
         ]);
 
-        // 1. Collision check for instructor
-        $instructorCollision = Driving::where('instructor_id', $validated['instructor_id'])
-            ->where('status', 'scheduled')
-            ->where(function ($q) use ($validated) {
-                $q->where(function ($q2) use ($validated) {
-                    $q2->where('start_time', '<', $validated['end_time'])
-                        ->where('end_time', '>', $validated['start_time']);
-                });
-            })
-            ->exists();
-
-        if ($instructorCollision) {
-            return redirect()->back()->withErrors([
-                'start_time' => 'Instruktor ushbu vaqt oralig\'ida boshqa darsga band (vaqt kesishuvi aniqlandi).',
-            ]);
+        if (! User::find($validated['instructor_id'])?->isInstructor()) {
+            return redirect()->back()->withErrors(['instructor_id' => 'Tanlangan xodim instruktor emas.']);
         }
 
-        // 2. Auto-detect or validate vehicle
-        $vehicle = null;
-        if (! empty($validated['vehicle_id'])) {
-            $vehicle = Vehicle::find($validated['vehicle_id']);
-        } else {
-            $vehicle = Vehicle::where('instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+        $scheduler = app(DrivingScheduler::class);
+
+        // Auto-detect or validate vehicle
+        $vehicle = ! empty($validated['vehicle_id'])
+            ? Vehicle::find($validated['vehicle_id'])
+            : Vehicle::where('instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+
+        $conflict = $scheduler->conflictMessage(
+            (int) $validated['instructor_id'],
+            $vehicle,
+            $validated['student_ids'],
+            $validated['start_time'],
+            $validated['end_time'],
+        );
+        if ($conflict) {
+            return redirect()->back()->withErrors(['start_time' => $conflict]);
         }
 
-        if ($vehicle) {
-            $vehicleCollision = Driving::where('vehicle_id', $vehicle->id)
-                ->where('status', 'scheduled')
-                ->where(function ($q) use ($validated) {
-                    $q->where(function ($q2) use ($validated) {
-                        $q2->where('start_time', '<', $validated['end_time'])
-                            ->where('end_time', '>', $validated['start_time']);
-                    });
-                })
-                ->exists();
-
-            if ($vehicleCollision) {
-                return redirect()->back()->withErrors([
-                    'start_time' => "Avtomobil ({$vehicle->plate_number}) ushbu vaqt oralig'ida boshqa darsga band.",
-                ]);
+        // Validate every student before creating anything so a later failure
+        // cannot leave the earlier students booked and notified.
+        $students = Student::with('activeContract.contractType')->whereIn('id', $validated['student_ids'])->get();
+        foreach ($students as $student) {
+            $restriction = $scheduler->studentRestrictionMessage($student, $validated['start_time']);
+            if ($restriction) {
+                return redirect()->back()->withErrors(['student_ids' => $restriction]);
             }
         }
 
-        // 3. Check 75% payment rule for students
-        foreach ($validated['student_ids'] as $studentId) {
-            $student = Student::with('activeContract.contractType')->find($studentId);
-            if (! $student) {
-                continue;
-            }
+        $drivings = DB::transaction(fn () => $students->map(fn (Student $student) => Driving::create([
+            'branch_id' => $student->branch_id ?: $request->user()->branch_id,
+            'instructor_id' => $validated['instructor_id'],
+            'student_id' => $student->id,
+            'group_id' => $student->group_id ?: ($validated['group_id'] ?? null),
+            'contract_id' => $student->activeContract?->id,
+            'vehicle_id' => $vehicle?->id,
+            'autodrome_id' => $validated['autodrome_id'] ?? null,
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'status' => 'scheduled',
+        ])));
 
-            $activeContract = $student->activeContract;
-            if ($activeContract && $activeContract->has_driving && ! $activeContract->canAccessDriving()) {
-                return redirect()->back()->withErrors([
-                    'student_ids' => "{$student->full_name} talabasi amaliy haydash uchun kamida 75% to'lov qilishi shart (Hozirgi to'lov: {$activeContract->payment_percentage}%).",
-                ]);
-            }
-
-            if ($activeContract) {
-                if ($activeContract->status === 'cancelled') {
-                    return redirect()->back()->withErrors([
-                        'student_ids' => "{$student->full_name} talabasining shartnomasi bekor qilingan.",
-                    ]);
-                }
-
-                $startTime = Carbon::parse($validated['start_time']);
-                if (! $activeContract->canScheduleDrivingAt($startTime)) {
-                    $formattedDate = $activeContract->end_date ? $activeContract->end_date->format('d.m.Y') : '';
-
-                    return redirect()->back()->withErrors([
-                        'student_ids' => "{$student->full_name} talabasining shartnoma muddati tugagan ({$formattedDate}). Mashg'ulot qo'shish uchun shartnoma muddatini uzaytirish kerak.",
-                    ]);
-                }
-            }
-
-            $groupId = $student->group_id ?: ($validated['group_id'] ?? null);
-            $branchId = $student->branch_id ?: $request->user()->branch_id;
-
-            $driving = Driving::create([
-                'branch_id' => $branchId,
-                'instructor_id' => $validated['instructor_id'],
-                'student_id' => $studentId,
-                'group_id' => $groupId,
-                'contract_id' => $activeContract?->id,
-                'vehicle_id' => $vehicle?->id,
-                'autodrome_id' => $validated['autodrome_id'] ?? null,
-                'start_time' => $validated['start_time'],
-                'end_time' => $validated['end_time'],
-                'status' => 'scheduled',
-            ]);
-
+        foreach ($drivings as $driving) {
             SendDrivingCreatedNotificationJob::dispatch($driving);
         }
 
@@ -275,11 +233,33 @@ class DrivingController extends Controller
         $validated = $request->validate([
             'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
             'start_time' => 'sometimes|required|date',
-            'end_time' => 'sometimes|required|date|after:start_time',
+            'end_time' => 'sometimes|required|date',
             'status' => 'sometimes|required|in:scheduled,completed,cancelled',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
+
+        // Compare against the stored value when only one end of the slot changes.
+        $newStart = Carbon::parse($validated['start_time'] ?? $driving->start_time);
+        $newEnd = Carbon::parse($validated['end_time'] ?? $driving->end_time);
+        if ($newEnd->lte($newStart)) {
+            return redirect()->back()->withErrors(['end_time' => 'Tugash vaqti boshlanish vaqtidan keyin bo\'lishi kerak.']);
+        }
+
+        $isRescheduled = ! $newStart->equalTo($driving->start_time) || ! $newEnd->equalTo($driving->end_time);
+        if ($isRescheduled && ($validated['status'] ?? $driving->status) === 'scheduled') {
+            $conflict = app(DrivingScheduler::class)->conflictMessage(
+                (int) $driving->instructor_id,
+                $driving->vehicle,
+                [$driving->student_id],
+                $newStart,
+                $newEnd,
+                $driving->id,
+            );
+            if ($conflict) {
+                return redirect()->back()->withErrors(['start_time' => $conflict]);
+            }
+        }
 
         $oldStatus = $driving->status;
         $oldStartTime = $driving->start_time;
@@ -288,7 +268,7 @@ class DrivingController extends Controller
 
         $driving->update($validated);
 
-        if ($oldStartTime != $driving->start_time) {
+        if (! $driving->start_time->equalTo($oldStartTime)) {
             $driving->update([
                 'reminded_24h_at' => null,
                 'reminded_2h_at' => null,
@@ -304,9 +284,9 @@ class DrivingController extends Controller
                 app(TelegramService::class)->sendDrivingCancelledNotification($driving);
             }
         } elseif ($newStatus === 'scheduled' && (
-            $oldStartTime !== $driving->start_time ||
-            $oldEndTime !== $driving->end_time ||
-            $oldAutodromeId !== $driving->autodrome_id
+            ! $driving->start_time->equalTo($oldStartTime) ||
+            ! $driving->end_time->equalTo($oldEndTime) ||
+            (int) $oldAutodromeId !== (int) $driving->autodrome_id
         )) {
             app(TelegramService::class)->sendDrivingUpdatedNotification($driving);
         }

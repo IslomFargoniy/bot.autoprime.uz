@@ -346,9 +346,9 @@ class AttendanceController extends Controller
             ->whereDate('started_at', $date)
             ->first()
             ?? LessonSession::create([
-                'branch_id' => $student->branch_id ?? $group?->branch_id,
+                'branch_id' => $student->branch_id ?? $group->branch_id,
                 'group_id' => $student->group_id,
-                'teacher_id' => $group?->teacher_id ?? $request->user()->id,
+                'teacher_id' => $group->teacher_id ?? $request->user()->id,
                 'topic' => 'Nazariy dars (Qo\'lda belgilash)',
                 'started_at' => Carbon::parse($date)->setTime(9, 0),
                 'ended_at' => Carbon::parse($date)->setTime(10, 30),
