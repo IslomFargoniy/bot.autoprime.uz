@@ -14,6 +14,7 @@ import {
     Building2,
     Lock,
     Unlock,
+    Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -214,6 +215,24 @@ export default function FinanceIndex({
         });
     };
 
+    const handleDeletePayment = (payment: Payment) => {
+        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+            router.delete(`/admin/finance/payment/${payment.id}`, {
+                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleDeleteExpense = (expense: Expense) => {
+        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+            router.delete(`/admin/finance/expense/${expense.id}`, {
+                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
     return (
         <div className="p-6">
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
@@ -324,6 +343,7 @@ export default function FinanceIndex({
                                 <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.cashier', 'Qabul qildi')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.date', 'Sana')}</th>
+                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -343,6 +363,17 @@ export default function FinanceIndex({
                                     <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.cash_register?.name}</td>
                                     <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.received_by?.name || '-'}</td>
                                     <td className="p-3.5 text-gray-400 dark:text-gray-500">{p.paid_at}</td>
+                                    <td className="p-3.5 text-right">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDeletePayment(p)}
+                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                            title={t('common.delete', "O'chirish")}
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -362,6 +393,7 @@ export default function FinanceIndex({
                                 <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.user', 'Xodim')}</th>
                                 <th className="p-3.5 font-semibold">{t('finance.date', 'Sana')}</th>
+                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -375,6 +407,17 @@ export default function FinanceIndex({
                                     <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.cash_register?.name}</td>
                                     <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</td>
                                     <td className="p-3.5 text-gray-400 dark:text-gray-500">{e.expense_date}</td>
+                                    <td className="p-3.5 text-right">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDeleteExpense(e)}
+                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                            title={t('common.delete', "O'chirish")}
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -302,3 +302,170 @@ test('contract refund creates refund payment, expense, decrements balance, and u
         ->and((float) $expense->amount)->toEqual(1500000.0)
         ->and($expense->recipient)->toContain($student->full_name);
 });
+
+test('deleting expense refunds the cash register balance', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-del-exp'], ['name' => 'Filial Exp', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+
+    $cashType = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd Pul', 'is_active' => true]);
+    $cashRegister = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => $cashType->id,
+        'name' => 'Chiqim Kassasi',
+        'balance' => 5000000,
+        'is_active' => true,
+    ]);
+
+    $category = \App\Models\ExpenseCategory::firstOrCreate(['name' => 'Ofis xarajatlari'], ['is_active' => true]);
+
+    $expense = Expense::create([
+        'branch_id' => $branch->id,
+        'cash_register_id' => $cashRegister->id,
+        'expense_category_id' => $category->id,
+        'user_id' => $admin->id,
+        'amount' => 1000000,
+        'description' => 'Qog\'oz va kanselyariya sotib olindi',
+        'spent_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('finance.destroy-expense', $expense));
+    $response->assertRedirect();
+
+    $cashRegister->refresh();
+    expect((float) $cashRegister->balance)->toEqual(6000000.0)
+        ->and(Expense::find($expense->id))->toBeNull();
+});
+
+test('deleting payment recalculates contract finances and adjusts cash register', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-del-pay'], ['name' => 'Filial Pay', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+    $student = Student::factory()->create(['branch_id' => $branch->id]);
+
+    $contractType = ContractType::create([
+        'branch_id' => $branch->id,
+        'name' => 'B Standart',
+        'category' => 'B',
+        'price' => 3000000,
+        'is_active' => true,
+    ]);
+
+    $contract = Contract::create([
+        'branch_id' => $branch->id,
+        'student_id' => $student->id,
+        'contract_type_id' => $contractType->id,
+        'created_by_user_id' => $admin->id,
+        'contract_number' => 'DEL-PAY-001',
+        'contract_date' => now()->toDateString(),
+        'total_amount' => 3000000,
+        'discount_amount' => 0,
+        'final_amount' => 3000000,
+        'paid_amount' => 1000000,
+        'debt_amount' => 2000000,
+        'status' => 'active',
+        'payment_status' => 'partial',
+    ]);
+
+    $cashType = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd Pul', 'is_active' => true]);
+    $cashRegister = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => $cashType->id,
+        'name' => 'To\'lov Kassasi',
+        'balance' => 2000000,
+        'is_active' => true,
+    ]);
+
+    $payment = Payment::create([
+        'branch_id' => $branch->id,
+        'contract_id' => $contract->id,
+        'student_id' => $student->id,
+        'cash_register_id' => $cashRegister->id,
+        'received_by_user_id' => $admin->id,
+        'amount' => 1000000,
+        'payment_type' => 'contract_tuition',
+        'payment_method' => 'cash',
+        'receipt_number' => 'REC-DEL-001',
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('finance.destroy-payment', $payment));
+    $response->assertRedirect();
+
+    $cashRegister->refresh();
+    $contract->refresh();
+
+    expect((float) $cashRegister->balance)->toEqual(1000000.0)
+        ->and((float) $contract->paid_amount)->toEqual(0.0)
+        ->and((float) $contract->debt_amount)->toEqual(3000000.0)
+        ->and(Payment::find($payment->id))->toBeNull();
+});
+
+test('driving controller blocks scheduling when contract driving limit is reached', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-limit'], ['name' => 'Filial Limit', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+    $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $branch->id]);
+    $student = Student::factory()->create(['branch_id' => $branch->id]);
+
+    $contractType = ContractType::create([
+        'branch_id' => $branch->id,
+        'name' => 'B Mini Kurs',
+        'category' => 'B',
+        'price' => 2000000,
+        'has_driving' => true,
+        'required_driving_lessons' => 2,
+        'is_active' => true,
+    ]);
+
+    $contract = Contract::create([
+        'branch_id' => $branch->id,
+        'student_id' => $student->id,
+        'contract_type_id' => $contractType->id,
+        'created_by_user_id' => $admin->id,
+        'contract_number' => 'LIMIT-001',
+        'contract_date' => now()->toDateString(),
+        'has_driving' => true,
+        'required_driving_lessons' => 2,
+        'total_amount' => 2000000,
+        'final_amount' => 2000000,
+        'paid_amount' => 2000000, // 100% paid
+        'debt_amount' => 0,
+        'status' => 'active',
+        'payment_status' => 'paid',
+    ]);
+
+    expect($contract->hasReachedDrivingLimit())->toBeFalse()
+        ->and($contract->getRemainingDrivingLessonsCount())->toBe(2);
+
+    // Create 2 drivings under this contract
+    \App\Models\Driving::create([
+        'branch_id' => $branch->id,
+        'instructor_id' => $instructor->id,
+        'student_id' => $student->id,
+        'contract_id' => $contract->id,
+        'start_time' => now()->addDay(),
+        'end_time' => now()->addDay()->addHour(),
+        'status' => 'scheduled',
+    ]);
+
+    \App\Models\Driving::create([
+        'branch_id' => $branch->id,
+        'instructor_id' => $instructor->id,
+        'student_id' => $student->id,
+        'contract_id' => $contract->id,
+        'start_time' => now()->addDays(2),
+        'end_time' => now()->addDays(2)->addHour(),
+        'status' => 'completed',
+    ]);
+
+    expect($contract->hasReachedDrivingLimit())->toBeTrue()
+        ->and($contract->getRemainingDrivingLessonsCount())->toBe(0);
+
+    // Attempt to schedule a 3rd driving lesson via DrivingController::store
+    $response = $this->actingAs($admin)->post('/admin/drivings', [
+        'instructor_id' => $instructor->id,
+        'student_ids' => [$student->id],
+        'start_time' => now()->addDays(3)->format('Y-m-d H:i:s'),
+        'end_time' => now()->addDays(3)->addHour()->format('Y-m-d H:i:s'),
+    ]);
+
+    $response->assertSessionHasErrors('student_ids');
+});
