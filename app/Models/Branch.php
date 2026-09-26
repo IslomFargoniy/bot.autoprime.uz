@@ -51,4 +51,18 @@ class Branch extends Model
     {
         return $this->hasMany(Driving::class);
     }
+
+    /**
+     * Whether the branch still owns people, lessons or money records; deleting it
+     * would cascade-delete them, so such branches must be deactivated instead.
+     */
+    public function hasDependentRecords(): bool
+    {
+        return $this->users()->exists()
+            || $this->students()->exists()
+            || $this->groups()->exists()
+            || Contract::where('branch_id', $this->id)->exists()
+            || Payment::where('branch_id', $this->id)->exists()
+            || CashRegister::where('branch_id', $this->id)->exists();
+    }
 }

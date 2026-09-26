@@ -107,6 +107,18 @@ class User extends Authenticatable implements PasskeyUser
         return $this->status !== 'inactive';
     }
 
+    /**
+     * Whether deleting this user would cascade-delete payroll or lesson history.
+     * Such staff should be deactivated (status = inactive) instead.
+     */
+    public function hasWorkHistory(): bool
+    {
+        return $this->salaries()->exists()
+            || $this->salaryPayments()->exists()
+            || $this->drivings()->exists()
+            || $this->lessonSessions()->exists();
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('superadmin');

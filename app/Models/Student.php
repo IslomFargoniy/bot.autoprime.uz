@@ -192,6 +192,19 @@ class Student extends Model
      * Whether the student passed the server-graded internal mock exam, which is
      * the only attempt type that counts toward certificate eligibility.
      */
+    /**
+     * Whether deleting this student would cascade-delete contracts, payments,
+     * certificates or lesson history.
+     */
+    public function hasHistory(): bool
+    {
+        return $this->contracts()->exists()
+            || $this->payments()->exists()
+            || $this->certificates()->exists()
+            || $this->attendances()->exists()
+            || $this->drivings()->exists();
+    }
+
     public function hasPassedMockExam(): bool
     {
         return $this->attempts()

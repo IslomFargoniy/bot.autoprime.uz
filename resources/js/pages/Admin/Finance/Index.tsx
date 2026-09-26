@@ -18,6 +18,7 @@ import {
     Search,
     RotateCcw,
     ArrowRight,
+    XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { useCan } from '@/hooks/use-can';
 
 interface CashRegister {
     id: number;
@@ -148,6 +150,8 @@ export default function FinanceIndex({
     filters = {},
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
+    const canApproveTransfers = can('cash_transfers.approve');
     const [activeTab, setActiveTab] = useState<'registers' | 'history' | 'payments' | 'expenses' | 'transfers'>('registers');
 
     // Modals
@@ -360,6 +364,15 @@ export default function FinanceIndex({
         if (confirm(t('finance.confirm_approve_transfer', 'Ushbu transferni tasdiqlab mablag\'ni o\'tkazmoqchimisiz?'))) {
             router.post(`/admin/finance/transfer/${transfer.id}/approve`, {}, {
                 onSuccess: () => toast.success(t('finance.transfer_approved', 'Transfer tasdiqlandi')),
+                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            });
+        }
+    };
+
+    const handleRejectTransfer = (transfer: CashTransfer) => {
+        if (confirm(t('finance.confirm_reject_transfer', 'Ushbu transferni rad etmoqchimisiz? Mablag\' o\'tkazilmaydi.'))) {
+            router.post(`/admin/finance/transfer/${transfer.id}/reject`, {}, {
+                onSuccess: () => toast.success(t('finance.transfer_rejected', 'Transfer rad etildi')),
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         }
@@ -1190,16 +1203,27 @@ export default function FinanceIndex({
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.approved_by?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{tr.created_at}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
-                                                    {tr.status === 'pending' && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="brand"
-                                                            onClick={() => handleApproveTransfer(tr)}
-                                                            className="h-7 text-xs"
-                                                        >
-                                                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                                            {t('common.confirm', 'Tasdiqlash')}
-                                                        </Button>
+                                                    {tr.status === 'pending' && canApproveTransfers && (
+                                                        <div className="inline-flex gap-1.5">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="brand"
+                                                                onClick={() => handleApproveTransfer(tr)}
+                                                                className="h-7 text-xs"
+                                                            >
+                                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                                                {t('common.confirm', 'Tasdiqlash')}
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleRejectTransfer(tr)}
+                                                                className="h-7 text-xs"
+                                                            >
+                                                                <XCircle className="w-3.5 h-3.5 mr-1" />
+                                                                {t('finance.reject', 'Rad etish')}
+                                                            </Button>
+                                                        </div>
                                                     )}
                                                 </TableCell>
                                             </TableRow>
@@ -1254,16 +1278,27 @@ export default function FinanceIndex({
                                             <span>{tr.transferred_by?.name || '-'}</span>
                                             {tr.approved_by?.name && <span> → {tr.approved_by.name}</span>}
                                         </div>
-                                        {tr.status === 'pending' && (
-                                            <Button
-                                                size="sm"
-                                                variant="brand"
-                                                onClick={() => handleApproveTransfer(tr)}
-                                                className="h-7 text-xs px-2.5"
-                                            >
-                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                                {t('common.confirm', 'Tasdiqlash')}
-                                            </Button>
+                                        {tr.status === 'pending' && canApproveTransfers && (
+                                            <div className="flex gap-1.5">
+                                                <Button
+                                                    size="sm"
+                                                    variant="brand"
+                                                    onClick={() => handleApproveTransfer(tr)}
+                                                    className="h-7 text-xs px-2.5"
+                                                >
+                                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                                    {t('common.confirm', 'Tasdiqlash')}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleRejectTransfer(tr)}
+                                                    className="h-7 text-xs px-2.5"
+                                                >
+                                                    <XCircle className="w-3.5 h-3.5 mr-1" />
+                                                    {t('finance.reject', 'Rad etish')}
+                                                </Button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>

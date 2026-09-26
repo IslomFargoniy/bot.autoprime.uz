@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class SalaryController extends Controller
 {
@@ -31,7 +32,7 @@ class SalaryController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         $period = $request->input('period', Carbon::now()->format('Y-m'));
 
-        $salariesQuery = Salary::with(['user', 'calculatedBy', 'salaryPayments'])
+        $salariesQuery = Salary::with(['user', 'calculatedBy', 'salaryPayments', 'payments'])
             ->where('period', $period)
             ->orderBy('created_at', 'desc');
 
@@ -83,11 +84,18 @@ class SalaryController extends Controller
         $startOfMonth = Carbon::createFromFormat('Y-m', $period)->startOfMonth();
         $endOfMonth = Carbon::createFromFormat('Y-m', $period)->endOfMonth();
 
-        $employees = User::with('roles')->where('status', 'active')->get();
+        $targetBranchId = BranchSessionService::getActiveBranchId($request);
+        $employees = User::with('roles')
+            ->where('status', 'active')
+            ->when($targetBranchId, fn ($q) => $q->where('branch_id', $targetBranchId))
+            ->get();
         $createdCount = 0;
 
         DB::transaction(function () use ($employees, $period, $startOfMonth, $endOfMonth, $request, &$createdCount) {
             foreach ($employees as $emp) {
+                // Lock the employee so a concurrent run waits and then sees this accrual
+                $emp = User::with('roles')->whereKey($emp->id)->lockForUpdate()->first();
+
                 // Check if already generated base payroll for this period
                 $existing = Salary::where('user_id', $emp->id)
                     ->where('period', $period)
@@ -181,7 +189,7 @@ class SalaryController extends Controller
             'user_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'period' => 'required|date_format:Y-m',
             'type' => 'required|in:bonus,kpi,fine,advance',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'description' => 'required|string|max:500',
         ]);
 
@@ -201,9 +209,12 @@ class SalaryController extends Controller
                 'accrued_at' => now(),
             ]);
 
+            $employee = User::whereKey($employee->id)->lockForUpdate()->first();
             $balBefore = (float) $employee->salary_balance;
+            // Deductions are applied in full (the balance may go negative) so the
+            // result never depends on the order of accruals, fines and payouts.
             if ($isDeduction) {
-                $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
+                $employee->decrement('salary_balance', (float) $validated['amount']);
             } else {
                 $employee->increment('salary_balance', (float) $validated['amount']);
             }
@@ -232,75 +243,97 @@ class SalaryController extends Controller
     {
         $validated = $request->validate([
             'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',
         ]);
 
-        $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
-        if ((float) $cashRegister->balance < (float) $validated['amount']) {
-            return redirect()->back()->withErrors([
-                'amount' => "Tanlangan kassada yetarli mablag' mavjud emas (Mavjud: {$cashRegister->balance} UZS).",
-            ]);
+        if ($salary->is_deduction) {
+            return redirect()->back()->withErrors(['amount' => "Ushlab qolish (jarima/avans) yozuvini to'lab bo'lmaydi."]);
         }
 
-        DB::transaction(function () use ($salary, $cashRegister, $validated, $request) {
-            $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
-            $employee = User::where('id', $salary->user_id)->lockForUpdate()->first();
+        $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
 
-            $category = ExpenseCategory::firstOrCreate(
-                ['name' => 'Xodimlar oylik maoshi'],
-                ['is_active' => true]
-            );
-
-            $expense = Expense::create([
-                'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
-                'cash_register_id' => $lockedRegister->id,
-                'expense_category_id' => $category->id,
-                'user_id' => $request->user()->id,
-                'amount' => $validated['amount'],
-                'recipient' => "Xodim: {$employee->name} ({$employee->role})",
-                'description' => "Oylik maosh to'lovi ({$salary->period})".(! empty($validated['notes']) ? ": {$validated['notes']}" : ''),
-                'spent_at' => now(),
-            ]);
-
-            $salaryPayment = SalaryPayment::create([
-                'salary_id' => $salary->id,
-                'user_id' => $employee->id,
-                'cash_register_id' => $lockedRegister->id,
-                'paid_by_user_id' => $request->user()->id,
-                'amount' => $validated['amount'],
-                'payment_method' => $validated['payment_method'],
-                'paid_at' => now(),
-                'comment' => $validated['notes'] ?? null,
-            ]);
-
-            $lockedRegister->withdraw(
-                amount: (float) $validated['amount'],
-                category: 'salary',
-                description: "Oylik maosh to'lovi: {$employee->name} ({$salary->period})",
-                reference: $expense,
-                userId: $request->user()->id
-            );
-
-            $balBefore = (float) $employee->salary_balance;
-            $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
-            $balAfter = (float) $employee->fresh()->salary_balance;
-
-            FinancialHistory::recordForUser($employee, [
-                'type' => 'debit',
-                'category' => 'salary_payout',
-                'amount' => (float) $validated['amount'],
-                'balance_before' => $balBefore,
-                'balance_after' => $balAfter,
-                'payment_method' => $validated['payment_method'],
-                'description' => "Oylik maosh to'lovi ({$salary->period} oyi uchun)",
-                'reference' => $salaryPayment,
-                'performed_by_user_id' => $request->user()->id,
-                'transacted_at' => now(),
-            ]);
-        });
+        try {
+            DB::transaction(function () use ($salary, $cashRegister, $validated, $request) {
+                $this->payLockedSalary($salary, $cashRegister, $validated, $request);
+            });
+        } catch (InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['amount' => $e->getMessage()]);
+        }
 
         return redirect()->back()->with('success', 'Oylik to\'lovi kassadan muvaffaqiyatli amalga oshirildi va Moliya xarajatlarida qayd etildi.');
+    }
+
+    /**
+     * Pay out (part of) a salary accrual. Must run inside a transaction: the
+     * accrual is locked so the remaining amount is checked against committed
+     * payments and two concurrent payouts cannot both pass.
+     *
+     * @param  array{cash_register_id: int|string, amount: int|float|string, payment_method: string, notes?: string|null}  $validated
+     */
+    private function payLockedSalary(Salary $salary, CashRegister $cashRegister, array $validated, Request $request): void
+    {
+        $lockedSalary = Salary::whereKey($salary->id)->lockForUpdate()->firstOrFail();
+        if ((float) $validated['amount'] > $lockedSalary->remainingAmount() + 0.01) {
+            throw new InvalidArgumentException(
+                "To'lov summasi qolgan qarzdan (".number_format($lockedSalary->remainingAmount(), 0, '', ' ')." UZS) ko'p bo'lishi mumkin emas."
+            );
+        }
+
+        $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
+        $employee = User::where('id', $salary->user_id)->lockForUpdate()->first();
+
+        $category = ExpenseCategory::firstOrCreate(
+            ['name' => 'Xodimlar oylik maoshi'],
+            ['is_active' => true]
+        );
+
+        $expense = Expense::create([
+            'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+            'cash_register_id' => $lockedRegister->id,
+            'expense_category_id' => $category->id,
+            'user_id' => $request->user()->id,
+            'amount' => $validated['amount'],
+            'recipient' => "Xodim: {$employee->name} ({$employee->role})",
+            'description' => "Oylik maosh to'lovi ({$salary->period})".(! empty($validated['notes']) ? ": {$validated['notes']}" : ''),
+            'spent_at' => now(),
+        ]);
+
+        $salaryPayment = SalaryPayment::create([
+            'salary_id' => $salary->id,
+            'user_id' => $employee->id,
+            'cash_register_id' => $lockedRegister->id,
+            'paid_by_user_id' => $request->user()->id,
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'],
+            'paid_at' => now(),
+            'comment' => $validated['notes'] ?? null,
+        ]);
+
+        $lockedRegister->withdraw(
+            amount: (float) $validated['amount'],
+            category: 'salary',
+            description: "Oylik maosh to'lovi: {$employee->name} ({$salary->period})",
+            reference: $expense,
+            userId: $request->user()->id
+        );
+
+        $balBefore = (float) $employee->salary_balance;
+        $employee->decrement('salary_balance', (float) $validated['amount']);
+        $balAfter = (float) $employee->fresh()->salary_balance;
+
+        FinancialHistory::recordForUser($employee, [
+            'type' => 'debit',
+            'category' => 'salary_payout',
+            'amount' => (float) $validated['amount'],
+            'balance_before' => $balBefore,
+            'balance_after' => $balAfter,
+            'payment_method' => $validated['payment_method'],
+            'description' => "Oylik maosh to'lovi ({$salary->period} oyi uchun)",
+            'reference' => $salaryPayment,
+            'performed_by_user_id' => $request->user()->id,
+            'transacted_at' => now(),
+        ]);
     }
 }

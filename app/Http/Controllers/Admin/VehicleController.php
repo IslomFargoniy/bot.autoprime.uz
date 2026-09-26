@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class VehicleController extends Controller
 {
@@ -154,7 +155,7 @@ class VehicleController extends Controller
     {
         $validated = $request->validate([
             'maintenance_type' => 'required|string|max:100',
-            'cost' => 'required|numeric|min:0',
+            'cost' => 'required|numeric|min:0|max:9999999999',
             'performed_date' => 'required|date',
             'next_due_date' => 'nullable|date',
             'odometer' => 'nullable|numeric|min:0',
@@ -171,66 +172,88 @@ class VehicleController extends Controller
             }
         }
 
-        DB::transaction(function () use ($validated, $vehicle, $request) {
-            $expenseId = null;
-            if (! empty($validated['cash_register_id']) && (float) $validated['cost'] > 0) {
-                $lockedRegister = CashRegister::where('id', $validated['cash_register_id'])->lockForUpdate()->first();
-                if ($lockedRegister && (float) $lockedRegister->balance >= (float) $validated['cost']) {
-                    $category = ExpenseCategory::firstOrCreate(
-                        ['name' => "Avtomobil ta'miri va ehtiyot qismlar"],
-                        ['is_active' => true]
-                    );
-
-                    $expense = Expense::create([
-                        'branch_id' => $vehicle->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
-                        'cash_register_id' => $lockedRegister->id,
-                        'expense_category_id' => $category->id,
-                        'user_id' => $request->user()->id,
-                        'amount' => $validated['cost'],
-                        'recipient' => "Avtomobil: {$vehicle->plate_number} ({$vehicle->make_model})",
-                        'description' => "Texnik xizmat: {$validated['maintenance_type']}".(! empty($validated['notes']) ? " ({$validated['notes']})" : ''),
-                        'spent_at' => $validated['performed_date'],
-                    ]);
-
-                    $lockedRegister->withdraw(
-                        amount: (float) $validated['cost'],
-                        category: 'maintenance',
-                        description: "Avtotransport xarajati: {$vehicle->plate_number} ({$validated['maintenance_type']})",
-                        reference: $expense,
-                        userId: $request->user()->id
-                    );
-
-                    $expenseId = $expense->id;
-                }
-            }
-
-            $mileage = ! empty($validated['odometer']) ? (int) $validated['odometer'] : ($vehicle->current_mileage ?? 0);
-
-            VehicleMaintenance::create([
-                'vehicle_id' => $vehicle->id,
-                'cash_register_id' => $validated['cash_register_id'] ?? null,
-                'expense_id' => $expenseId,
-                'maintenance_type' => $validated['maintenance_type'],
-                'cost' => $validated['cost'],
-                'performed_at' => $validated['performed_date'],
-                'next_due_date' => $validated['next_due_date'] ?? null,
-                'mileage' => $mileage,
-                'description' => $validated['notes'] ?? null,
-            ]);
-
-            if (! empty($validated['odometer']) && (int) $validated['odometer'] > (int) $vehicle->current_mileage) {
-                $vehicle->update(['current_mileage' => (int) $validated['odometer']]);
-            }
-        });
+        try {
+            DB::transaction(function () use ($validated, $vehicle, $request) {
+                $this->recordMaintenance($validated, $vehicle, $request);
+            });
+        } catch (InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['cash_register_id' => $e->getMessage()]);
+        }
 
         return redirect()->back()->with('success', __('vehicles.maintenance_success', [], app()->getLocale()));
+    }
+
+    /**
+     * Record a maintenance entry and, when paid from a register, its expense and
+     * withdrawal. withdraw() throws when the balance is insufficient, which rolls
+     * the whole entry back instead of saving an unpaid "paid" maintenance.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function recordMaintenance(array $validated, Vehicle $vehicle, Request $request): void
+    {
+        $expenseId = null;
+        if (! empty($validated['cash_register_id']) && (float) $validated['cost'] > 0) {
+            $lockedRegister = CashRegister::where('id', $validated['cash_register_id'])->lockForUpdate()->first();
+            if ($lockedRegister) {
+                $category = ExpenseCategory::firstOrCreate(
+                    ['name' => "Avtomobil ta'miri va ehtiyot qismlar"],
+                    ['is_active' => true]
+                );
+
+                $expense = Expense::create([
+                    'branch_id' => $vehicle->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+                    'cash_register_id' => $lockedRegister->id,
+                    'expense_category_id' => $category->id,
+                    'user_id' => $request->user()->id,
+                    'amount' => $validated['cost'],
+                    'recipient' => "Avtomobil: {$vehicle->plate_number} ({$vehicle->make_model})",
+                    'description' => "Texnik xizmat: {$validated['maintenance_type']}".(! empty($validated['notes']) ? " ({$validated['notes']})" : ''),
+                    'spent_at' => $validated['performed_date'],
+                ]);
+
+                $lockedRegister->withdraw(
+                    amount: (float) $validated['cost'],
+                    category: 'maintenance',
+                    description: "Avtotransport xarajati: {$vehicle->plate_number} ({$validated['maintenance_type']})",
+                    reference: $expense,
+                    userId: $request->user()->id
+                );
+
+                $expenseId = $expense->id;
+            }
+        }
+
+        $mileage = ! empty($validated['odometer']) ? (int) $validated['odometer'] : ($vehicle->current_mileage ?? 0);
+
+        VehicleMaintenance::create([
+            'vehicle_id' => $vehicle->id,
+            'cash_register_id' => $validated['cash_register_id'] ?? null,
+            'expense_id' => $expenseId,
+            'maintenance_type' => $validated['maintenance_type'],
+            'cost' => $validated['cost'],
+            'performed_at' => $validated['performed_date'],
+            'next_due_date' => $validated['next_due_date'] ?? null,
+            'mileage' => $mileage,
+            'description' => $validated['notes'] ?? null,
+        ]);
+
+        if (! empty($validated['odometer']) && (int) $validated['odometer'] > (int) $vehicle->current_mileage) {
+            $vehicle->update(['current_mileage' => (int) $validated['odometer']]);
+        }
     }
 
     public function destroyMaintenance(Vehicle $vehicle, VehicleMaintenance $maintenance): RedirectResponse
     {
         DB::transaction(function () use ($maintenance) {
+            // Re-read under lock so a double submit cannot refund the register twice.
+            $maintenance = VehicleMaintenance::whereKey($maintenance->id)->lockForUpdate()->first();
+            if (! $maintenance) {
+                return;
+            }
+
             if ($maintenance->expense_id) {
-                $expense = Expense::find($maintenance->expense_id);
+                $expense = Expense::whereKey($maintenance->expense_id)->lockForUpdate()->first();
                 if ($expense && $expense->cash_register_id) {
                     $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->lockForUpdate()->first();
                     if ($lockedRegister) {

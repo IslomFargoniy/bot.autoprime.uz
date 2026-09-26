@@ -188,6 +188,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::delete('admin/finance/expense/{expense}', [FinanceController::class, 'destroyExpense'])->middleware('permission:expenses.delete')->name('finance.destroy-expense');
     Route::post('admin/finance/transfer', [FinanceController::class, 'createTransfer'])->middleware('permission:cash_transfers.create')->name('finance.create-transfer');
     Route::post('admin/finance/transfer/{transfer}/approve', [FinanceController::class, 'approveTransfer'])->middleware('permission:cash_transfers.approve')->name('finance.approve-transfer');
+    Route::post('admin/finance/transfer/{transfer}/reject', [FinanceController::class, 'rejectTransfer'])->middleware('permission:cash_transfers.approve')->name('finance.reject-transfer');
     Route::post('admin/finance/sweep', [FinanceController::class, 'sweepRegisters'])->middleware('permission:cash_transfers.create')->name('finance.sweep');
 
     // Payroll & Salaries

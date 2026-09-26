@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class ContractController extends Controller
 {
@@ -121,7 +122,7 @@ class ContractController extends Controller
             'contract_type_id' => 'required|exists:contract_types,id',
             'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
-            'discount_amount' => 'nullable|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0|max:9999999999',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'terms' => 'nullable|string',
@@ -220,7 +221,7 @@ class ContractController extends Controller
     {
         $validated = $request->validate([
             'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'cancel_contract' => 'nullable|boolean',
             'notes' => 'nullable|string',
@@ -240,78 +241,102 @@ class ContractController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($contract, $cashRegister, $validated, $request) {
-            $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
-            $lockedContract = Contract::with('student')->where('id', $contract->id)->lockForUpdate()->first();
-
-            $receiptNumber = DocumentNumberService::nextRefundNumber();
-
-            // 1. Create refund payment
-            Payment::create([
-                'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
-                'contract_id' => $lockedContract->id,
-                'student_id' => $lockedContract->student_id,
-                'cash_register_id' => $lockedRegister->id,
-                'received_by_user_id' => $request->user()->id,
-                'amount' => $validated['amount'],
-                'payment_type' => 'refund',
-                'payment_method' => $validated['payment_method'],
-                'receipt_number' => $receiptNumber,
-                'paid_at' => now(),
-                'comment' => $validated['notes'] ?? 'Shartnoma to\'lovini qaytarish',
-            ]);
-
-            // 2. Create expense record in Finance
-            $category = ExpenseCategory::firstOrCreate(
-                ['name' => "Talaba to'lovini qaytarish (Refund)"],
-                ['is_active' => true]
-            );
-
-            $expense = Expense::create([
-                'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
-                'cash_register_id' => $lockedRegister->id,
-                'expense_category_id' => $category->id,
-                'user_id' => $request->user()->id,
-                'amount' => $validated['amount'],
-                'recipient' => "Talaba: {$lockedContract->student?->full_name} (#{$lockedContract->contract_number})",
-                'description' => "To'lovni qaytarish (Chek: #{$receiptNumber})".(! empty($validated['notes']) ? ": {$validated['notes']}" : ''),
-                'spent_at' => now(),
-            ]);
-
-            // 3. Decrement cash register balance & record transaction
-            $lockedRegister->withdraw(
-                amount: (float) $validated['amount'],
-                category: 'refund',
-                description: "To'lovni qaytarish: {$lockedContract->student?->full_name} (#{$lockedContract->contract_number})",
-                reference: $expense,
-                userId: $request->user()->id
-            );
-
-            // 4. Recalculate contract finances
-            $lockedContract->recalculateFinances();
-
-            // 5. Record financial history for the student
-            if ($lockedContract->student) {
-                FinancialHistory::recordForStudent($lockedContract->student, [
-                    'type' => 'debit',
-                    'category' => 'refund',
-                    'amount' => (float) $validated['amount'],
-                    'balance_before' => (float) ($lockedContract->debt_amount - (float) $validated['amount']),
-                    'balance_after' => (float) $lockedContract->debt_amount,
-                    'payment_method' => $validated['payment_method'],
-                    'description' => "To'lov qaytarildi (#{$receiptNumber})",
-                    'reference' => $expense,
-                    'performed_by_user_id' => $request->user()->id,
-                    'transacted_at' => now(),
-                ]);
-            }
-
-            // 6. If cancel_contract is true, set status = cancelled
-            if (! empty($validated['cancel_contract'])) {
-                $lockedContract->update(['status' => 'cancelled']);
-            }
-        });
+        try {
+            DB::transaction(function () use ($contract, $cashRegister, $validated, $request) {
+                $this->refundLockedContract($contract, $cashRegister, $validated, $request);
+            });
+        } catch (InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['amount' => $e->getMessage()]);
+        }
 
         return redirect()->back()->with('success', "To'lov muvaffaqiyatli qaytarildi va kassadan yechildi.");
+    }
+
+    /**
+     * Refund part of a contract. Must run inside a transaction; the contract is
+     * locked first (same order as payments) and the refundable amount is
+     * re-checked under the lock so concurrent refunds cannot exceed what was paid.
+     *
+     * @param  array{cash_register_id: int|string, amount: int|float|string, payment_method: string, cancel_contract?: bool|null, notes?: string|null}  $validated
+     */
+    private function refundLockedContract(Contract $contract, CashRegister $cashRegister, array $validated, Request $request): void
+    {
+        $lockedContract = Contract::with('student')->where('id', $contract->id)->lockForUpdate()->first();
+        $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
+
+        $refundable = (float) $lockedContract->payments()->where('payment_type', '!=', 'refund')->sum('amount')
+            - (float) $lockedContract->payments()->where('payment_type', 'refund')->sum('amount');
+        if ((float) $validated['amount'] > $refundable + 0.01) {
+            throw new InvalidArgumentException(
+                "Qaytariladigan summa to'langan summadan (".number_format(max(0, $refundable), 0, '', ' ')." UZS) ko'p bo'lishi mumkin emas."
+            );
+        }
+
+        $receiptNumber = DocumentNumberService::nextRefundNumber();
+
+        // 1. Create refund payment
+        Payment::create([
+            'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
+            'contract_id' => $lockedContract->id,
+            'student_id' => $lockedContract->student_id,
+            'cash_register_id' => $lockedRegister->id,
+            'received_by_user_id' => $request->user()->id,
+            'amount' => $validated['amount'],
+            'payment_type' => 'refund',
+            'payment_method' => $validated['payment_method'],
+            'receipt_number' => $receiptNumber,
+            'paid_at' => now(),
+            'comment' => $validated['notes'] ?? 'Shartnoma to\'lovini qaytarish',
+        ]);
+
+        // 2. Create expense record in Finance
+        $category = ExpenseCategory::firstOrCreate(
+            ['name' => "Talaba to'lovini qaytarish (Refund)"],
+            ['is_active' => true]
+        );
+
+        $expense = Expense::create([
+            'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
+            'cash_register_id' => $lockedRegister->id,
+            'expense_category_id' => $category->id,
+            'user_id' => $request->user()->id,
+            'amount' => $validated['amount'],
+            'recipient' => "Talaba: {$lockedContract->student?->full_name} (#{$lockedContract->contract_number})",
+            'description' => "To'lovni qaytarish (Chek: #{$receiptNumber})".(! empty($validated['notes']) ? ": {$validated['notes']}" : ''),
+            'spent_at' => now(),
+        ]);
+
+        // 3. Decrement cash register balance & record transaction
+        $lockedRegister->withdraw(
+            amount: (float) $validated['amount'],
+            category: 'refund',
+            description: "To'lovni qaytarish: {$lockedContract->student?->full_name} (#{$lockedContract->contract_number})",
+            reference: $expense,
+            userId: $request->user()->id
+        );
+
+        // 4. Recalculate contract finances
+        $lockedContract->recalculateFinances();
+
+        // 5. Record financial history for the student
+        if ($lockedContract->student) {
+            FinancialHistory::recordForStudent($lockedContract->student, [
+                'type' => 'debit',
+                'category' => 'refund',
+                'amount' => (float) $validated['amount'],
+                'balance_before' => (float) ($lockedContract->debt_amount - (float) $validated['amount']),
+                'balance_after' => (float) $lockedContract->debt_amount,
+                'payment_method' => $validated['payment_method'],
+                'description' => "To'lov qaytarildi (#{$receiptNumber})",
+                'reference' => $expense,
+                'performed_by_user_id' => $request->user()->id,
+                'transacted_at' => now(),
+            ]);
+        }
+
+        // 6. If cancel_contract is true, set status = cancelled
+        if (! empty($validated['cancel_contract'])) {
+            $lockedContract->update(['status' => 'cancelled']);
+        }
     }
 }

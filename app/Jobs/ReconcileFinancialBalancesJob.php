@@ -3,19 +3,14 @@
 namespace App\Jobs;
 
 use App\Models\CashRegister;
-use App\Models\CashTransaction;
-use App\Models\CashTransfer;
 use App\Models\Contract;
-use App\Models\Expense;
-use App\Models\Payment;
-use App\Models\Salary;
-use App\Models\SalaryPayment;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReconcileFinancialBalancesJob implements ShouldQueue
@@ -23,81 +18,139 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Execute the job.
+     * Rebuild every cached balance from its source records, using exactly the
+     * same rules as the live code:
+     *  - contract paid/debt: tuition payments minus refunds
+     *  - cash register balance: the cash_transactions ledger (in - out), which
+     *    also contains opening balances ("initial" entries)
+     *  - salary balance: accruals - deductions - payouts (no clamping)
+     * Each correction runs under a row lock and is logged as drift.
      */
     public function handle(): void
     {
         Log::info('[Reconciliation] Starting midnight financial balance check...');
-        $driftDetected = false;
 
-        // 1. Reconcile Contracts finances
-        $contracts = Contract::all();
-        foreach ($contracts as $contract) {
-            $tuitionPaid = (float) Payment::where('contract_id', $contract->id)
-                ->where('payment_type', '!=', 'refund')
-                ->sum('amount');
-            $refunded = (float) Payment::where('contract_id', $contract->id)
-                ->where('payment_type', 'refund')
-                ->sum('amount');
-            $expectedPaid = max(0, $tuitionPaid - $refunded);
-            $final = (float) $contract->final_amount;
-            $expectedDebt = max(0, $final - $expectedPaid);
-            $expectedOverpaid = max(0, $expectedPaid - $final);
+        $driftCount = $this->reconcileContracts()
+            + $this->reconcileCashRegisters()
+            + $this->reconcileSalaryBalances();
 
-            if (abs((float) $contract->paid_amount - $expectedPaid) > 0.01 || abs((float) $contract->debt_amount - $expectedDebt) > 0.01) {
-                Log::warning("[Reconciliation Drift] Contract #{$contract->contract_number} (ID: {$contract->id}) cached paid: {$contract->paid_amount}, expected: {$expectedPaid}. Recalculating.");
-                $contract->recalculateFinances();
-                $driftDetected = true;
+        Log::info("[Reconciliation] Finished financial balance check. Drift corrections: {$driftCount}");
+    }
+
+    private function reconcileContracts(): int
+    {
+        $driftCount = 0;
+
+        Contract::query()
+            ->withSum(['payments as tuition_sum' => fn ($q) => $q->where('payment_type', '!=', 'refund')], 'amount')
+            ->withSum(['payments as refund_sum' => fn ($q) => $q->where('payment_type', 'refund')], 'amount')
+            ->chunkById(200, function ($contracts) use (&$driftCount) {
+                foreach ($contracts as $contract) {
+                    $expectedPaid = max(0, (float) $contract->tuition_sum - (float) $contract->refund_sum);
+
+                    if (abs((float) $contract->paid_amount - $expectedPaid) <= 0.01) {
+                        continue;
+                    }
+
+                    Log::warning("[Reconciliation Drift] Contract #{$contract->contract_number} (ID: {$contract->id}) cached paid: {$contract->paid_amount}, expected: {$expectedPaid}. Recalculating.");
+
+                    DB::transaction(function () use ($contract) {
+                        Contract::whereKey($contract->id)->lockForUpdate()->first()?->recalculateFinances();
+                    });
+                    $driftCount++;
+                }
+            });
+
+        return $driftCount;
+    }
+
+    private function reconcileCashRegisters(): int
+    {
+        $driftCount = 0;
+
+        CashRegister::query()->chunkById(200, function ($registers) use (&$driftCount) {
+            foreach ($registers as $register) {
+                $driftCount += (int) DB::transaction(function () use ($register) {
+                    $locked = CashRegister::whereKey($register->id)->lockForUpdate()->first();
+                    if (! $locked) {
+                        return false;
+                    }
+
+                    $ledgerBalance = $this->ledgerBalance($locked);
+                    if ($ledgerBalance === null || abs((float) $locked->balance - $ledgerBalance) <= 0.01) {
+                        return false;
+                    }
+
+                    Log::warning("[Reconciliation Drift] Register {$locked->name} (ID: {$locked->id}) cached: {$locked->balance}, ledger: {$ledgerBalance}. Updating from ledger.");
+                    $locked->update(['balance' => $ledgerBalance]);
+
+                    return true;
+                });
             }
+        });
+
+        return $driftCount;
+    }
+
+    /**
+     * Balance implied by the register's ledger, or null when it has no entries yet.
+     */
+    private function ledgerBalance(CashRegister $register): ?float
+    {
+        $totals = DB::table('cash_transactions')
+            ->where('cash_register_id', $register->id)
+            ->selectRaw("COUNT(*) as entries, COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in, COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out")
+            ->first();
+
+        if (! $totals || (int) $totals->entries === 0) {
+            return null;
         }
 
-        // 2. Reconcile Cash Register Balances
-        $registers = CashRegister::all();
-        foreach ($registers as $register) {
-            // Tuition payments received (excluding refund records)
-            $incomes = (float) Payment::where('cash_register_id', $register->id)
-                ->where('payment_type', '!=', 'refund')
-                ->sum('amount');
+        return round((float) $totals->total_in - (float) $totals->total_out, 2);
+    }
 
-            // All expenses from this register (salaries, vehicle maintenance, direct expenses, and refunds are all in expenses)
-            $expenses = (float) Expense::where('cash_register_id', $register->id)->sum('amount');
+    private function reconcileSalaryBalances(): int
+    {
+        $driftCount = 0;
 
-            // Transfers: received vs sent
-            $transfersIn = (float) CashTransfer::where('to_cash_register_id', $register->id)->where('status', 'approved')->sum('amount');
-            $transfersOut = (float) CashTransfer::where('from_cash_register_id', $register->id)->where('status', 'approved')->sum('amount');
+        User::query()
+            ->withSum(['salaries as accrued_sum' => fn ($q) => $q->where('is_deduction', false)], 'amount')
+            ->withSum(['salaries as deduction_sum' => fn ($q) => $q->where('is_deduction', true)], 'amount')
+            ->withSum('salaryPayments as paid_sum', 'amount')
+            ->chunkById(200, function ($users) use (&$driftCount) {
+                foreach ($users as $user) {
+                    $expected = round((float) $user->accrued_sum - (float) $user->deduction_sum - (float) $user->paid_sum, 2);
 
-            $expectedBalance = max(0, $incomes + $transfersIn - $expenses - $transfersOut);
+                    if (abs((float) $user->salary_balance - $expected) <= 0.01) {
+                        continue;
+                    }
 
-            if (abs((float) $register->balance - $expectedBalance) > 0.01) {
-                Log::warning("[Reconciliation Drift] Register #{$register->name} (ID: {$register->id}) cached: {$register->balance}, calculated: {$expectedBalance}. Updating.");
-                $register->update(['balance' => $expectedBalance]);
-                $driftDetected = true;
-            }
+                    $driftCount += (int) DB::transaction(function () use ($user) {
+                        $locked = User::whereKey($user->id)->lockForUpdate()->first();
+                        if (! $locked) {
+                            return false;
+                        }
 
-            // Cross-check register balance with latest CashTransaction ledger record
-            $latestTx = CashTransaction::where('cash_register_id', $register->id)->latest('id')->first();
-            if ($latestTx && abs((float) $register->balance - (float) $latestTx->balance_after) > 0.01) {
-                Log::warning("[Reconciliation Ledger Mismatch] Register #{$register->name} (ID: {$register->id}) balance: {$register->balance}, latest ledger balance_after: {$latestTx->balance_after}.");
-                $driftDetected = true;
-            }
-        }
+                        // Recompute under the lock so a payout committed meanwhile is included.
+                        $expected = round(
+                            (float) $locked->salaries()->where('is_deduction', false)->sum('amount')
+                            - (float) $locked->salaries()->where('is_deduction', true)->sum('amount')
+                            - (float) $locked->salaryPayments()->sum('amount'),
+                            2
+                        );
 
-        // 3. Reconcile User Salary Balances
-        $users = User::all();
-        foreach ($users as $u) {
-            $accrued = (float) Salary::where('user_id', $u->id)->where('is_deduction', false)->sum('amount');
-            $deductions = (float) Salary::where('user_id', $u->id)->where('is_deduction', true)->sum('amount');
-            $paid = (float) SalaryPayment::where('user_id', $u->id)->sum('amount');
+                        if (abs((float) $locked->salary_balance - $expected) <= 0.01) {
+                            return false;
+                        }
 
-            $expectedSalaryBalance = max(0, $accrued - $deductions - $paid);
+                        Log::warning("[Reconciliation Drift] User {$locked->name} (ID: {$locked->id}) cached salary_balance: {$locked->salary_balance}, expected: {$expected}. Updating.");
+                        User::whereKey($locked->id)->update(['salary_balance' => $expected]);
 
-            if (abs((float) $u->salary_balance - $expectedSalaryBalance) > 0.01) {
-                Log::warning("[Reconciliation Drift] User #{$u->name} (ID: {$u->id}) cached salary_balance: {$u->salary_balance}, calculated: {$expectedSalaryBalance}. Updating.");
-                $u->update(['salary_balance' => $expectedSalaryBalance]);
-                $driftDetected = true;
-            }
-        }
+                        return true;
+                    });
+                }
+            });
 
-        Log::info('[Reconciliation] Finished financial balance check. Drift found: '.($driftDetected ? 'YES' : 'NO'));
+        return $driftCount;
     }
 }

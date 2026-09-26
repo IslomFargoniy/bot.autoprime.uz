@@ -131,7 +131,7 @@ class LeadController extends Controller
             'contract_type_id' => 'required|exists:contract_types,id',
             'branch_id' => 'nullable|exists:branches,id',
             'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
-            'discount_amount' => 'nullable|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0|max:9999999999',
         ]);
 
         if ($lead->stage === 'contract_signed' || $lead->student_id) {

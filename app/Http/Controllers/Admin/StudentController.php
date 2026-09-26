@@ -260,6 +260,12 @@ class StudentController extends Controller
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
+        if ($student->hasHistory()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Bu o\'quvchining shartnoma, to\'lov yoki dars tarixi bor. O\'chirish o\'rniga holatini o\'zgartiring.',
+            ]);
+        }
+
         $student->delete();
 
         return redirect()->back();

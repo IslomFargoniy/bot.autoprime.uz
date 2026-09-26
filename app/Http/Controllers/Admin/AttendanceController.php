@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -223,7 +224,7 @@ class AttendanceController extends Controller
             'date' => 'required|date',
             'topic' => 'nullable|string|max:255',
             'attendances' => 'required|array',
-            'attendances.*.student_id' => 'required|exists:students,id',
+            'attendances.*.student_id' => ['required', Rule::exists('students', 'id')->where('group_id', $request->input('group_id'))],
             'attendances.*.status' => 'required|in:present,late,absent',
             'attendances.*.manual_reason' => 'nullable|string|max:255',
         ]);
@@ -232,6 +233,9 @@ class AttendanceController extends Controller
         $date = Carbon::parse($validated['date'])->toDateString();
 
         DB::transaction(function () use ($validated, $group, $date, $request) {
+            // Lock the group so two simultaneous saves reuse one session for the day.
+            Group::whereKey($group->id)->lockForUpdate()->first();
+
             $session = LessonSession::where('group_id', $group->id)
                 ->whereDate('started_at', $date)
                 ->first();
@@ -240,7 +244,8 @@ class AttendanceController extends Controller
                 $session = LessonSession::create([
                     'branch_id' => $group->branch_id,
                     'group_id' => $group->id,
-                    'teacher_id' => $request->user()->id,
+                    // Lesson credit (payroll) belongs to the group teacher, not whoever filled the journal.
+                    'teacher_id' => $group->teacher_id ?? $request->user()->id,
                     'topic' => ! empty($validated['topic']) ? $validated['topic'] : 'Nazariy dars (Guruh jurnali)',
                     'room_number' => $group->room ?? '101-xona',
                     'started_at' => Carbon::parse($date)->setTime(9, 0),
@@ -303,22 +308,7 @@ class AttendanceController extends Controller
 
         $sessionId = $validated['session_id'] ?? null;
         if (! $sessionId && $student->group_id) {
-            $session = LessonSession::where('group_id', $student->group_id)
-                ->whereDate('started_at', $date)
-                ->first();
-
-            if (! $session) {
-                $session = LessonSession::create([
-                    'branch_id' => $student->branch_id ?? ($student->group ? $student->group->branch_id : 1),
-                    'group_id' => $student->group_id,
-                    'teacher_id' => $request->user()->id,
-                    'topic' => 'Nazariy dars (Qo\'lda belgilash)',
-                    'started_at' => Carbon::parse($date)->setTime(9, 0),
-                    'ended_at' => Carbon::parse($date)->setTime(10, 30),
-                    'status' => 'finished',
-                    'qr_secret_salt' => bin2hex(random_bytes(16)),
-                ]);
-            }
+            $session = DB::transaction(fn () => $this->findOrCreateManualSession($student, $date, $request));
             $sessionId = $session->id;
         }
 
@@ -341,6 +331,30 @@ class AttendanceController extends Controller
         );
 
         return redirect()->back()->with('success', 'Davomat qo\'lda belgilandi.');
+    }
+
+    /**
+     * Reuse the student group's session for the day or create one. Runs inside a
+     * transaction with the group locked so concurrent marks share one session,
+     * and credits the lesson to the group teacher for payroll.
+     */
+    private function findOrCreateManualSession(Student $student, string $date, Request $request): LessonSession
+    {
+        $group = Group::whereKey($student->group_id)->lockForUpdate()->first();
+
+        return LessonSession::where('group_id', $student->group_id)
+            ->whereDate('started_at', $date)
+            ->first()
+            ?? LessonSession::create([
+                'branch_id' => $student->branch_id ?? $group?->branch_id,
+                'group_id' => $student->group_id,
+                'teacher_id' => $group?->teacher_id ?? $request->user()->id,
+                'topic' => 'Nazariy dars (Qo\'lda belgilash)',
+                'started_at' => Carbon::parse($date)->setTime(9, 0),
+                'ended_at' => Carbon::parse($date)->setTime(10, 30),
+                'status' => 'finished',
+                'qr_secret_salt' => bin2hex(random_bytes(16)),
+            ]);
     }
 
     /**

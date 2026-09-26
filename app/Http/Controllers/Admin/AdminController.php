@@ -110,6 +110,10 @@ class AdminController extends Controller
             return redirect()->back()->withErrors(['message' => 'O\'z hisobingizni o\'chira olmaysiz.']);
         }
 
+        if ($admin->hasWorkHistory()) {
+            return redirect()->back()->withErrors(['delete' => 'Bu xodimning oylik yoki dars tarixi bor. O\'chirish o\'rniga holatini "nofaol" qiling.']);
+        }
+
         $admin->delete();
 
         return redirect()->back();

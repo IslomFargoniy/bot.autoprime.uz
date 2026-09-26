@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class FinanceController extends Controller
 {
@@ -171,7 +172,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'contract_id' => ['required', $this->existsInUserBranch($request, 'contracts')],
             'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',
         ]);
@@ -187,9 +188,17 @@ class FinanceController extends Controller
         }
 
         $contract = Contract::with('student')->findOrFail($validated['contract_id']);
+        if ($contract->status === 'cancelled') {
+            return redirect()->back()->withErrors([
+                'contract_id' => "Bekor qilingan shartnomaga to'lov qabul qilib bo'lmaydi.",
+            ]);
+        }
+
         $payment = null;
 
-        DB::transaction(function () use ($validated, $cashRegister, $contract, $request, &$payment) {
+        DB::transaction(function () use ($validated, $cashRegister, &$contract, $request, &$payment) {
+            // Serialize payments per contract so recalculated totals include every committed payment.
+            $contract = Contract::with('student')->whereKey($contract->id)->lockForUpdate()->first();
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
 
             $receiptNumber = DocumentNumberService::nextReceiptNumber();
@@ -252,7 +261,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'expense_category_id' => 'required|exists:expense_categories,id',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'description' => 'required|string|max:500',
         ]);
 
@@ -300,7 +309,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'from_cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers'), 'different:to_cash_register_id'],
             'to_cash_register_id' => 'required|exists:cash_registers,id',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:9999999999',
             'notes' => 'nullable|string',
         ]);
 
@@ -328,29 +337,67 @@ class FinanceController extends Controller
      */
     public function approveTransfer(Request $request, CashTransfer $transfer): RedirectResponse
     {
-        if ($transfer->status !== 'pending') {
+        try {
+            $approved = DB::transaction(function () use ($transfer, $request) {
+                // Re-read under lock so a double click cannot move the money twice.
+                $lockedTransfer = CashTransfer::whereKey($transfer->id)->lockForUpdate()->first();
+                if (! $lockedTransfer || $lockedTransfer->status !== 'pending') {
+                    return false;
+                }
+
+                $fromReg = CashRegister::findOrFail($lockedTransfer->from_cash_register_id);
+                $toReg = CashRegister::findOrFail($lockedTransfer->to_cash_register_id);
+
+                $lockedTransfer->update([
+                    'status' => 'approved',
+                    'approved_by_user_id' => $request->user()->id,
+                ]);
+
+                $fromReg->transferTo(
+                    targetRegister: $toReg,
+                    amount: (float) $lockedTransfer->amount,
+                    category: 'transfer',
+                    reference: $lockedTransfer,
+                    userId: $request->user()->id
+                );
+
+                return true;
+            });
+        } catch (InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['transfer' => $e->getMessage()]);
+        }
+
+        if (! $approved) {
             return redirect()->back()->withErrors(['transfer' => 'Ushbu transfer allaqachon ko\'rib chiqilgan.']);
         }
 
-        DB::transaction(function () use ($transfer, $request) {
-            $fromReg = CashRegister::findOrFail($transfer->from_cash_register_id);
-            $toReg = CashRegister::findOrFail($transfer->to_cash_register_id);
+        return redirect()->back()->with('success', 'Transfer tasdiqlandi va mablag\' o\'tkazildi.');
+    }
 
-            $transfer->update([
-                'status' => 'approved',
+    /**
+     * Reject a pending cash transfer; no money moves.
+     */
+    public function rejectTransfer(Request $request, CashTransfer $transfer): RedirectResponse
+    {
+        $rejected = DB::transaction(function () use ($transfer, $request) {
+            $lockedTransfer = CashTransfer::whereKey($transfer->id)->lockForUpdate()->first();
+            if (! $lockedTransfer || $lockedTransfer->status !== 'pending') {
+                return false;
+            }
+
+            $lockedTransfer->update([
+                'status' => 'rejected',
                 'approved_by_user_id' => $request->user()->id,
             ]);
 
-            $fromReg->transferTo(
-                targetRegister: $toReg,
-                amount: (float) $transfer->amount,
-                category: 'transfer',
-                reference: $transfer,
-                userId: $request->user()->id
-            );
+            return true;
         });
 
-        return redirect()->back()->with('success', 'Transfer tasdiqlandi va mablag\' o\'tkazildi.');
+        if (! $rejected) {
+            return redirect()->back()->withErrors(['transfer' => 'Ushbu transfer allaqachon ko\'rib chiqilgan.']);
+        }
+
+        return redirect()->back()->with('success', 'Transfer rad etildi.');
     }
 
     /**
@@ -361,7 +408,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'registers' => 'nullable|array',
             'registers.*.cash_register_id' => 'required|exists:cash_registers,id',
-            'registers.*.amount' => 'required|numeric|min:0.01',
+            'registers.*.amount' => 'required|numeric|min:0.01|max:9999999999',
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -462,24 +509,44 @@ class FinanceController extends Controller
      */
     public function destroyExpense(Expense $expense): RedirectResponse
     {
+        // Salary payouts and contract refunds also create an expense; deleting only the
+        // expense would return the cash while the payout/refund records stay in place.
+        $linkedCategory = CashTransaction::where('reference_type', Expense::class)
+            ->where('reference_id', $expense->id)
+            ->where('type', 'out')
+            ->whereIn('category', ['salary', 'refund'])
+            ->value('category');
+
+        if ($linkedCategory === 'salary') {
+            return redirect()->back()->withErrors(['expense' => "Bu xarajat oylik to'lovi bilan bog'langan va alohida o'chirilmaydi."]);
+        }
+
+        if ($linkedCategory === 'refund') {
+            return redirect()->back()->withErrors(['expense' => "Bu xarajat to'lov qaytarish (refund) bilan bog'langan. Uni qaytarish to'lovini o'chirish orqali bekor qiling."]);
+        }
+
         DB::transaction(function () use ($expense) {
-            if ($expense->cash_register_id) {
-                $lockedRegister = CashRegister::where('id', $expense->cash_register_id)->first();
-                if ($lockedRegister) {
-                    $lockedRegister->deposit(
-                        amount: (float) $expense->amount,
-                        category: 'refund',
-                        description: "O'chirilgan xarajat qaytarildi: {$expense->description}",
-                        reference: $expense,
-                        userId: auth()->id()
-                    );
-                }
+            // Re-read under lock so a double submit cannot refund the register twice.
+            $lockedExpense = Expense::whereKey($expense->id)->lockForUpdate()->first();
+            if (! $lockedExpense) {
+                return;
+            }
+
+            if ($lockedExpense->cash_register_id) {
+                $register = CashRegister::find($lockedExpense->cash_register_id);
+                $register?->deposit(
+                    amount: (float) $lockedExpense->amount,
+                    category: 'refund',
+                    description: "O'chirilgan xarajat qaytarildi: {$lockedExpense->description}",
+                    reference: $lockedExpense,
+                    userId: auth()->id()
+                );
             }
 
             // If this expense is attached to vehicle maintenance, reset expense_id on maintenance
-            VehicleMaintenance::where('expense_id', $expense->id)->update(['expense_id' => null]);
+            VehicleMaintenance::where('expense_id', $lockedExpense->id)->update(['expense_id' => null]);
 
-            $expense->delete();
+            $lockedExpense->delete();
         });
 
         return redirect()->back()->with('success', "Xarajat o'chirildi va mablag' kassaga qaytarildi.");
@@ -492,6 +559,33 @@ class FinanceController extends Controller
     {
         try {
             DB::transaction(function () use ($payment) {
+                // Lock the contract first (same order as payments/refunds) and re-read the
+                // payment so a double submit cannot reverse it twice.
+                if ($payment->contract_id) {
+                    Contract::whereKey($payment->contract_id)->lockForUpdate()->first();
+                }
+
+                $payment = Payment::whereKey($payment->id)->lockForUpdate()->first();
+                if (! $payment) {
+                    return;
+                }
+
+                if ($payment->payment_type !== 'refund' && $payment->contract_id) {
+                    $otherTuition = (float) Payment::where('contract_id', $payment->contract_id)
+                        ->where('payment_type', '!=', 'refund')
+                        ->whereKeyNot($payment->id)
+                        ->sum('amount');
+                    $refunded = (float) Payment::where('contract_id', $payment->contract_id)
+                        ->where('payment_type', 'refund')
+                        ->sum('amount');
+
+                    if ($otherTuition + 0.01 < $refunded) {
+                        throw new InvalidArgumentException(
+                            "Bu to'lov qaytarilgan (refund) mablag'ni qoplaydi. Avval tegishli qaytarish to'lovini o'chiring."
+                        );
+                    }
+                }
+
                 $lockedRegister = $payment->cash_register_id
                     ? CashRegister::where('id', $payment->cash_register_id)->first()
                     : null;
@@ -525,7 +619,23 @@ class FinanceController extends Controller
                 $payment->delete();
 
                 if ($contract) {
+                    $debtBefore = (float) $contract->debt_amount;
                     $contract->recalculateFinances();
+
+                    if ($contract->student) {
+                        $isRefund = $payment->payment_type === 'refund';
+                        FinancialHistory::recordForStudent($contract->student, [
+                            'type' => $isRefund ? 'credit' : 'debit',
+                            'category' => $isRefund ? 'refund_reversal' : 'payment_reversal',
+                            'amount' => (float) $payment->amount,
+                            'balance_before' => $debtBefore,
+                            'balance_after' => (float) $contract->debt_amount,
+                            'payment_method' => $payment->payment_method,
+                            'description' => "To'lov bekor qilindi (Chek #{$payment->receipt_number})",
+                            'performed_by_user_id' => auth()->id(),
+                            'transacted_at' => now(),
+                        ]);
+                    }
                 }
             });
         } catch (\Exception $e) {

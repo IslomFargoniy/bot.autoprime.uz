@@ -312,6 +312,10 @@ class InstructorController extends Controller
     {
         $this->ensureManageableInstructor($request, $instructor);
 
+        if ($instructor->hasWorkHistory()) {
+            return redirect()->back()->withErrors(['delete' => 'Bu xodimning oylik yoki dars tarixi bor. O\'chirish o\'rniga holatini "nofaol" qiling.']);
+        }
+
         if ($instructor->photo_path) {
             Storage::disk('public')->delete($instructor->photo_path);
         }

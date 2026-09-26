@@ -259,6 +259,10 @@ class StaffController extends Controller
 
         $this->ensureCanAccessStaff($currentUser, $staff);
 
+        if ($staff->hasWorkHistory()) {
+            return redirect()->back()->withErrors(['delete' => 'Bu xodimning oylik yoki dars tarixi bor. O\'chirish o\'rniga holatini "nofaol" qiling.']);
+        }
+
         if ($staff->photo_path) {
             Storage::disk('public')->delete($staff->photo_path);
         }

@@ -33,9 +33,31 @@ class Salary extends Model
 
     protected $appends = ['type', 'description', 'status', 'is_paid'];
 
+    /**
+     * Amount already paid out against this accrual. Uses eager-loaded payments
+     * when available to avoid a query per row.
+     */
+    public function paidAmount(): float
+    {
+        if ($this->relationLoaded('salaryPayments')) {
+            return (float) $this->salaryPayments->sum('amount');
+        }
+
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->sum('amount');
+        }
+
+        return (float) $this->payments()->sum('amount');
+    }
+
+    public function remainingAmount(): float
+    {
+        return max(0.0, (float) $this->amount - $this->paidAmount());
+    }
+
     public function getIsPaidAttribute(): bool
     {
-        return $this->payments()->sum('amount') >= (float) $this->amount;
+        return $this->paidAmount() >= (float) $this->amount;
     }
 
     public function getStatusAttribute(): string

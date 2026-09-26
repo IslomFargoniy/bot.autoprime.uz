@@ -114,6 +114,12 @@ class BranchController extends Controller
             return redirect()->back()->with('error', 'Asosiy filialni o\'chirib bo\'lmaydi.');
         }
 
+        if ($branch->hasDependentRecords()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Filialda xodim, o\'quvchi, guruh yoki moliyaviy yozuvlar mavjud. O\'chirish o\'rniga filialni nofaol qiling.',
+            ]);
+        }
+
         $branch->delete();
 
         return redirect()->back()->with('success', 'Filial o\'chirildi.');
