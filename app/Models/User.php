@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -127,6 +128,11 @@ class User extends Authenticatable implements PasskeyUser
     public function salaryPayments(): HasMany
     {
         return $this->hasMany(SalaryPayment::class);
+    }
+
+    public function financialHistories(): MorphMany
+    {
+        return $this->morphMany(FinancialHistory::class, 'entity')->orderBy('transacted_at', 'desc')->orderBy('id', 'desc');
     }
 
     public function vehicle(): HasOne

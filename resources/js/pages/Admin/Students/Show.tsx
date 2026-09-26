@@ -2,7 +2,25 @@ import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { SharedData } from '@/types';
-import { ArrowLeft, Calendar, Car, Star, User, Phone, Send, CheckCircle2, Clock, XCircle, Filter } from 'lucide-react';
+import {
+    ArrowLeft,
+    Calendar,
+    Car,
+    Star,
+    User,
+    Phone,
+    Send,
+    CheckCircle2,
+    Clock,
+    XCircle,
+    Filter,
+    Wallet,
+    Banknote,
+    FileText,
+    ArrowDownLeft,
+    ArrowUpRight,
+    Receipt,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -63,6 +81,42 @@ interface Driving {
     review?: DrivingReview;
 }
 
+interface Contract {
+    id: number;
+    contract_number: string;
+    total_amount: number;
+    paid_amount: number;
+    status: string;
+    payment_status: string;
+    contract_type?: {
+        name: string;
+    };
+    payments?: Array<{
+        id: number;
+        amount: number;
+        payment_method: string;
+        paid_at: string;
+        cash_register?: {
+            name: string;
+        };
+    }>;
+}
+
+interface FinancialHistoryItem {
+    id: number;
+    type: 'credit' | 'debit';
+    category: string;
+    amount: number;
+    balance_before: number;
+    balance_after: number;
+    payment_method?: string | null;
+    description?: string | null;
+    transacted_at: string;
+    performed_by?: {
+        name: string;
+    };
+}
+
 interface PageProps {
     student: Student;
     drivings: {
@@ -77,18 +131,37 @@ interface PageProps {
         cancelled_drivings: number;
         average_rating: number;
     };
+    contracts?: Contract[];
+    financialHistories?: FinancialHistoryItem[];
     filters?: {
         status?: string;
         per_page?: string;
     };
 }
 
-export default function StudentShow({ student, drivings, stats, filters = {} }: PageProps) {
+export default function StudentShow({
+    student,
+    drivings,
+    stats,
+    contracts = [],
+    financialHistories = [],
+    filters = {},
+}: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth.user.role === 'instructor';
+    const [activeTab, setActiveTab] = useState<'drivings' | 'finance'>('drivings');
     const [status, setStatus] = useState(filters.status || '');
     const [perPage, setPerPage] = useState(filters.per_page || '25');
+
+    const formatMoney = (val: number | string | undefined | null) => {
+        const num = Number(val || 0);
+        return new Intl.NumberFormat('uz-UZ').format(num) + ' ' + t('common.sum', "so'm");
+    };
+
+    const totalContractAmount = contracts.reduce((acc, c) => acc + Number(c.total_amount || 0), 0);
+    const totalPaidAmount = contracts.reduce((acc, c) => acc + Number(c.paid_amount || 0), 0);
+    const totalDebt = Math.max(totalContractAmount - totalPaidAmount, 0);
 
     const applyFilters = (newStatus: string, newPerPage: string) => {
         router.get(`/admin/students/${student.id}`, { status: newStatus, per_page: newPerPage }, { preserveState: true, replace: true });
@@ -202,6 +275,44 @@ export default function StudentShow({ student, drivings, stats, filters = {} }: 
                 </div>
             </div>
 
+            {/* Tabs for Admin / Non-Instructors */}
+            {!isInstructor && (
+                <div className="flex items-center gap-2 border-b pb-2">
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('drivings')}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                            activeTab === 'drivings'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        <Car className="w-4 h-4" />
+                        <span>{t('students.tab_drivings', "Mashg'ulotlar")}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('finance')}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                            activeTab === 'finance'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        <Wallet className="w-4 h-4" />
+                        <span>{t('students.tab_finance', "Moliya & To'lovlar tarixi")}</span>
+                        {contracts.length > 0 && (
+                            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary-foreground/20 text-primary-foreground">
+                                {contracts.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            )}
+
+            {activeTab === 'drivings' ? (
+                <div>
             {/* Filters Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card border p-4 rounded-xl shadow-sm">
                 <div>
@@ -470,6 +581,154 @@ export default function StudentShow({ student, drivings, stats, filters = {} }: 
 
                 <Pagination links={drivings.links} />
             </div>
+            </div>
+            ) : (
+                <div className="space-y-6">
+                    {/* Finance Stats */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                        <div className="bg-card border p-4 rounded-xl space-y-1 shadow-xs">
+                            <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
+                                <span>{t('students.total_contract', 'Jami shartnoma qiymati')}</span>
+                                <FileText className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="text-xl md:text-2xl font-bold text-foreground">
+                                {formatMoney(totalContractAmount)}
+                            </div>
+                        </div>
+
+                        <div className="bg-card border p-4 rounded-xl space-y-1 shadow-xs">
+                            <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                                <span>{t('students.total_paid', "To'langan summa")}</span>
+                                <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                            <div className="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                                {formatMoney(totalPaidAmount)}
+                            </div>
+                        </div>
+
+                        <div className="bg-card border p-4 rounded-xl space-y-1 shadow-xs">
+                            <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 text-xs font-medium">
+                                <span>{t('students.debt_remaining', 'Qoldiq qarz')}</span>
+                                <Wallet className="w-4 h-4" />
+                            </div>
+                            <div className="text-xl md:text-2xl font-bold text-rose-600 dark:text-rose-400">
+                                {formatMoney(totalDebt)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Financial Transactions Ledger */}
+                    <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
+                        <div className="p-4 border-b">
+                            <h2 className="text-base font-semibold">{t('students.financial_ledger', 'Moliyaviy amaliyotlar daftari')}</h2>
+                            <p className="text-xs text-muted-foreground">{t('students.financial_ledger_desc', "Barcha to'lovlar, hisoblangan qarzlar va pul o'tkazmalari tarixi")}</p>
+                        </div>
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-12">№</TableHead>
+                                        <TableHead>{t('common.date', 'Sana')}</TableHead>
+                                        <TableHead>{t('finance.type', 'Amaliyot turi')}</TableHead>
+                                        <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                        <TableHead>{t('finance.payment_method', "To'lov usuli")}</TableHead>
+                                        <TableHead>{t('finance.balance_state', "Balans o'zgarishi")}</TableHead>
+                                        <TableHead>{t('common.description', 'Izoh')}</TableHead>
+                                        <TableHead>{t('finance.performed_by', "Mas'ul")}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {financialHistories.length === 0 ? (
+                                        <TableEmpty colSpan={8} title={t('common.no_data', "Ma'lumot topilmadi")} />
+                                    ) : (
+                                        financialHistories.map((fh, idx) => {
+                                            const isDebit = fh.type === 'debit';
+                                            return (
+                                                <TableRow key={fh.id}>
+                                                    <TableCell className="text-muted-foreground font-mono text-xs">{idx + 1}</TableCell>
+                                                    <TableCell className="text-xs">{new Date(fh.transacted_at).toLocaleDateString('uz-UZ')}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-1.5 text-xs font-medium">
+                                                            {isDebit ? (
+                                                                <ArrowDownLeft className="w-3.5 h-3.5 text-rose-500" />
+                                                            ) : (
+                                                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                                                            )}
+                                                            <span>
+                                                                {fh.category === 'tuition_payment'
+                                                                    ? t('finance.tuition_payment', "O'qish to'lovi")
+                                                                    : fh.category === 'refund'
+                                                                      ? t('finance.refund', "To'lov qaytarish")
+                                                                      : fh.category === 'discount'
+                                                                        ? t('finance.discount', 'Chegirma')
+                                                                        : fh.category}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className={`font-semibold text-xs ${isDebit ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                            {isDebit ? '-' : '+'}{formatMoney(fh.amount)}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="text-xs text-muted-foreground">{fh.payment_method || '-'}</TableCell>
+                                                    <TableCell className="text-xs font-mono">
+                                                        <span className="text-muted-foreground">{formatMoney(fh.balance_before)}</span>
+                                                        <span className="mx-1">→</span>
+                                                        <span className="font-semibold text-foreground">{formatMoney(fh.balance_after)}</span>
+                                                    </TableCell>
+                                                    <TableCell className="text-xs text-muted-foreground max-w-xs truncate">{fh.description || '-'}</TableCell>
+                                                    <TableCell className="text-xs text-muted-foreground">{fh.performed_by?.name || '-'}</TableCell>
+                                                </TableRow>
+                                            );
+                                        })
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {/* Mobile List */}
+                        <div className="md:hidden p-3 space-y-2.5">
+                            {financialHistories.length === 0 ? (
+                                <div className="text-center py-8 text-xs text-muted-foreground">{t('common.no_data', "Ma'lumot topilmadi")}</div>
+                            ) : (
+                                financialHistories.map((fh) => {
+                                    const isDebit = fh.type === 'debit';
+                                    return (
+                                        <div key={fh.id} className="p-3 bg-muted/20 border rounded-xl space-y-1.5 text-xs">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1.5 font-medium">
+                                                    {isDebit ? (
+                                                        <ArrowDownLeft className="w-3.5 h-3.5 text-rose-500" />
+                                                    ) : (
+                                                        <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                                                    )}
+                                                    <span>
+                                                        {fh.category === 'tuition_payment'
+                                                            ? t('finance.tuition_payment', "O'qish to'lovi")
+                                                            : fh.category === 'refund'
+                                                              ? t('finance.refund', "To'lov qaytarish")
+                                                              : fh.category}
+                                                    </span>
+                                                </div>
+                                                <span className={`font-bold ${isDebit ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                    {isDebit ? '-' : '+'}{formatMoney(fh.amount)}
+                                                </span>
+                                            </div>
+                                            {fh.description && <div className="text-[11px] text-muted-foreground">{fh.description}</div>}
+                                            <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t">
+                                                <span>{new Date(fh.transacted_at).toLocaleDateString('uz-UZ')}</span>
+                                                <span>{t('staff.balance_after', 'Balans')}: {formatMoney(fh.balance_after)}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

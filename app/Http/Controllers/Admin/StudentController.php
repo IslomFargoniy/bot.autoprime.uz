@@ -223,10 +223,19 @@ class StudentController extends Controller
             'average_rating' => $avgRating,
         ];
 
+        $student->load(['group.instructor', 'branch', 'contracts.contractType', 'contracts.payments.cashRegister']);
+
+        $financialHistories = $student->financialHistories()
+            ->with(['performedBy'])
+            ->take(50)
+            ->get();
+
         return Inertia::render('Admin/Students/Show', [
             'student' => $student,
             'drivings' => $drivings,
             'stats' => $stats,
+            'contracts' => $student->contracts,
+            'financialHistories' => $financialHistories,
             'filters' => [
                 'status' => $request->status,
                 'per_page' => $request->per_page,

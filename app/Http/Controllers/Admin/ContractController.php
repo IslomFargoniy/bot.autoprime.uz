@@ -9,6 +9,7 @@ use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\FinancialHistory;
 use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Student;
@@ -282,7 +283,23 @@ class ContractController extends Controller
             // 4. Recalculate contract finances
             $lockedContract->recalculateFinances();
 
-            // 5. If cancel_contract is true, set status = cancelled
+            // 5. Record financial history for the student
+            if ($lockedContract->student) {
+                FinancialHistory::recordForStudent($lockedContract->student, [
+                    'type' => 'debit',
+                    'category' => 'refund',
+                    'amount' => (float) $validated['amount'],
+                    'balance_before' => (float) ($lockedContract->debt_amount - (float) $validated['amount']),
+                    'balance_after' => (float) $lockedContract->debt_amount,
+                    'payment_method' => $validated['payment_method'],
+                    'description' => "To'lov qaytarildi (#{$receiptNumber})",
+                    'reference' => $expense,
+                    'performed_by_user_id' => $request->user()->id,
+                    'transacted_at' => now(),
+                ]);
+            }
+
+            // 6. If cancel_contract is true, set status = cancelled
             if (! empty($validated['cancel_contract'])) {
                 $lockedContract->update(['status' => 'cancelled']);
             }

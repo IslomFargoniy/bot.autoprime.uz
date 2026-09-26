@@ -8,6 +8,7 @@ use App\Models\CashRegister;
 use App\Models\Driving;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\FinancialHistory;
 use App\Models\LessonSession;
 use App\Models\Salary;
 use App\Models\SalaryPayment;
@@ -145,8 +146,22 @@ class SalaryController extends Controller
                     'accrued_at' => now(),
                 ]);
 
-                // Update employee salary_balance
+                // Update employee salary_balance & record financial history
+                $balBefore = (float) $emp->salary_balance;
                 $emp->increment('salary_balance', $totalGross);
+                $balAfter = (float) ($balBefore + $totalGross);
+
+                FinancialHistory::recordForUser($emp, [
+                    'type' => 'credit',
+                    'category' => 'salary_accrual',
+                    'amount' => (float) $totalGross,
+                    'balance_before' => $balBefore,
+                    'balance_after' => $balAfter,
+                    'description' => "{$period} oyi uchun oylik hisoblandi (Oklad + Amaliyot + Nazariya)",
+                    'performed_by_user_id' => $request->user()->id,
+                    'transacted_at' => now(),
+                ]);
+
                 $createdCount++;
             }
         });
@@ -171,7 +186,7 @@ class SalaryController extends Controller
         $employee = User::findOrFail($validated['user_id']);
 
         DB::transaction(function () use ($validated, $isDeduction, $employee, $request) {
-            Salary::create([
+            $createdSalary = Salary::create([
                 'branch_id' => $employee->branch_id,
                 'user_id' => $employee->id,
                 'created_by_user_id' => $request->user()->id,
@@ -183,11 +198,25 @@ class SalaryController extends Controller
                 'accrued_at' => now(),
             ]);
 
+            $balBefore = (float) $employee->salary_balance;
             if ($isDeduction) {
                 $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
             } else {
                 $employee->increment('salary_balance', (float) $validated['amount']);
             }
+            $balAfter = (float) $employee->fresh()->salary_balance;
+
+            FinancialHistory::recordForUser($employee, [
+                'type' => $isDeduction ? 'debit' : 'credit',
+                'category' => $validated['type'],
+                'amount' => (float) $validated['amount'],
+                'balance_before' => $balBefore,
+                'balance_after' => $balAfter,
+                'description' => "{$validated['description']} ({$validated['period']})",
+                'reference' => $createdSalary,
+                'performed_by_user_id' => $request->user()->id,
+                'transacted_at' => now(),
+            ]);
         });
 
         return redirect()->back()->with('success', 'Amal saqlandi va xodim balansi yangilandi.');
@@ -232,7 +261,7 @@ class SalaryController extends Controller
                 'spent_at' => now(),
             ]);
 
-            SalaryPayment::create([
+            $salaryPayment = SalaryPayment::create([
                 'salary_id' => $salary->id,
                 'user_id' => $employee->id,
                 'cash_register_id' => $lockedRegister->id,
@@ -251,7 +280,22 @@ class SalaryController extends Controller
                 userId: $request->user()->id
             );
 
+            $balBefore = (float) $employee->salary_balance;
             $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
+            $balAfter = (float) $employee->fresh()->salary_balance;
+
+            FinancialHistory::recordForUser($employee, [
+                'type' => 'debit',
+                'category' => 'salary_payout',
+                'amount' => (float) $validated['amount'],
+                'balance_before' => $balBefore,
+                'balance_after' => $balAfter,
+                'payment_method' => $validated['payment_method'],
+                'description' => "Oylik maosh to'lovi ({$salary->period} oyi uchun)",
+                'reference' => $salaryPayment,
+                'performed_by_user_id' => $request->user()->id,
+                'transacted_at' => now(),
+            ]);
         });
 
         return redirect()->back()->with('success', 'Oylik to\'lovi kassadan muvaffaqiyatli amalga oshirildi va Moliya xarajatlarida qayd etildi.');

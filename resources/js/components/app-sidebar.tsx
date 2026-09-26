@@ -15,6 +15,7 @@ import {
     LayoutGrid,
     MapPin,
     ShieldCheck,
+    UserCheck,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -147,17 +148,27 @@ export function AppSidebar() {
             ],
         },
         {
+            title: t('sidebar.group_staff', 'Xodimlar'),
+            items: [
+                {
+                    title: t('sidebar.staff', 'Xodimlar'),
+                    href: '/admin/staff',
+                    icon: UserCheck,
+                },
+                {
+                    title: t('sidebar.salaries', 'Xodimlar Oyligi'),
+                    href: '/admin/salaries',
+                    icon: Banknote,
+                },
+            ],
+        },
+        {
             title: t('sidebar.group_finance', 'Moliya'),
             items: [
                 {
                     title: t('sidebar.finance', 'Moliya & Kassa'),
                     href: '/admin/finance',
                     icon: Wallet,
-                },
-                {
-                    title: t('sidebar.salaries', 'Xodimlar Oyligi'),
-                    href: '/admin/salaries',
-                    icon: Banknote,
                 },
             ],
         },
