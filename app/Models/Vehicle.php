@@ -79,6 +79,6 @@ class Vehicle extends Model
 
     public function maintenances(): HasMany
     {
-        return $this->hasMany(VehicleMaintenance::class);
+        return $this->hasMany(VehicleMaintenance::class)->orderBy('performed_at', 'desc')->orderBy('id', 'desc');
     }
 }
