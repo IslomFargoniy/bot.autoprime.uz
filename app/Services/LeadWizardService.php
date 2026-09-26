@@ -21,6 +21,47 @@ class LeadWizardService
 
     protected const TTL = 3600; // 1 hour
 
+    protected const CATEGORIES = ['A', 'B', 'C', 'BC'];
+
+    protected const TIME_LABELS = [
+        'morning' => 'Ertalabki (09:00 - 11:00)',
+        'daytime' => 'Kunduzgi (14:00 - 16:00)',
+        'evening' => 'Kechki (18:30 - 20:30)',
+    ];
+
+    /**
+     * Wizard step each "skip" button is allowed to skip.
+     */
+    protected const SKIPPABLE_STEPS = [
+        'passport' => 'passport_photo',
+        'photo' => 'photo',
+        'birth_date_address' => 'birth_date_address',
+        'pinfl' => 'pinfl',
+    ];
+
+    /**
+     * Load the wizard state only when the user is at the expected step, so
+     * forged or stale callback buttons cannot jump over required steps.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function stateAtStep(int|string $telegramId, string $expectedStep): ?array
+    {
+        $state = Cache::get(self::CACHE_PREFIX.$telegramId);
+
+        return ($state['step'] ?? null) === $expectedStep ? $state : null;
+    }
+
+    /**
+     * Normalize a phone number to +<digits>, or null when it is not plausible.
+     */
+    protected function normalizePhone(string $phone): ?string
+    {
+        $digits = preg_replace('/\D/', '', $phone);
+
+        return strlen($digits) >= 9 && strlen($digits) <= 15 ? '+'.$digits : null;
+    }
+
     /**
      * Start the lead onboarding wizard.
      */
@@ -84,9 +125,10 @@ class LeadWizardService
                 break;
 
             case 'phone':
-                $phone = trim($text);
-                if (! str_starts_with($phone, '+')) {
-                    $phone = '+'.$phone;
+                $phone = $this->normalizePhone($text);
+                if (! $phone) {
+                    $bot->sendMessage("❗️ Telefon raqami noto'g'ri. Iltimos, +998901234567 ko'rinishida kiriting yoki tugma orqali ulashing.");
+                    break;
                 }
                 $state['phone'] = $phone;
                 $this->askCategory($bot, $state);
@@ -129,11 +171,16 @@ class LeadWizardService
             'full_name' => ($bot->user() ? $bot->user()->first_name : "O'quvchi"),
         ];
 
-        if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+        if (($state['step'] ?? null) !== 'phone') {
+            return;
         }
 
-        $state['phone'] = $phone;
+        $normalizedPhone = $this->normalizePhone($phone);
+        if (! $normalizedPhone) {
+            return;
+        }
+
+        $state['phone'] = $normalizedPhone;
         $this->askCategory($bot, $state);
     }
 
@@ -167,8 +214,8 @@ class LeadWizardService
     public function handleCategorySelect(Nutgram $bot, string $category): void
     {
         $telegramId = $bot->userId();
-        $state = Cache::get(self::CACHE_PREFIX.$telegramId);
-        if (! $state) {
+        $state = $this->stateAtStep($telegramId, 'category');
+        if (! $state || ! in_array($category, self::CATEGORIES, true)) {
             return;
         }
 
@@ -200,8 +247,8 @@ class LeadWizardService
     public function handleBranchSelect(Nutgram $bot, int $branchId): void
     {
         $telegramId = $bot->userId();
-        $state = Cache::get(self::CACHE_PREFIX.$telegramId);
-        if (! $state) {
+        $state = $this->stateAtStep($telegramId, 'branch');
+        if (! $state || ! Branch::where('id', $branchId)->where('status', 'active')->exists()) {
             return;
         }
 
@@ -227,18 +274,12 @@ class LeadWizardService
     public function handleTimeSelect(Nutgram $bot, string $timeKey): void
     {
         $telegramId = $bot->userId();
-        $state = Cache::get(self::CACHE_PREFIX.$telegramId);
-        if (! $state) {
+        $state = $this->stateAtStep($telegramId, 'preferred_time');
+        if (! $state || ! isset(self::TIME_LABELS[$timeKey])) {
             return;
         }
 
-        $timeLabels = [
-            'morning' => 'Ertalabki (09:00 - 11:00)',
-            'daytime' => 'Kunduzgi (14:00 - 16:00)',
-            'evening' => 'Kechki (18:30 - 20:30)',
-        ];
-
-        $state['preferred_time'] = $timeLabels[$timeKey] ?? $timeKey;
+        $state['preferred_time'] = self::TIME_LABELS[$timeKey];
         $state['step'] = 'passport_photo';
         Cache::put(self::CACHE_PREFIX.$telegramId, $state, self::TTL);
 
@@ -259,7 +300,7 @@ class LeadWizardService
     {
         $telegramId = $bot->userId();
         $state = Cache::get(self::CACHE_PREFIX.$telegramId);
-        if (! $state || ! isset($state['step'])) {
+        if (! in_array($state['step'] ?? null, ['passport_photo', 'photo'], true)) {
             return;
         }
 
@@ -330,7 +371,8 @@ class LeadWizardService
     public function handleSkip(Nutgram $bot, string $stepKey): void
     {
         $telegramId = $bot->userId();
-        $state = Cache::get(self::CACHE_PREFIX.$telegramId);
+        $expectedStep = self::SKIPPABLE_STEPS[$stepKey] ?? null;
+        $state = $expectedStep ? $this->stateAtStep($telegramId, $expectedStep) : null;
         if (! $state) {
             return;
         }
@@ -389,11 +431,22 @@ class LeadWizardService
         $telegramId = $state['telegram_id'];
         Cache::forget(self::CACHE_PREFIX.$telegramId);
 
-        $lead = Lead::create([
+        if (empty($state['full_name']) || empty($state['phone'])) {
+            return;
+        }
+
+        // Re-submitting the form updates the still-open lead instead of creating duplicates.
+        $lead = Lead::where('telegram_id', $telegramId)
+            ->whereIn('stage', ['new_lead', 'form_sent', 'form_completed'])
+            ->latest('id')
+            ->first() ?? new Lead;
+        $isNewLead = ! $lead->exists;
+
+        $lead->fill([
             'branch_id' => $state['branch_id'] ?? null,
             'telegram_id' => $telegramId,
-            'full_name' => $state['full_name'] ?? 'Yangi O\'quvchi',
-            'phone' => $state['phone'] ?? '+998000000000',
+            'full_name' => $state['full_name'],
+            'phone' => $state['phone'],
             'category' => $state['category'] ?? 'B',
             'preferred_time' => $state['preferred_time'] ?? null,
             'passport_photo_url' => $state['passport_photo_url'] ?? null,
@@ -403,12 +456,7 @@ class LeadWizardService
             'stage' => 'form_completed',
             'source' => 'telegram_bot',
             'is_form_completed' => true,
-        ]);
-
-        $appUrl = config('app.url');
-        if (! str_starts_with($appUrl, 'https://')) {
-            $appUrl = preg_replace('/^http:/i', 'https:', $appUrl);
-        }
+        ])->save();
 
         $bot->sendMessage(
             "🎉 <b>Arizangiz muvaffaqiyatli qabul qilindi!</b>\n\n".
@@ -421,8 +469,10 @@ class LeadWizardService
             reply_markup: ReplyKeyboardRemove::make(true)
         );
 
-        // Notify reception / superadmin users
-        $this->notifyReception($bot, $lead);
+        // Notify reception / superadmin users once per lead
+        if ($isNewLead) {
+            $this->notifyReception($bot, $lead);
+        }
     }
 
     /**

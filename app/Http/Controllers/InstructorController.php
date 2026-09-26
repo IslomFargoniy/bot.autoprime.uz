@@ -99,6 +99,10 @@ class InstructorController extends Controller
             throw ValidationException::withMessages(['general' => 'Sizga tegishli bo\'lmagan dars']);
         }
 
+        if ($driving->status !== 'scheduled') {
+            throw ValidationException::withMessages(['general' => 'Faqat rejalashtirilgan darsni yakunlash mumkin.']);
+        }
+
         $autodrome = $driving->autodrome;
 
         if (! $autodrome) {

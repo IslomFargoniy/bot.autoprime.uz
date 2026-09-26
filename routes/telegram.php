@@ -3,9 +3,9 @@
 /** @var Nutgram $bot */
 
 use App\Models\Driving;
-use App\Models\Review;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\DrivingReviewService;
 use App\Services\LeadWizardService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -477,15 +477,10 @@ if (! function_exists('buildTagKeyboard')) {
 }
 
 $bot->onCallbackQueryData('rate:{driving_id}:{rating}', function (Nutgram $bot, $driving_id, $rating) {
-    $driving = Driving::find($driving_id);
-    if (! $driving) {
-        $bot->answerCallbackQuery(text: "Mashg'ulot topilmadi.");
-
-        return;
-    }
-
-    if ($driving->student && $driving->student->telegram_id != $bot->userId()) {
-        $bot->answerCallbackQuery(text: "Bu sizning mashg'ulotingiz emas.");
+    $driving = Driving::with('student')->find($driving_id);
+    $rejectionReason = app(DrivingReviewService::class)->rejectionReason($driving, $bot->userId(), $rating);
+    if ($rejectionReason) {
+        $bot->answerCallbackQuery(text: $rejectionReason);
 
         return;
     }
@@ -503,15 +498,10 @@ $bot->onCallbackQueryData('rate:{driving_id}:{rating}', function (Nutgram $bot, 
 });
 
 $bot->onCallbackQueryData('tag_toggle:{driving_id}:{rating}:{tag_index}', function (Nutgram $bot, $driving_id, $rating, $tag_index) {
-    $driving = Driving::find($driving_id);
-    if (! $driving) {
-        $bot->answerCallbackQuery(text: "Mashg'ulot topilmadi.");
-
-        return;
-    }
-
-    if ($driving->student && $driving->student->telegram_id != $bot->userId()) {
-        $bot->answerCallbackQuery(text: "Bu sizning mashg'ulotingiz emas.");
+    $driving = Driving::with('student')->find($driving_id);
+    $rejectionReason = app(DrivingReviewService::class)->rejectionReason($driving, $bot->userId(), $rating);
+    if ($rejectionReason) {
+        $bot->answerCallbackQuery(text: $rejectionReason);
 
         return;
     }
@@ -542,15 +532,10 @@ $bot->onCallbackQueryData('tag_toggle:{driving_id}:{rating}:{tag_index}', functi
 use SergiX44\Nutgram\Telegram\Properties\MessageType;
 
 $bot->onCallbackQueryData('submit_rate:{driving_id}:{rating}', function (Nutgram $bot, $driving_id, $rating) {
-    $driving = Driving::find($driving_id);
-    if (! $driving) {
-        $bot->answerCallbackQuery(text: "Mashg'ulot topilmadi.");
-
-        return;
-    }
-
-    if ($driving->student && $driving->student->telegram_id != $bot->userId()) {
-        $bot->answerCallbackQuery(text: "Bu sizning mashg'ulotingiz emas.");
+    $driving = Driving::with('student')->find($driving_id);
+    $rejectionReason = app(DrivingReviewService::class)->rejectionReason($driving, $bot->userId(), $rating);
+    if ($rejectionReason) {
+        $bot->answerCallbackQuery(text: $rejectionReason);
 
         return;
     }
@@ -568,13 +553,7 @@ $bot->onCallbackQueryData('submit_rate:{driving_id}:{rating}', function (Nutgram
         }
     }
 
-    Review::updateOrCreate(
-        ['driving_id' => $driving->id],
-        [
-            'rating' => $rating,
-            'reason_tags' => $selectedTags,
-        ]
-    );
+    app(DrivingReviewService::class)->store($driving, $rating, $selectedTags);
 
     Cache::forget($cacheKey);
     $messageId = $bot->message()?->message_id;
@@ -598,9 +577,14 @@ $bot->onCallbackQueryData('submit_rate:{driving_id}:{rating}', function (Nutgram
 });
 
 $bot->onCallbackQueryData('skip_comment:{driving_id}', function (Nutgram $bot, $driving_id) {
-    Cache::forget("awaiting_review_comment_{$bot->userId()}");
+    $driving = Driving::with(['review', 'student'])->find($driving_id);
+    if (! app(DrivingReviewService::class)->isOwner($driving, $bot->userId())) {
+        $bot->answerCallbackQuery(text: "Bu sizning mashg'ulotingiz emas.");
 
-    $driving = Driving::with('review')->find($driving_id);
+        return;
+    }
+
+    Cache::forget("awaiting_review_comment_{$bot->userId()}");
     $rating = ($driving && $driving->review) ? $driving->review->rating : 5;
     $selectedTags = ($driving && $driving->review && ! empty($driving->review->reason_tags)) ? $driving->review->reason_tags : [];
     $tagsText = ! empty($selectedTags) ? "\n📝 Sabablar: ".implode(', ', $selectedTags) : '';
