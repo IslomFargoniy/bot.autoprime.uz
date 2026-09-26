@@ -601,6 +601,9 @@
         "method_click": "Click",
         "method_payme": "Payme",
         "method_other": "Другое",
+        "selected_register_balance": "Баланс выбранной кассы",
+        "insufficient_funds": "Недостаточно средств в кассе!",
+        "remaining_after_pay": "Остаток после выплаты",
         "register": "Касса",
         "cashier": "Кассир",
         "date": "Дата",
@@ -739,7 +742,12 @@
         "role_accountant": "Бухгалтер",
         "status_paid": "Выплачено",
         "status_pending": "Начислено",
-        "status_calculated": "Начислено"
+        "status_calculated": "Начислено",
+        "for_period": "за расчетный месяц",
+        "due_amount": "К выплате",
+        "set_full_amount": "Ввести всю сумму",
+        "notes_optional": "Примечание (Необязательно)",
+        "notes_placeholder": "Детали платежа или номер чека..."
     },
     "attendance": {
         "title": "Журнал посещаемости",

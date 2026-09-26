@@ -641,7 +641,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                 </>
                             ) : (
                                 <>
-                                    <XCircle className="w-5 h-5 text-red-600" />
+                                    <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                                     {t('drivings.cancel_title', 'Mashg\'ulotni bekor qilish')}
                                 </>
                             )}
@@ -1044,7 +1044,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                         <TableCell>
                                             {driving.status === 'scheduled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">{t('status.scheduled', 'Rejada')}</span>}
                                             {driving.status === 'completed' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">{t('status.completed', 'Tugagan')}</span>}
-                                            {driving.status === 'cancelled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">{t('status.cancelled', 'Bekor qilingan')}</span>}
+                                            {driving.status === 'cancelled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50">{t('status.cancelled', 'Bekor qilingan')}</span>}
                                         </TableCell>
                                         {!isInstructor && (
                                             <TableCell>
@@ -1091,7 +1091,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="text-green-600 border-green-200 hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-950/30"
+                                                            className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
                                                             onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
                                                             title={t('drivings.complete_action', 'Tugatish')}
                                                         >
@@ -1100,7 +1100,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/30"
+                                                            className="text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
                                                             onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
                                                             title={t('drivings.cancel_action', 'Bekor qilish')}
                                                         >
@@ -1109,7 +1109,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-9 w-9"
+                                                            className="h-9 w-9 hover:bg-muted"
                                                             onClick={() => handleEdit(driving)}
                                                             title={t('common.edit', 'Tahrirlash')}
                                                         >
@@ -1118,7 +1118,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-9 w-9 text-destructive border-destructive/20 hover:bg-destructive/10"
+                                                            className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
                                                             onClick={() => handleDelete(driving)}
                                                             disabled={isDeleting === driving.id}
                                                             title={t('common.delete', 'O\'chirish')}
@@ -1156,7 +1156,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                     <div>
                                         {driving.status === 'scheduled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">{t('status.scheduled', 'Rejada')}</span>}
                                         {driving.status === 'completed' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">{t('status.completed', 'Tugagan')}</span>}
-                                        {driving.status === 'cancelled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">{t('status.cancelled', 'Bekor qilingan')}</span>}
+                                        {driving.status === 'cancelled' && <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50">{t('status.cancelled', 'Bekor qilingan')}</span>}
                                     </div>
                                 </div>
                                 
@@ -1216,7 +1216,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex-1 text-green-600 border-green-200 hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-950/30"
+                                                className="flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
                                                 onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
                                             >
                                                 <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
@@ -1224,7 +1224,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex-1 text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/30"
+                                                className="flex-1 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
                                                 onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
                                             >
                                                 <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
@@ -1236,7 +1236,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                className="h-9 w-9"
+                                                className="h-9 w-9 hover:bg-muted"
                                                 onClick={() => handleEdit(driving)}
                                                 title={t('common.edit', 'Tahrirlash')}
                                             >
@@ -1245,7 +1245,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                className="h-9 w-9 text-destructive border-destructive/20 hover:bg-destructive/10"
+                                                className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
                                                 onClick={() => handleDelete(driving)}
                                                 disabled={isDeleting === driving.id}
                                                 title={t('common.delete', 'O\'chirish')}

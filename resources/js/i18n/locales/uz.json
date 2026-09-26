@@ -601,6 +601,9 @@
         "method_click": "Click",
         "method_payme": "Payme",
         "method_other": "Boshqa",
+        "selected_register_balance": "Tanlangan kassa balansi",
+        "insufficient_funds": "Mablag' yetarli emas!",
+        "remaining_after_pay": "To'lovdan keyin qoladi",
         "register": "Kassa",
         "cashier": "Qabul qildi",
         "date": "Sana",
@@ -739,7 +742,12 @@
         "role_accountant": "Hisobchi",
         "status_paid": "To'langan",
         "status_pending": "Hisoblangan",
-        "status_calculated": "Hisoblangan"
+        "status_calculated": "Hisoblangan",
+        "for_period": "oyi uchun hisob",
+        "due_amount": "To'lanishi kerak",
+        "set_full_amount": "To'liq summani kiritish",
+        "notes_optional": "Izoh (Ixtiyoriy)",
+        "notes_placeholder": "To'lov tafsilotlari yoki chek raqami..."
     },
     "attendance": {
         "title": "Davomat Jurnali",

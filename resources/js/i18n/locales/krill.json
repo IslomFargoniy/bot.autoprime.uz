@@ -601,6 +601,9 @@
         "method_click": "Click",
         "method_payme": "Payme",
         "method_other": "Бошқа",
+        "selected_register_balance": "Танланган касса баланси",
+        "insufficient_funds": "Маблағ етарли эмас!",
+        "remaining_after_pay": "Тўловдан кейин қолади",
         "register": "Касса",
         "cashier": "Қабул қилди",
         "date": "Сана",
@@ -739,7 +742,12 @@
         "role_accountant": "Ҳисобчи",
         "status_paid": "Тўланган",
         "status_pending": "Ҳисобланган",
-        "status_calculated": "Ҳисобланган"
+        "status_calculated": "Ҳисобланган",
+        "for_period": "ойи учун ҳисоб",
+        "due_amount": "Тўланиши керак",
+        "set_full_amount": "Тўлиқ суммани киритиш",
+        "notes_optional": "Изоҳ (Ихтиёрий)",
+        "notes_placeholder": "Тўлов тафсилотлари ёки чек рақами..."
     },
     "attendance": {
         "title": "Давомат Журнали",
