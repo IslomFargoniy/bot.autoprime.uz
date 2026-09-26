@@ -193,6 +193,7 @@ Route::middleware(['auth.telegram'])->group(function () {
 
     // Contracts
     Route::get('admin/contracts/{contract}/download-pdf', [ContractController::class, 'downloadPdf'])->name('contracts.download-pdf');
+    Route::post('admin/contracts/{contract}/refund', [ContractController::class, 'refund'])->name('contracts.refund');
     Route::resource('admin/contracts', ContractController::class)->except(['create', 'edit']);
 
     // Finance & Cash Registers

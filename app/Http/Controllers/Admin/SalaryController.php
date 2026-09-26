@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
 use App\Models\Driving;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\LessonSession;
 use App\Models\Salary;
 use App\Models\SalaryPayment;
@@ -214,6 +216,22 @@ class SalaryController extends Controller
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
             $employee = User::where('id', $salary->user_id)->lockForUpdate()->first();
 
+            $category = ExpenseCategory::firstOrCreate(
+                ['name' => 'Xodimlar oylik maoshi'],
+                ['is_active' => true]
+            );
+
+            Expense::create([
+                'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()?->id ?? 1,
+                'cash_register_id' => $lockedRegister->id,
+                'expense_category_id' => $category->id,
+                'user_id' => $request->user()->id,
+                'amount' => $validated['amount'],
+                'recipient' => "Xodim: {$employee->name} ({$employee->role})",
+                'description' => "Oylik maosh to'lovi ({$salary->period})".(! empty($validated['notes']) ? ": {$validated['notes']}" : ''),
+                'spent_at' => now(),
+            ]);
+
             SalaryPayment::create([
                 'salary_id' => $salary->id,
                 'user_id' => $employee->id,
@@ -229,6 +247,6 @@ class SalaryController extends Controller
             $employee->decrement('salary_balance', min((float) $employee->salary_balance, (float) $validated['amount']));
         });
 
-        return redirect()->back()->with('success', 'Oylik to\'lovi kassadan muvaffaqiyatli amalga oshirildi.');
+        return redirect()->back()->with('success', 'Oylik to\'lovi kassadan muvaffaqiyatli amalga oshirildi va Moliya xarajatlarida qayd etildi.');
     }
 }

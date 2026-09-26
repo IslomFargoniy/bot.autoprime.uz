@@ -147,14 +147,16 @@ class Contract extends Model
      */
     public function recalculateFinances(): void
     {
-        $paid = (float) $this->payments()->sum('amount');
+        $tuitionPaid = (float) $this->payments()->where('payment_type', '!=', 'refund')->sum('amount');
+        $refunded = (float) $this->payments()->where('payment_type', 'refund')->sum('amount');
+        $paid = max(0, $tuitionPaid - $refunded);
         $final = (float) $this->final_amount;
 
         $debt = max(0, $final - $paid);
         $overpaid = max(0, $paid - $final);
 
         $paymentStatus = 'unpaid';
-        if ($paid >= $final) {
+        if ($paid >= $final && $final > 0) {
             $paymentStatus = 'paid';
         } elseif ($paid > 0) {
             $paymentStatus = 'partial';
