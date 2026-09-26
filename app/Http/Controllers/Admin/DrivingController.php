@@ -222,12 +222,21 @@ class DrivingController extends Controller
                 ]);
             }
 
-            if ($activeContract && $activeContract->has_driving && $activeContract->hasReachedDrivingLimit()) {
-                $limit = $activeContract->required_driving_lessons ?: ($activeContract->contractType?->required_driving_lessons ?? 0);
+            if ($activeContract) {
+                if ($activeContract->status === 'cancelled') {
+                    return redirect()->back()->withErrors([
+                        'student_ids' => "{$student->full_name} talabasining shartnomasi bekor qilingan.",
+                    ]);
+                }
 
-                return redirect()->back()->withErrors([
-                    'student_ids' => "{$student->full_name} talabasining amaliy mashg'ulotlar limiti ({$limit} ta dars) to'lgan. Yangi dars biriktirish uchun qo'shimcha shartnoma yoki to'lov talab qilinadi.",
-                ]);
+                $startTime = Carbon::parse($validated['start_time']);
+                if (! $activeContract->canScheduleDrivingAt($startTime)) {
+                    $formattedDate = $activeContract->end_date ? $activeContract->end_date->format('d.m.Y') : '';
+
+                    return redirect()->back()->withErrors([
+                        'student_ids' => "{$student->full_name} talabasining shartnoma muddati tugagan ({$formattedDate}). Mashg'ulot qo'shish uchun shartnoma muddatini uzaytirish kerak.",
+                    ]);
+                }
             }
 
             $groupId = $student->group_id ?: ($validated['group_id'] ?? null);

@@ -459,7 +459,10 @@
     "cancel_contract_checkbox": "Set contract status to Cancelled",
     "refund_reason": "Refund reason / Notes",
     "refund_success": "Payment successfully refunded",
-    "max_refund_notice": "Maximum refundable amount"
+    "max_refund_notice": "Maximum refundable amount",
+    "payments_history": "Payment History",
+    "confirm_delete_payment": "Are you sure you want to delete this payment? Funds will be deducted from the register and contract balance will be recalculated.",
+    "no_payments": "No payments recorded for this contract"
   },
   "contract_types": {
     "title": "Contract Tariffs",

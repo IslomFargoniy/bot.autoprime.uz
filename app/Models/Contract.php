@@ -238,28 +238,26 @@ class Contract extends Model
     }
 
     /**
-     * Check if the student has reached their allocated driving lesson limit
+     * Check if contract period has expired
      */
-    public function hasReachedDrivingLimit(): bool
+    public function isExpired(): bool
     {
-        $limit = $this->required_driving_lessons ?: ($this->contractType?->required_driving_lessons ?? 0);
-        if ($limit <= 0) {
-            return false;
-        }
-
-        return $this->getScheduledOrCompletedDrivingsCount() >= $limit;
+        return $this->end_date && $this->end_date->isPast() && ! $this->end_date->isToday();
     }
 
     /**
-     * Get remaining available driving lessons for this contract
+     * Check if a lesson at given time falls within contract duration
      */
-    public function getRemainingDrivingLessonsCount(): int
+    public function canScheduleDrivingAt(Carbon $time): bool
     {
-        $limit = $this->required_driving_lessons ?: ($this->contractType?->required_driving_lessons ?? 0);
-        if ($limit <= 0) {
-            return 999;
+        if ($this->status === 'cancelled') {
+            return false;
         }
 
-        return max(0, $limit - $this->getScheduledOrCompletedDrivingsCount());
+        if ($this->end_date && $time->gt($this->end_date->copy()->endOfDay())) {
+            return false;
+        }
+
+        return true;
     }
 }

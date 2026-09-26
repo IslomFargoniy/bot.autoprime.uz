@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Download, FileText, Search, Trash2, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
+import { Plus, Download, FileText, Search, Trash2, CheckCircle2, AlertCircle, RotateCcw, ReceiptText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,18 @@ interface CashRegister {
     type?: { id: number; name: string };
 }
 
+interface ContractPayment {
+    id: number;
+    receipt_number: string;
+    amount: number | string;
+    payment_type: string;
+    payment_method: string;
+    paid_at: string;
+    comment?: string;
+    cash_register?: { id: number; name: string };
+    received_by?: { id: number; name: string };
+}
+
 interface Contract {
     id: number;
     contract_number: string;
@@ -39,6 +51,7 @@ interface Contract {
     status: 'draft' | 'active' | 'completed' | 'cancelled';
     payment_status: 'unpaid' | 'partial' | 'paid';
     contract_date: string;
+    payments?: ContractPayment[];
 }
 
 interface PageProps {
@@ -65,6 +78,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [refundingContract, setRefundingContract] = useState<Contract | null>(null);
+    const [viewingPaymentsContract, setViewingPaymentsContract] = useState<Contract | null>(null);
     const [search, setSearch] = useState(filters.search || '');
 
     const refundForm = useForm({
@@ -140,6 +154,20 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                 toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
             },
         });
+    };
+
+    const handleDeletePayment = (paymentId: number) => {
+        if (confirm(t('contracts.confirm_delete_payment', 'Rostdan ham ushbu to\'lovni o\'chirmoqchimisiz? Kassadan mablag\' yechiladi va shartnoma balansi qayta hisoblanadi.'))) {
+            router.delete(`/admin/finance/payment/${paymentId}`, {
+                onSuccess: () => {
+                    toast.success(t('finance.payment_deleted', 'To\'lov o\'chirildi'));
+                    setViewingPaymentsContract(null);
+                },
+                onError: (err) => {
+                    toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
+                },
+            });
+        }
     };
 
     const getBadgeStyle = (color: string) => {
@@ -256,7 +284,15 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                             {Number(c.final_amount).toLocaleString('uz-UZ')} UZS
                                         </td>
                                         <td className="p-3.5 font-medium text-emerald-600">
-                                            {Number(c.paid_amount).toLocaleString('uz-UZ')} UZS
+                                            <button
+                                                type="button"
+                                                onClick={() => setViewingPaymentsContract(c)}
+                                                className="hover:underline inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400"
+                                                title={t('contracts.payments_history', "To'lovlar tarixi")}
+                                            >
+                                                <ReceiptText className="w-3.5 h-3.5 text-emerald-500" />
+                                                {Number(c.paid_amount).toLocaleString('uz-UZ')} UZS
+                                            </button>
                                         </td>
                                         <td className="p-3.5 font-medium text-red-500">
                                             {Number(c.debt_amount).toLocaleString('uz-UZ')} UZS
@@ -267,6 +303,15 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                             </span>
                                         </td>
                                         <td className="p-3.5 text-right space-x-1">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setViewingPaymentsContract(c)}
+                                                title={t('contracts.payments_history', "To'lovlar tarixi")}
+                                                className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                            >
+                                                <ReceiptText className="w-3.5 h-3.5" />
+                                            </Button>
                                             <a
                                                 href={`/admin/contracts/${c.id}/download-pdf`}
                                                 className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium"
@@ -528,6 +573,91 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 </Button>
                             </div>
                         </form>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Contract Payments History Modal */}
+            <Dialog open={!!viewingPaymentsContract} onOpenChange={(open) => !open && setViewingPaymentsContract(null)}>
+                <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                            <ReceiptText className="w-5 h-5" />
+                            {t('contracts.payments_history', "To'lovlar Tarixi")}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {viewingPaymentsContract && (
+                        <div className="space-y-4 text-xs">
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between items-center">
+                                <div>
+                                    <div className="font-semibold text-gray-900 dark:text-white">
+                                        {viewingPaymentsContract.student?.full_name}
+                                    </div>
+                                    <div className="text-gray-500">#{viewingPaymentsContract.contract_number}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-emerald-600 font-bold">
+                                        {t('contracts.paid_amount', "To'langan")}: {Number(viewingPaymentsContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                    </div>
+                                    <div className="text-red-500 text-[11px]">
+                                        {t('contracts.debt_amount', 'Qarz')}: {Number(viewingPaymentsContract.debt_amount).toLocaleString('uz-UZ')} UZS
+                                    </div>
+                                </div>
+                            </div>
+
+                            {(!viewingPaymentsContract.payments || viewingPaymentsContract.payments.length === 0) ? (
+                                <div className="text-center py-6 text-gray-400">
+                                    {t('contracts.no_payments', "Ushbu shartnoma bo'yicha to'lovlar mavjud emas")}
+                                </div>
+                            ) : (
+                                <div className="border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden">
+                                    <table className="w-full text-left text-xs">
+                                        <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 border-b border-gray-100 dark:border-gray-800">
+                                            <tr>
+                                                <th className="p-2.5 font-semibold">{t('finance.receipt', 'Chek №')}</th>
+                                                <th className="p-2.5 font-semibold">{t('finance.date', 'Sana')}</th>
+                                                <th className="p-2.5 font-semibold">{t('finance.register', 'Kassa')}</th>
+                                                <th className="p-2.5 font-semibold">{t('finance.amount', 'Summa')}</th>
+                                                <th className="p-2.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                            {viewingPaymentsContract.payments.map((p) => {
+                                                const isRefund = p.payment_type === 'refund';
+                                                return (
+                                                    <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
+                                                        <td className="p-2.5 font-medium">#{p.receipt_number}</td>
+                                                        <td className="p-2.5 text-gray-500">{p.paid_at}</td>
+                                                        <td className="p-2.5 text-gray-500">{p.cash_register?.name || '-'}</td>
+                                                        <td className={`p-2.5 font-semibold ${isRefund ? 'text-red-500' : 'text-emerald-600'}`}>
+                                                            {isRefund ? '-' : '+'}{Number(p.amount).toLocaleString('uz-UZ')} UZS
+                                                        </td>
+                                                        <td className="p-2.5 text-right">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => handleDeletePayment(p.id)}
+                                                                title={t('common.delete', "O'chirish")}
+                                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end pt-2">
+                                <Button type="button" variant="outline" onClick={() => setViewingPaymentsContract(null)}>
+                                    {t('common.close', 'Yopish')}
+                                </Button>
+                            </div>
+                        </div>
                     )}
                 </DialogContent>
             </Dialog>

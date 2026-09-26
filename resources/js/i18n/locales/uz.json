@@ -462,7 +462,10 @@
     "cancel_contract_checkbox": "Shartnoma holatini bekor qilingan (Cancelled) ga o'tkazish",
     "refund_reason": "Qaytarish sababi / Izoh",
     "refund_success": "To'lov muvaffaqiyatli qaytarildi",
-    "max_refund_notice": "Maksimal qaytarish mumkin bo'lgan summa"
+    "max_refund_notice": "Maksimal qaytarish mumkin bo'lgan summa",
+    "payments_history": "To'lovlar Tarixi",
+    "confirm_delete_payment": "Rostdan ham ushbu to'lovni o'chirmoqchimisiz? Kassadan mablag' yechiladi va shartnoma balansi qayta hisoblanadi.",
+    "no_payments": "Ushbu shartnoma bo'yicha to'lovlar mavjud emas"
   },
   "contract_types": {
     "title": "Shartnoma Tariflari",
