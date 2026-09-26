@@ -158,8 +158,24 @@ class InstructorController extends Controller
         ]);
     }
 
+    /**
+     * The route binds any user id, so make sure it really is an instructor the
+     * current user may manage (branch-restricted staff: same branch only).
+     */
+    private function ensureManageableInstructor(Request $request, User $instructor): void
+    {
+        abort_unless($instructor->isInstructor(), 404);
+
+        $currentUser = $request->user();
+        if ($currentUser->isBranchRestricted() && $instructor->branch_id !== $currentUser->branch_id) {
+            abort(403, 'Boshqa filial instruktori ustida amal bajarish huquqingiz yo\'q.');
+        }
+    }
+
     public function show(Request $request, User $instructor): Response
     {
+        $this->ensureManageableInstructor($request, $instructor);
+
         $instructor->loadCount('groups');
 
         $drivings = Driving::with(['student.group', 'autodrome', 'review'])
@@ -220,7 +236,7 @@ class InstructorController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -235,7 +251,7 @@ class InstructorController extends Controller
         ]);
 
         $user = $request->user();
-        $branchId = ($user->role === 'admin' && $user->branch_id) ? $user->branch_id : ($validated['branch_id'] ?? $user->branch_id);
+        $branchId = ($user->isBranchRestricted()) ? $user->branch_id : ($validated['branch_id'] ?? $user->branch_id);
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -258,9 +274,7 @@ class InstructorController extends Controller
 
     public function update(Request $request, User $instructor)
     {
-        if ($request->user()->role === 'instructor') {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        $this->ensureManageableInstructor($request, $instructor);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -285,6 +299,10 @@ class InstructorController extends Controller
             unset($validated['password']);
         }
 
+        if ($request->user()->isBranchRestricted()) {
+            $validated['branch_id'] = $request->user()->branch_id;
+        }
+
         $instructor->update($validated);
 
         return redirect()->back();
@@ -292,9 +310,7 @@ class InstructorController extends Controller
 
     public function destroy(User $instructor, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        $this->ensureManageableInstructor($request, $instructor);
 
         if ($instructor->photo_path) {
             Storage::disk('public')->delete($instructor->photo_path);

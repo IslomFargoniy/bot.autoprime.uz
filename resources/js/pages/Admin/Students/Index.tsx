@@ -71,7 +71,7 @@ export default function StudentsIndex({ students, groups, branches = [], filters
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth?.user?.role === 'instructor';
-    const isSuperAdmin = auth?.user?.role === 'superadmin' || auth?.user?.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const [editing, setEditing] = useState<Student | null>(null);
     const [showForm, setShowForm] = useState(false);

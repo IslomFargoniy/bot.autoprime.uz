@@ -16,7 +16,7 @@ class AdminController extends Controller
     private function authorizeSuperAdmin(Request $request): void
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ushbu bo\'lim faqat Super Admin uchun ajratilgan.');
         }
     }

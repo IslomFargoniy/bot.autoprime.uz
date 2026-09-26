@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     Award,
     Banknote,
@@ -23,6 +23,7 @@ import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { useTranslation } from 'react-i18next';
+import { useCan } from '@/hooks/use-can';
 import { isTelegramWebApp } from '@/hooks/use-telegram';
 import {
     Sidebar,
@@ -34,13 +35,35 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
-import type { NavGroup, SharedData } from '@/types';
+import type { NavGroup } from '@/types';
+
+/**
+ * Permission(s) required to see each sidebar entry (any of them is enough).
+ * Entries without a mapping are visible to superadmins only.
+ */
+const NAV_PERMISSIONS: Record<string, string[]> = {
+    '/admin/dashboard': ['dashboard.view'],
+    '/admin/leads': ['crm.view'],
+    '/admin/contracts': ['contracts.view'],
+    '/admin/contract-types': ['contracts.view', 'contract_types.manage'],
+    '/admin/courses': ['lms.view'],
+    '/admin/groups': ['groups.view'],
+    '/admin/students': ['students.view'],
+    '/admin/attendance': ['attendance.view'],
+    '/admin/tests': ['tickets.manage', 'attempts.view'],
+    '/admin/certificates': ['certificates.view'],
+    '/admin/drivings': ['drivings.view'],
+    '/admin/vehicles': ['fleet.view'],
+    '/admin/autodromes': ['autodromes.manage'],
+    '/admin/instructors': ['users.view'],
+    '/admin/staff': ['users.view'],
+    '/admin/salaries': ['salaries.view'],
+    '/admin/finance': ['finance.view'],
+};
 
 export function AppSidebar() {
     const { t } = useTranslation();
-    const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth.user.role === 'instructor';
-    const isSuperAdmin = auth.user.role === 'superadmin' || auth.user.id === 1;
+    const can = useCan();
     const { setOpenMobile, isMobile } = useSidebar();
     const [isTg, setIsTg] = useState(false);
 
@@ -192,17 +215,7 @@ export function AppSidebar() {
     const filteredGroups = navGroups
         .map((group) => ({
             ...group,
-            items: group.items.filter((item) => {
-                if (item.href === '/admin/branches' || item.href === '/admin/admins') {
-                    return isSuperAdmin;
-                }
-                if (isInstructor) {
-                    return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings', '/admin/vehicles'].includes(
-                        item.href as string
-                    );
-                }
-                return true;
-            }),
+            items: group.items.filter((item) => can(...(NAV_PERMISSIONS[item.href as string] ?? ['__superadmin_only__']))),
         }))
         .filter((group) => group.items.length > 0);
 

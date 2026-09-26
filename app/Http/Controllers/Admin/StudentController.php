@@ -29,7 +29,7 @@ class StudentController extends Controller
     public function searchApi(Request $request)
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Student::with(['group', 'branch'])->orderBy('full_name', 'asc');
 
@@ -83,7 +83,7 @@ class StudentController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Student::with(['group', 'branch'])
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
@@ -150,7 +150,7 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -163,7 +163,7 @@ class StudentController extends Controller
         ]);
 
         $user = $request->user();
-        if ($user->role === 'admin' && $user->branch_id) {
+        if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
         } elseif (empty($validated['branch_id'])) {
             $validated['branch_id'] = $user->branch_id;
@@ -176,7 +176,7 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -245,7 +245,7 @@ class StudentController extends Controller
 
     public function destroy(Student $student, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 

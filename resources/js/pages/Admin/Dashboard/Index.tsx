@@ -37,7 +37,7 @@ interface PageProps {
 export default function DashboardIndex({ metrics, chartData, branches = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isSuperAdmin = auth?.user?.role === 'superadmin' || auth?.user?.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const [from, setFrom] = useState(filters.from || '');
     const [to, setTo] = useState(filters.to || '');

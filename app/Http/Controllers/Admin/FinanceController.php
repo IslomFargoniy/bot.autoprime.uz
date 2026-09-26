@@ -390,7 +390,7 @@ class FinanceController extends Controller
 
                 // If user is not superadmin, they can only sweep registers of their own branch
                 $user = $request->user();
-                if ($user->role !== 'superadmin' && (int) $branchRegister->branch_id !== (int) $user->branch_id) {
+                if (! $user->isSuperAdmin() && (int) $branchRegister->branch_id !== (int) $user->branch_id) {
                     continue;
                 }
 

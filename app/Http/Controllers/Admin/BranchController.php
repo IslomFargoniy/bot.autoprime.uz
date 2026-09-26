@@ -17,7 +17,7 @@ class BranchController extends Controller
             return redirect()->route('login');
         }
 
-        $isSuperAdmin = $user->role === 'superadmin' || $user->id === 1;
+        $isSuperAdmin = $user->isSuperAdmin();
 
         if (! $isSuperAdmin) {
             abort(403, 'Filialni faqat Asosiy Admin almashtira oladi.');
@@ -31,7 +31,7 @@ class BranchController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ushbu bo\'lim faqat SuperAdmin uchun ochiq.');
         }
 
@@ -66,7 +66,7 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ruxsat berilmagan.');
         }
 
@@ -86,7 +86,7 @@ class BranchController extends Controller
     public function update(Request $request, Branch $branch)
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ruxsat berilmagan.');
         }
 
@@ -106,7 +106,7 @@ class BranchController extends Controller
     public function destroy(Request $request, Branch $branch)
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ruxsat berilmagan.');
         }
 

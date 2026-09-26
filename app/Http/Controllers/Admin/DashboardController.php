@@ -41,7 +41,7 @@ class DashboardController extends Controller
         }
 
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $branchId = BranchSessionService::getActiveBranchId($request);
 

@@ -26,7 +26,7 @@ class DrivingController extends Controller
     {
         $filters = $request->all();
         $user = $request->user();
-        if ($user->role === 'instructor') {
+        if ($user->isInstructor()) {
             $filters['instructor_id'] = $user->id;
         } else {
             $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -41,7 +41,7 @@ class DrivingController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Driving::with(['instructor', 'student', 'group', 'review', 'autodrome', 'branch'])
             ->orderBy('start_time', 'desc');

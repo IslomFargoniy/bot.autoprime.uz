@@ -105,7 +105,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'base_salary' => 15000000,
             ]);
         }
-        $superAdmin->syncRoles(['super_admin', 'superadmin']);
 
         // Filial Admin
         $branchAdmin = User::updateOrCreate(
@@ -120,7 +119,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'base_salary' => 8000000,
             ]
         );
-        $branchAdmin->syncRoles(['admin']);
 
         // Buxgalter
         $accountant = User::updateOrCreate(
@@ -135,7 +133,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'base_salary' => 6000000,
             ]
         );
-        $accountant->syncRoles(['accountant']);
 
         // Reception
         $reception = User::updateOrCreate(
@@ -150,7 +147,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'base_salary' => 4500000,
             ]
         );
-        $reception->syncRoles(['reception']);
 
         // Kassir
         $kassir = User::updateOrCreate(
@@ -165,7 +161,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'base_salary' => 4000000,
             ]
         );
-        $kassir->syncRoles(['kassir']);
 
         // Teacher
         $teacher = User::updateOrCreate(
@@ -181,7 +176,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'lesson_rate' => 75000,
             ]
         );
-        $teacher->syncRoles(['teacher']);
 
         // Instructor 1 (Chilonzor)
         $instructor1 = User::updateOrCreate(
@@ -198,7 +192,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'driving_hourly_rate' => 60000,
             ]
         );
-        $instructor1->syncRoles(['instructor']);
 
         // Instructor 2 (Yunusobod)
         $instructor2 = User::updateOrCreate(
@@ -215,7 +208,6 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 'driving_hourly_rate' => 60000,
             ]
         );
-        $instructor2->syncRoles(['instructor']);
 
         // ---------------------------------------------------------------------
         // 3. CASH REGISTER TYPES & CASH REGISTERS

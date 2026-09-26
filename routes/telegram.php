@@ -38,7 +38,7 @@ $bot->onCommand('start', function (Nutgram $bot) {
     }
 
     if ($user) {
-        $roleTitle = $user->role === 'instructor' ? '👨‍🏫 Instruktor' : '👑 Admin';
+        $roleTitle = $user->isInstructor() ? '👨‍🏫 Instruktor' : '👑 Admin';
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(InlineKeyboardButton::make(
@@ -126,7 +126,7 @@ if (! function_exists('buildDrivingsMessage')) {
         $text = '';
 
         if ($user) {
-            if ($user->role === 'instructor') {
+            if ($user->isInstructor()) {
                 $text .= "👨‍🏫 <b>Instruktor: {$user->name}</b>\n\n";
 
                 if ($status === 'scheduled') {
@@ -371,7 +371,7 @@ $bot->onContact(function (Nutgram $bot) {
     $user = User::where('phone', $phone)->orWhere('phone', $cleanPhone)->first();
     if ($user) {
         $user->update(['telegram_id' => $telegramId]);
-        $roleTitle = $user->role === 'instructor' ? '👨‍🏫 Instruktor' : '👑 Admin';
+        $roleTitle = $user->isInstructor() ? '👨‍🏫 Instruktor' : '👑 Admin';
 
         $bot->sendMessage(
             "✅ Muvaffaqiyatli avtorizatsiyadan o'tdingiz!\n\n👤 <b>Ismingiz:</b> {$user->name}\n📌 <b>Siz tizimga <u>{$roleTitle}</u> sifatida kirdingiz.</b>",

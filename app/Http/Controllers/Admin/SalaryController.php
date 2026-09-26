@@ -80,7 +80,7 @@ class SalaryController extends Controller
         $startOfMonth = Carbon::createFromFormat('Y-m', $period)->startOfMonth();
         $endOfMonth = Carbon::createFromFormat('Y-m', $period)->endOfMonth();
 
-        $employees = User::where('status', 'active')->get();
+        $employees = User::with('roles')->where('status', 'active')->get();
         $createdCount = 0;
 
         DB::transaction(function () use ($employees, $period, $startOfMonth, $endOfMonth, $request, &$createdCount) {
@@ -102,7 +102,7 @@ class SalaryController extends Controller
                 $lessonAmount = 0.0;
 
                 // 1. Calculate Driving hours for Instructors
-                if ($emp->role === 'instructor' || $emp->driving_hourly_rate > 0) {
+                if ($emp->isInstructor() || $emp->driving_hourly_rate > 0) {
                     $completedDrivings = Driving::where('instructor_id', $emp->id)
                         ->where('status', 'completed')
                         ->whereBetween('start_time', [$startOfMonth, $endOfMonth])
@@ -117,7 +117,7 @@ class SalaryController extends Controller
                 }
 
                 // 2. Calculate Theory lessons for Teachers
-                if ($emp->role === 'teacher' || $emp->lesson_rate > 0) {
+                if ($emp->hasRole('teacher') || $emp->lesson_rate > 0) {
                     $lessonCount = LessonSession::where('teacher_id', $emp->id)
                         ->whereIn('status', ['finished', 'completed'])
                         ->whereBetween('started_at', [$startOfMonth, $endOfMonth])

@@ -18,10 +18,8 @@ class BranchSessionService
             return null;
         }
 
-        $isSuperAdmin = $user->role === 'superadmin' || $user->id === 1;
-
-        // Subordinate branch admins and instructors are strictly restricted to their assigned branch
-        if (! $isSuperAdmin && $user->branch_id && in_array($user->role, ['admin', 'instructor'])) {
+        // Every non-superadmin staff member is strictly restricted to their assigned branch
+        if ($user->isBranchRestricted()) {
             return (string) $user->branch_id;
         }
 

@@ -40,7 +40,7 @@ class AutodromeController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -53,7 +53,7 @@ class AutodromeController extends Controller
         ]);
 
         $user = $request->user();
-        if ($user->role === 'admin' && $user->branch_id) {
+        if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
         }
 
@@ -64,7 +64,7 @@ class AutodromeController extends Controller
 
     public function update(Request $request, Autodrome $autodrome)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -83,7 +83,7 @@ class AutodromeController extends Controller
 
     public function destroy(Autodrome $autodrome, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 

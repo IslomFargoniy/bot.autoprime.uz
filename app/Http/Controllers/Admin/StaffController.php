@@ -11,27 +11,31 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
 
 class StaffController extends Controller
 {
-    private function checkAccess(Request $request): void
+    /**
+     * Branch-restricted staff may only touch colleagues in their own branch,
+     * and only a superadmin may touch a superadmin account.
+     */
+    private function ensureCanAccessStaff(User $currentUser, User $staff): void
     {
-        $user = $request->user();
-        if ($user->role === 'instructor') {
-            abort(403, 'Instruktorlar ushbu bo\'limdan foydalana olmaydi.');
+        if ($staff->isSuperAdmin() && ! $currentUser->isSuperAdmin()) {
+            abort(403, 'Bosh admin hisobini faqat Superadmin boshqara oladi.');
+        }
+
+        if ($currentUser->isBranchRestricted() && $staff->branch_id !== $currentUser->branch_id) {
+            abort(403, 'Boshqa filial xodimi ustida amal bajarish huquqingiz yo\'q.');
         }
     }
 
     public function index(Request $request): Response
     {
-        $this->checkAccess($request);
-
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->role === 'superadmin' || $currentUser->id === 1;
+        $isSuperAdmin = $currentUser->isSuperAdmin();
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
-        if ($currentUser->role === 'admin' && $currentUser->branch_id) {
+        if ($currentUser->isBranchRestricted()) {
             $targetBranchId = $currentUser->branch_id;
         }
 
@@ -126,10 +130,8 @@ class StaffController extends Controller
 
     public function store(Request $request)
     {
-        $this->checkAccess($request);
-
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->role === 'superadmin' || $currentUser->id === 1;
+        $isSuperAdmin = $currentUser->isSuperAdmin();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -150,7 +152,7 @@ class StaffController extends Controller
             abort(403, 'Faqat Bosh Admin superadmin qo\'sha oladi.');
         }
 
-        $branchId = ($currentUser->role === 'admin' && $currentUser->branch_id)
+        $branchId = $currentUser->isBranchRestricted()
             ? $currentUser->branch_id
             : ($validated['branch_id'] ?? null);
 
@@ -175,29 +177,15 @@ class StaffController extends Controller
             'salary_balance' => 0,
         ]);
 
-        try {
-            Role::firstOrCreate(['name' => $validated['role'], 'guard_name' => 'web']);
-            $user->syncRoles([$validated['role']]);
-        } catch (\Exception $e) {
-        }
-
         return redirect()->back()->with('success', 'Xodim muvaffaqiyatli qo\'shildi.');
     }
 
     public function update(Request $request, User $staff)
     {
-        $this->checkAccess($request);
-
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->role === 'superadmin' || $currentUser->id === 1;
+        $isSuperAdmin = $currentUser->isSuperAdmin();
 
-        if ($staff->role === 'superadmin' && ! $isSuperAdmin) {
-            abort(403, 'Bosh admin hisobini faqat Superadmin tahrirlay oladi.');
-        }
-
-        if ($currentUser->role === 'admin' && $currentUser->branch_id && $staff->branch_id !== $currentUser->branch_id) {
-            abort(403, 'Boshqa filial xodimini tahrirlash huquqingiz yo\'q.');
-        }
+        $this->ensureCanAccessStaff($currentUser, $staff);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -218,6 +206,10 @@ class StaffController extends Controller
             abort(403, 'Faqat Bosh Admin superadmin rolini biriktira oladi.');
         }
 
+        if ($currentUser->isBranchRestricted()) {
+            $validated['branch_id'] = $currentUser->branch_id;
+        }
+
         if ($request->hasFile('photo')) {
             if ($staff->photo_path) {
                 Storage::disk('public')->delete($staff->photo_path);
@@ -231,23 +223,14 @@ class StaffController extends Controller
             unset($validated['password']);
         }
 
-        $oldRole = $staff->role;
         $staff->update($validated);
-
-        if ($oldRole !== $validated['role']) {
-            try {
-                Role::firstOrCreate(['name' => $validated['role'], 'guard_name' => 'web']);
-                $staff->syncRoles([$validated['role']]);
-            } catch (\Exception $e) {
-            }
-        }
 
         return redirect()->back()->with('success', 'Xodim ma\'lumotlari yangilandi.');
     }
 
     public function show(User $staff, Request $request)
     {
-        $this->checkAccess($request);
+        $this->ensureCanAccessStaff($request->user(), $staff);
 
         $staff->load(['branch', 'salaries' => function ($q) {
             $q->orderBy('created_at', 'desc')->take(12);
@@ -268,18 +251,13 @@ class StaffController extends Controller
 
     public function destroy(User $staff, Request $request)
     {
-        $this->checkAccess($request);
-
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->role === 'superadmin' || $currentUser->id === 1;
 
         if ($currentUser->id === $staff->id) {
             return redirect()->back()->withErrors(['message' => 'O\'z hisobingizni o\'chira olmaysiz.']);
         }
 
-        if ($staff->id === 1 || ($staff->role === 'superadmin' && ! $isSuperAdmin)) {
-            abort(403, 'Bosh admin hisobini o\'chirish taqiqlangan.');
-        }
+        $this->ensureCanAccessStaff($currentUser, $staff);
 
         if ($staff->photo_path) {
             Storage::disk('public')->delete($staff->photo_path);

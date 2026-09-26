@@ -431,7 +431,7 @@ class LeadWizardService
     protected function notifyReception(Nutgram $bot, Lead $lead): void
     {
         try {
-            $admins = User::whereIn('role', ['admin', 'super_admin', 'superadmin'])
+            $admins = User::role(['admin', 'superadmin'])
                 ->whereNotNull('telegram_id')
                 ->get();
 

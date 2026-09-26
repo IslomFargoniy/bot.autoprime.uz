@@ -28,7 +28,7 @@ class GroupController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Group::with(['instructor', 'branch', 'course'])->orderBy('id', 'desc');
 
@@ -84,7 +84,7 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -96,7 +96,7 @@ class GroupController extends Controller
         ]);
 
         $user = $request->user();
-        if ($user->role === 'admin' && $user->branch_id) {
+        if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
         } elseif (empty($validated['branch_id'])) {
             $validated['branch_id'] = $user->branch_id;
@@ -109,7 +109,7 @@ class GroupController extends Controller
 
     public function update(Request $request, Group $group)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -127,7 +127,7 @@ class GroupController extends Controller
 
     public function destroy(Group $group, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -139,7 +139,7 @@ class GroupController extends Controller
     public function show(Request $request, Group $group): Response
     {
         $user = $request->user();
-        if ($user->role === 'instructor' && $group->instructor_id !== $user->id) {
+        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
             abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni ko\'rishingiz mumkin.');
         }
 
@@ -177,7 +177,7 @@ class GroupController extends Controller
 
     public function importStudents(Request $request, Group $group)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 

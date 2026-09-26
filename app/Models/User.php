@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -68,6 +69,31 @@ class User extends Authenticatable implements PasskeyUser
 
     protected $appends = ['photo_url'];
 
+    /**
+     * Mirrors the database default so new models know their role before refresh.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'instructor',
+    ];
+
+    /**
+     * Spatie roles are the source of truth for authorization. The `role` column
+     * is kept as the user's single primary-role label, and any change to it is
+     * synced to the Spatie role assignment here so the two can never drift.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (User $user): void {
+            if (! $user->wasRecentlyCreated && ! $user->wasChanged('role')) {
+                return;
+            }
+
+            $user->syncRoles($user->role ? [Role::findOrCreate($user->role, 'web')] : []);
+        });
+    }
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
@@ -79,6 +105,24 @@ class User extends Authenticatable implements PasskeyUser
     public function isActive(): bool
     {
         return $this->status !== 'inactive';
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('superadmin');
+    }
+
+    public function isInstructor(): bool
+    {
+        return $this->hasRole('instructor');
+    }
+
+    /**
+     * Staff other than superadmins only ever work within their own branch.
+     */
+    public function isBranchRestricted(): bool
+    {
+        return ! $this->isSuperAdmin() && $this->branch_id !== null;
     }
 
     public function getPhotoUrlAttribute(): ?string

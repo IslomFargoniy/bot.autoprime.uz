@@ -97,7 +97,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
     const defaultCenter = useMemo(() => new L.LatLng(41.2995, 69.2401), []);
     const [position, setPosition] = useState<L.LatLng | null>(null);
 
-    const isSuperAdmin = auth?.user?.role === 'superadmin' || auth?.user?.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const { data, setData, post, put, delete: destroy, reset, errors, processing } = useForm({
         name: '',

@@ -131,7 +131,7 @@ export default function StaffIndex({
 }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isSuperAdmin = auth?.user?.role === 'superadmin' || auth?.user?.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const [search, setSearch] = useState(filters.search || '');
     const [selectedRole, setSelectedRole] = useState(filters.role || 'all');
