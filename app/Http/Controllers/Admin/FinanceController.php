@@ -11,6 +11,7 @@ use App\Models\CashTransfer;
 use App\Models\Contract;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\FinancialHistory;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\VehicleMaintenance;
@@ -200,6 +201,22 @@ class FinanceController extends Controller
 
             // Recalculate contract finances
             $contract->recalculateFinances();
+
+            // Record financial history for the student
+            if ($contract->student) {
+                FinancialHistory::recordForStudent($contract->student, [
+                    'type' => 'credit',
+                    'category' => 'tuition_payment',
+                    'amount' => (float) $validated['amount'],
+                    'balance_before' => (float) ($contract->debt_amount + (float) $validated['amount']),
+                    'balance_after' => (float) $contract->debt_amount,
+                    'payment_method' => $validated['payment_method'],
+                    'description' => "Shartnoma to'lovi qabul qilindi: #{$contract->contract_number} (Chek #{$receiptNumber})",
+                    'reference' => $payment,
+                    'performed_by_user_id' => $request->user()->id,
+                    'transacted_at' => now(),
+                ]);
+            }
         });
 
         if ($payment) {

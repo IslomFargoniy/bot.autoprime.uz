@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\SalaryController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -179,6 +180,7 @@ Route::middleware(['auth.telegram'])->group(function () {
     Route::resource('admin/drivings', DrivingController::class)->except(['create', 'show', 'edit']);
     Route::resource('admin/autodromes', AutodromeController::class)->except(['create', 'show', 'edit']);
     Route::resource('admin/admins', AdminController::class)->except(['create', 'show', 'edit']);
+    Route::resource('admin/staff', StaffController::class)->except(['create', 'edit']);
     Route::resource('admin/branches', BranchController::class)->except(['create', 'show', 'edit']);
 
     // CRM Leads
