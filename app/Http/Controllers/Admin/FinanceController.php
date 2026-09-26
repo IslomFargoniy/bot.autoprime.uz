@@ -13,6 +13,7 @@ use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\VehicleMaintenance;
 use App\Services\BranchSessionService;
 use App\Services\TelegramService;
 use Illuminate\Http\RedirectResponse;
@@ -335,7 +336,7 @@ class FinanceController extends Controller
             }
 
             // If this expense is attached to vehicle maintenance, reset expense_id on maintenance
-            \App\Models\VehicleMaintenance::where('expense_id', $expense->id)->update(['expense_id' => null]);
+            VehicleMaintenance::where('expense_id', $expense->id)->update(['expense_id' => null]);
 
             $expense->delete();
         });
