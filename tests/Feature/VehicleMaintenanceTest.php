@@ -4,6 +4,7 @@ use App\Models\Branch;
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
@@ -145,7 +146,7 @@ test('admin can delete maintenance which refunds cash register and deletes expen
         'status' => 'active',
     ]);
 
-    $category = \App\Models\ExpenseCategory::firstOrCreate(['name' => "Ta'mir"], ['is_active' => true]);
+    $category = ExpenseCategory::firstOrCreate(['name' => "Ta'mir"], ['is_active' => true]);
     $expense = Expense::create([
         'branch_id' => $branch->id,
         'cash_register_id' => $register->id,

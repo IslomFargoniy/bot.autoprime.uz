@@ -449,7 +449,20 @@
     "has_theory": "Nazariya",
     "has_driving": "Amaliy",
     "has_lms": "LMS Video",
-    "total_amount": "Jami to'lov"
+    "total_amount": "Jami to'lov",
+    "refund": "Qaytarish",
+    "refund_button": "To'lovni qaytarish (Refund)",
+    "refund_modal_title": "To'lovni Qaytarish (Refund)",
+    "refund_amount": "Qaytariladigan summa (UZS)",
+    "refund_from_register": "Qaysi kassadan qaytariladi",
+    "payment_method": "To'lov usuli",
+    "method_cash": "Naqd pul",
+    "method_card": "Karta / Terminal",
+    "method_bank": "Bank hisob raqami",
+    "cancel_contract_checkbox": "Shartnoma holatini bekor qilingan (Cancelled) ga o'tkazish",
+    "refund_reason": "Qaytarish sababi / Izoh",
+    "refund_success": "To'lov muvaffaqiyatli qaytarildi",
+    "max_refund_notice": "Maksimal qaytarish mumkin bo'lgan summa"
   },
   "contract_types": {
     "title": "Shartnoma Tariflari",

@@ -449,7 +449,20 @@
     "has_theory": "Теория",
     "has_driving": "Вождение",
     "has_lms": "LMS Видео",
-    "total_amount": "Общая сумма"
+    "total_amount": "Общая сумма",
+    "refund": "Возврат",
+    "refund_button": "Возврат средств (Refund)",
+    "refund_modal_title": "Возврат средств (Refund)",
+    "refund_amount": "Сумма возврата (UZS)",
+    "refund_from_register": "С какой кассы вернуть",
+    "payment_method": "Способ возврата",
+    "method_cash": "Наличные",
+    "method_card": "Карта / Терминал",
+    "method_bank": "Банковский перевод",
+    "cancel_contract_checkbox": "Перевести договор в статус Аннулирован (Cancelled)",
+    "refund_reason": "Причина возврата / Примечание",
+    "refund_success": "Средства успешно возвращены",
+    "max_refund_notice": "Максимальная сумма к возврату"
   },
   "contract_types": {
     "title": "Тарифы договоров",

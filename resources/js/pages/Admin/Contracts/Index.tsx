@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Download, FileText, Search, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Download, FileText, Search, Trash2, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { DatePicker } from '@/components/ui/date-picker';
+
+interface CashRegister {
+    id: number;
+    name: string;
+    balance: number | string;
+    type?: { id: number; name: string };
+}
 
 interface Contract {
     id: number;
@@ -44,6 +51,7 @@ interface PageProps {
     contractTypes: Array<{ id: number; name: string; price: number | string; category: string }>;
     groups: Array<{ id: number; name: string }>;
     branches: Array<{ id: number; name: string }>;
+    cashRegisters?: CashRegister[];
     filters: {
         search?: string;
         status?: string;
@@ -53,10 +61,19 @@ interface PageProps {
     };
 }
 
-export default function ContractsIndex({ contracts, students, contractTypes, groups, branches, filters }: PageProps) {
+export default function ContractsIndex({ contracts, students, contractTypes, groups, branches, cashRegisters = [], filters }: PageProps) {
     const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
+    const [refundingContract, setRefundingContract] = useState<Contract | null>(null);
     const [search, setSearch] = useState(filters.search || '');
+
+    const refundForm = useForm({
+        cash_register_id: cashRegisters[0]?.id ? String(cashRegisters[0].id) : '',
+        amount: '',
+        payment_method: 'cash',
+        cancel_contract: true,
+        notes: '',
+    });
 
     const form = useForm({
         student_id: students[0]?.id || '',
@@ -96,6 +113,33 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         }
+    };
+
+    const openRefund = (contract: Contract) => {
+        setRefundingContract(contract);
+        refundForm.setData({
+            cash_register_id: cashRegisters[0]?.id ? String(cashRegisters[0].id) : '',
+            amount: String(contract.paid_amount),
+            payment_method: 'cash',
+            cancel_contract: true,
+            notes: '',
+        });
+    };
+
+    const handleRefundSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!refundingContract) return;
+
+        refundForm.post(`/admin/contracts/${refundingContract.id}/refund`, {
+            onSuccess: () => {
+                setRefundingContract(null);
+                refundForm.reset();
+                toast.success(t('contracts.refund_success', "To'lov muvaffaqiyatli qaytarildi"));
+            },
+            onError: (err) => {
+                toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
+            },
+        });
     };
 
     const getBadgeStyle = (color: string) => {
@@ -232,6 +276,18 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                 <Download className="w-3.5 h-3.5 mr-1" />
                                                 PDF
                                             </a>
+                                            {Number(c.paid_amount) > 0 && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => openRefund(c)}
+                                                    title={t('contracts.refund_button', "To'lovni qaytarish (Refund)")}
+                                                    className="h-7 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                                                >
+                                                    <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                                                    {t('contracts.refund', 'Qaytarish')}
+                                                </Button>
+                                            )}
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -354,6 +410,125 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                             </Button>
                         </div>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Refund Modal */}
+            <Dialog open={!!refundingContract} onOpenChange={(open) => !open && setRefundingContract(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                            <RotateCcw className="w-5 h-5" />
+                            {t('contracts.refund_modal_title', "To'lovni Qaytarish (Refund)")}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {refundingContract && (
+                        <form onSubmit={handleRefundSubmit} className="space-y-4 text-xs">
+                            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-lg space-y-1">
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                    {refundingContract.student?.full_name}
+                                </div>
+                                <div className="text-gray-500 flex justify-between">
+                                    <span>#{refundingContract.contract_number}</span>
+                                    <span>
+                                        {t('contracts.max_refund_notice', "Maksimal summa")}:{' '}
+                                        <strong className="text-emerald-600">
+                                            {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                        </strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="refund_amount">{t('contracts.refund_amount', 'Qaytariladigan summa (UZS)')}</Label>
+                                <Input
+                                    id="refund_amount"
+                                    type="number"
+                                    min="1"
+                                    max={refundingContract.paid_amount}
+                                    value={refundForm.data.amount}
+                                    onChange={(e) => refundForm.setData('amount', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                />
+                                {refundForm.errors.amount && (
+                                    <p className="text-red-500 text-[11px] mt-1">{refundForm.errors.amount}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="refund_cash_register_id">{t('contracts.refund_from_register', 'Qaysi kassadan qaytariladi')}</Label>
+                                <SearchableSelect
+                                    id="refund_cash_register_id"
+                                    value={refundForm.data.cash_register_id}
+                                    onChange={(val) => refundForm.setData('cash_register_id', String(val))}
+                                    options={(cashRegisters || []).map((cr) => ({
+                                        value: cr.id,
+                                        label: `${cr.name} (${Number(cr.balance).toLocaleString('uz-UZ')} UZS)`,
+                                        sublabel: cr.type?.name || undefined,
+                                    }))}
+                                    placeholder={t('contracts.refund_from_register', 'Kassani tanlang')}
+                                    className="mt-1"
+                                    required
+                                />
+                                {refundForm.errors.cash_register_id && (
+                                    <p className="text-red-500 text-[11px] mt-1">{refundForm.errors.cash_register_id}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="refund_payment_method">{t('contracts.payment_method', "To'lov usuli")}</Label>
+                                <SearchableSelect
+                                    id="refund_payment_method"
+                                    value={refundForm.data.payment_method}
+                                    onChange={(val) => refundForm.setData('payment_method', String(val))}
+                                    options={[
+                                        { value: 'cash', label: t('contracts.method_cash', 'Naqd pul') },
+                                        { value: 'card_click', label: t('contracts.method_card', 'Karta / Terminal') },
+                                        { value: 'bank_transfer', label: t('contracts.method_bank', 'Bank hisob raqami') },
+                                    ]}
+                                    placeholder={t('contracts.payment_method', "To'lov usuli")}
+                                    className="mt-1"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="refund_notes">{t('contracts.refund_reason', 'Qaytarish sababi / Izoh')}</Label>
+                                <Input
+                                    id="refund_notes"
+                                    type="text"
+                                    value={refundForm.data.notes}
+                                    onChange={(e) => refundForm.setData('notes', e.target.value)}
+                                    placeholder={t('contracts.refund_reason', 'Qaytarish sababi...')}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-1">
+                                <input
+                                    type="checkbox"
+                                    id="cancel_contract"
+                                    checked={refundForm.data.cancel_contract}
+                                    onChange={(e) => refundForm.setData('cancel_contract', e.target.checked)}
+                                    className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                />
+                                <Label htmlFor="cancel_contract" className="cursor-pointer text-xs font-normal">
+                                    {t('contracts.cancel_contract_checkbox', "Shartnoma holatini bekor qilingan (Cancelled) ga o'tkazish")}
+                                </Label>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                                <Button type="button" variant="outline" onClick={() => setRefundingContract(null)}>
+                                    {t('common.cancel', 'Bekor qilish')}
+                                </Button>
+                                <Button type="submit" disabled={refundForm.processing} className="bg-amber-600 hover:bg-amber-700 text-white">
+                                    {t('contracts.refund_button', "To'lovni qaytarish")}
+                                </Button>
+                            </div>
+                        </form>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>

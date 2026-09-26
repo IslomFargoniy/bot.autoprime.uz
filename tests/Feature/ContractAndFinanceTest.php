@@ -180,3 +180,124 @@ test('salary accrual and payment correctly track payroll', function () {
     expect($salaryPayment->amount)->toEqual('2000000.00')
         ->and($salaryPayment->salary->id)->toBe($salary->id);
 });
+
+test('paying salary creates finance expense and deducts cash register balance', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-2'], ['name' => 'Filial 2', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+    $employee = User::factory()->create(['role' => 'instructor', 'branch_id' => $branch->id, 'base_salary' => 3000000]);
+
+    $salary = Salary::create([
+        'branch_id' => $branch->id,
+        'user_id' => $employee->id,
+        'created_by_user_id' => $admin->id,
+        'period' => '2026-09',
+        'salary_type' => 'base_salary',
+        'amount' => 3000000,
+        'is_deduction' => false,
+        'accrued_at' => now(),
+    ]);
+
+    $cashType = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd Pul', 'is_active' => true]);
+    $cashRegister = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => $cashType->id,
+        'name' => 'Oylik Kassasi',
+        'balance' => 10000000,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('salaries.pay', $salary), [
+        'cash_register_id' => $cashRegister->id,
+        'amount' => 3000000,
+        'payment_method' => 'cash',
+        'notes' => 'Sentyabr oyligi to\'landi',
+    ]);
+
+    $response->assertRedirect();
+    $cashRegister->refresh();
+    expect((float) $cashRegister->balance)->toEqual(7000000.0);
+
+    $expense = \App\Models\Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
+    expect($expense)->not->toBeNull()
+        ->and((float) $expense->amount)->toEqual(3000000.0)
+        ->and($expense->recipient)->toContain($employee->full_name);
+});
+
+test('contract refund creates refund payment, expense, decrements balance, and updates contract', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-3'], ['name' => 'Filial 3', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
+    $student = Student::factory()->create(['branch_id' => $branch->id]);
+
+    $contractType = ContractType::create([
+        'branch_id' => $branch->id,
+        'name' => 'B Standart',
+        'category' => 'B',
+        'price' => 4000000,
+        'is_active' => true,
+    ]);
+
+    $contract = Contract::create([
+        'branch_id' => $branch->id,
+        'student_id' => $student->id,
+        'contract_type_id' => $contractType->id,
+        'created_by_user_id' => $admin->id,
+        'contract_number' => 'REF-TEST-001',
+        'contract_date' => now()->toDateString(),
+        'total_amount' => 4000000,
+        'discount_amount' => 0,
+        'final_amount' => 4000000,
+        'paid_amount' => 2000000,
+        'debt_amount' => 2000000,
+        'status' => 'active',
+        'payment_status' => 'partial',
+    ]);
+
+    $cashType = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd Pul', 'is_active' => true]);
+    $cashRegister = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => $cashType->id,
+        'name' => 'Qaytarish Kassasi',
+        'balance' => 5000000,
+        'is_active' => true,
+    ]);
+
+    // Initial student payment record
+    Payment::create([
+        'branch_id' => $branch->id,
+        'contract_id' => $contract->id,
+        'student_id' => $student->id,
+        'cash_register_id' => $cashRegister->id,
+        'received_by_user_id' => $admin->id,
+        'amount' => 2000000,
+        'payment_type' => 'contract_tuition',
+        'payment_method' => 'cash',
+        'receipt_number' => 'REC-INIT-001',
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('contracts.refund', $contract), [
+        'cash_register_id' => $cashRegister->id,
+        'amount' => 1500000,
+        'payment_method' => 'cash',
+        'cancel_contract' => true,
+        'notes' => 'Talaba darslarni to\'xtatgani sababli qaytarildi',
+    ]);
+
+    $response->assertRedirect();
+    $contract->refresh();
+    $cashRegister->refresh();
+
+    expect((float) $cashRegister->balance)->toEqual(3500000.0)
+        ->and((float) $contract->paid_amount)->toEqual(500000.0)
+        ->and((float) $contract->debt_amount)->toEqual(3500000.0)
+        ->and($contract->status)->toBe('cancelled');
+
+    $refundPayment = Payment::where('contract_id', $contract->id)->where('payment_type', 'refund')->first();
+    expect($refundPayment)->not->toBeNull()
+        ->and((float) $refundPayment->amount)->toEqual(1500000.0);
+
+    $expense = \App\Models\Expense::where('cash_register_id', $cashRegister->id)->latest()->first();
+    expect($expense)->not->toBeNull()
+        ->and((float) $expense->amount)->toEqual(1500000.0)
+        ->and($expense->recipient)->toContain($student->full_name);
+});

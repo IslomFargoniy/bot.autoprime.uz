@@ -446,7 +446,20 @@
     "has_theory": "Theory",
     "has_driving": "Driving",
     "has_lms": "LMS Video",
-    "total_amount": "Total Amount"
+    "total_amount": "Total Amount",
+    "refund": "Refund",
+    "refund_button": "Refund Payment",
+    "refund_modal_title": "Refund Payment",
+    "refund_amount": "Refund Amount (UZS)",
+    "refund_from_register": "Deduct from cash register",
+    "payment_method": "Refund Method",
+    "method_cash": "Cash",
+    "method_card": "Card / Terminal",
+    "method_bank": "Bank Transfer",
+    "cancel_contract_checkbox": "Set contract status to Cancelled",
+    "refund_reason": "Refund reason / Notes",
+    "refund_success": "Payment successfully refunded",
+    "max_refund_notice": "Maximum refundable amount"
   },
   "contract_types": {
     "title": "Contract Tariffs",
