@@ -254,4 +254,5 @@ Route::middleware(['auth.telegram'])->group(function () {
     // Vehicles & Fleet
     Route::resource('admin/vehicles', VehicleController::class)->except(['create', 'show', 'edit']);
     Route::post('admin/vehicles/{vehicle}/maintenances', [VehicleController::class, 'storeMaintenance'])->name('vehicles.store-maintenance');
+    Route::delete('admin/vehicles/{vehicle}/maintenances/{maintenance}', [VehicleController::class, 'destroyMaintenance'])->name('vehicles.destroy-maintenance');
 });

@@ -12,6 +12,8 @@ class VehicleMaintenance extends Model
 
     protected $fillable = [
         'vehicle_id',
+        'cash_register_id',
+        'expense_id',
         'maintenance_type',
         'cost',
         'mileage',
@@ -63,5 +65,15 @@ class VehicleMaintenance extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    public function cashRegister(): BelongsTo
+    {
+        return $this->belongsTo(CashRegister::class);
+    }
+
+    public function expense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class);
     }
 }
