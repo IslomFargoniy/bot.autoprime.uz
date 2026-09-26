@@ -360,6 +360,7 @@ class FinanceController extends Controller
                     if ($lockedRegister) {
                         $lockedRegister->increment('balance', (float) $payment->amount);
                     }
+                    Expense::where('description', 'like', "%{$payment->receipt_number}%")->delete();
                 } else {
                     // Deleting an income payment deducts the money from the register
                     if ($lockedRegister) {

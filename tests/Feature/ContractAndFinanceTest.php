@@ -401,8 +401,8 @@ test('deleting payment recalculates contract finances and adjusts cash register'
         ->and(Payment::find($payment->id))->toBeNull();
 });
 
-test('driving controller blocks scheduling when contract driving limit is reached', function () {
-    $branch = Branch::firstOrCreate(['code' => 'test-branch-limit'], ['name' => 'Filial Limit', 'status' => 'active']);
+test('driving controller allows scheduling while contract is valid and blocks when contract period expires', function () {
+    $branch = Branch::firstOrCreate(['code' => 'test-branch-valid'], ['name' => 'Filial Valid', 'status' => 'active']);
     $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $branch->id]);
     $student = Student::factory()->create(['branch_id' => $branch->id]);
@@ -422,8 +422,10 @@ test('driving controller blocks scheduling when contract driving limit is reache
         'student_id' => $student->id,
         'contract_type_id' => $contractType->id,
         'created_by_user_id' => $admin->id,
-        'contract_number' => 'LIMIT-001',
+        'contract_number' => 'VALID-001',
         'contract_date' => now()->toDateString(),
+        'start_date' => now()->toDateString(),
+        'end_date' => now()->addDays(5)->toDateString(),
         'has_driving' => true,
         'required_driving_lessons' => 2,
         'total_amount' => 2000000,
@@ -434,40 +436,24 @@ test('driving controller blocks scheduling when contract driving limit is reache
         'payment_status' => 'paid',
     ]);
 
-    expect($contract->hasReachedDrivingLimit())->toBeFalse()
-        ->and($contract->getRemainingDrivingLessonsCount())->toBe(2);
+    expect($contract->isExpired())->toBeFalse();
 
-    // Create 2 drivings under this contract
-    Driving::create([
-        'branch_id' => $branch->id,
-        'instructor_id' => $instructor->id,
-        'student_id' => $student->id,
-        'contract_id' => $contract->id,
-        'start_time' => now()->addDay(),
-        'end_time' => now()->addDay()->addHour(),
-        'status' => 'scheduled',
-    ]);
-
-    Driving::create([
-        'branch_id' => $branch->id,
-        'instructor_id' => $instructor->id,
-        'student_id' => $student->id,
-        'contract_id' => $contract->id,
-        'start_time' => now()->addDays(2),
-        'end_time' => now()->addDays(2)->addHour(),
-        'status' => 'completed',
-    ]);
-
-    expect($contract->hasReachedDrivingLimit())->toBeTrue()
-        ->and($contract->getRemainingDrivingLessonsCount())->toBe(0);
-
-    // Attempt to schedule a 3rd driving lesson via DrivingController::store
-    $response = $this->actingAs($admin)->post('/admin/drivings', [
+    // Scheduling within contract period is allowed even with multiple lessons
+    $validResponse = $this->actingAs($admin)->post('/admin/drivings', [
         'instructor_id' => $instructor->id,
         'student_ids' => [$student->id],
-        'start_time' => now()->addDays(3)->format('Y-m-d H:i:s'),
-        'end_time' => now()->addDays(3)->addHour()->format('Y-m-d H:i:s'),
+        'start_time' => now()->addDay()->setTime(10, 0)->format('Y-m-d H:i:s'),
+        'end_time' => now()->addDay()->setTime(11, 0)->format('Y-m-d H:i:s'),
     ]);
+    $validResponse->assertRedirect();
+    $validResponse->assertSessionHasNoErrors();
 
-    $response->assertSessionHasErrors('student_ids');
+    // Attempt to schedule a lesson AFTER contract end_date (day 6)
+    $expiredLessonResponse = $this->actingAs($admin)->post('/admin/drivings', [
+        'instructor_id' => $instructor->id,
+        'student_ids' => [$student->id],
+        'start_time' => now()->addDays(6)->setTime(10, 0)->format('Y-m-d H:i:s'),
+        'end_time' => now()->addDays(6)->setTime(11, 0)->format('Y-m-d H:i:s'),
+    ]);
+    $expiredLessonResponse->assertSessionHasErrors('student_ids');
 });

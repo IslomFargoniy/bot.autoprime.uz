@@ -27,7 +27,7 @@ class ContractController extends Controller
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
-        $query = Contract::with(['student', 'contractType', 'group', 'branch', 'payments'])
+        $query = Contract::with(['student', 'contractType', 'group', 'branch', 'payments.cashRegister', 'payments.receivedBy'])
             ->orderBy('created_at', 'desc');
 
         if ($targetBranchId) {
