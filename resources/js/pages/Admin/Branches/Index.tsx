@@ -4,7 +4,17 @@ import { Building2, Edit2, Plus, Search, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
 import {
     Dialog,
     DialogContent,
@@ -112,7 +122,7 @@ export default function Index({ branches, filters }: Props) {
                         <Building2 className="w-6 h-6 text-primary" />
                         {t('branches.title', 'Filiallar')}
                     </h1>
-                    <Button onClick={openCreateModal} className="bg-primary text-primary-foreground gap-1.5 shadow-sm">
+                    <Button onClick={openCreateModal} variant="brand" className="gap-1.5 shadow-sm">
                         <Plus className="w-4 h-4" />
                         <span>{t('branches.new', 'Yangi filial')}</span>
                     </Button>
@@ -147,46 +157,47 @@ export default function Index({ branches, filters }: Props) {
                 </div>
 
                 {/* Desktop Table View */}
-                <div className="hidden md:block rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-muted/50 text-muted-foreground border-b">
-                            <tr>
-                                <th className="px-4 py-3 font-semibold">{t('branches.name', 'Filial nomi')}</th>
-                                <th className="px-4 py-3 font-semibold">{t('branches.code', 'Kodi')}</th>
-                                <th className="px-4 py-3 font-semibold">{t('branches.phone', 'Telefon')}</th>
-                                <th className="px-4 py-3 font-semibold">{t('branches.address', 'Manzil')}</th>
-                                <th className="px-4 py-3 font-semibold text-center">{t('branches.users_count', 'Xodimlar')}</th>
-                                <th className="px-4 py-3 font-semibold text-center">{t('branches.groups_count', 'Guruhlar')}</th>
-                                <th className="px-4 py-3 font-semibold text-center">{t('branches.students_count', 'O\'quvchilar')}</th>
-                                <th className="px-4 py-3 font-semibold">{t('branches.status', 'Holati')}</th>
-                                <th className="px-4 py-3 text-right font-semibold">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('branches.name', 'Filial nomi')}</TableHead>
+                                <TableHead>{t('branches.code', 'Kodi')}</TableHead>
+                                <TableHead>{t('branches.phone', 'Telefon')}</TableHead>
+                                <TableHead>{t('branches.address', 'Manzil')}</TableHead>
+                                <TableHead className="text-center">{t('branches.users_count', 'Xodimlar')}</TableHead>
+                                <TableHead className="text-center">{t('branches.groups_count', 'Guruhlar')}</TableHead>
+                                <TableHead className="text-center">{t('branches.students_count', 'O\'quvchilar')}</TableHead>
+                                <TableHead>{t('branches.status', 'Holati')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {branches.data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                                        {t('common.no_data', 'Ma\'lumot topilmadi')}
-                                    </td>
-                                </tr>
+                                <TableEmpty
+                                    icon={Building2}
+                                    title={t('common.empty_state_title', 'Ma\'lumot topilmadi')}
+                                    description={t('common.empty_state_desc', 'Qidiruv parametrlarini o\'zgartirib ko\'ring')}
+                                    colSpan={9}
+                                />
                             ) : (
                                 branches.data.map((branch) => (
-                                    <tr key={branch.id} className="hover:bg-muted/30 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-foreground">{branch.name}</td>
-                                        <td className="px-4 py-3">
+                                    <TableRow key={branch.id}>
+                                        <TableCell className="font-semibold text-foreground">{branch.name}</TableCell>
+                                        <TableCell>
                                             <code className="text-xs bg-muted px-2 py-1 rounded font-mono">{branch.code}</code>
-                                        </td>
-                                        <td className="px-4 py-3">{branch.phone || '-'}</td>
-                                        <td className="px-4 py-3 max-w-[200px] truncate">{branch.address || '-'}</td>
-                                        <td className="px-4 py-3 text-center font-semibold">{branch.users_count || 0}</td>
-                                        <td className="px-4 py-3 text-center font-semibold">{branch.groups_count || 0}</td>
-                                        <td className="px-4 py-3 text-center font-semibold">{branch.students_count || 0}</td>
-                                        <td className="px-4 py-3">
+                                        </TableCell>
+                                        <TableCell>{branch.phone || '-'}</TableCell>
+                                        <TableCell className="max-w-[200px] truncate">{branch.address || '-'}</TableCell>
+                                        <TableCell className="text-center font-semibold">{branch.users_count || 0}</TableCell>
+                                        <TableCell className="text-center font-semibold">{branch.groups_count || 0}</TableCell>
+                                        <TableCell className="text-center font-semibold">{branch.students_count || 0}</TableCell>
+                                        <TableCell>
                                             <Badge variant={branch.status === 'active' ? 'default' : 'secondary'}>
                                                 {branch.status === 'active' ? t('branches.active', 'Faol') : t('branches.inactive', 'Nofaol')}
                                             </Badge>
-                                        </td>
-                                        <td className="px-4 py-3 text-right space-x-1">
+                                        </TableCell>
+                                        <TableCell className="text-right space-x-1">
                                             <Button variant="ghost" size="icon" onClick={() => openEditModal(branch)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                                                 <Edit2 className="w-4 h-4" />
                                             </Button>
@@ -195,12 +206,12 @@ export default function Index({ branches, filters }: Props) {
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
                                             )}
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 ))
                             )}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </div>
 
                 {/* Mobile Card List View */}
@@ -263,15 +274,17 @@ export default function Index({ branches, filters }: Props) {
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle>
-                                {editingBranch ? t('branches.edit', 'Filialni tahrirlash') : t('branches.new', 'Yangi filial')}
+                            <DialogTitle className="flex items-center gap-2">
+                                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <span>{editingBranch ? t('branches.edit', 'Filialni tahrirlash') : t('branches.new', 'Yangi filial')}</span>
                             </DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-medium text-foreground">{t('branches.name', 'Filial nomi')} *</label>
+                                    <Label htmlFor="branch_name" required>{t('branches.name', 'Filial nomi')}</Label>
                                     <Input
+                                        id="branch_name"
                                         value={data.name}
                                         onChange={(e) => setData('name', e.target.value)}
                                         placeholder="Chilonzor filiali"
@@ -280,8 +293,9 @@ export default function Index({ branches, filters }: Props) {
                                     {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-medium text-foreground">{t('branches.code', 'Filial kodi')} *</label>
+                                    <Label htmlFor="branch_code" required>{t('branches.code', 'Filial kodi')}</Label>
                                     <Input
+                                        id="branch_code"
                                         value={data.code}
                                         onChange={(e) => setData('code', e.target.value)}
                                         placeholder="chilonzor"
@@ -293,8 +307,9 @@ export default function Index({ branches, filters }: Props) {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-medium text-foreground">{t('branches.phone', 'Telefon')}</label>
+                                    <Label htmlFor="branch_phone">{t('branches.phone', 'Telefon')}</Label>
                                     <Input
+                                        id="branch_phone"
                                         value={data.phone}
                                         onChange={(e) => setData('phone', e.target.value)}
                                         placeholder="+998901234567"
@@ -302,8 +317,9 @@ export default function Index({ branches, filters }: Props) {
                                     {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-medium text-foreground">{t('branches.status', 'Holati')}</label>
+                                    <Label htmlFor="branch_status">{t('branches.status', 'Holati')}</Label>
                                     <SearchableSelect
+                                        id="branch_status"
                                         value={data.status}
                                         onChange={(val) => setData('status', val as 'active' | 'inactive')}
                                         options={[
@@ -316,8 +332,9 @@ export default function Index({ branches, filters }: Props) {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-medium text-foreground">{t('branches.address', 'Manzil')}</label>
+                                <Label htmlFor="branch_address">{t('branches.address', 'Manzil')}</Label>
                                 <Input
+                                    id="branch_address"
                                     value={data.address}
                                     onChange={(e) => setData('address', e.target.value)}
                                     placeholder="Toshkent sh., Chilonzor t., 19-mavze"
@@ -329,7 +346,7 @@ export default function Index({ branches, filters }: Props) {
                                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" disabled={processing} className="bg-primary text-primary-foreground">
+                                <Button type="submit" disabled={processing} variant="brand">
                                     {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>

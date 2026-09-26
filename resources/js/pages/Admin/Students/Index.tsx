@@ -2,10 +2,19 @@ import { useState, useCallback } from 'react';
 import { Head, useForm, router, Link, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, Eye, Download } from 'lucide-react';
+import { Trash2, Edit2, Plus, Search, Eye, Download, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import { Branch, SharedData } from '@/types/auth';
 import {
@@ -167,8 +176,8 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                         <span className="hidden md:inline">{t('common.export_excel', 'Excel yuklab olish')}</span>
                     </Button>
                     {!isInstructor && (
-                        <Button onClick={() => setShowForm(true)} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                            <Plus className="w-4 h-4 md:mr-2" /> 
+                        <Button onClick={() => setShowForm(true)} variant="brand" className="shrink-0 gap-1.5 md:w-auto md:px-4 md:py-2">
+                            <Plus className="w-4 h-4" /> 
                             <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
                         </Button>
                     )}
@@ -274,117 +283,132 @@ export default function StudentsIndex({ students, groups, branches = [], filters
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editing ? t('students.edit', 'O\'quvchini tahrirlash') : t('students.new', 'Yangi o\'quvchi qo\'shish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <GraduationCap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <span>{editing ? t('students.edit', 'O\'quvchini tahrirlash') : t('students.new', 'Yangi o\'quvchi qo\'shish')}</span>
+                        </DialogTitle>
                         <DialogDescription>{t('students.form_desc', 'O\'quvchi ma\'lumotlarini kiriting')}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <Label htmlFor="full_name">{t('students.full_name', 'F.I.SH')}</Label>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="full_name" required>{t('students.full_name', 'F.I.SH')}</Label>
                             <Input id="full_name" value={data.full_name} onChange={e => setData('full_name', e.target.value)} required />
-                            {errors.full_name && <div className="text-destructive text-sm mt-1">{errors.full_name}</div>}
+                            {errors.full_name && <div className="text-destructive text-xs mt-1">{errors.full_name}</div>}
                         </div>
-                        <div>
-                            <Label htmlFor="phone">{t('students.phone', 'Telefon')} (Masalan: +998901234567)</Label>
-                            <Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} required />
-                            {errors.phone && <div className="text-destructive text-sm mt-1">{errors.phone}</div>}
-                        </div>
-                        <div>
-                            <Label htmlFor="telegram_id">{t('common.telegram_id_optional', 'Telegram ID (Ixtiyoriy)')}</Label>
-                            <Input id="telegram_id" value={data.telegram_id} onChange={e => setData('telegram_id', e.target.value)} />
-                            {errors.telegram_id && <div className="text-destructive text-sm mt-1">{errors.telegram_id}</div>}
-                        </div>
-                        <div>
-                            <Label htmlFor="group_id">{t('students.group', 'Guruh')}</Label>
-                            <SearchableSelect
-                                id="group_id"
-                                value={data.group_id}
-                                onChange={(val) => setData('group_id', val)}
-                                options={groups.map((grp) => ({ value: grp.id, label: grp.name }))}
-                                placeholder={t('common.select', '-- Tanlang --')}
-                                allowClear
-                                triggerClassName="h-10 text-sm"
-                            />
-                            {errors.group_id && <div className="text-destructive text-sm mt-1">{errors.group_id}</div>}
-                        </div>
-                        {isSuperAdmin && (
-                            <div>
-                                <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <SearchableSelect
-                                    id="branch_id"
-                                    value={data.branch_id}
-                                    onChange={(val) => setData('branch_id', val)}
-                                    options={branches.map((b) => ({ value: b.id, label: b.name }))}
-                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
-                                    allowClear
-                                    triggerClassName="h-10 text-sm"
-                                />
-                                {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="phone" required>{t('students.phone', 'Telefon')}</Label>
+                                <Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} placeholder="+998901234567" required />
+                                {errors.phone && <div className="text-destructive text-xs mt-1">{errors.phone}</div>}
                             </div>
-                        )}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="telegram_id">{t('common.telegram_id_optional', 'Telegram ID')}</Label>
+                                <Input id="telegram_id" value={data.telegram_id} onChange={e => setData('telegram_id', e.target.value)} placeholder="12345678" />
+                                {errors.telegram_id && <div className="text-destructive text-xs mt-1">{errors.telegram_id}</div>}
+                            </div>
+                        </div>
+                        <div className={isSuperAdmin ? "grid grid-cols-2 gap-3" : "space-y-1.5"}>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="group_id">{t('students.group', 'Guruh')}</Label>
+                                <SearchableSelect
+                                    id="group_id"
+                                    value={data.group_id}
+                                    onChange={(val) => setData('group_id', val)}
+                                    options={groups.map((grp) => ({ value: grp.id, label: grp.name }))}
+                                    placeholder={t('common.select', '-- Tanlang --')}
+                                    allowClear
+                                />
+                                {errors.group_id && <div className="text-destructive text-xs mt-1">{errors.group_id}</div>}
+                            </div>
+                            {isSuperAdmin && (
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
+                                    <SearchableSelect
+                                        id="branch_id"
+                                        value={data.branch_id}
+                                        onChange={(val) => setData('branch_id', val)}
+                                        options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                                        placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                        allowClear
+                                    />
+                                    {errors.branch_id && <div className="text-destructive text-xs mt-1">{errors.branch_id}</div>}
+                                </div>
+                            )}
+                        </div>
                         <div className="flex gap-2 pt-2 justify-end">
                             <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
-                            <Button type="submit" disabled={processing}>{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
+                            <Button type="submit" disabled={processing} variant="brand">{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
                         </div>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('students.full_name', 'F.I.SH')}</th>
-                            <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
-                            <th className="px-4 py-3 font-medium">{t('students.phone', 'Telefon')}</th>
-                            <th className="px-4 py-3 font-medium">{t('students.group', 'Guruh')}</th>
-                            <th className="px-4 py-3 font-medium">{t('common.telegram_id', 'Telegram ID')}</th>
-                            <th className="px-4 py-3 font-medium text-center">{t('students.completed_drivings', 'Tugagan darslar')}</th>
-                            <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {students.data.map((item, index) => (
-                            <tr key={item.id} className="hover:bg-muted/30">
-                                <td className="px-4 py-3">{(students.from || 1) + index}</td>
-                                <td className="px-4 py-3 font-medium">
-                                    <Link href={`/admin/students/${item.id}`} className="text-primary hover:underline font-semibold">
-                                        {item.full_name}
-                                    </Link>
-                                </td>
-                                <td className="px-4 py-3 text-xs">{item.branch?.name || '-'}</td>
-                                <td className="px-4 py-3">{item.phone}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{item.group?.name || t('students.no_group', 'Biriktirilmagan')}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{item.telegram_id || '-'}</td>
-                                <td className="px-4 py-3 text-center">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                        {item.completed_drivings_count || 0}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" asChild>
-                                            <Link href={`/admin/students/${item.id}`}>
-                                                <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                            </Link>
-                                        </Button>
-                                        {!isInstructor && (
-                                            <>
-                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                    <Edit2 className="w-4 h-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('common.number', '№')}</TableHead>
+                            <TableHead>{t('students.full_name', 'F.I.SH')}</TableHead>
+                            <TableHead>{t('branches.branch', 'Filial')}</TableHead>
+                            <TableHead>{t('students.phone', 'Telefon')}</TableHead>
+                            <TableHead>{t('students.group', 'Guruh')}</TableHead>
+                            <TableHead>{t('common.telegram_id', 'Telegram ID')}</TableHead>
+                            <TableHead className="text-center">{t('students.completed_drivings', 'Tugagan darslar')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {students.data.length === 0 ? (
+                            <TableEmpty
+                                icon={GraduationCap}
+                                title={t('common.empty_state_title', 'Ma\'lumot topilmadi')}
+                                description={t('common.empty_state_desc', 'Qidiruv parametrlarini o\'zgartirib ko\'ring')}
+                                colSpan={8}
+                            />
+                        ) : (
+                            students.data.map((item, index) => (
+                                <TableRow key={item.id}>
+                                    <TableCell>{(students.from || 1) + index}</TableCell>
+                                    <TableCell className="font-semibold">
+                                        <Link href={`/admin/students/${item.id}`} className="text-primary hover:underline">
+                                            {item.full_name}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell className="text-xs">{item.branch?.name || '-'}</TableCell>
+                                    <TableCell>{item.phone}</TableCell>
+                                    <TableCell className="text-muted-foreground">{item.group?.name || t('students.no_group', 'Biriktirilmagan')}</TableCell>
+                                    <TableCell className="text-muted-foreground font-mono">{item.telegram_id || '-'}</TableCell>
+                                    <TableCell className="text-center">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                            {item.completed_drivings_count || 0}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <Button variant="ghost" size="icon" asChild>
+                                                <Link href={`/admin/students/${item.id}`}>
+                                                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                </Link>
+                                            </Button>
+                                            {!isInstructor && (
+                                                <>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
                 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">
@@ -442,7 +466,6 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                         </div>
                     ))}
                 </div>
-            </div>
 
             <Pagination links={students.links} />
         </div>

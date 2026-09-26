@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, CheckCircle2, XCircle, FileText } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableEmpty } from '@/components/ui/table';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -119,84 +120,107 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('contract_types.title', 'Shartnoma Tariflari')}</h1>
-                <Button onClick={openCreate} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                    <Plus className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
+                <Button onClick={openCreate} variant="brand" className="shrink-0">
+                    <Plus className="w-4 h-4 mr-2" />
+                    <span>{t('common.add', 'Qo\'shish')}</span>
                 </Button>
             </div>
 
             {/* Contract Types Grid / Table */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {contractTypes.data.map((ct) => (
-                    <div
-                        key={ct.id}
-                        className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
-                    >
-                        <div>
-                            <div className="flex items-center justify-between gap-2 mb-2">
-                                <span className="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-xs">
-                                    {ct.category} toifa
-                                </span>
-                                <span className={`text-[11px] px-2 py-0.5 rounded-full ${ct.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                                    {ct.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
-                                </span>
+            {contractTypes.data.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
+                    <Table>
+                        <TableBody>
+                            <TableEmpty
+                                icon={FileText}
+                                title={t('contract_types.no_tariffs', 'Tariflar mavjud emas')}
+                                description={t('contract_types.no_tariffs_desc', 'Hozircha hech qanday shartnoma tarifi yaratilmagan.')}
+                                action={
+                                    <Button variant="brand" size="sm" onClick={openCreate} className="mt-2">
+                                        <Plus className="w-4 h-4 mr-1.5" />
+                                        {t('contract_types.add_new', 'Yangi tarif qo\'shish')}
+                                    </Button>
+                                }
+                            />
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {contractTypes.data.map((ct) => (
+                        <div
+                            key={ct.id}
+                            className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
+                        >
+                            <div>
+                                <div className="flex items-center justify-between gap-2 mb-2">
+                                    <span className="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-xs">
+                                        {ct.category} {t('contract_types.category_suffix', 'toifa')}
+                                    </span>
+                                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${ct.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                                        {ct.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
+                                    </span>
+                                </div>
+
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{ct.name}</h3>
+                                <p className="text-xl font-extrabold text-gray-900 dark:text-white mt-2">
+                                    {Number(ct.price).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500">UZS</span>
+                                </p>
+
+                                {ct.description && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">{ct.description}</p>
+                                )}
+
+                                {/* Modules Checklist */}
+                                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 space-y-1.5 text-xs">
+                                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                                        <span>{t('contracts.has_theory', 'Nazariya')}:</span>
+                                        <span className="font-semibold">{ct.has_theory ? `${t('common.yes', 'Ha')} (${ct.required_theory_lessons} ${t('common.lessons', 'dars')})` : t('common.no', 'Yo\'q')}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                                        <span>{t('contracts.has_driving', 'Amaliy haydash')}:</span>
+                                        <span className="font-semibold">{ct.has_driving ? `${t('common.yes', 'Ha')} (${ct.required_driving_lessons} ${t('common.lessons', 'dars')})` : t('common.no', 'Yo\'q')}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                                        <span>{t('contracts.has_lms', 'LMS Testlar')}:</span>
+                                        <span className="font-semibold">{ct.has_lms ? t('common.yes', 'Ha') : t('common.no', 'Yo\'q')}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                                        <span>{t('contract_types.min_payment', 'Minimal to\'lov')}:</span>
+                                        <span className="font-semibold">{ct.min_theory_payment_percent}%</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <h3 className="font-bold text-base text-gray-900 dark:text-white">{ct.name}</h3>
-                            <p className="text-xl font-extrabold text-gray-900 dark:text-white mt-2">
-                                {Number(ct.price).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500">UZS</span>
-                            </p>
-
-                            {ct.description && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">{ct.description}</p>
-                            )}
-
-                            {/* Modules Checklist */}
-                            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 space-y-1.5 text-xs">
-                                <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                    <span>{t('contracts.has_theory', 'Nazariya')}:</span>
-                                    <span className="font-semibold">{ct.has_theory ? `Ha (${ct.required_theory_lessons} dars)` : 'Yo\'q'}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                    <span>{t('contracts.has_driving', 'Amaliy haydash')}:</span>
-                                    <span className="font-semibold">{ct.has_driving ? `Ha (${ct.required_driving_lessons} dars)` : 'Yo\'q'}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                    <span>{t('contracts.has_lms', 'LMS Testlar')}:</span>
-                                    <span className="font-semibold">{ct.has_lms ? 'Ha' : 'Yo\'q'}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                    <span>{t('contract_types.min_payment', 'Minimal to\'lov')}:</span>
-                                    <span className="font-semibold">{ct.min_theory_payment_percent}%</span>
-                                </div>
+                            <div className="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-2">
+                                <Button size="sm" variant="outline" onClick={() => openEdit(ct)} className="h-8 text-xs">
+                                    <Edit2 className="w-3.5 h-3.5 mr-1" />
+                                    {t('common.edit', 'Tahrirlash')}
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                             </div>
                         </div>
-
-                        <div className="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-2">
-                            <Button size="sm" variant="outline" onClick={() => openEdit(ct)} className="h-8 text-xs">
-                                <Edit2 className="w-3.5 h-3.5 mr-1" />
-                                {t('common.edit', 'Tahrirlash')}
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700">
-                                <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingType ? t('contract_types.edit_title', 'Tarifni Tahrirlash') : t('contract_types.create_title', 'Yangi Tarif Yaratish')}
+                        <DialogTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                            <span>
+                                {editingType ? t('contract_types.edit_title', 'Tarifni Tahrirlash') : t('contract_types.create_title', 'Yangi Tarif Yaratish')}
+                            </span>
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="name">{t('contract_types.name', 'Tarif Nomi')}</Label>
+                                <Label htmlFor="name" required>{t('contract_types.name', 'Tarif Nomi')}</Label>
                                 <Input
                                     id="name"
                                     value={form.data.name}
@@ -207,7 +231,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="category">{t('contract_types.category', 'Toifa')}</Label>
+                                <Label htmlFor="category" required>{t('contract_types.category', 'Toifa')}</Label>
                                 <SearchableSelect
                                     id="category"
                                     value={form.data.category}
@@ -227,7 +251,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="price">{t('contract_types.price', 'Narx (UZS)')}</Label>
+                                <Label htmlFor="price" required>{t('contract_types.price', 'Narx (UZS)')}</Label>
                                 <Input
                                     id="price"
                                     type="number"
@@ -253,7 +277,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="theory_lessons">{t('contract_types.theory_count', 'Nazariya Darslari Soni')}</Label>
+                                <Label htmlFor="theory_lessons" required>{t('contract_types.theory_count', 'Nazariya Darslari Soni')}</Label>
                                 <Input
                                     id="theory_lessons"
                                     type="number"
@@ -263,7 +287,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="driving_lessons">{t('contract_types.driving_count', 'Vajdeniya Darslari Soni')}</Label>
+                                <Label htmlFor="driving_lessons" required>{t('contract_types.driving_count', 'Vajdeniya Darslari Soni')}</Label>
                                 <Input
                                     id="driving_lessons"
                                     type="number"
@@ -312,7 +336,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                             <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={form.processing}>
+                            <Button type="submit" variant="brand" disabled={form.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>

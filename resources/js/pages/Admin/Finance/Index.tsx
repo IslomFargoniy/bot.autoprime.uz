@@ -26,6 +26,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface CashRegister {
@@ -398,188 +407,309 @@ export default function FinanceIndex({
                 </button>
             </div>
 
+            {/* Tab: Registers */}
+            {activeTab === 'registers' && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('finance.register_name', 'Kassa Nomi')}</TableHead>
+                                <TableHead>{t('finance.type', 'Turi')}</TableHead>
+                                <TableHead>{t('finance.branch', 'Filial')}</TableHead>
+                                <TableHead>{t('finance.balance', 'Balans')}</TableHead>
+                                <TableHead>{t('finance.shift', 'Smena')}</TableHead>
+                                <TableHead>{t('finance.status', 'Holati')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {cashRegisters.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={7}
+                                    icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_registers', 'Kassalar topilmadi')}
+                                />
+                            ) : (
+                                cashRegisters.map((reg) => (
+                                    <TableRow key={reg.id}>
+                                        <TableCell className="font-semibold text-gray-900 dark:text-white">
+                                            {reg.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
+                                                {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500" />}
+                                                {reg.type?.name || 'Kassa'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">
+                                            {reg.branch?.name || '-'}
+                                        </TableCell>
+                                        <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
+                                            {Number(reg.balance).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
+                                        <TableCell>
+                                            {reg.open_shift ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                    {t('finance.shift_status_open', 'Smena ochiq')}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                    {t('finance.shift_status_closed', 'Yopiq')}
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                                reg.is_active
+                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                    : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
+                                            }`}>
+                                                {reg.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => openShiftForRegister(reg)}
+                                                className="h-7 text-xs"
+                                            >
+                                                {reg.open_shift ? (
+                                                    <>
+                                                        <Lock className="w-3.5 h-3.5 mr-1" />
+                                                        {t('finance.close_shift_button', 'Yopish')}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Unlock className="w-3.5 h-3.5 mr-1" />
+                                                        {t('finance.open_shift_button', 'Smena ochish')}
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
+
             {/* Tab: Payments */}
             {activeTab === 'payments' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('finance.receipt', 'Chek №')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.student', 'Talaba')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.contract', 'Shartnoma')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.amount', 'Summa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.method', 'Usul')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.cashier', 'Qabul qildi')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.date', 'Sana')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {payments.data.map((p) => (
-                                <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                    <td className="p-3.5 font-semibold text-gray-900 dark:text-white">#{p.receipt_number}</td>
-                                    <td className="p-3.5 font-medium">{p.student?.full_name}</td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">#{p.contract?.contract_number}</td>
-                                    <td className="p-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                                        +{Number(p.amount).toLocaleString('uz-UZ')} UZS
-                                    </td>
-                                    <td className="p-3.5">
-                                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
-                                            {p.payment_method}
-                                        </span>
-                                    </td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.cash_register?.name}</td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{p.received_by?.name || '-'}</td>
-                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{p.paid_at}</td>
-                                    <td className="p-3.5 text-right">
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDeletePayment(p)}
-                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                            title={t('common.delete', "O'chirish")}
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('finance.receipt', 'Chek №')}</TableHead>
+                                <TableHead>{t('finance.student', 'Talaba')}</TableHead>
+                                <TableHead>{t('finance.contract', 'Shartnoma')}</TableHead>
+                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                <TableHead>{t('finance.method', 'Usul')}</TableHead>
+                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
+                                <TableHead>{t('finance.cashier', 'Qabul qildi')}</TableHead>
+                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {payments.data.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={9}
+                                    icon={<DollarSign className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_payments', "To'lovlar topilmadi")}
+                                />
+                            ) : (
+                                payments.data.map((p) => (
+                                    <TableRow key={p.id}>
+                                        <TableCell className="font-semibold text-gray-900 dark:text-white">#{p.receipt_number}</TableCell>
+                                        <TableCell className="font-medium">{p.student?.full_name}</TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">#{p.contract?.contract_number}</TableCell>
+                                        <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
+                                            +{Number(p.amount).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-medium">
+                                                {p.payment_method}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{p.cash_register?.name}</TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{p.received_by?.name || '-'}</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{p.paid_at}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDeletePayment(p)}
+                                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                title={t('common.delete', "O'chirish")}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 
             {/* Tab: Expenses */}
             {activeTab === 'expenses' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('finance.category', 'Kategoriya')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.description', 'Tavsif')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.amount', 'Summa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.user', 'Xodim')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.date', 'Sana')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {expenses.data.map((e) => (
-                                <tr key={e.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                    <td className="p-3.5 font-medium">{e.category?.name || '-'}</td>
-                                    <td className="p-3.5 text-gray-700 dark:text-gray-300">{e.description}</td>
-                                    <td className="p-3.5 font-bold text-red-500 dark:text-red-400">
-                                        -{Number(e.amount).toLocaleString('uz-UZ')} UZS
-                                    </td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.cash_register?.name}</td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</td>
-                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{e.expense_date}</td>
-                                    <td className="p-3.5 text-right">
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDeleteExpense(e)}
-                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                            title={t('common.delete', "O'chirish")}
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('finance.category', 'Kategoriya')}</TableHead>
+                                <TableHead>{t('finance.description', 'Tavsif')}</TableHead>
+                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
+                                <TableHead>{t('finance.user', 'Xodim')}</TableHead>
+                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {expenses.data.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={7}
+                                    icon={<ArrowUpRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_expenses', "Xarajatlar topilmadi")}
+                                />
+                            ) : (
+                                expenses.data.map((e) => (
+                                    <TableRow key={e.id}>
+                                        <TableCell className="font-medium">{e.category?.name || '-'}</TableCell>
+                                        <TableCell className="text-gray-700 dark:text-gray-300">{e.description}</TableCell>
+                                        <TableCell className="font-bold text-red-500 dark:text-red-400">
+                                            -{Number(e.amount).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{e.cash_register?.name}</TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{e.user?.name || '-'}</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{e.expense_date}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDeleteExpense(e)}
+                                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                title={t('common.delete', "O'chirish")}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 
             {/* Tab: Shifts */}
             {activeTab === 'shifts' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('finance.register', 'Kassa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.status', 'Holat')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.opening_balance', 'Boshlang\'ich')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.income', 'Jami Kirim')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.expense', 'Jami Chiqim')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.closing_balance', 'Yakuniy')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.opened_at', 'Ochilgan')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.closed_at', 'Yopilgan')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {shifts.data.map((sh) => (
-                                <tr key={sh.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                    <td className="p-3.5 font-medium">{sh.cash_register?.name}</td>
-                                    <td className="p-3.5">
-                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${sh.status === 'open' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                                            {sh.status === 'open' ? t('finance.open', 'Ochiq') : t('finance.closed', 'Yopiq')}
-                                        </span>
-                                    </td>
-                                    <td className="p-3.5">{Number(sh.opening_balance).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-semibold">+{Number(sh.total_income).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-red-500 dark:text-red-400 font-semibold">-{Number(sh.total_expense).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 font-bold">{Number(sh.closing_balance || 0).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{sh.opened_at}</td>
-                                    <td className="p-3.5 text-gray-400 dark:text-gray-500">{sh.closed_at || '-'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
+                                <TableHead>{t('finance.status', 'Holat')}</TableHead>
+                                <TableHead>{t('finance.opening_balance', 'Boshlang\'ich')}</TableHead>
+                                <TableHead>{t('finance.income', 'Jami Kirim')}</TableHead>
+                                <TableHead>{t('finance.expense', 'Jami Chiqim')}</TableHead>
+                                <TableHead>{t('finance.closing_balance', 'Yakuniy')}</TableHead>
+                                <TableHead>{t('finance.opened_at', 'Ochilgan')}</TableHead>
+                                <TableHead>{t('finance.closed_at', 'Yopilgan')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {shifts.data.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={8}
+                                    icon={<Clock className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_shifts', "Smenalar topilmadi")}
+                                />
+                            ) : (
+                                shifts.data.map((sh) => (
+                                    <TableRow key={sh.id}>
+                                        <TableCell className="font-medium">{sh.cash_register?.name}</TableCell>
+                                        <TableCell>
+                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${sh.status === 'open' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+                                                {sh.status === 'open' ? t('finance.open', 'Ochiq') : t('finance.closed', 'Yopiq')}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>{Number(sh.opening_balance).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-semibold">+{Number(sh.total_income).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell className="text-red-500 dark:text-red-400 font-semibold">-{Number(sh.total_expense).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell className="font-bold">{Number(sh.closing_balance || 0).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{sh.opened_at}</TableCell>
+                                        <TableCell className="text-gray-400 dark:text-gray-500">{sh.closed_at || '-'}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 
             {/* Tab: Transfers */}
             {activeTab === 'transfers' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('finance.from_register', 'Chiqim Kassasi')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.amount', 'Summa')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.status', 'Holat')}</th>
-                                <th className="p-3.5 font-semibold">{t('finance.initiator', 'Yuboruvchi')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {transfers.data.map((tr) => (
-                                <tr key={tr.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                    <td className="p-3.5 font-medium">{tr.from_cash_register?.name}</td>
-                                    <td className="p-3.5 font-medium">{tr.to_cash_register?.name}</td>
-                                    <td className="p-3.5 font-bold">{Number(tr.amount).toLocaleString('uz-UZ')} UZS</td>
-                                    <td className="p-3.5">
-                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                            tr.status === 'approved'
-                                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                                                : tr.status === 'pending'
-                                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                                                : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
-                                        }`}>
-                                            {tr.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-3.5 text-gray-500 dark:text-gray-400">{tr.transferred_by?.name || '-'}</td>
-                                    <td className="p-3.5 text-right">
-                                        {tr.status === 'pending' && (
-                                            <Button
-                                                size="sm"
-                                                onClick={() => handleApproveTransfer(tr)}
-                                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                                            >
-                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                                {t('finance.approve', 'Tasdiqlash')}
-                                            </Button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('finance.from_register', 'Chiqim Kassasi')}</TableHead>
+                                <TableHead>{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</TableHead>
+                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
+                                <TableHead>{t('finance.status', 'Holat')}</TableHead>
+                                <TableHead>{t('finance.initiator', 'Yuboruvchi')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {transfers.data.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={6}
+                                    icon={<ArrowLeftRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                    title={t('finance.no_transfers', "Transferlar topilmadi")}
+                                />
+                            ) : (
+                                transfers.data.map((tr) => (
+                                    <TableRow key={tr.id}>
+                                        <TableCell className="font-medium">{tr.from_cash_register?.name}</TableCell>
+                                        <TableCell className="font-medium">{tr.to_cash_register?.name}</TableCell>
+                                        <TableCell className="font-bold">{Number(tr.amount).toLocaleString('uz-UZ')} UZS</TableCell>
+                                        <TableCell>
+                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                                tr.status === 'approved'
+                                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                    : tr.status === 'pending'
+                                                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                                    : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300'
+                                            }`}>
+                                                {tr.status}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{tr.transferred_by?.name || '-'}</TableCell>
+                                        <TableCell className="text-right">
+                                            {tr.status === 'pending' && (
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleApproveTransfer(tr)}
+                                                    className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                >
+                                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                                    {t('finance.approve', 'Tasdiqlash')}
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 
@@ -587,11 +717,14 @@ export default function FinanceIndex({
             <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('finance.accept_payment_title', 'To\'lov Qabul Qilish (Rasmiy Chek)')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ArrowDownRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            {t('finance.accept_payment_title', 'To\'lov Qabul Qilish (Rasmiy Chek)')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handlePaymentSubmit} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="pay_contract_id">{t('finance.select_contract', 'Shartnoma')}</Label>
+                            <Label required htmlFor="pay_contract_id">{t('finance.select_contract', 'Shartnoma')}</Label>
                             <SearchableSelect
                                 id="pay_contract_id"
                                 value={paymentForm.data.contract_id}
@@ -612,7 +745,7 @@ export default function FinanceIndex({
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="payment_method">{t('finance.method', 'To\'lov Usuli')}</Label>
+                                <Label required htmlFor="payment_method">{t('finance.method', 'To\'lov Usuli')}</Label>
                                 <SearchableSelect
                                     id="payment_method"
                                     value={paymentForm.data.payment_method}
@@ -633,7 +766,7 @@ export default function FinanceIndex({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="pay_register_id">{t('finance.cash_register', 'Kassa')}</Label>
+                                <Label required htmlFor="pay_register_id">{t('finance.cash_register', 'Kassa')}</Label>
                                 <SearchableSelect
                                     id="pay_register_id"
                                     value={paymentForm.data.cash_register_id}
@@ -649,7 +782,7 @@ export default function FinanceIndex({
                         </div>
 
                         <div>
-                            <Label htmlFor="pay_amount">{t('finance.amount', 'To\'lov Summasi (UZS)')}</Label>
+                            <Label required htmlFor="pay_amount">{t('finance.amount', 'To\'lov Summasi (UZS)')}</Label>
                             <Input
                                 id="pay_amount"
                                 type="number"
@@ -687,12 +820,15 @@ export default function FinanceIndex({
             <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('finance.add_expense_title', 'Yangi Xarajat (Chiqim)')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ArrowUpRight className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            {t('finance.add_expense_title', 'Yangi Xarajat (Chiqim)')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleExpenseSubmit} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="exp_register_id">{t('finance.register', 'Chiqim Kassasi')}</Label>
+                                <Label required htmlFor="exp_register_id">{t('finance.register', 'Chiqim Kassasi')}</Label>
                                 <SearchableSelect
                                     id="exp_register_id"
                                     value={expenseForm.data.cash_register_id}
@@ -706,7 +842,7 @@ export default function FinanceIndex({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="exp_category_id">{t('finance.category', 'Kategoriya')}</Label>
+                                <Label required htmlFor="exp_category_id">{t('finance.category', 'Kategoriya')}</Label>
                                 <SearchableSelect
                                     id="exp_category_id"
                                     value={expenseForm.data.expense_category_id}
@@ -719,7 +855,7 @@ export default function FinanceIndex({
                         </div>
 
                         <div>
-                            <Label htmlFor="exp_amount">{t('finance.amount', 'Summa (UZS)')}</Label>
+                            <Label required htmlFor="exp_amount">{t('finance.amount', 'Summa (UZS)')}</Label>
                             <Input
                                 id="exp_amount"
                                 type="number"
@@ -731,7 +867,7 @@ export default function FinanceIndex({
                         </div>
 
                         <div>
-                            <Label htmlFor="exp_desc">{t('finance.description', 'Xarajat Tavsifi')}</Label>
+                            <Label required htmlFor="exp_desc">{t('finance.description', 'Xarajat Tavsifi')}</Label>
                             <Input
                                 id="exp_desc"
                                 value={expenseForm.data.description}
@@ -745,7 +881,7 @@ export default function FinanceIndex({
                             <Button type="button" variant="outline" onClick={() => setShowExpenseModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={expenseForm.processing}>
+                            <Button type="submit" variant="brand" disabled={expenseForm.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -757,12 +893,15 @@ export default function FinanceIndex({
             <Dialog open={showTransferModal} onOpenChange={setShowTransferModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('finance.transfer_title', 'Kassalararo Pul O\'tkazmasi')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ArrowLeftRight className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('finance.transfer_title', 'Kassalararo Pul O\'tkazmasi')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleTransferSubmit} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="tr_from">{t('finance.from_register', 'Chiqim Kassasi')}</Label>
+                                <Label required htmlFor="tr_from">{t('finance.from_register', 'Chiqim Kassasi')}</Label>
                                 <SearchableSelect
                                     id="tr_from"
                                     value={transferForm.data.from_cash_register_id}
@@ -772,7 +911,7 @@ export default function FinanceIndex({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="tr_to">{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</Label>
+                                <Label required htmlFor="tr_to">{t('finance.to_register', 'Qabul Qiluvchi Kassa')}</Label>
                                 <SearchableSelect
                                     id="tr_to"
                                     value={transferForm.data.to_cash_register_id}
@@ -784,7 +923,7 @@ export default function FinanceIndex({
                         </div>
 
                         <div>
-                            <Label htmlFor="tr_amount">{t('finance.amount', 'O\'tkaziladigan Summa (UZS)')}</Label>
+                            <Label required htmlFor="tr_amount">{t('finance.amount', 'O\'tkaziladigan Summa (UZS)')}</Label>
                             <Input
                                 id="tr_amount"
                                 type="number"
@@ -799,7 +938,7 @@ export default function FinanceIndex({
                             <Button type="button" variant="outline" onClick={() => setShowTransferModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={transferForm.processing}>
+                            <Button type="submit" variant="brand" disabled={transferForm.processing}>
                                 {t('finance.send_transfer', 'O\'tkazish')}
                             </Button>
                         </div>
@@ -829,7 +968,7 @@ export default function FinanceIndex({
                             <form onSubmit={handleShiftSubmit} className="space-y-4 text-xs">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <Label htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
+                                        <Label required htmlFor="sh_register">{t('finance.register', 'Kassa')}</Label>
                                         <SearchableSelect
                                             id="sh_register"
                                             value={shiftForm.data.cash_register_id}
@@ -843,7 +982,7 @@ export default function FinanceIndex({
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
+                                        <Label required htmlFor="sh_action">{t('finance.action', 'Amal')}</Label>
                                         <SearchableSelect
                                             id="sh_action"
                                             value={shiftForm.data.action}
@@ -891,7 +1030,7 @@ export default function FinanceIndex({
                                 )}
 
                                 <div>
-                                    <Label htmlFor="sh_balance">
+                                    <Label required htmlFor="sh_balance">
                                         {shiftForm.data.action === 'open'
                                             ? t('finance.shift_opening_balance', "Boshlang'ich kassa qoldig'i (UZS)")
                                             : t('finance.shift_closing_balance', "Yakuniy kassa qoldig'i (UZS)")}
@@ -932,7 +1071,7 @@ export default function FinanceIndex({
                                     <Button type="button" variant="outline" onClick={() => setShowShiftModal(false)}>
                                         {t('common.cancel', 'Bekor qilish')}
                                     </Button>
-                                    <Button type="submit" disabled={shiftForm.processing}>
+                                    <Button type="submit" variant="brand" disabled={shiftForm.processing}>
                                         {t('common.confirm', 'Tasdiqlash')}
                                     </Button>
                                 </div>

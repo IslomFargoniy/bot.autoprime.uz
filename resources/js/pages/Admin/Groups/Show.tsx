@@ -3,6 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Users, Upload, ArrowLeft, Download, Trash2, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { useRef, useState } from 'react';
 import { SharedData } from '@/types/auth';
 
@@ -131,7 +141,8 @@ export default function GroupShow({ group, students }: PageProps) {
                                 </div>
                                 
                                 <form onSubmit={submitUpload} className="space-y-4">
-                                    <div>
+                                    <div className="space-y-1.5">
+                                        <Label required>{t('groups.select_file', 'Faylni tanlang')}</Label>
                                         <Input
                                             type="file"
                                             accept=".xlsx,.xls,.csv"
@@ -141,7 +152,7 @@ export default function GroupShow({ group, students }: PageProps) {
                                         />
                                         {errors.file && <div className="text-red-500 text-sm mt-1">{errors.file}</div>}
                                     </div>
-                                    <Button type="submit" disabled={!data.file || uploading} className="w-full">
+                                    <Button type="submit" variant="brand" disabled={!data.file || uploading} className="w-full">
                                         {uploading ? t('common.uploading', 'Yuklanmoqda...') : t('common.upload', 'Yuklash')}
                                     </Button>
                                 </form>
@@ -155,56 +166,59 @@ export default function GroupShow({ group, students }: PageProps) {
                             <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{t('groups.students_title', 'Guruh Talabalari')}</h2>
                             </div>
-                            <div className="overflow-x-auto">
+                            <div>
                                 {/* Desktop Table */}
-                                <table className="hidden md:table w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700/50 dark:text-gray-300">
-                                        <tr>
-                                            <th className="px-6 py-4 font-medium">{t('common.number', '№')}</th>
-                                            <th className="px-6 py-4 font-medium">{t('students.full_name', 'F.I.SH')}</th>
-                                            <th className="px-6 py-4 font-medium">{t('students.phone', 'Telefon')}</th>
-                                            <th className="px-6 py-4 font-medium text-center">{t('students.completed_drivings', 'Tugagan darslar')}</th>
-                                            {!isInstructor && <th className="px-6 py-4 font-medium text-right">{t('common.actions', 'Amallar')}</th>}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                                        {students.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={isInstructor ? 4 : 5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                                    {t('groups.no_students_in_group', "Guruhda hozircha talabalar yo'q. Excel orqali yuklang.")}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            students.map((student, index) => (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/25 transition-colors">
-                                                    <td className="px-6 py-4">{index + 1}</td>
-                                                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                        {student.full_name}
-                                                    </td>
-                                                    <td className="px-6 py-4">{student.phone || '-'}</td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                            {student.completed_drivings_count || 0}
-                                                        </span>
-                                                    </td>
-                                                    {!isInstructor && (
-                                                        <td className="px-6 py-4 text-right">
-                                                            <Button variant="ghost" size="icon" onClick={() => handleDeleteStudent(student.id)} className="h-8 w-8 text-destructive hover:text-destructive/90">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </td>
-                                                    )}
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                                <div className="hidden md:block">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-16">{t('common.number', '№')}</TableHead>
+                                                <TableHead>{t('students.full_name', 'F.I.SH')}</TableHead>
+                                                <TableHead>{t('students.phone', 'Telefon')}</TableHead>
+                                                <TableHead className="text-center">{t('students.completed_drivings', 'Tugagan darslar')}</TableHead>
+                                                {!isInstructor && <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>}
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {students.length === 0 ? (
+                                                <TableEmpty
+                                                    colSpan={isInstructor ? 4 : 5}
+                                                    icon={Users}
+                                                    title={t('groups.no_students_in_group', "Guruhda hozircha talabalar yo'q")}
+                                                    description={t('groups.no_students_in_group_desc', "Excel orqali talabalarni yuklang")}
+                                                />
+                                            ) : (
+                                                students.map((student, index) => (
+                                                    <TableRow key={student.id}>
+                                                        <TableCell className="font-medium text-muted-foreground">{index + 1}</TableCell>
+                                                        <TableCell className="font-medium text-foreground">
+                                                            {student.full_name}
+                                                        </TableCell>
+                                                        <TableCell>{student.phone || '-'}</TableCell>
+                                                        <TableCell className="text-center">
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                                {student.completed_drivings_count || 0}
+                                                            </span>
+                                                        </TableCell>
+                                                        {!isInstructor && (
+                                                            <TableCell className="text-right">
+                                                                <Button variant="ghost" size="icon" onClick={() => handleDeleteStudent(student.id)} className="h-8 w-8 text-destructive hover:text-destructive/90">
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </TableCell>
+                                                        )}
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
 
                                 {/* Mobile Cards */}
                                 <div className="md:hidden p-3 space-y-3 bg-muted/20">
                                     {students.length === 0 ? (
                                         <div className="p-6 text-center text-muted-foreground text-sm">
-                                            {t('groups.no_students_in_group', "Guruhda hozircha talabalar yo'q. Excel orqali yuklang.")}
+                                            {t('groups.no_students_in_group', "Guruhda hozircha talabalar yo'q")}
                                         </div>
                                     ) : (
                                         students.map((student, index) => (

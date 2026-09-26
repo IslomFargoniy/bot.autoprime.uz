@@ -12,6 +12,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 
 interface Lead {
@@ -142,9 +151,9 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('leads.title', 'CRM Lidlar')}</h1>
-                <Button onClick={() => setShowCreateModal(true)} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                    <Plus className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
+                <Button onClick={() => setShowCreateModal(true)} variant="brand" className="text-xs">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    {t('common.add', 'Qo\'shish')}
                 </Button>
             </div>
 
@@ -184,98 +193,99 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
             {/* Leads Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="p-3.5 font-semibold">{t('leads.client', 'Mijoz (F.I.O)')}</th>
-                                <th className="p-3.5 font-semibold">{t('leads.phone', 'Telefon')}</th>
-                                <th className="p-3.5 font-semibold">{t('leads.category', 'Toifa')}</th>
-                                <th className="p-3.5 font-semibold">{t('leads.source', 'Manba')}</th>
-                                <th className="p-3.5 font-semibold">{t('leads.stage', 'Holat')}</th>
-                                <th className="p-3.5 font-semibold">{t('leads.branch', 'Filial')}</th>
-                                <th className="p-3.5 font-semibold text-right">{t('common.actions', 'Amallar')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
-                            {leads.data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-400 dark:text-gray-500">
-                                        {t('leads.no_leads', 'Hech qanday lid topilmadi')}
-                                    </td>
-                                </tr>
-                            ) : (
-                                leads.data.map((lead) => (
-                                    <tr key={lead.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/40">
-                                        <td className="p-3.5 font-medium text-gray-900 dark:text-white">
-                                            {lead.full_name}
-                                        </td>
-                                        <td className="p-3.5 text-gray-600 dark:text-gray-300">
-                                            <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400">
-                                                <Phone className="w-3.5 h-3.5 text-gray-400" />
-                                                {lead.phone}
-                                            </a>
-                                        </td>
-                                        <td className="p-3.5">
-                                            <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-semibold">
-                                                {lead.category || 'B'}
-                                            </span>
-                                        </td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
-                                            {lead.source}
-                                        </td>
-                                        <td className="p-3.5">
-                                            <span className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${getStageBadge(lead.stage)}`}>
-                                                {t(`leads.stage_${lead.stage}`, lead.stage)}
-                                            </span>
-                                        </td>
-                                        <td className="p-3.5 text-gray-500 dark:text-gray-400">
-                                            {lead.branch?.name || '-'}
-                                        </td>
-                                        <td className="p-3.5 text-right space-x-1">
-                                            {lead.stage !== 'contract_signed' && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => {
-                                                        setConvertingLead(lead);
-                                                        convertForm.setData({
-                                                            ...convertForm.data,
-                                                            branch_id: String(lead.branch_id || branches[0]?.id || ''),
-                                                        });
-                                                    }}
-                                                    className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
-                                                >
-                                                    <UserCheck className="w-3.5 h-3.5 mr-1" />
-                                                    {t('leads.convert_button', 'Shartnoma tuzish')}
-                                                </Button>
-                                            )}
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('leads.client', 'Mijoz (F.I.O)')}</TableHead>
+                            <TableHead>{t('leads.phone', 'Telefon')}</TableHead>
+                            <TableHead>{t('leads.category', 'Toifa')}</TableHead>
+                            <TableHead>{t('leads.source', 'Manba')}</TableHead>
+                            <TableHead>{t('leads.stage', 'Holat')}</TableHead>
+                            <TableHead>{t('leads.branch', 'Filial')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {leads.data.length === 0 ? (
+                            <TableEmpty
+                                colSpan={7}
+                                icon={UserCheck}
+                                title={t('leads.no_leads', 'Hech qanday lid topilmadi')}
+                            />
+                        ) : (
+                            leads.data.map((lead) => (
+                                <TableRow key={lead.id}>
+                                    <TableCell className="font-medium text-gray-900 dark:text-white">
+                                        {lead.full_name}
+                                    </TableCell>
+                                    <TableCell className="text-gray-600 dark:text-gray-300">
+                                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400">
+                                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                            {lead.phone}
+                                        </a>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-semibold">
+                                            {lead.category || 'B'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">
+                                        {lead.source}
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${getStageBadge(lead.stage)}`}>
+                                            {t(`leads.stage_${lead.stage}`, lead.stage)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-500 dark:text-gray-400">
+                                        {lead.branch?.name || '-'}
+                                    </TableCell>
+                                    <TableCell className="text-right space-x-1">
+                                        {lead.stage !== 'contract_signed' && (
                                             <Button
                                                 size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDelete(lead)}
-                                                className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setConvertingLead(lead);
+                                                    convertForm.setData({
+                                                        ...convertForm.data,
+                                                        branch_id: String(lead.branch_id || branches[0]?.id || ''),
+                                                    });
+                                                }}
+                                                className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <UserCheck className="w-3.5 h-3.5 mr-1" />
+                                                {t('leads.convert_button', 'Shartnoma tuzish')}
                                             </Button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        )}
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDelete(lead)}
+                                            className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             {/* Create Lead Modal */}
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('leads.create_lead_title', 'Yangi Lid Qo\'shish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('leads.create_lead_title', 'Yangi Lid Qo\'shish')}
+                        </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="full_name">{t('leads.full_name', 'Mijoz F.I.O')}</Label>
+                            <Label required htmlFor="full_name">{t('leads.full_name', 'Mijoz F.I.O')}</Label>
                             <Input
                                 id="full_name"
                                 value={createForm.data.full_name}
@@ -286,7 +296,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="phone">{t('leads.phone', 'Telefon')}</Label>
+                                <Label required htmlFor="phone">{t('leads.phone', 'Telefon')}</Label>
                                 <Input
                                     id="phone"
                                     value={createForm.data.phone}
@@ -355,7 +365,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" disabled={createForm.processing}>
+                            <Button type="submit" variant="brand" disabled={createForm.processing}>
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -367,7 +377,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             <Dialog open={!!convertingLead} onOpenChange={(open) => !open && setConvertingLead(null)}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('leads.convert_modal_title', 'Lidni O\'quvchiga Aylantirish')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            {t('leads.convert_modal_title', 'Lidni O\'quvchiga Aylantirish')}
+                        </DialogTitle>
                     </DialogHeader>
                     {convertingLead && (
                         <form onSubmit={handleConvertSubmit} className="space-y-4 text-xs">
@@ -376,7 +389,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                 <p className="text-gray-500 mt-0.5">{convertingLead.phone} • {convertingLead.category || 'B'} toifa</p>
                             </div>
                             <div>
-                                <Label htmlFor="contract_type_id">{t('leads.select_tariff', 'Shartnoma Tarifi')}</Label>
+                                <Label required htmlFor="contract_type_id">{t('leads.select_tariff', 'Shartnoma Tarifi')}</Label>
                                 <SearchableSelect
                                     id="contract_type_id"
                                     value={convertForm.data.contract_type_id}
