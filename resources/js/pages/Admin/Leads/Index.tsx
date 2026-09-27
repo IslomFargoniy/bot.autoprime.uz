@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface Lead {
     id: number;
@@ -127,11 +128,27 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
     });
 
     const convertForm = useForm({
-        contract_type_id: contractTypes[0]?.id || '',
-        group_id: groups[0]?.id || '',
+        contract_type_id: String(contractTypes[0]?.id || ''),
+        group_id: '',
         branch_id: '',
         discount_amount: 0,
+        start_date: '',
+        end_date: '',
+        terms: '',
     });
+
+    const openConvertModal = (lead: Lead) => {
+        setConvertingLead(lead);
+        convertForm.setData({
+            contract_type_id: String(contractTypes[0]?.id || ''),
+            group_id: '',
+            branch_id: String(lead.branch_id || branches[0]?.id || ''),
+            discount_amount: 0,
+            start_date: '',
+            end_date: '',
+            terms: '',
+        });
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -343,13 +360,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => {
-                                                    setConvertingLead(lead);
-                                                    convertForm.setData({
-                                                        ...convertForm.data,
-                                                        branch_id: String(lead.branch_id || branches[0]?.id || ''),
-                                                    });
-                                                }}
+                                                onClick={() => openConvertModal(lead)}
                                                 className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
                                             >
                                                 <UserCheck className="w-3.5 h-3.5 mr-1" />
@@ -433,13 +444,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => {
-                                            setConvertingLead(lead);
-                                            convertForm.setData({
-                                                ...convertForm.data,
-                                                branch_id: String(lead.branch_id || branches[0]?.id || ''),
-                                            });
-                                        }}
+                                        onClick={() => openConvertModal(lead)}
                                         className="h-8 flex-1 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                                     >
                                         <UserCheck className="w-3.5 h-3.5 mr-1" />
@@ -702,13 +707,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     {viewingLead.stage !== 'contract_signed' && (
                                         <Button
                                             type="button"
-                                            onClick={() => {
-                                                setConvertingLead(viewingLead);
-                                                convertForm.setData({
-                                                    ...convertForm.data,
-                                                    branch_id: String(viewingLead.branch_id || branches[0]?.id || ''),
-                                                });
-                                            }}
+                                            onClick={() => openConvertModal(viewingLead)}
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                         >
                                             <UserCheck className="w-4 h-4 mr-1.5" />
@@ -906,69 +905,115 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                 </DialogContent>
             </Dialog>
 
-            {/* Convert to Student Modal */}
+            {/* Convert to Student / Create Contract Modal */}
             <Dialog open={!!convertingLead} onOpenChange={(open) => !open && setConvertingLead(null)}>
-                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            {t('leads.convert_modal_title', 'Lidni O\'quvchiga Aylantirish')}
-                        </DialogTitle>
-                        <DialogDescription className="sr-only">Lidni o'quvchiga aylantirib shartnoma tuzish</DialogDescription>
+                        <DialogTitle>{t('contracts.create_title', 'Yangi Shartnoma Rasmiylashtirish')}</DialogTitle>
                     </DialogHeader>
                     {convertingLead && (
                         <form onSubmit={handleConvertSubmit} className="space-y-4 text-xs">
-                            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                                <p className="font-semibold text-gray-900 dark:text-white">{convertingLead.full_name}</p>
-                                <p className="text-gray-500 mt-0.5 font-mono">{convertingLead.phone} • {convertingLead.category || 'B'} toifa</p>
-                            </div>
                             <div>
-                                <Label required htmlFor="contract_type_id">{t('leads.select_tariff', 'Shartnoma Tarifi')}</Label>
+                                <Label required htmlFor="lead_student">{t('contracts.select_student', 'Talaba (O\'quvchi)')}</Label>
                                 <SearchableSelect
-                                    id="contract_type_id"
-                                    value={convertForm.data.contract_type_id}
-                                    onChange={(val) => convertForm.setData('contract_type_id', val)}
-                                    options={contractTypes.map((ct) => ({
-                                        value: ct.id,
-                                        label: ct.name,
-                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS`,
-                                    }))}
+                                    id="lead_student"
+                                    value={String(convertingLead.id)}
+                                    disabled
+                                    options={[
+                                        {
+                                            value: String(convertingLead.id),
+                                            label: convertingLead.full_name,
+                                            sublabel: convertingLead.phone,
+                                        },
+                                    ]}
+                                    placeholder={t('contracts.select_student', 'Talabani tanlang')}
                                     className="mt-1"
                                 />
                             </div>
+
+                            <div>
+                                <Label required htmlFor="conv_contract_type_id">{t('contracts.select_tariff', 'Tarif')}</Label>
+                                <SearchableSelect
+                                    id="conv_contract_type_id"
+                                    value={convertForm.data.contract_type_id}
+                                    onChange={(val) => convertForm.setData('contract_type_id', val)}
+                                    options={contractTypes.map((ct) => ({
+                                        value: String(ct.id),
+                                        label: ct.name,
+                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS (${ct.category})`,
+                                    }))}
+                                    placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
+                                    className="mt-1"
+                                />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="conv_group_id">{t('leads.select_group', 'Guruh')}</Label>
+                                    <Label htmlFor="conv_group_id">{t('contracts.select_group', 'Guruh')}</Label>
                                     <SearchableSelect
                                         id="conv_group_id"
                                         value={convertForm.data.group_id}
                                         onChange={(val) => convertForm.setData('group_id', val)}
                                         options={[
                                             { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
-                                            ...groups.map((g) => ({ value: g.id, label: g.name })),
+                                            ...groups.map((g) => ({ value: String(g.id), label: g.name })),
                                         ]}
                                         placeholder={t('common.not_assigned', 'Biriktirilmagan')}
                                         className="mt-1"
                                     />
                                 </div>
+
                                 <div>
-                                    <Label htmlFor="discount_amount">{t('leads.discount_amount', 'Chegirma (UZS)')}</Label>
+                                    <Label htmlFor="conv_discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
                                     <Input
-                                        id="discount_amount"
+                                        id="conv_discount_amount"
                                         type="number"
                                         value={convertForm.data.discount_amount}
                                         onChange={(e) => convertForm.setData('discount_amount', Number(e.target.value))}
                                         className="mt-1"
+                                        placeholder="0"
                                     />
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <Label htmlFor="conv_start_date">{t('contracts.start_date', 'Boshlanish Sanasi')}</Label>
+                                    <DatePicker
+                                        id="conv_start_date"
+                                        value={convertForm.data.start_date}
+                                        onChange={(val) => convertForm.setData('start_date', val)}
+                                        className="mt-1"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="conv_end_date">{t('contracts.end_date', 'Tugash Sanasi')}</Label>
+                                    <DatePicker
+                                        id="conv_end_date"
+                                        value={convertForm.data.end_date}
+                                        onChange={(val) => convertForm.setData('end_date', val)}
+                                        className="mt-1"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="conv_terms">{t('common.description', 'Tavsif')}</Label>
+                                <Input
+                                    id="conv_terms"
+                                    value={convertForm.data.terms}
+                                    onChange={(e) => convertForm.setData('terms', e.target.value)}
+                                    className="mt-1"
+                                    placeholder="Maxsus kelishuvlar..."
+                                />
+                            </div>
+
                             <div className="flex justify-end gap-2 pt-2">
                                 <Button type="button" variant="outline" onClick={() => setConvertingLead(null)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700" disabled={convertForm.processing}>
-                                    <ArrowRight className="w-4 h-4 mr-1.5" />
-                                    {t('leads.confirm_convert', 'Shartnomani Rasmiylashtirish')}
+                                <Button type="submit" variant="brand" disabled={convertForm.processing}>
+                                    {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>
                         </form>

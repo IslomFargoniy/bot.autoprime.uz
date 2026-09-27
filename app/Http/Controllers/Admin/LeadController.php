@@ -153,6 +153,9 @@ class LeadController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
             'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'discount_amount' => 'nullable|numeric|min:0|max:9999999999',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'terms' => 'nullable|string',
         ]);
 
         if ($lead->stage === 'contract_signed' || $lead->student_id) {
@@ -210,6 +213,8 @@ class LeadController extends Controller
                 'created_by_user_id' => $request->user()->id,
                 'contract_number' => $contractNumber,
                 'contract_date' => now()->toDateString(),
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
                 'has_theory' => $contractType->has_theory,
                 'has_driving' => $contractType->has_driving,
                 'has_lms' => $contractType->has_lms,
@@ -223,6 +228,7 @@ class LeadController extends Controller
                 'overpaid_amount' => 0,
                 'status' => 'active',
                 'payment_status' => 'unpaid',
+                'terms' => $validated['terms'] ?? null,
             ]);
 
             // Update Lead
