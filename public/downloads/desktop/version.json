@@ -4,7 +4,7 @@
   "release_date": "2026-09-27",
   "is_mandatory": false,
   "download_url_windows": "https://lms.autoprime.uz/downloads/desktop/AutoPrime-Setup-1.0.0.exe",
-  "file_size_mb": 21.0,
+  "file_size_mb": 10.4,
   "changelog_uz": "AutoPrime LMS Desktop birinchi rasmiy relizi.\n• Telegram OTP orqali xavfsiz kirish\n• 130 ta Biletlar va Ichki Nazorat Imtihoni\n• Tezkor klaviatura boshqaruvi (F1-F4)\n• Video darslar va LMS materiallar",
   "changelog_ru": "Первый официальный релиз AutoPrime LMS Desktop.\n• Безопасный вход через Telegram OTP\n• 130 Билетов и Внутренний Контрольный Экзамен\n• Быстрое управление с клавиатуры (F1-F4)\n• Видеоуроки и материалы LMS"
 }
