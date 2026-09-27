@@ -1,7 +1,29 @@
 import { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Download, FileText, Search, Trash2, CheckCircle2, AlertCircle, RotateCcw, ReceiptText } from 'lucide-react';
+import {
+    Plus,
+    Download,
+    FileText,
+    Search,
+    Trash2,
+    CheckCircle2,
+    AlertCircle,
+    RotateCcw,
+    ReceiptText,
+    Eye,
+    User,
+    Calendar,
+    Check,
+    X,
+    ExternalLink,
+    Clock,
+    DollarSign,
+    Shield,
+    BookOpen,
+    Car,
+    Laptop,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +33,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import {
     Table,
@@ -48,18 +71,44 @@ interface Contract {
     contract_number: string;
     student_id: number;
     student?: { id: number; full_name: string; phone: string };
-    contract_type?: { name: string; category: string };
-    group?: { name: string };
-    branch?: { name: string };
+    contract_type_id?: number;
+    contract_type?: {
+        id: number;
+        name: string;
+        category: string;
+        has_theory?: boolean;
+        has_driving?: boolean;
+        has_lms?: boolean;
+        required_theory_lessons?: number;
+        required_driving_lessons?: number;
+        price?: number | string;
+    };
+    group_id?: number;
+    group?: { id: number; name: string };
+    branch_id?: number;
+    branch?: { id: number; name: string };
+    created_by_user_id?: number;
+    createdBy?: { id: number; name: string };
+    contract_date: string;
+    start_date?: string;
+    end_date?: string;
+    has_theory?: boolean;
+    has_driving?: boolean;
+    has_lms?: boolean;
+    required_driving_lessons?: number;
+    required_theory_lessons?: number;
     total_amount: number | string;
+    discount_amount: number | string;
     final_amount: number | string;
     paid_amount: number | string;
     debt_amount: number | string;
+    overpaid_amount: number | string;
     payment_percentage: number;
     payment_badge_color: 'white' | 'red' | 'yellow' | 'green';
     status: 'active' | 'completed' | 'cancelled' | 'frozen';
     payment_status: 'unpaid' | 'partial' | 'paid';
-    contract_date: string;
+    terms?: string;
+    file_url?: string;
     payments?: ContractPayment[];
 }
 
@@ -86,6 +135,7 @@ interface PageProps {
 export default function ContractsIndex({ contracts, students, contractTypes, groups, branches, cashRegisters = [], filters }: PageProps) {
     const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
+    const [viewingContract, setViewingContract] = useState<Contract | null>(null);
     const [refundingContract, setRefundingContract] = useState<Contract | null>(null);
     const [viewingPaymentsContract, setViewingPaymentsContract] = useState<Contract | null>(null);
     const [search, setSearch] = useState(filters.search || '');
@@ -132,7 +182,10 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const handleDelete = (contract: Contract) => {
         if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/contracts/${contract.id}`, {
-                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
+                onSuccess: () => {
+                    if (viewingContract?.id === contract.id) setViewingContract(null);
+                    toast.success(t('common.deleted', 'O\'chirildi'));
+                },
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
             });
         }
@@ -193,20 +246,20 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     };
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
             <Head title={t('contracts.title', 'Shartnomalar')} />
 
             {/* Page Title & Add Button */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('contracts.title', 'Shartnomalar')}</h1>
-                <Button onClick={() => setShowModal(true)} variant="brand" size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
-                    <Plus className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
+            <div className="flex items-center justify-between gap-4">
+                <h1 className="text-xl sm:text-2xl font-bold">{t('contracts.title', 'Shartnomalar')}</h1>
+                <Button onClick={() => setShowModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    <span>{t('common.add', 'Qo\'shish')}</span>
                 </Button>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-card border rounded-xl p-4 shadow-xs mb-6 flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
                 <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0 flex-nowrap md:flex-wrap">
                     {['all', 'unpaid', 'partial', 'paid'].map((st) => (
                         <button
@@ -252,106 +305,121 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             {/* Desktop & Tablet Table */}
             <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-20">{t('contracts.number', '№')}</TableHead>
-                            <TableHead>{t('contracts.student', 'Talaba')}</TableHead>
-                            <TableHead>{t('contracts.tariff', 'Tarif')}</TableHead>
-                            <TableHead>{t('contracts.group', 'Guruh')}</TableHead>
-                            <TableHead>{t('contracts.final_amount', 'Summa')}</TableHead>
-                            <TableHead>{t('contracts.paid_amount', 'To\'langan')}</TableHead>
-                            <TableHead>{t('contracts.debt_amount', 'Qarz')}</TableHead>
-                            <TableHead>{t('contracts.progress', 'To\'lov foizi')}</TableHead>
-                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {contracts.data.length === 0 ? (
-                            <TableEmpty colSpan={9} title={t('contracts.no_contracts', 'Shartnomalar topilmadi')} />
-                        ) : (
-                            contracts.data.map((c) => (
-                                <TableRow key={c.id}>
-                                    <TableCell className="font-semibold font-mono">
-                                        #{c.contract_number}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="font-medium">{c.student?.full_name}</div>
-                                        <div className="text-muted-foreground text-[11px] font-mono">{c.student?.phone}</div>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground text-xs">
-                                        {c.contract_type?.name || '-'} ({c.contract_type?.category || 'B'})
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground text-xs">
-                                        {c.group?.name || '-'}
-                                    </TableCell>
-                                    <TableCell className="font-medium text-xs">
-                                        {Number(c.final_amount).toLocaleString('uz-UZ')} UZS
-                                    </TableCell>
-                                    <TableCell className="font-medium text-xs text-emerald-600 dark:text-emerald-400">
-                                        <button
-                                            type="button"
-                                            onClick={() => setViewingPaymentsContract(c)}
-                                            className="hover:underline inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400"
-                                            title={t('contracts.payments_history', "To'lovlar tarixi")}
-                                        >
-                                            <ReceiptText className="w-3.5 h-3.5 text-emerald-500" />
-                                            {Number(c.paid_amount).toLocaleString('uz-UZ')} UZS
-                                        </button>
-                                    </TableCell>
-                                    <TableCell className="font-medium text-xs text-red-500">
-                                        {Number(c.debt_amount).toLocaleString('uz-UZ')} UZS
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className={`px-2.5 py-1 rounded-md border text-xs font-semibold ${getBadgeStyle(c.payment_badge_color)}`}>
-                                            {c.payment_percentage}%
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right space-x-1">
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => setViewingPaymentsContract(c)}
-                                            title={t('contracts.payments_history', "To'lovlar tarixi")}
-                                            className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                                        >
-                                            <ReceiptText className="w-3.5 h-3.5" />
-                                        </Button>
-                                        <a
-                                            href={`/admin/contracts/${c.id}/download-pdf`}
-                                            className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            <Download className="w-3.5 h-3.5 mr-1" />
-                                            PDF
-                                        </a>
-                                        {Number(c.paid_amount) > 0 && (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-20">{t('contracts.number', '№')}</TableHead>
+                                <TableHead>{t('contracts.student', 'Talaba')}</TableHead>
+                                <TableHead>{t('contracts.tariff', 'Tarif')}</TableHead>
+                                <TableHead>{t('contracts.group', 'Guruh')}</TableHead>
+                                <TableHead>{t('contracts.final_amount', 'Summa')}</TableHead>
+                                <TableHead>{t('contracts.paid_amount', 'To\'langan')}</TableHead>
+                                <TableHead>{t('contracts.debt_amount', 'Qarz')}</TableHead>
+                                <TableHead>{t('contracts.progress', 'To\'lov foizi')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {contracts.data.length === 0 ? (
+                                <TableEmpty colSpan={9} title={t('contracts.no_contracts', 'Shartnomalar topilmadi')} />
+                            ) : (
+                                contracts.data.map((c) => (
+                                    <TableRow key={c.id}>
+                                        <TableCell className="font-semibold font-mono text-xs">
+                                            <button
+                                                type="button"
+                                                onClick={() => setViewingContract(c)}
+                                                className="text-blue-600 dark:text-blue-400 hover:underline"
+                                            >
+                                                #{c.contract_number}
+                                            </button>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-medium text-xs">{c.student?.full_name}</div>
+                                            <div className="text-muted-foreground text-[11px] font-mono">{c.student?.phone}</div>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-xs">
+                                            {c.contract_type?.name || '-'} ({c.contract_type?.category || 'B'})
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-xs">
+                                            {c.group?.name || '-'}
+                                        </TableCell>
+                                        <TableCell className="font-medium text-xs">
+                                            {Number(c.final_amount).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
+                                        <TableCell className="font-medium text-xs text-emerald-600 dark:text-emerald-400">
+                                            <button
+                                                type="button"
+                                                onClick={() => setViewingPaymentsContract(c)}
+                                                className="hover:underline inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400"
+                                                title={t('contracts.payments_history', "To'lovlar tarixi")}
+                                            >
+                                                <ReceiptText className="w-3.5 h-3.5 text-emerald-500" />
+                                                {Number(c.paid_amount).toLocaleString('uz-UZ')} UZS
+                                            </button>
+                                        </TableCell>
+                                        <TableCell className="font-medium text-xs text-red-500">
+                                            {Number(c.debt_amount).toLocaleString('uz-UZ')} UZS
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className={`px-2.5 py-1 rounded-md border text-xs font-semibold ${getBadgeStyle(c.payment_badge_color)}`}>
+                                                {c.payment_percentage}%
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right space-x-1">
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => openRefund(c)}
-                                                title={t('contracts.refund_button', "To'lovni qaytarish (Refund)")}
-                                                className="h-7 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                                                onClick={() => setViewingContract(c)}
+                                                title={t('contracts.view_details', 'Shartnoma tafsilotlari')}
+                                                className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                                             >
-                                                <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                                                {t('contracts.refund', 'Qaytarish')}
+                                                <Eye className="w-3.5 h-3.5" />
                                             </Button>
-                                        )}
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDelete(c)}
-                                            className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setViewingPaymentsContract(c)}
+                                                title={t('contracts.payments_history', "To'lovlar tarixi")}
+                                                className="h-7 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                                            >
+                                                <ReceiptText className="w-3.5 h-3.5" />
+                                            </Button>
+                                            <a
+                                                href={`/admin/contracts/${c.id}/download-pdf`}
+                                                className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Download className="w-3.5 h-3.5 mr-1" />
+                                                PDF
+                                            </a>
+                                            {Number(c.paid_amount) > 0 && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => openRefund(c)}
+                                                    title={t('contracts.refund_button', "To'lovni qaytarish (Refund)")}
+                                                    className="h-7 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                                                >
+                                                    <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                                                    {t('contracts.refund', 'Qaytarish')}
+                                                </Button>
+                                            )}
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDelete(c)}
+                                                className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
 
@@ -364,11 +432,17 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                 ) : (
                     contracts.data.map((c) => (
                         <div key={c.id} className="bg-card border rounded-xl p-4 space-y-3 shadow-xs">
-                            {/* Header: Contract Number + Student + Badge */}
+                            {/* Header */}
                             <div className="flex items-start justify-between gap-2">
                                 <div>
                                     <div className="font-semibold text-sm flex items-center gap-1.5">
-                                        <span className="font-mono text-primary font-bold">#{c.contract_number}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setViewingContract(c)}
+                                            className="font-mono text-primary font-bold hover:underline"
+                                        >
+                                            #{c.contract_number}
+                                        </button>
                                         <span>{c.student?.full_name}</span>
                                     </div>
                                     <div className="text-xs text-muted-foreground font-mono mt-0.5">{c.student?.phone}</div>
@@ -378,7 +452,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 </span>
                             </div>
 
-                            {/* Tariff & Group Badges */}
+                            {/* Tariff & Group */}
                             <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                                 <span className="px-2 py-0.5 bg-muted rounded">
                                     {c.contract_type?.name || '-'} ({c.contract_type?.category || 'B'})
@@ -402,7 +476,6 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         type="button"
                                         onClick={() => setViewingPaymentsContract(c)}
                                         className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
-                                        title={t('contracts.payments_history', "To'lovlar tarixi")}
                                     >
                                         <ReceiptText className="w-3 h-3" />
                                         {Number(c.paid_amount).toLocaleString('uz-UZ')}
@@ -416,140 +489,318 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 </div>
                             </div>
 
-                            {/* Progress Bar */}
-                            <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                                <div
-                                    className={`h-full transition-all duration-300 ${
-                                        c.payment_badge_color === 'green'
-                                            ? 'bg-emerald-500'
-                                            : c.payment_badge_color === 'yellow'
-                                            ? 'bg-amber-500'
-                                            : 'bg-red-500'
-                                    }`}
-                                    style={{ width: `${Math.min(100, Math.max(0, c.payment_percentage))}%` }}
-                                />
-                            </div>
-
                             {/* Actions Footer */}
-                            <div className="flex items-center justify-between pt-2 border-t text-xs">
-                                <button
-                                    type="button"
-                                    onClick={() => setViewingPaymentsContract(c)}
-                                    className="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center gap-1 hover:underline"
+                            <div className="flex items-center justify-between pt-2 border-t text-xs gap-1.5">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setViewingContract(c)}
+                                    className="h-7 text-xs flex-1"
                                 >
-                                    <ReceiptText className="w-3.5 h-3.5" />
-                                    {t('contracts.payments_history', "To'lovlar")}
-                                </button>
-                                <div className="flex items-center gap-1.5">
-                                    <a
-                                        href={`/admin/contracts/${c.id}/download-pdf`}
-                                        className="inline-flex items-center px-2 py-1 rounded bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <Download className="w-3.5 h-3.5 mr-1" />
-                                        PDF
-                                    </a>
-                                    {Number(c.paid_amount) > 0 && (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => openRefund(c)}
-                                            className="h-7 text-xs text-amber-600 hover:text-amber-700 border-amber-300 dark:border-amber-800"
-                                        >
-                                            <RotateCcw className="w-3 h-3 mr-1" />
-                                            {t('contracts.refund', 'Qaytarish')}
-                                        </Button>
-                                    )}
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => handleDelete(c)}
-                                        className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    </Button>
-                                </div>
+                                    <Eye className="w-3.5 h-3.5 mr-1" />
+                                    {t('common.details', 'Batafsil')}
+                                </Button>
+                                <a
+                                    href={`/admin/contracts/${c.id}/download-pdf`}
+                                    className="inline-flex items-center px-2.5 py-1 rounded bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <Download className="w-3.5 h-3.5 mr-1" />
+                                    PDF
+                                </a>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDelete(c)}
+                                    className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                             </div>
                         </div>
                     ))
                 )}
             </div>
 
+            {/* View Full Contract Details Modal */}
+            <Dialog open={!!viewingContract} onOpenChange={(open) => !open && setViewingContract(null)}>
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center justify-between gap-2 border-b pb-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <FileText className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <span className="text-base font-bold font-mono block">#{viewingContract?.contract_number}</span>
+                                    <span className="text-xs text-muted-foreground font-normal">
+                                        {viewingContract?.contract_date ? new Date(viewingContract.contract_date).toLocaleDateString('uz-UZ') : ''}
+                                    </span>
+                                </div>
+                            </div>
+                            {viewingContract && (
+                                <div className="flex items-center gap-2">
+                                    <span className={`px-2.5 py-1 rounded-md border text-xs font-semibold ${getBadgeStyle(viewingContract.payment_badge_color)}`}>
+                                        {viewingContract.payment_percentage}%
+                                    </span>
+                                    <span className="px-2.5 py-1 rounded-md border bg-muted text-xs font-medium uppercase">
+                                        {viewingContract.status}
+                                    </span>
+                                </div>
+                            )}
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">Shartnomaning barcha tafsilotlari, modullari va to'lovlari</DialogDescription>
+                    </DialogHeader>
+
+                    {viewingContract && (
+                        <div className="space-y-4 pt-2 text-xs">
+                            {/* Student & Branch Info */}
+                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
+                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
+                                    <User className="w-4 h-4 text-blue-600" />
+                                    {t('contracts.student', 'Talaba va Filial')}
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <span className="text-[11px] text-muted-foreground block">{t('contracts.student', 'Talaba')}</span>
+                                        <Link
+                                            href={`/admin/students/${viewingContract.student_id}`}
+                                            className="font-semibold text-sm text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                                        >
+                                            <span>{viewingContract.student?.full_name}</span>
+                                            <ExternalLink className="w-3 h-3" />
+                                        </Link>
+                                        <div className="text-muted-foreground font-mono text-xs">{viewingContract.student?.phone}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-[11px] text-muted-foreground block">{t('leads.branch', 'Filial')}</span>
+                                        <span className="font-semibold text-sm text-foreground mt-0.5 inline-block">
+                                            {viewingContract.branch?.name || '-'}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[11px] text-muted-foreground block">{t('contracts.group', 'Guruh')}</span>
+                                        <span className="font-medium px-2 py-0.5 bg-background border rounded inline-block mt-0.5">
+                                            {viewingContract.group?.name || t('common.not_assigned', 'Biriktirilmagan')}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[11px] text-muted-foreground block">{t('contracts.dates', 'O\'qish muddatlari')}</span>
+                                        <span className="font-medium text-foreground mt-0.5 inline-flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                            {viewingContract.start_date || '-'} — {viewingContract.end_date || '-'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tariff & Learning Modules */}
+                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
+                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
+                                    <Shield className="w-4 h-4 text-emerald-600" />
+                                    {t('contracts.tariff_and_modules', 'Tarif va Ta\'lim Modullari')}
+                                </h3>
+                                <div className="p-2.5 bg-background rounded-lg border flex items-center justify-between">
+                                    <div>
+                                        <span className="font-bold text-sm text-foreground">{viewingContract.contract_type?.name || '-'}</span>
+                                        <span className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[11px] font-semibold">
+                                            {viewingContract.contract_type?.category || 'B'} toifa
+                                        </span>
+                                    </div>
+                                    <span className="font-semibold font-mono text-primary">
+                                        {Number(viewingContract.total_amount).toLocaleString('uz-UZ')} UZS
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                    <div className={`p-2.5 rounded-lg border flex items-center gap-2 ${viewingContract.has_theory ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200' : 'bg-background opacity-60'}`}>
+                                        <BookOpen className={`w-4 h-4 ${viewingContract.has_theory ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                                        <div>
+                                            <span className="font-semibold text-[11px] block">{t('contracts.theory_module', 'Nazariya')}</span>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {viewingContract.required_theory_lessons || 24} {t('contracts.lessons_count', 'dars')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className={`p-2.5 rounded-lg border flex items-center gap-2 ${viewingContract.has_driving ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200' : 'bg-background opacity-60'}`}>
+                                        <Car className={`w-4 h-4 ${viewingContract.has_driving ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                                        <div>
+                                            <span className="font-semibold text-[11px] block">{t('contracts.driving_module', 'Haydash')}</span>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {viewingContract.required_driving_lessons || 10} {t('contracts.lessons_count', 'dars')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className={`p-2.5 rounded-lg border flex items-center gap-2 ${viewingContract.has_lms ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200' : 'bg-background opacity-60'}`}>
+                                        <Laptop className={`w-4 h-4 ${viewingContract.has_lms ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                                        <div>
+                                            <span className="font-semibold text-[11px] block">{t('contracts.lms_module', 'LMS Video')}</span>
+                                            <span className="text-[10px] text-muted-foreground">Test & Video</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Financial Calculation */}
+                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
+                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
+                                    <DollarSign className="w-4 h-4 text-emerald-600" />
+                                    {t('contracts.financial_details', 'Moliyaviy Hisob-Kitob')}
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    <div className="p-2 bg-background rounded-lg border">
+                                        <span className="text-[10px] text-muted-foreground block">{t('contracts.total_amount', 'Tarif summasi')}</span>
+                                        <span className="font-semibold text-xs">{Number(viewingContract.total_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                    <div className="p-2 bg-background rounded-lg border">
+                                        <span className="text-[10px] text-muted-foreground block">{t('contracts.discount', 'Chegirma')}</span>
+                                        <span className="font-semibold text-xs text-amber-600">-{Number(viewingContract.discount_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                    <div className="p-2 bg-background rounded-lg border">
+                                        <span className="text-[10px] text-muted-foreground block">{t('contracts.final_amount', 'Yakuniy summa')}</span>
+                                        <span className="font-bold text-xs text-foreground">{Number(viewingContract.final_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                    <div className="p-2 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-lg border border-emerald-200">
+                                        <span className="text-[10px] text-emerald-700 dark:text-emerald-300 block font-medium">{t('contracts.paid_amount', 'To\'langan')}</span>
+                                        <span className="font-bold text-xs text-emerald-700 dark:text-emerald-300">{Number(viewingContract.paid_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                    <div className="p-2 bg-rose-50/60 dark:bg-rose-950/30 rounded-lg border border-rose-200">
+                                        <span className="text-[10px] text-rose-700 dark:text-rose-300 block font-medium">{t('contracts.debt_amount', 'Qoldiq qarz')}</span>
+                                        <span className="font-bold text-xs text-rose-700 dark:text-rose-300">{Number(viewingContract.debt_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                    <div className="p-2 bg-background rounded-lg border">
+                                        <span className="text-[10px] text-muted-foreground block">{t('contracts.overpaid', 'Ortiqcha to\'lov')}</span>
+                                        <span className="font-semibold text-xs text-blue-600">{Number(viewingContract.overpaid_amount).toLocaleString('uz-UZ')} UZS</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Additional Info & Officer */}
+                            {(viewingContract.createdBy || viewingContract.terms) && (
+                                <div className="bg-muted/40 rounded-xl p-3.5 border space-y-2">
+                                    {viewingContract.createdBy && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[11px] text-muted-foreground">{t('contracts.created_by', 'Rasmiylashtirdi')}:</span>
+                                            <span className="font-medium text-foreground">{viewingContract.createdBy.name}</span>
+                                        </div>
+                                    )}
+                                    {viewingContract.terms && (
+                                        <div>
+                                            <span className="text-[11px] text-muted-foreground block">{t('common.description', 'Izoh / Shartlar')}:</span>
+                                            <p className="mt-0.5 text-foreground bg-background p-2 rounded border">{viewingContract.terms}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Footer Actions */}
+                            <div className="flex items-center justify-between pt-2 border-t gap-2">
+                                <Button type="button" variant="outline" onClick={() => setViewingContract(null)}>
+                                    {t('common.close', 'Yopish')}
+                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setViewingPaymentsContract(viewingContract);
+                                        }}
+                                        className="text-xs"
+                                    >
+                                        <ReceiptText className="w-3.5 h-3.5 mr-1" />
+                                        {t('contracts.payments_history', 'To\'lovlar tarixi')}
+                                    </Button>
+                                    <a
+                                        href={`/admin/contracts/${viewingContract.id}/download-pdf`}
+                                        className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Download className="w-3.5 h-3.5 mr-1.5" />
+                                        {t('common.download_pdf', 'PDF Yuklab olish')}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
             {/* Create Contract Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-blue-600" />
-                            {t('contracts.create_title', 'Yangi Shartnoma Rasmiylashtirish')}
-                        </DialogTitle>
+                        <DialogTitle>{t('contracts.create_title', 'Yangi Shartnoma Rasmiylashtirish')}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
                         <div>
-                            <Label htmlFor="student_id" required>{t('contracts.select_student', 'Talaba (O\'quvchi)')}</Label>
+                            <Label required htmlFor="student_id">{t('contracts.select_student', 'Talaba (O\'quvchi)')}</Label>
                             <SearchableSelect
                                 id="student_id"
                                 value={form.data.student_id}
                                 onChange={(val) => {
-                                    const stId = Number(val);
-                                    const found = students.find((s) => s.id === stId);
-                                    form.setData({
-                                        ...form.data,
-                                        student_id: String(stId),
-                                        group_id: found?.group_id ? String(found.group_id) : form.data.group_id,
-                                    });
+                                    form.setData('student_id', val);
+                                    const std = students.find((s) => s.id === Number(val));
+                                    if (std && std.group_id) {
+                                        form.setData('group_id', String(std.group_id));
+                                    }
                                 }}
                                 options={students.map((s) => ({
                                     value: s.id,
                                     label: s.full_name,
                                     sublabel: s.phone,
                                 }))}
-                                placeholder={t('contracts.select_student', 'Talaba (O\'quvchi)')}
+                                placeholder={t('contracts.select_student', 'Talabani tanlang')}
                                 className="mt-1"
-                                required
+                            />
+                        </div>
+
+                        <div>
+                            <Label required htmlFor="contract_type_id">{t('contracts.select_tariff', 'Tarif')}</Label>
+                            <SearchableSelect
+                                id="contract_type_id"
+                                value={form.data.contract_type_id}
+                                onChange={(val) => form.setData('contract_type_id', val)}
+                                options={contractTypes.map((ct) => ({
+                                    value: ct.id,
+                                    label: ct.name,
+                                    sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS (${ct.category})`,
+                                }))}
+                                placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
+                                className="mt-1"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <Label htmlFor="contract_type_id" required>{t('contracts.select_tariff', 'Tarif')}</Label>
-                                <SearchableSelect
-                                    id="contract_type_id"
-                                    value={form.data.contract_type_id}
-                                    onChange={(val) => form.setData('contract_type_id', val)}
-                                    options={contractTypes.map((ct) => ({
-                                        value: ct.id,
-                                        label: ct.name,
-                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS`,
-                                    }))}
-                                    placeholder={t('contracts.select_tariff', 'Tarif')}
-                                    className="mt-1"
-                                />
-                            </div>
                             <div>
                                 <Label htmlFor="group_id">{t('contracts.select_group', 'Guruh')}</Label>
                                 <SearchableSelect
                                     id="group_id"
                                     value={form.data.group_id}
                                     onChange={(val) => form.setData('group_id', val)}
-                                    options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                    options={[
+                                        { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
+                                        ...groups.map((g) => ({ value: g.id, label: g.name })),
+                                    ]}
                                     placeholder={t('common.not_assigned', 'Biriktirilmagan')}
-                                    allowClear
                                     className="mt-1"
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <Label htmlFor="discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
-                            <Input
-                                id="discount_amount"
-                                type="number"
-                                value={form.data.discount_amount}
-                                onChange={(e) => form.setData('discount_amount', Number(e.target.value))}
-                                className="mt-1"
-                            />
+                            <div>
+                                <Label htmlFor="discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
+                                <Input
+                                    id="discount_amount"
+                                    type="number"
+                                    value={form.data.discount_amount}
+                                    onChange={(e) => form.setData('discount_amount', Number(e.target.value))}
+                                    className="mt-1"
+                                    placeholder="0"
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -559,8 +810,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     id="start_date"
                                     value={form.data.start_date}
                                     onChange={(val) => form.setData('start_date', val)}
-                                    placeholder="YYYY-MM-DD"
-                                    className="mt-1 h-9 text-xs"
+                                    className="mt-1"
                                 />
                             </div>
                             <div>
@@ -569,10 +819,20 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     id="end_date"
                                     value={form.data.end_date}
                                     onChange={(val) => form.setData('end_date', val)}
-                                    placeholder="YYYY-MM-DD"
-                                    className="mt-1 h-9 text-xs"
+                                    className="mt-1"
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="terms">{t('common.description', 'Qo\'shimcha shartlar / Izoh')}</Label>
+                            <Input
+                                id="terms"
+                                value={form.data.terms}
+                                onChange={(e) => form.setData('terms', e.target.value)}
+                                className="mt-1"
+                                placeholder="Maxsus kelishuvlar..."
+                            />
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
@@ -580,7 +840,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
                             <Button type="submit" variant="brand" disabled={form.processing}>
-                                {t('common.save', 'Shartnoma Tuzish')}
+                                {t('common.save', 'Rasmiylashtirish')}
                             </Button>
                         </div>
                     </form>
@@ -591,7 +851,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             <Dialog open={!!refundingContract} onOpenChange={(open) => !open && setRefundingContract(null)}>
                 <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                             <RotateCcw className="w-5 h-5" />
                             {t('contracts.refund_modal_title', "To'lovni Qaytarish (Refund)")}
                         </DialogTitle>
@@ -599,103 +859,93 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
                     {refundingContract && (
                         <form onSubmit={handleRefundSubmit} className="space-y-4 text-xs">
-                            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-lg space-y-1">
-                                <div className="font-semibold text-gray-900 dark:text-white">
+                            <div className="p-3 bg-muted/50 rounded-lg space-y-1">
+                                <div className="font-semibold text-foreground">
                                     {refundingContract.student?.full_name}
                                 </div>
-                                <div className="text-gray-500 flex justify-between">
-                                    <span>#{refundingContract.contract_number}</span>
-                                    <span>
-                                        {t('contracts.max_refund_notice', "Maksimal summa")}:{' '}
-                                        <strong className="text-emerald-600">
-                                            {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
-                                        </strong>
-                                    </span>
+                                <div className="text-muted-foreground">
+                                    #{refundingContract.contract_number} • {refundingContract.contract_type?.name}
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <Label htmlFor="refund_amount" required>{t('contracts.refund_amount', 'Qaytariladigan summa (UZS)')}</Label>
-                                    <Input
-                                        id="refund_amount"
-                                        type="number"
-                                        min="1"
-                                        max={refundingContract.paid_amount}
-                                        value={refundForm.data.amount}
-                                        onChange={(e) => refundForm.setData('amount', e.target.value)}
-                                        className="mt-1"
-                                        required
-                                    />
-                                    {refundForm.errors.amount && (
-                                        <p className="text-red-500 text-[11px] mt-1">{refundForm.errors.amount}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="refund_payment_method" required>{t('contracts.payment_method', "To'lov usuli")}</Label>
-                                    <SearchableSelect
-                                        id="refund_payment_method"
-                                        value={refundForm.data.payment_method}
-                                        onChange={(val) => refundForm.setData('payment_method', String(val))}
-                                        options={[
-                                            { value: 'cash', label: t('contracts.method_cash', 'Naqd pul') },
-                                            { value: 'card_click', label: t('contracts.method_card', 'Karta / Terminal') },
-                                            { value: 'bank_transfer', label: t('contracts.method_bank', 'Bank hisob raqami') },
-                                        ]}
-                                        placeholder={t('contracts.payment_method', "To'lov usuli")}
-                                        className="mt-1"
-                                        required
-                                    />
+                                <div className="text-emerald-600 dark:text-emerald-400 font-bold pt-1">
+                                    {t('contracts.paid_amount', "To'langan summa")}: {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
                                 </div>
                             </div>
 
                             <div>
-                                <Label htmlFor="refund_cash_register_id" required>{t('contracts.refund_from_register', 'Qaysi kassadan qaytariladi')}</Label>
-                                <SearchableSelect
-                                    id="refund_cash_register_id"
-                                    value={refundForm.data.cash_register_id}
-                                    onChange={(val) => refundForm.setData('cash_register_id', String(val))}
-                                    options={(cashRegisters || []).map((cr) => ({
-                                        value: cr.id,
-                                        label: `${cr.name} (${Number(cr.balance).toLocaleString('uz-UZ')} UZS)`,
-                                        sublabel: cr.type?.name || undefined,
-                                    }))}
-                                    placeholder={t('contracts.refund_from_register', 'Kassani tanlang')}
-                                    className="mt-1"
+                                <Label required htmlFor="refund_amount">
+                                    {t('contracts.refund_amount', 'Qaytariladigan summa (UZS)')}
+                                </Label>
+                                <Input
+                                    id="refund_amount"
+                                    type="number"
+                                    step="any"
+                                    max={Number(refundingContract.paid_amount)}
+                                    value={refundForm.data.amount}
+                                    onChange={(e) => refundForm.setData('amount', e.target.value)}
+                                    className="mt-1 font-semibold text-amber-600"
                                     required
                                 />
-                                {refundForm.errors.cash_register_id && (
-                                    <p className="text-red-500 text-[11px] mt-1">{refundForm.errors.cash_register_id}</p>
-                                )}
+                                <span className="text-[11px] text-muted-foreground mt-0.5 block">
+                                    {t('contracts.max_refund_notice', 'Maksimal qaytarish mumkin bo\'lgan summa')}: {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                </span>
+                            </div>
+
+                            <div>
+                                <Label required htmlFor="refund_cash_register">
+                                    {t('contracts.refund_from_register', 'Qaysi kassadan qaytariladi')}
+                                </Label>
+                                <SearchableSelect
+                                    id="refund_cash_register"
+                                    value={refundForm.data.cash_register_id}
+                                    onChange={(val) => refundForm.setData('cash_register_id', String(val))}
+                                    options={cashRegisters.map((cr) => ({
+                                        value: String(cr.id),
+                                        label: `${cr.name} (${Number(cr.balance).toLocaleString('uz-UZ')} UZS)`,
+                                    }))}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label required htmlFor="refund_method">{t('contracts.payment_method', "To'lov usuli")}</Label>
+                                <SearchableSelect
+                                    id="refund_method"
+                                    value={refundForm.data.payment_method}
+                                    onChange={(val) => refundForm.setData('payment_method', String(val))}
+                                    options={[
+                                        { value: 'cash', label: t('contracts.method_cash', 'Naqd pul') },
+                                        { value: 'card', label: t('contracts.method_card', 'Karta / Terminal') },
+                                        { value: 'bank_transfer', label: t('contracts.method_bank', 'Bank hisob raqami') },
+                                    ]}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div className="flex items-center space-x-2 pt-1">
+                                <input
+                                    type="checkbox"
+                                    id="cancel_contract"
+                                    checked={refundForm.data.cancel_contract}
+                                    onChange={(e) => refundForm.setData('cancel_contract', e.target.checked)}
+                                    className="rounded border-input text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                                />
+                                <label htmlFor="cancel_contract" className="text-xs text-foreground font-medium cursor-pointer">
+                                    {t('contracts.cancel_contract_checkbox', 'Shartnoma holatini bekor qilingan (Cancelled) ga o\'tkazish')}
+                                </label>
                             </div>
 
                             <div>
                                 <Label htmlFor="refund_notes">{t('contracts.refund_reason', 'Qaytarish sababi / Izoh')}</Label>
                                 <Input
                                     id="refund_notes"
-                                    type="text"
                                     value={refundForm.data.notes}
                                     onChange={(e) => refundForm.setData('notes', e.target.value)}
-                                    placeholder={t('contracts.refund_reason', 'Qaytarish sababi...')}
+                                    placeholder="O'qishni to'xtatdi..."
                                     className="mt-1"
                                 />
                             </div>
 
-                            <div className="flex items-center gap-2 pt-1">
-                                <input
-                                    type="checkbox"
-                                    id="cancel_contract"
-                                    checked={refundForm.data.cancel_contract}
-                                    onChange={(e) => refundForm.setData('cancel_contract', e.target.checked)}
-                                    className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                />
-                                <Label htmlFor="cancel_contract" className="cursor-pointer text-xs font-normal">
-                                    {t('contracts.cancel_contract_checkbox', "Shartnoma holatini bekor qilingan (Cancelled) ga o'tkazish")}
-                                </Label>
-                            </div>
-
-                            <div className="flex justify-end gap-2 pt-2 border-t border-input">
+                            <div className="flex justify-end gap-2 pt-2">
                                 <Button type="button" variant="outline" onClick={() => setRefundingContract(null)}>
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>

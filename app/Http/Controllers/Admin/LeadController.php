@@ -27,7 +27,7 @@ class LeadController extends Controller
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
-        $query = Lead::with(['branch', 'assignedTo', 'convertedStudent'])
+        $query = Lead::with(['branch', 'assignedTo', 'convertedStudent', 'contract'])
             ->orderBy('created_at', 'desc');
 
         if ($targetBranchId) {
@@ -89,6 +89,12 @@ class LeadController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
             'category' => 'nullable|string|in:A,B,C,BC,D,E',
+            'preferred_time' => 'nullable|string|max:50',
+            'birth_date' => 'nullable|date',
+            'address' => 'nullable|string|max:500',
+            'passport_series' => 'nullable|string|max:10',
+            'passport_number' => 'nullable|string|max:20',
+            'pinfl' => 'nullable|string|max:20',
             'source' => 'nullable|string|in:telegram_bot,website,instagram,recommendation,walk_in,reception_manual',
             'notes' => 'nullable|string',
         ]);
@@ -100,6 +106,12 @@ class LeadController extends Controller
             'full_name' => $validated['full_name'],
             'phone' => $validated['phone'],
             'category' => $validated['category'] ?? 'B',
+            'preferred_time' => $validated['preferred_time'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'passport_series' => $validated['passport_series'] ?? null,
+            'passport_number' => $validated['passport_number'] ?? null,
+            'pinfl' => $validated['pinfl'] ?? null,
             'source' => $validated['source'] ?? 'reception_manual',
             'stage' => 'new_lead',
             'notes' => $validated['notes'] ?? null,
@@ -113,7 +125,14 @@ class LeadController extends Controller
         $validated = $request->validate([
             'stage' => 'sometimes|required|in:new_lead,form_sent,form_completed,contract_signed,rejected',
             'notes' => 'nullable|string',
+            'lost_reason' => 'nullable|string',
             'category' => 'nullable|string|in:A,B,C,BC,D,E',
+            'preferred_time' => 'nullable|string|max:50',
+            'birth_date' => 'nullable|date',
+            'address' => 'nullable|string|max:500',
+            'passport_series' => 'nullable|string|max:10',
+            'passport_number' => 'nullable|string|max:20',
+            'pinfl' => 'nullable|string|max:20',
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
