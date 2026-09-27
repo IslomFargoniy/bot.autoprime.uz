@@ -116,18 +116,35 @@ export default function MiniApp({
 
     const handleQrScan = () => {
         const tgWindow = window as any;
-        if (typeof window !== 'undefined' && tgWindow.Telegram?.WebApp?.showScanQrPopup) {
-            tgWindow.Telegram.WebApp.showScanQrPopup(
-                { text: t('tma.scan_prompt', 'Doskadagi dars QR kodini skanerlang') },
-                (scannedText: string) => {
-                    if (scannedText) {
-                        tgWindow.Telegram.WebApp.closeScanQrPopup();
-                        sendScanToken(scannedText);
-                        return true;
+        const tg = typeof window !== 'undefined' ? tgWindow.Telegram?.WebApp : null;
+        const isQrSupported = Boolean(
+            tg &&
+            typeof tg.isVersionAtLeast === 'function' &&
+            tg.isVersionAtLeast('6.4') &&
+            typeof tg.showScanQrPopup === 'function'
+        );
+
+        if (isQrSupported) {
+            try {
+                tg.showScanQrPopup(
+                    { text: t('tma.scan_prompt', 'Doskadagi dars QR kodini skanerlang') },
+                    (scannedText: string) => {
+                        if (scannedText) {
+                            try {
+                                tg.closeScanQrPopup();
+                            } catch {
+                                // ignore
+                            }
+                            sendScanToken(scannedText);
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
-                }
-            );
+                );
+                return;
+            } catch {
+                setShowManualModal(true);
+            }
         } else {
             setShowManualModal(true);
         }
@@ -173,6 +190,36 @@ export default function MiniApp({
                 return 'bg-slate-500/10 text-slate-600 border border-slate-500/20';
         }
     };
+
+    if (!student) {
+        return (
+            <TMALayout title={t('tma.dashboard_title', 'O\'quvchi Kabineti')}>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 py-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm mt-4">
+                    <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 ring-8 ring-blue-500/5">
+                        <GraduationCap className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                        {t('tma.auth_required_title', 'Faqat O\'quvchilar Uchun')}
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mb-6 leading-relaxed">
+                        {t(
+                            'tma.auth_required_desc',
+                            'Ushbu tizim faqat AutoPrime avtomaktabi o\'quvchilari uchun mo\'ljallangan. Iltimos, Telegram boti orqali shaxsiy kabinetingizga kiring.'
+                        )}
+                    </p>
+                    <a
+                        href="https://t.me/autoprimeuz_bot"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                    >
+                        <Phone className="w-4 h-4" />
+                        {t('tma.open_telegram_bot', 'Telegram Botni Ochish')}
+                    </a>
+                </div>
+            </TMALayout>
+        );
+    }
 
     return (
         <TMALayout title={t('tma.dashboard_title', 'O\'quvchi Kabineti')}>

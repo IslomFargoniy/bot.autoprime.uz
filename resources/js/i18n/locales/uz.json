@@ -503,7 +503,10 @@
         "manual_scan_title": "QR Kod Skaneri (Veb Rejim)",
         "manual_scan_desc": "Doskadagi dars sessiyasi QR kodi tokenini kiriting yoki nusxalang:",
         "submit_scan": "Yuborish",
-        "guest_student": "Mehmon O'quvchi"
+        "guest_student": "Mehmon O'quvchi",
+        "auth_required_title": "Faqat O'quvchilar Uchun",
+        "auth_required_desc": "Ushbu tizim faqat AutoPrime avtomaktabi o'quvchilari uchun mo'ljallangan. Iltimos, Telegram boti orqali shaxsiy kabinetingizga kiring.",
+        "open_telegram_bot": "Telegram Botni Ochish"
     },
     "quiz": {
         "tab_exam": "Imtihon",

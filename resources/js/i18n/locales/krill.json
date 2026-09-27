@@ -503,7 +503,10 @@
         "manual_scan_title": "QR Код Сканери (Веб Режим)",
         "manual_scan_desc": "Доскадаги дарс сессияси QR коди токенини киритинг:",
         "submit_scan": "Юбориш",
-        "guest_student": "Меҳмон Ўқувчи"
+        "guest_student": "Меҳмон Ўқувчи",
+        "auth_required_title": "Фақат Ўқувчилар Учун",
+        "auth_required_desc": "Ушбу тизим фақат AutoPrime автомактаби ўқувчилари учун мўлжалланган. Илтимос, Telegram боти орқали шахсий кабинетингизга киринг.",
+        "open_telegram_bot": "Telegram Ботни Очиш"
     },
     "quiz": {
         "tab_exam": "Имтиҳон",

@@ -503,7 +503,10 @@
         "manual_scan_title": "QR Сканер (Веб Режим)",
         "manual_scan_desc": "Введите токен QR-кода с доски:",
         "submit_scan": "Отправить",
-        "guest_student": "Гость"
+        "guest_student": "Гость",
+        "auth_required_title": "Доступ только для учащихся",
+        "auth_required_desc": "Эта система предназначена только для учащихся автошколы AutoPrime. Пожалуйста, войдите в личный кабинет через Telegram-бота.",
+        "open_telegram_bot": "Открыть Telegram-бота"
     },
     "quiz": {
         "tab_exam": "Экзамен",

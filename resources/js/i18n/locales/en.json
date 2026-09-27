@@ -503,7 +503,10 @@
         "manual_scan_title": "QR Scanner (Web Mode)",
         "manual_scan_desc": "Enter dynamic session token:",
         "submit_scan": "Submit",
-        "guest_student": "Guest Student"
+        "guest_student": "Guest Student",
+        "auth_required_title": "Students Only",
+        "auth_required_desc": "This portal is intended exclusively for AutoPrime driving school students. Please access via the Telegram bot.",
+        "open_telegram_bot": "Open Telegram Bot"
     },
     "quiz": {
         "tab_exam": "Exam",

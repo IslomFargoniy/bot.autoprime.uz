@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { telegramInitDataHeaders } from '@/hooks/use-telegram';
+import { telegramInitDataHeaders, useTelegramHaptic } from '@/hooks/use-telegram';
 import {
     Award,
     CheckCircle2,
@@ -89,6 +89,7 @@ interface RoadLine {
 export function TestQuiz() {
     const { t, i18n } = useTranslation();
     const currentLang = i18n.language || 'uz';
+    const haptic = useTelegramHaptic();
 
     // Top view modes
     const [subTab, setSubTab] = useState<'tickets' | 'signs' | 'history'>('tickets');
@@ -315,12 +316,10 @@ export function TestQuiz() {
         const selectedAns = currentQ?.answers?.find((a) => a.id === answerId);
 
         // Haptic feedback if available in Telegram WebApp
-        if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.HapticFeedback) {
-            if (selectedAns?.is_correct) {
-                (window as any).Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            } else {
-                (window as any).Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            }
+        if (selectedAns?.is_correct) {
+            haptic.success();
+        } else {
+            haptic.error();
         }
 
         if (isExplanationEnabled) {
@@ -572,7 +571,7 @@ export function TestQuiz() {
                 </header>
 
                 {/* Question Area */}
-                <main className="flex-1 flex flex-col gap-3 py-3">
+                <main className="flex-1 flex flex-col gap-3 py-3 w-full max-w-6xl mx-auto">
                     {/* Savol sarlavhasi + Tavsif Info tugmasi */}
                     <div className="border-border bg-card rounded-2xl border p-4 shadow-xs">
                         <div className="flex items-start justify-between gap-3">
@@ -601,104 +600,115 @@ export function TestQuiz() {
                         </div>
                     </div>
 
-                    {/* Question Image (agar mavjud bo'lsa) */}
-                    {currentQ?.image_url && (
-                        <div className="border-border bg-card/60 rounded-2xl border p-3 flex items-center justify-center">
-                            <img
-                                src={formatImageUrl(currentQ.image_url) || ''}
-                                alt="Question"
-                                className="max-h-56 md:max-h-64 w-auto max-w-full object-contain rounded-lg shadow-xs"
-                                loading="lazy"
-                            />
-                        </div>
-                    )}
-
-                    {/* Answers Options (Exact panel.prava24.uz styling) */}
-                    <div className="flex flex-col gap-2.5">
-                        {currentQ?.answers?.map((ans, idx) => {
-                            const isSelected = selectedAnswers[currentQ.id] === ans.id || optimisticAnswerId === ans.id;
-                            const isAnswered = isCurrentAnswered || !!result;
-                            const isCorrect = ans.is_correct;
-
-                            let btnStyle = 'border-border bg-card hover:border-primary hover:bg-muted/50';
-
-                            if (isAnswered) {
-                                if (isCorrect) {
-                                    btnStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold ring-1 ring-emerald-500';
-                                } else if (isSelected && !isCorrect) {
-                                    btnStyle = 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 font-semibold ring-1 ring-rose-500';
-                                }
-                            } else if (isSelected) {
-                                btnStyle = 'border-primary bg-primary/10 text-primary font-bold';
-                            }
-
-                            return (
-                                <button
-                                    key={ans.id}
-                                    onClick={() => handleSelectAnswer(currentQ.id, ans.id)}
-                                    className={cn(
-                                        'group flex items-stretch rounded-xl border text-left transition-all active:scale-[0.98]',
-                                        btnStyle
-                                    )}
-                                >
-                                    <div className="bg-primary/10 text-primary group-hover:bg-primary/20 flex w-11 shrink-0 items-center justify-center font-bold text-sm">
-                                        F{idx + 1}
-                                    </div>
-                                    <div
-                                        className="text-foreground/90 flex-1 p-3 leading-snug font-medium"
-                                        style={{ fontSize: `${fontSize}px` }}
-                                    >
-                                        {getLocalized(ans, 'answer')}
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </main>
-
-                {/* Sticky Bottom Navigation (Ribbon + Tugatish) */}
-                <footer className="sticky bottom-0 z-30 border-border bg-card/95 backdrop-blur-md border-t p-3 -mx-4 mt-auto">
+                    {/* Question Content: Desktop Side-by-Side (Image Left, Options Right) or Mobile Stack */}
                     <div
-                        ref={mobileScrollRef}
-                        className="overflow-x-auto py-1 mb-2.5 no-scrollbar"
+                        className={cn(
+                            currentQ?.image_url
+                                ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start'
+                                : 'flex flex-col gap-2.5'
+                        )}
                     >
-                        <div className="flex gap-1.5 w-max mx-auto px-1">
-                            {questions.map((q, idx) => {
-                                const selectedAnsId = selectedAnswers[q.id];
-                                const isActive = currentIndex === idx;
-                                const isAnswered = selectedAnsId !== undefined && selectedAnsId !== null;
-                                const selectedAnsObj = q.answers?.find((a) => a.id === selectedAnsId);
-                                const isCorrect = selectedAnsObj?.is_correct;
+                        {/* Question Image (Left on Desktop) */}
+                        {currentQ?.image_url && (
+                            <div className="border-border bg-card/60 rounded-2xl border p-3 flex items-center justify-center min-h-[220px] md:min-h-[300px] lg:min-h-[360px] h-full">
+                                <img
+                                    src={formatImageUrl(currentQ.image_url) || ''}
+                                    alt="Question"
+                                    className="max-h-64 md:max-h-80 lg:max-h-[380px] w-auto max-w-full object-contain rounded-lg shadow-xs"
+                                    loading="lazy"
+                                />
+                            </div>
+                        )}
+
+                        {/* Answers Options (Right on Desktop) */}
+                        <div className="flex flex-col gap-2.5 flex-1">
+                            {currentQ?.answers?.map((ans, idx) => {
+                                const isSelected = selectedAnswers[currentQ.id] === ans.id || optimisticAnswerId === ans.id;
+                                const isAnswered = isCurrentAnswered || !!result;
+                                const isCorrect = ans.is_correct;
+
+                                let btnStyle = 'border-border bg-card hover:border-primary hover:bg-muted/50';
+
+                                if (isAnswered) {
+                                    if (isCorrect) {
+                                        btnStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold ring-1 ring-emerald-500';
+                                    } else if (isSelected && !isCorrect) {
+                                        btnStyle = 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 font-semibold ring-1 ring-rose-500';
+                                    }
+                                } else if (isSelected) {
+                                    btnStyle = 'border-primary bg-primary/10 text-primary font-bold';
+                                }
 
                                 return (
                                     <button
-                                        key={q.id}
-                                        data-active={isActive ? 'true' : 'false'}
-                                        onClick={() => {
-                                            setOptimisticAnswerId(null);
-                                            setCurrentIndex(idx);
-                                        }}
+                                        key={ans.id}
+                                        onClick={() => handleSelectAnswer(currentQ.id, ans.id)}
                                         className={cn(
-                                            'flex h-8 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all shadow-xs',
-                                            isActive && 'ring-2 ring-blue-400 z-10',
-                                            !isAnswered
-                                                ? (isActive ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80')
-                                                : (isCorrect ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-rose-600 text-white hover:bg-rose-700')
+                                            'group flex items-stretch rounded-xl border text-left transition-all active:scale-[0.98]',
+                                            btnStyle
                                         )}
                                     >
-                                        {idx + 1}
+                                        <div className="bg-primary/10 text-primary group-hover:bg-primary/20 flex w-11 shrink-0 items-center justify-center font-bold text-sm">
+                                            F{idx + 1}
+                                        </div>
+                                        <div
+                                            className="text-foreground/90 flex-1 p-3 leading-snug font-medium"
+                                            style={{ fontSize: `${fontSize}px` }}
+                                        >
+                                            {getLocalized(ans, 'answer')}
+                                        </div>
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
+                </main>
 
-                    <button
-                        onClick={() => setShowFinishConfirmModal(true)}
-                        className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 text-sm transition-colors active:scale-95 shadow-sm"
-                    >
-                        {t('tests.finish_quiz', 'Testni Yakunlash')}
-                    </button>
+                {/* Sticky Bottom Navigation (Ribbon + Tugatish) */}
+                <footer className="sticky bottom-0 z-30 border-border bg-card/95 backdrop-blur-md border-t p-3 -mx-4 mt-auto">
+                    <div className="max-w-6xl mx-auto w-full">
+                        <div
+                            ref={mobileScrollRef}
+                            className="overflow-x-auto py-1 mb-2.5 no-scrollbar"
+                        >
+                            <div className="flex gap-1.5 w-max mx-auto px-1">
+                                {questions.map((q, idx) => {
+                                    const selectedAnsId = selectedAnswers[q.id];
+                                    const isActive = currentIndex === idx;
+                                    const isAnswered = selectedAnsId !== undefined && selectedAnsId !== null;
+                                    const selectedAnsObj = q.answers?.find((a) => a.id === selectedAnsId);
+                                    const isCorrect = selectedAnsObj?.is_correct;
+
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            data-active={isActive ? 'true' : 'false'}
+                                            onClick={() => {
+                                                setOptimisticAnswerId(null);
+                                                setCurrentIndex(idx);
+                                            }}
+                                            className={cn(
+                                                'flex h-8 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all shadow-xs',
+                                                isActive && 'ring-2 ring-blue-400 z-10',
+                                                !isAnswered
+                                                    ? (isActive ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80')
+                                                    : (isCorrect ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-rose-600 text-white hover:bg-rose-700')
+                                            )}
+                                        >
+                                            {idx + 1}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowFinishConfirmModal(true)}
+                            className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 text-sm transition-colors active:scale-95 shadow-sm"
+                        >
+                            {t('tests.finish_quiz', 'Testni Yakunlash')}
+                        </button>
+                    </div>
                 </footer>
 
                 {/* Explanation Modal Overlay (Matching panel.prava24.uz) */}
