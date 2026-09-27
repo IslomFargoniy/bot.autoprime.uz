@@ -1,0 +1,78 @@
+name: Build Flutter Desktop (Windows .exe & macOS .dmg)
+
+on:
+  push:
+    paths:
+      - 'desktop/**'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  # 1. WINDOWS (.exe) BUILD
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        working-directory: ./desktop
+        run: flutter pub get
+
+      - name: Build Windows Executable
+        working-directory: ./desktop
+        run: flutter build windows --release
+
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AutoPrime-Windows-Release
+          path: desktop/build/windows/x64/runner/Release/
+
+  # 2. MACOS (.dmg) BUILD
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Enable macOS Desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Install dependencies
+        working-directory: ./desktop
+        run: flutter pub get
+
+      - name: Build macOS Application
+        working-directory: ./desktop
+        run: flutter build macos --release
+
+      - name: Create DMG package
+        working-directory: ./desktop
+        run: |
+          npm install --global create-dmg
+          create-dmg build/macos/Build/Products/Release/autoprime_desktop.app build/macos/ || true
+
+      - name: Upload macOS Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AutoPrime-macOS-Release
+          path: desktop/build/macos/
