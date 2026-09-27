@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\VehicleController;
+use App\Http\Controllers\Api\Desktop\DesktopAuthController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\MiniAppController;
@@ -93,13 +94,19 @@ Route::get('/mini-app', [MiniAppController::class, 'index'])->name('student.mini
 Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->name('attendance.scan-qr');
 Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
 
-// Student Tests & Mock Exam Endpoints
+// Student Tests & Mock Exam Endpoints (TMA & Desktop)
 Route::get('/api/tests/tickets', [StudentTestController::class, 'getTickets'])->name('tests.tickets');
 Route::get('/api/tests/ticket/{ticket}', [StudentTestController::class, 'getTicketQuestions'])->name('tests.ticket.questions');
 Route::get('/api/tests/exam', [StudentTestController::class, 'getMockExam'])->middleware('throttle:20,1')->name('tests.exam');
 Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt'])->middleware('throttle:30,1')->name('tests.submit');
 Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
 Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats'])->name('tests.stats');
+
+// Desktop Application Endpoints (Auto-Update, Telegram OTP Auth & Single Session Dashboard)
+Route::get('/api/desktop/version-check', [DesktopAuthController::class, 'versionCheck'])->name('desktop.version-check');
+Route::post('/api/desktop/auth/send-otp', [DesktopAuthController::class, 'sendOtp'])->middleware('throttle:10,1')->name('desktop.send-otp');
+Route::post('/api/desktop/auth/verify-otp', [DesktopAuthController::class, 'verifyOtp'])->middleware('throttle:20,1')->name('desktop.verify-otp');
+Route::get('/api/desktop/student/dashboard', [DesktopAuthController::class, 'dashboard'])->name('desktop.dashboard');
 
 Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -65,12 +65,17 @@ class Student extends Model
         'telegram_chat_id',
         'status',
         'is_active',
+        'current_desktop_session_id',
+        'current_desktop_device_uuid',
+        'desktop_auth_token',
+        'desktop_token_expires_at',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'medical_certificate_date' => 'date',
         'is_active' => 'boolean',
+        'desktop_token_expires_at' => 'datetime',
     ];
 
     /**

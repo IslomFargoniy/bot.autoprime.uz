@@ -8,7 +8,9 @@ use App\Models\AttemptAnswer;
 use App\Models\Question;
 use App\Models\RoadLine;
 use App\Models\SignCategory;
+use App\Models\Student;
 use App\Models\Ticket;
+use App\Services\DesktopStudentResolver;
 use App\Services\MiniAppStudentResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,22 @@ class StudentTestController extends Controller
      * Seconds accepted after the exam time limit to absorb network latency.
      */
     public const MOCK_EXAM_GRACE_SECONDS = 60;
+
+    /**
+     * Resolve student from Desktop Bearer Token or Telegram Mini App initData.
+     */
+    protected function resolveStudent(Request $request): ?Student
+    {
+        $authHeader = $request->header('Authorization');
+        if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
+            [$student] = DesktopStudentResolver::resolve($request);
+            if ($student) {
+                return $student;
+            }
+        }
+
+        return MiniAppStudentResolver::resolve($request);
+    }
 
     /**
      * Get all active tickets with question counts.
@@ -71,7 +89,7 @@ class StudentTestController extends Controller
      */
     public function getMockExam(Request $request): JsonResponse
     {
-        $student = MiniAppStudentResolver::resolve($request);
+        $student = $this->resolveStudent($request);
 
         $questions = Question::where('is_active', true)
             ->with(['answers' => function ($ans) {
@@ -132,7 +150,7 @@ class StudentTestController extends Controller
             default => $validated['attempt_type'],
         };
 
-        $student = MiniAppStudentResolver::resolve($request);
+        $student = $this->resolveStudent($request);
 
         // First submitted answer per question wins; later duplicates are ignored.
         $submittedAnswers = collect($validated['answers'])
@@ -328,7 +346,7 @@ class StudentTestController extends Controller
      */
     public function getStudentStats(Request $request): JsonResponse
     {
-        $student = MiniAppStudentResolver::resolve($request);
+        $student = $this->resolveStudent($request);
 
         if (! $student) {
             return response()->json([

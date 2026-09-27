@@ -507,4 +507,34 @@ class TelegramService
             Log::error("Failed to send contract signed notification to student {$student->id}: ".$e->getMessage());
         }
     }
+
+    /**
+     * Send OTP code for Desktop application login.
+     */
+    public function sendDesktopLoginOtp(Student $student, string $otp): bool
+    {
+        $bot = $this->getBot();
+        if (! $bot || ! $student->telegram_id) {
+            return false;
+        }
+
+        $text = "🚗 <b>AutoPrime LMS Desktop Dasturi</b>\n\n".
+                "🔐 <b>Kirish uchun tasdiqlash kodi:</b> <code>{$otp}</code>\n\n".
+                "⚠️ <i>Ushbu kodni hech kimga bermang. Kod 2 daqiqa davomida amal qiladi.</i>";
+
+        try {
+            $bot->sendMessage(
+                text: $text,
+                chat_id: (int) $student->telegram_id,
+                parse_mode: 'HTML'
+            );
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error("Failed to send Telegram Desktop OTP to student {$student->id}: ".$e->getMessage());
+
+            return false;
+        }
+    }
 }
+
