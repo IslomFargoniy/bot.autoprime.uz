@@ -218,14 +218,22 @@ class StudentController extends Controller
 
         $drivings = $drivingsQuery->paginate($perPage)->withQueryString();
 
-        $reviews = $student->drivings()->has('review')->with('review')->get()->pluck('review');
-        $avgRating = $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : 0;
+        $drivingCounts = $student->drivings()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->all();
+
+        $avgRating = (float) ($student->drivings()
+            ->join('reviews', 'reviews.driving_id', '=', 'drivings.id')
+            ->avg('reviews.rating') ?? 0);
+        $avgRating = round($avgRating, 1);
 
         $stats = [
-            'total_drivings' => $student->drivings()->count(),
-            'completed_drivings' => $student->drivings()->where('status', 'completed')->count(),
-            'scheduled_drivings' => $student->drivings()->where('status', 'scheduled')->count(),
-            'cancelled_drivings' => $student->drivings()->where('status', 'cancelled')->count(),
+            'total_drivings' => array_sum($drivingCounts),
+            'completed_drivings' => $drivingCounts['completed'] ?? 0,
+            'scheduled_drivings' => $drivingCounts['scheduled'] ?? 0,
+            'cancelled_drivings' => $drivingCounts['cancelled'] ?? 0,
             'average_rating' => $avgRating,
         ];
 

@@ -108,12 +108,15 @@ class StudentTestController extends Controller
                 'started_at' => now(),
             ]);
 
-            foreach ($questions as $question) {
-                AttemptAnswer::create([
-                    'attempt_id' => $attempt->id,
-                    'question_id' => $question->id,
-                ]);
-            }
+            $now = now();
+            $attemptAnswers = $questions->map(fn ($question) => [
+                'attempt_id' => $attempt->id,
+                'question_id' => $question->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->all();
+
+            AttemptAnswer::insert($attemptAnswers);
 
             return $attempt;
         });
@@ -186,15 +189,18 @@ class StudentTestController extends Controller
                 'duration_seconds' => $duration,
             ]);
 
-            foreach ($graded['details'] as $detail) {
-                AttemptAnswer::create([
-                    'attempt_id' => $attempt->id,
-                    'question_id' => $detail['question_id'],
-                    'answer_id' => $detail['selected_answer_id'],
-                    'is_correct' => $detail['is_correct'],
-                    'answered_at' => now(),
-                ]);
-            }
+            $now = now();
+            $attemptAnswers = array_map(fn ($detail) => [
+                'attempt_id' => $attempt->id,
+                'question_id' => $detail['question_id'],
+                'answer_id' => $detail['selected_answer_id'],
+                'is_correct' => $detail['is_correct'],
+                'answered_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], $graded['details']);
+
+            AttemptAnswer::insert($attemptAnswers);
 
             return $attempt;
         });

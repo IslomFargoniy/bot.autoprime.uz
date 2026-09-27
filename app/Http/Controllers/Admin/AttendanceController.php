@@ -126,14 +126,18 @@ class AttendanceController extends Controller
      */
     public function sessionScreen(LessonSession $session): Response
     {
-        $session->load(['group', 'teacher', 'attendances.student']);
+        $session->load([
+            'group' => fn ($q) => $q->withCount('students'),
+            'teacher',
+            'attendances.student',
+        ]);
 
         $qrToken = $session->generateQrToken();
 
         return Inertia::render('Admin/Attendance/Screen', [
             'session' => $session,
             'qrToken' => $qrToken,
-            'studentsCount' => $session->group ? $session->group->students()->count() : 0,
+            'studentsCount' => $session->group?->students_count ?? 0,
             'attendances' => $session->attendances,
         ]);
     }
@@ -152,7 +156,7 @@ class AttendanceController extends Controller
         return response()->json([
             'qrToken' => $session->generateQrToken(),
             'attendances' => $session->attendances,
-            'presentCount' => $session->attendances()->count(),
+            'presentCount' => $session->attendances->count(),
         ]);
     }
 

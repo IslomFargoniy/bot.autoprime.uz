@@ -130,10 +130,9 @@ class TestController extends Controller
     public function destroyTicket(Ticket $ticket): RedirectResponse
     {
         DB::transaction(function () use ($ticket) {
-            foreach ($ticket->questions as $q) {
-                $q->answers()->delete();
-                $q->delete();
-            }
+            $questionIds = $ticket->questions()->pluck('id');
+            Answer::whereIn('question_id', $questionIds)->delete();
+            Question::whereIn('id', $questionIds)->delete();
             $ticket->delete();
         });
 

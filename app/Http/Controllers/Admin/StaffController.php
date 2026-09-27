@@ -75,7 +75,7 @@ class StaffController extends Controller
             });
         }
 
-        // Role counts for tabs
+        // Role counts for tabs (single aggregated query)
         $countsQuery = User::query();
         if (! $isSuperAdmin) {
             $countsQuery->where('role', '!=', 'superadmin');
@@ -86,15 +86,21 @@ class StaffController extends Controller
             $countsQuery->where('branch_id', $targetBranchId);
         }
 
+        $groupedCounts = (clone $countsQuery)
+            ->selectRaw('role, COUNT(*) as count')
+            ->groupBy('role')
+            ->pluck('count', 'role')
+            ->all();
+
         $roleCounts = [
-            'all' => (clone $countsQuery)->count(),
-            'instructor' => (clone $countsQuery)->where('role', 'instructor')->count(),
-            'teacher' => (clone $countsQuery)->where('role', 'teacher')->count(),
-            'admin' => (clone $countsQuery)->where('role', 'admin')->count(),
-            'reception' => (clone $countsQuery)->where('role', 'reception')->count(),
-            'accountant' => (clone $countsQuery)->where('role', 'accountant')->count(),
-            'kassir' => (clone $countsQuery)->where('role', 'kassir')->count(),
-            'superadmin' => $isSuperAdmin ? (clone $countsQuery)->where('role', 'superadmin')->count() : 0,
+            'all' => array_sum($groupedCounts),
+            'instructor' => $groupedCounts['instructor'] ?? 0,
+            'teacher' => $groupedCounts['teacher'] ?? 0,
+            'admin' => $groupedCounts['admin'] ?? 0,
+            'reception' => $groupedCounts['reception'] ?? 0,
+            'accountant' => $groupedCounts['accountant'] ?? 0,
+            'kassir' => $groupedCounts['kassir'] ?? 0,
+            'superadmin' => $isSuperAdmin ? ($groupedCounts['superadmin'] ?? 0) : 0,
         ];
 
         $totalBaseSalary = (float) (clone $countsQuery)->sum('base_salary');
@@ -233,7 +239,7 @@ class StaffController extends Controller
         $this->ensureCanAccessStaff($request->user(), $staff);
 
         $staff->load(['branch', 'salaries' => function ($q) {
-            $q->orderBy('created_at', 'desc')->take(12);
+            $q->with('payments')->orderBy('created_at', 'desc')->take(12);
         }, 'salaryPayments' => function ($q) {
             $q->with('cashRegister')->orderBy('paid_at', 'desc')->take(20);
         }]);

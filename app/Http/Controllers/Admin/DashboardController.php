@@ -76,17 +76,23 @@ class DashboardController extends Controller
                 $query->where('instructor_id', $user->id);
             });
 
-        $periodDrivingsCount = (clone $drivingsQuery)->count();
+        $drivingStats = (clone $drivingsQuery)
+            ->selectRaw('DATE(start_time) as date_val, status, COUNT(*) as count')
+            ->groupBy('date_val', 'status')
+            ->get();
 
-        $completedPeriodDrivings = (clone $drivingsQuery)
-            ->where('status', 'completed')
-            ->count();
+        $periodDrivingsCount = (int) $drivingStats->sum('count');
+        $completedPeriodDrivings = (int) $drivingStats->where('status', 'completed')->sum('count');
 
         $completionRate = $periodDrivingsCount > 0
             ? round(($completedPeriodDrivings / $periodDrivingsCount) * 100, 1)
             : 0;
 
-        $drivingsInPeriod = (clone $drivingsQuery)->get();
+        // Group by "Y-m-d_status" for O(1) fast lookup
+        $metricsLookup = [];
+        foreach ($drivingStats as $stat) {
+            $metricsLookup[$stat->date_val.'_'.$stat->status] = (int) $stat->count;
+        }
 
         $chartData = [];
         $currentDate = $fromDate->copy();
@@ -96,17 +102,14 @@ class DashboardController extends Controller
         $daysAdded = 0;
 
         while ($currentDate->lte($toDate) && $daysAdded < $maxDays) {
-            $dateStr = $currentDate->format('d-m-Y');
-
-            $dayDrivings = $drivingsInPeriod->filter(function ($d) use ($dateStr) {
-                return Carbon::parse($d->start_time)->format('d-m-Y') === $dateStr;
-            });
+            $dateFormatted = $currentDate->format('d-m-Y');
+            $dateDb = $currentDate->format('Y-m-d');
 
             $chartData[] = [
-                'date' => $dateStr,
-                'Rejada' => $dayDrivings->where('status', 'scheduled')->count(),
-                'Tugagan' => $dayDrivings->where('status', 'completed')->count(),
-                'Bekor_qilingan' => $dayDrivings->where('status', 'cancelled')->count(),
+                'date' => $dateFormatted,
+                'Rejada' => $metricsLookup[$dateDb.'_scheduled'] ?? 0,
+                'Tugagan' => $metricsLookup[$dateDb.'_completed'] ?? 0,
+                'Bekor_qilingan' => $metricsLookup[$dateDb.'_cancelled'] ?? 0,
             ];
 
             $currentDate->addDay();

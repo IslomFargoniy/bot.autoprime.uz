@@ -49,8 +49,11 @@ class FinanceController extends Controller
 
         // 2. Superadmin / Central Registers (one for each type)
         $registerTypes = CashRegisterType::where('is_active', true)->get();
+        $existingSuperadminTypeIds = CashRegister::whereNull('branch_id')->pluck('cash_register_type_id')->all();
         foreach ($registerTypes as $type) {
-            CashRegister::getSuperadminRegisterForType($type->id);
+            if (! in_array($type->id, $existingSuperadminTypeIds, true)) {
+                CashRegister::getSuperadminRegisterForType($type->id);
+            }
         }
         $superadminRegisters = CashRegister::whereNull('branch_id')
             ->with(['type'])

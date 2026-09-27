@@ -40,11 +40,13 @@ class DrivingScheduler
             return "Avtomobil ({$vehicle->plate_number}) ushbu vaqt oralig'ida boshqa darsga band.";
         }
 
-        $busyStudentId = $overlapping()->whereIn('student_id', $studentIds)->value('student_id');
-        if ($busyStudentId) {
-            $name = Student::whereKey($busyStudentId)->value('full_name');
+        $busyDriving = $overlapping()
+            ->whereIn('student_id', $studentIds)
+            ->with('student')
+            ->first();
 
-            return "{$name} ushbu vaqt oralig'ida boshqa mashg'ulotga yozilgan.";
+        if ($busyDriving && $busyDriving->student) {
+            return "{$busyDriving->student->full_name} ushbu vaqt oralig'ida boshqa mashg'ulotga yozilgan.";
         }
 
         return null;
