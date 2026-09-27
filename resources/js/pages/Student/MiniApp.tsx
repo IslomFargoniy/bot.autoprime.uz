@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { TestQuiz } from '@/components/test-quiz';
 import { telegramInitDataHeaders } from '@/hooks/use-telegram';
+import { parseDate } from '@/lib/utils';
 
 
 interface StudentProps {
@@ -531,7 +532,7 @@ export default function MiniApp({
                                     <div className="flex items-center gap-2">
                                         <Car className="w-4 h-4 text-blue-600" />
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">
-                                            {new Date(drv.start_time).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            {parseDate(drv.start_time).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
                                     <span

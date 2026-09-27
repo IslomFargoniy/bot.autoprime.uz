@@ -12,6 +12,19 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
 }
 
 /**
+ * Parse a server date. The backend sends "YYYY-MM-DD HH:mm:ss", which some
+ * Safari / iOS Telegram WebView versions reject, so it is converted to the
+ * ISO form "YYYY-MM-DDTHH:mm:ss" (still read as local time) first.
+ */
+export function parseDate(value: string | Date): Date {
+    if (value instanceof Date) {
+        return value;
+    }
+
+    return new Date(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value) ? value.replace(' ', 'T') : value);
+}
+
+/**
  * Format datetime to standard format: YYYY-MM-DD HH:mm:ss (e.g. 2026-09-27 10:35:26)
  */
 export function formatDateTime(dateStr?: string | Date | null): string {
@@ -19,7 +32,7 @@ export function formatDateTime(dateStr?: string | Date | null): string {
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateStr)) {
         return dateStr;
     }
-    const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+    const d = parseDate(dateStr);
     if (isNaN(d.getTime())) return typeof dateStr === 'string' ? dateStr : '-';
 
     const year = d.getFullYear();
@@ -40,7 +53,7 @@ export function formatDate(dateStr?: string | Date | null): string {
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         return dateStr;
     }
-    const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+    const d = parseDate(dateStr);
     if (isNaN(d.getTime())) return typeof dateStr === 'string' ? dateStr : '-';
 
     const year = d.getFullYear();

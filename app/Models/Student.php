@@ -79,9 +79,17 @@ class Student extends Model
     ];
 
     /**
-     * Canonical phone format (+998XXXXXXXXX) so manual entry, imports and lead
-     * conversion all match the same student instead of creating duplicates.
+     * Desktop session credentials are only ever compared on the server.
+     *
+     * @var list<string>
      */
+    protected $hidden = [
+        'current_desktop_session_id',
+        'current_desktop_device_uuid',
+        'desktop_auth_token',
+        'desktop_token_expires_at',
+    ];
+
     /**
      * Students of a branch: assigned directly or through a group of that branch.
      * Every list and counter must use this so the numbers agree.
@@ -95,6 +103,10 @@ class Student extends Model
             ->orWhereHas('group', fn (Builder $group) => $group->where('branch_id', $branchId)));
     }
 
+    /**
+     * Canonical phone format (+998XXXXXXXXX) so manual entry, imports and lead
+     * conversion all match the same student instead of creating duplicates.
+     */
     public static function normalizePhone(?string $phone): ?string
     {
         $digits = preg_replace('/\D/', '', (string) $phone);
@@ -234,10 +246,6 @@ class Student extends Model
     }
 
     /**
-     * Whether the student passed the server-graded internal mock exam, which is
-     * the only attempt type that counts toward certificate eligibility.
-     */
-    /**
      * Whether deleting this student would cascade-delete contracts, payments,
      * certificates or lesson history.
      */
@@ -250,6 +258,10 @@ class Student extends Model
             || $this->drivings()->exists();
     }
 
+    /**
+     * Whether the student passed the server-graded internal mock exam, which is
+     * the only attempt type that counts toward certificate eligibility.
+     */
     public function hasPassedMockExam(): bool
     {
         return $this->attempts()

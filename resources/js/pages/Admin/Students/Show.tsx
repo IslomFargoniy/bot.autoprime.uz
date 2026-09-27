@@ -42,7 +42,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, parseDate } from '@/lib/utils';
 
 interface Student {
     id: number;
@@ -433,7 +433,7 @@ export default function StudentShow({
                                         <TableCell className="whitespace-nowrap">
                                             <div className="font-medium">
                                                 {(() => {
-                                                    const d = new Date(driving.start_time);
+                                                    const d = parseDate(driving.start_time);
                                                     const dd = String(d.getDate()).padStart(2, '0');
                                                     const mm = String(d.getMonth() + 1).padStart(2, '0');
                                                     const yyyy = d.getFullYear();
@@ -441,9 +441,9 @@ export default function StudentShow({
                                                 })()}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                                {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                                 {' - '}
-                                                {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                                {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">{driving.instructor?.name || '-'}</TableCell>
@@ -514,7 +514,7 @@ export default function StudentShow({
                                     <div>
                                         <div className="font-semibold text-sm">
                                             {(() => {
-                                                const d = new Date(driving.start_time);
+                                                const d = parseDate(driving.start_time);
                                                 const dd = String(d.getDate()).padStart(2, '0');
                                                 const mm = String(d.getMonth() + 1).padStart(2, '0');
                                                 const yyyy = d.getFullYear();
@@ -522,9 +522,9 @@ export default function StudentShow({
                                             })()}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
-                                            {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                             {' - '}
-                                            {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
                                     <div>

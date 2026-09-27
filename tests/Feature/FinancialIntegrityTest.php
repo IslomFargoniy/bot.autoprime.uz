@@ -217,6 +217,28 @@ test('payroll generation twice accrues the base salary only once', function () {
         ->and((float) $employee->fresh()->salary_balance)->toEqual(2000000.0);
 });
 
+test('payroll generation re-checks under the lock for a run that finished concurrently', function () {
+    $employee = User::factory()->create(['role' => 'teacher', 'branch_id' => $this->branch->id, 'base_salary' => 2000000]);
+
+    // Simulate a concurrent run committing between the pre-fetch and the row lock:
+    // the second read of the employee is the locked one.
+    $reads = 0;
+    User::retrieved(function (User $user) use ($employee, &$reads) {
+        if ($user->id === $employee->id && ++$reads === 2) {
+            Salary::create([
+                'branch_id' => $employee->branch_id, 'user_id' => $employee->id, 'period' => '2026-09',
+                'salary_type' => 'base_salary', 'amount' => 2000000, 'is_deduction' => false, 'accrued_at' => now(),
+            ]);
+        }
+    });
+
+    $this->actingAs($this->admin)->post(route('salaries.generate'), ['period' => '2026-09'])->assertRedirect();
+
+    expect($reads)->toBeGreaterThanOrEqual(2)
+        ->and(Salary::where('user_id', $employee->id)->where('salary_type', 'base_salary')->count())->toBe(1)
+        ->and((float) $employee->fresh()->salary_balance)->toEqual(0.0);
+});
+
 test('marking a group journal twice reuses one session credited to the group teacher', function () {
     $teacher = User::factory()->create(['role' => 'teacher', 'branch_id' => $this->branch->id]);
     $group = Group::create(['name' => 'Jurnal', 'branch_id' => $this->branch->id, 'teacher_id' => $teacher->id]);

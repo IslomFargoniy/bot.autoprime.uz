@@ -41,9 +41,7 @@ class VehicleController extends Controller
                     ->orWhere('model', 'like', "%{$s}%");
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $vehicles = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $vehicles = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $instructors = User::where('role', 'instructor')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {

@@ -74,8 +74,6 @@ class InstructorController extends Controller
             }
         };
 
-        $perPage = $request->get('per_page', '15');
-
         $items = $query->withCount('groups')
             ->with([
                 'groups' => fn ($gQuery) => $gQuery->withCount('students'),
@@ -131,7 +129,7 @@ class InstructorController extends Controller
         })->sortByDesc('kpi_percentage')->values();
 
         $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPageInt = $perPage === 'all' ? max($transformed->count(), 1) : (int) $perPage;
+        $perPageInt = $this->perPage($request, fn () => $transformed->count());
 
         $paginatedItems = $transformed->slice(($page - 1) * $perPageInt, $perPageInt)->values();
 

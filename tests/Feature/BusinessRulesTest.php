@@ -220,3 +220,15 @@ test('dashboard student count matches the branch student list', function () {
 
     expect($counted)->toBe(2)->and($listed)->toBe($counted);
 });
+
+test('invalid page sizes fall back to safe values instead of failing', function (string $perPage, int $expected) {
+    $this->actingAs($this->admin)->get(route('students.index', ['per_page' => $perPage]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page->where('students.per_page', $expected));
+})->with([
+    'negative' => ['-5', 15],
+    'zero' => ['0', 15],
+    'text' => ['abc', 15],
+    'too large' => ['100000', 100],
+    'valid' => ['50', 50],
+]);

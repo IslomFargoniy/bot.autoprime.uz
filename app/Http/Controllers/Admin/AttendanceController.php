@@ -47,9 +47,7 @@ class AttendanceController extends Controller
                 $q->where('branch_id', $targetBranchId);
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $attendances = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $attendances = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $activeSessions = LessonSession::with(['group', 'teacher'])
             ->where('status', 'active')

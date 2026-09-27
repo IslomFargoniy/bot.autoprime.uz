@@ -46,9 +46,7 @@ class TestController extends Controller
         if ($request->filled('type')) {
             $query->where('attempt_type', $request->type);
         }
-
-        $perPage = $request->get('per_page', '15');
-        $attempts = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $attempts = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $stats = [
             'total_tickets' => Ticket::count(),

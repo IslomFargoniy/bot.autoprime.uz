@@ -57,10 +57,7 @@ class GroupController extends Controller
             $query->where('instructor_id', $request->instructor_id);
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $groups = $query->paginate($perPage)->withQueryString();
 

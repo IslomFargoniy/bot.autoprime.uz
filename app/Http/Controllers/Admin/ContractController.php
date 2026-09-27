@@ -62,9 +62,7 @@ class ContractController extends Controller
                     });
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $contracts = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $contracts = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $students = Student::orderBy('full_name')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {

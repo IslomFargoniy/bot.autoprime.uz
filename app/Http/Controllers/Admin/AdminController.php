@@ -40,10 +40,7 @@ class AdminController extends Controller
             $query->where('branch_id', $targetBranchId);
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $admins = $query->paginate($perPage)->withQueryString();
         $branches = Branch::where('status', 'active')->get();

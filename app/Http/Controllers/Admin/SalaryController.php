@@ -41,9 +41,7 @@ class SalaryController extends Controller
                 $q->where('branch_id', $targetBranchId);
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $salaries = $salariesQuery->paginate($perPage === 'all' ? max($salariesQuery->count(), 1) : (int) $perPage)->withQueryString();
+        $salaries = $salariesQuery->paginate($this->perPage($request, fn () => $salariesQuery->count()))->withQueryString();
 
         $employees = User::where('status', 'active')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -135,6 +133,15 @@ class SalaryController extends Controller
                 // Lock the employee so a concurrent run waits and then sees this accrual
                 $emp = User::whereKey($emp->id)->lockForUpdate()->first();
                 if (! $emp) {
+                    continue;
+                }
+
+                // Re-check under the lock: the pre-fetch above may predate a concurrent run
+                $alreadyGenerated = Salary::where('user_id', $emp->id)
+                    ->where('period', $period)
+                    ->where('salary_type', 'base_salary')
+                    ->exists();
+                if ($alreadyGenerated) {
                     continue;
                 }
 

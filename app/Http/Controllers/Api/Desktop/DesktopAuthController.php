@@ -15,6 +15,14 @@ use Illuminate\Support\Str;
 
 class DesktopAuthController extends Controller
 {
+    private const OTP_CACHE_PREFIX = 'desktop_otp_';
+
+    private const OTP_TTL_SECONDS = 120;
+
+    private const OTP_RESEND_COOLDOWN_SECONDS = 60;
+
+    private const OTP_MAX_ATTEMPTS = 5;
+
     /**
      * Check current desktop app version and available updates.
      */
@@ -55,6 +63,10 @@ class DesktopAuthController extends Controller
 
     /**
      * Send 6-digit OTP to student's Telegram for Desktop Login.
+     *
+     * The answer is the same whether or not the phone belongs to a student, so
+     * the endpoint cannot be used to discover registered numbers, and each
+     * phone gets at most one code per cooldown window.
      */
     public function sendOtp(Request $request, TelegramService $telegramService): JsonResponse
     {
@@ -62,96 +74,80 @@ class DesktopAuthController extends Controller
             'phone' => 'required|string|min:7|max:25',
         ]);
 
-        $rawPhone = preg_replace('/[^\d+]/', '', (string) $request->input('phone'));
-        $phoneWithoutPlus = ltrim($rawPhone, '+');
-        $phoneWithPlus = '+'.$phoneWithoutPlus;
-
-        $student = Student::where('phone', $rawPhone)
-            ->orWhere('phone', $phoneWithoutPlus)
-            ->orWhere('phone', $phoneWithPlus)
-            ->first();
-
-        if (! $student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ushbu telefon raqam bilan ro\'yxatdan o\'tgan o\'quvchi topilmadi.',
-            ], 404);
+        $phone = Student::normalizePhone($request->input('phone'));
+        if (! $phone) {
+            return $this->otpSentResponse();
         }
 
-        if (! $student->is_active) {
+        if (! Cache::add(self::OTP_CACHE_PREFIX.'cooldown_'.$phone, true, now()->addSeconds(self::OTP_RESEND_COOLDOWN_SECONDS))) {
             return response()->json([
                 'success' => false,
-                'message' => 'O\'quvchi hisobingiz faol emas. Iltimos, ma\'muriyatga murojaat qiling.',
-            ], 403);
+                'message' => 'Kod yaqinda yuborilgan. Iltimos, '.self::OTP_RESEND_COOLDOWN_SECONDS.' soniyadan keyin qayta urinib ko\'ring.',
+            ], 429);
         }
 
-        if (! $student->telegram_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ushbu hisob Telegram botimizga ulanmagan. Iltimos, avval @LmsAutoprimeBot boti orqali /start bosing va telefon raqamingizni tasdiqlang.',
-            ], 403);
+        $student = $this->findStudentByPhone($phone);
+
+        if (! $student || ! $student->is_active || ! $student->telegram_id) {
+            return $this->otpSentResponse();
         }
 
-        // Generate 6-digit cryptographically secure OTP
-        $otp = (string) mt_rand(100000, 999999);
-        Cache::put('desktop_otp_'.$student->id, $otp, now()->addMinutes(2));
+        $otp = (string) random_int(100000, 999999);
+        Cache::put(self::OTP_CACHE_PREFIX.$student->id, $otp, now()->addSeconds(self::OTP_TTL_SECONDS));
+        Cache::forget(self::OTP_CACHE_PREFIX.'attempts_'.$student->id);
 
-        $sent = $telegramService->sendDesktopLoginOtp($student, $otp);
+        if (! $telegramService->sendDesktopLoginOtp($student, $otp)) {
+            Cache::forget(self::OTP_CACHE_PREFIX.$student->id);
 
-        if (! $sent) {
             return response()->json([
                 'success' => false,
                 'message' => 'Telegram botga kod yuborishda xatolik yuz berdi. Iltimos, bot faolligini tekshiring yoki qayta urinib ko\'ring.',
             ], 500);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => '6 xonali tasdiqlash kodi Telegram botingizga yuborildi.',
-            'expires_in_seconds' => 120,
-        ]);
+        return $this->otpSentResponse();
     }
 
     /**
      * Verify OTP and establish a single active Desktop session.
+     *
+     * A code allows only a few wrong guesses before it is discarded, so it
+     * cannot be brute-forced within its lifetime.
      */
     public function verifyOtp(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => 'required|string',
+            'phone' => 'required|string|max:25',
             'otp' => 'required|string|min:4|max:10',
             'device_uuid' => 'required|string|max:255',
             'device_name' => 'nullable|string|max:255',
         ]);
 
-        $rawPhone = preg_replace('/[^\d+]/', '', (string) $request->input('phone'));
-        $phoneWithoutPlus = ltrim($rawPhone, '+');
-        $phoneWithPlus = '+'.$phoneWithoutPlus;
+        $phone = Student::normalizePhone($request->input('phone'));
+        $student = $phone ? $this->findStudentByPhone($phone) : null;
 
-        $student = Student::where('phone', $rawPhone)
-            ->orWhere('phone', $phoneWithoutPlus)
-            ->orWhere('phone', $phoneWithPlus)
-            ->first();
+        $otpKey = $student ? self::OTP_CACHE_PREFIX.$student->id : null;
+        $cachedOtp = $otpKey ? Cache::get($otpKey) : null;
 
-        if (! $student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'O\'quvchi topilmadi.',
-            ], 404);
+        if (! $student || ! $student->is_active || ! is_string($cachedOtp)) {
+            return $this->invalidOtpResponse();
         }
 
-        $cachedOtp = Cache::get('desktop_otp_'.$student->id);
+        if (! hash_equals($cachedOtp, trim((string) $request->input('otp')))) {
+            $attemptsKey = self::OTP_CACHE_PREFIX.'attempts_'.$student->id;
+            Cache::add($attemptsKey, 0, now()->addSeconds(self::OTP_TTL_SECONDS));
 
-        if (! $cachedOtp || $cachedOtp !== trim($request->input('otp'))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tasdiqlash kodi noto\'g\'ri yoki muddati o\'tgan. Iltimos, qayta kod so\'rang.',
-            ], 422);
+            if (Cache::increment($attemptsKey) >= self::OTP_MAX_ATTEMPTS) {
+                Cache::forget($otpKey);
+                Cache::forget($attemptsKey);
+            }
+
+            return $this->invalidOtpResponse();
         }
 
         // Invalidate OTP
-        Cache::forget('desktop_otp_'.$student->id);
-
+        Cache::forget($otpKey);
+        Cache::forget(self::OTP_CACHE_PREFIX.'attempts_'.$student->id);
         // Generate Single Active Desktop Session and Secret Token
         $sessionId = (string) Str::uuid();
         $rawToken = Str::random(60);
@@ -229,7 +225,7 @@ class DesktopAuthController extends Controller
         }
 
         $drivings = $student->drivings()
-            ->with(['instructor', 'vehicle', 'autodrome', 'review'])
+            ->with(['instructor:id,name,phone', 'vehicle', 'autodrome', 'review'])
             ->orderBy('start_time', 'desc')
             ->take(15)
             ->get();
@@ -268,5 +264,37 @@ class DesktopAuthController extends Controller
             'drivings' => $drivings,
             'attendances' => $attendances,
         ]);
+    }
+
+    /**
+     * Find a student by a normalized phone, also matching numbers stored
+     * before phone normalization was introduced.
+     */
+    private function findStudentByPhone(string $normalizedPhone): ?Student
+    {
+        $digits = ltrim($normalizedPhone, '+');
+        $candidates = [$normalizedPhone, $digits];
+        if (str_starts_with($digits, '998')) {
+            $candidates[] = substr($digits, 3);
+        }
+
+        return Student::whereIn('phone', $candidates)->first();
+    }
+
+    private function otpSentResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Agar raqam ro\'yxatdan o\'tgan va Telegram botimizga ulangan bo\'lsa, 6 xonali tasdiqlash kodi Telegram botingizga yuborildi. Kod kelmasa, @LmsAutoprimeBot boti orqali /start bosing va telefon raqamingizni tasdiqlang.',
+            'expires_in_seconds' => self::OTP_TTL_SECONDS,
+        ]);
+    }
+
+    private function invalidOtpResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tasdiqlash kodi noto\'g\'ri yoki muddati o\'tgan. Iltimos, qayta kod so\'rang.',
+        ], 422);
     }
 }

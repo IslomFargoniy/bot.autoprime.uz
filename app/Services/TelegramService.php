@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Contract;
 use App\Models\Driving;
 use App\Models\Payment;
+use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
@@ -520,7 +521,7 @@ class TelegramService
 
         $text = "🚗 <b>AutoPrime LMS Desktop Dasturi</b>\n\n".
                 "🔐 <b>Kirish uchun tasdiqlash kodi:</b> <code>{$otp}</code>\n\n".
-                "⚠️ <i>Ushbu kodni hech kimga bermang. Kod 2 daqiqa davomida amal qiladi.</i>";
+                '⚠️ <i>Ushbu kodni hech kimga bermang. Kod 2 daqiqa davomida amal qiladi.</i>';
 
         try {
             $bot->sendMessage(
@@ -537,4 +538,3 @@ class TelegramService
         }
     }
 }
-

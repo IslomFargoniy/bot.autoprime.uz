@@ -49,9 +49,7 @@ class LeadController extends Controller
                     ->orWhere('phone', 'like', "%{$s}%");
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $leads = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $leads = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $contractTypes = ContractType::where('is_active', true)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {

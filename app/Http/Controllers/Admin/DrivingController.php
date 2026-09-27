@@ -98,10 +98,7 @@ class DrivingController extends Controller
             }
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1); // Avoid 0 per page
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $drivings = $query->paginate($perPage)->withQueryString();
 

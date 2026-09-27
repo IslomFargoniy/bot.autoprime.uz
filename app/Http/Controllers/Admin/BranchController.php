@@ -47,10 +47,7 @@ class BranchController extends Controller
             });
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $branches = $query->orderBy('id', 'desc')->paginate($perPage)->withQueryString();
 

@@ -41,9 +41,7 @@ class CertificateController extends Controller
                     });
             });
         }
-
-        $perPage = $request->get('per_page', '15');
-        $certificates = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
+        $certificates = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         // Candidates: students with active contracts
         $activeContracts = Contract::with(['student', 'contractType', 'group'])

@@ -112,10 +112,7 @@ class StudentController extends Controller
             $query->where('group_id', $request->group_id);
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $students = $query->paginate($perPage)->withQueryString();
 
@@ -211,10 +208,7 @@ class StudentController extends Controller
             $drivingsQuery->where('status', $request->status);
         }
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($drivingsQuery->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $drivingsQuery->count());
 
         $drivings = $drivingsQuery->paginate($perPage)->withQueryString();
 

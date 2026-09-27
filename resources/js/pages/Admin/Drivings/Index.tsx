@@ -33,7 +33,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
-import { formatDate } from '@/lib/utils';
+import { formatDate, parseDate } from '@/lib/utils';
 
 interface Instructor {
     id: number;
@@ -218,11 +218,11 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
         setEditing(driving);
 
         const formatTime = (dateString: string) => {
-            const date = new Date(dateString);
+            const date = parseDate(dateString);
             return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(11, 16);
         };
         const formatDate = (dateString: string) => {
-            const date = new Date(dateString);
+            const date = parseDate(dateString);
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
@@ -1035,7 +1035,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                 {formatDate(driving.start_time)}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                                {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -1164,7 +1164,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             {formatDate(driving.start_time)}
                                         </div>
                                         <div className="text-muted-foreground text-xs">
-                                            {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
                                     <div>

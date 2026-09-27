@@ -29,6 +29,15 @@ class LessonSession extends Model
 {
     use HasFactory;
 
+    /**
+     * The QR salt signs the rotating attendance tokens, so it must never reach a client.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'qr_secret_salt',
+    ];
+
     protected $fillable = [
         'branch_id',
         'group_id',

@@ -106,10 +106,7 @@ class StaffController extends Controller
         $totalBaseSalary = (float) (clone $countsQuery)->sum('base_salary');
         $activeCount = (clone $countsQuery)->where('status', 'active')->count();
 
-        $perPage = $request->get('per_page', 15);
-        if ($perPage === 'all') {
-            $perPage = max($query->count(), 1);
-        }
+        $perPage = $this->perPage($request, fn () => $query->count());
 
         $staff = $query->paginate($perPage)->withQueryString();
 
