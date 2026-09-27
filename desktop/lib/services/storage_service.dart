@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const _storage = FlutterSecureStorage();
   static const String _keyToken = 'auth_token';
   static const String _keySessionId = 'desktop_session_id';
   static const String _keyDeviceUuid = 'device_uuid';
@@ -15,21 +13,25 @@ class StorageService {
     required String token,
     required String sessionId,
   }) async {
-    await _storage.write(key: _keyToken, value: token);
-    await _storage.write(key: _keySessionId, value: sessionId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyToken, token);
+    await prefs.setString(_keySessionId, sessionId);
   }
 
   static Future<String?> getToken() async {
-    return await _storage.read(key: _keyToken);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyToken);
   }
 
   static Future<String?> getSessionId() async {
-    return await _storage.read(key: _keySessionId);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keySessionId);
   }
 
   static Future<void> clearSession() async {
-    await _storage.delete(key: _keyToken);
-    await _storage.delete(key: _keySessionId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyToken);
+    await prefs.remove(_keySessionId);
   }
 
   // Get or Generate Unique Machine GUID (Device UUID)

@@ -14,16 +14,14 @@ echo "[2/4] macOS Release dastur yig'ilmoqda..."
 flutter build macos --release
 
 # 3. Create DMG or ZIP
-echo "[3/4] DMG paket yaratilmoqda..."
-APP_PATH="build/macos/Build/Products/Release/autoprime_desktop.app"
-DEST_PATH="../public/downloads/desktop/AutoPrime-Setup-1.0.0.dmg"
+STAGE_DIR="/tmp/autoprime_dmg_stage_$$"
+rm -rf "$STAGE_DIR"
+mkdir -p "$STAGE_DIR"
+cp -R "$APP_PATH" "$STAGE_DIR/AutoPrime.app"
+ln -s /Applications "$STAGE_DIR/Applications"
 
-if command -v create-dmg &> /dev/null; then
-    create-dmg "$APP_PATH" "../public/downloads/desktop/" --overwrite || true
-else
-    # Fallback to hdiutil (native macOS built-in tool)
-    hdiutil create -volname "AutoPrime LMS" -srcfolder "$APP_PATH" -ov -format UDZO "$DEST_PATH"
-fi
+hdiutil create -volname "AutoPrime LMS" -srcfolder "$STAGE_DIR" -ov -format UDZO -fs HFS+ "$DEST_PATH"
+rm -rf "$STAGE_DIR"
 
 echo "========================================================"
 echo "[4/4] TAYYOR! DMG fayli: $DEST_PATH"

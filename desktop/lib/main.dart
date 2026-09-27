@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'constants/app_colors.dart';
 import 'providers/auth_provider.dart';
@@ -17,25 +16,6 @@ import 'services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Desktop Window Configuration
-  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-    await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(1280, 800),
-      minimumSize: Size(1024, 680),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      title: 'AutoPrime LMS — Driving School Desktop',
-    );
-
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
 
   // Initialize Dio and Interceptors
   ApiService.init();

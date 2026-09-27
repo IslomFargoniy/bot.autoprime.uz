@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../providers/quiz_provider.dart';
+import '../../services/api_service.dart';
 import '../../utils/localization.dart';
 import '../quiz/desktop_quiz_screen.dart';
 
@@ -551,7 +553,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       itemCount: dash.roadLines.length,
       itemBuilder: (context, idx) {
         final sign = dash.roadLines[idx];
-        final imgUrl = ApiConstants.formatImageUrl(sign['image_url']);
+        final imgUrl = ApiService.formatImageUrl(sign['image_url']);
 
         return Container(
           padding: const EdgeInsets.all(12),

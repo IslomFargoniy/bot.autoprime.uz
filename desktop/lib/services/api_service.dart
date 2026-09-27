@@ -46,4 +46,12 @@ class ApiService {
       ),
     );
   }
+
+  static String formatImageUrl(dynamic path) {
+    if (path == null || path.toString().isEmpty) return '';
+    final str = path.toString();
+    if (str.startsWith('http://') || str.startsWith('https://')) return str;
+    if (str.startsWith('/')) return 'https://lms.autoprime.uz$str';
+    return 'https://lms.autoprime.uz/$str';
+  }
 }

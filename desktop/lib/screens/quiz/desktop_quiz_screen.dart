@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../constants/api_constants.dart';
 import '../../constants/app_colors.dart';
 import '../../models/question.dart';
-import '../../models/answer.dart';
 import '../../providers/quiz_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/localization.dart';
