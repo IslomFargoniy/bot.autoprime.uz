@@ -59,7 +59,6 @@ class PublishDesktopReleaseCommand extends Command
             'release_date' => date('Y-m-d'),
             'is_mandatory' => $isMandatory,
             'download_url_windows' => "{$appUrl}/downloads/desktop/AutoPrime-Setup-{$version}.exe",
-            'download_url_macos' => "{$appUrl}/downloads/desktop/AutoPrime-Setup-{$version}.dmg",
             'file_size_mb' => 25.0,
             'changelog_uz' => "AutoPrime LMS Desktop v{$version}\n• {$changelog}",
             'changelog_ru' => "AutoPrime LMS Desktop v{$version}\n• {$changelog}",
@@ -70,7 +69,6 @@ class PublishDesktopReleaseCommand extends Command
         $this->info("✅ Yangi versiya muvaffaqiyatli e'lon qilindi: v{$version} (Build #{$newBuild})");
         $this->line("📁 version.json yangilandi: {$versionFilePath}");
         $this->line("🔗 Windows URL: {$newData['download_url_windows']}");
-        $this->line("🔗 macOS URL: {$newData['download_url_macos']}");
 
         return self::SUCCESS;
     }

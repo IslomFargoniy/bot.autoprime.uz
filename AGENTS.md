@@ -243,7 +243,6 @@ ssh -o StrictHostKeyChecking=no root@193.181.213.60 "cd /var/www/lms_autoprim_us
 - **Server Downloads Folder**: `/public/downloads/desktop/` (Public URL: `https://lms.autoprime.uz/downloads/desktop/`)
 - **Auto-Update Endpoint**: `GET https://lms.autoprime.uz/api/desktop/version-check`
 - **Building Windows (.exe)**: Run `desktop/build_windows.bat` on Windows.
-- **Building macOS (.dmg)**: Run `desktop/build_macos.sh` on macOS.
 - **Publishing a New Desktop Release on Server**:
   ```bash
   /opt/php83/bin/php artisan desktop:publish-release <version> --changelog="<description>"
