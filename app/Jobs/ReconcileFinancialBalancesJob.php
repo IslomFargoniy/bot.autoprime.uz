@@ -69,7 +69,25 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
         $driftCount = 0;
 
         CashRegister::query()->chunkById(200, function ($registers) use (&$driftCount) {
+            $registerIds = $registers->pluck('id')->all();
+            $ledgerTotals = DB::table('cash_transactions')
+                ->whereIn('cash_register_id', $registerIds)
+                ->selectRaw("cash_register_id, COUNT(*) as entries, COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in, COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out")
+                ->groupBy('cash_register_id')
+                ->get()
+                ->keyBy('cash_register_id');
+
             foreach ($registers as $register) {
+                $totals = $ledgerTotals->get($register->id);
+                if (! $totals || (int) $totals->entries === 0) {
+                    continue;
+                }
+
+                $expectedBalance = round((float) $totals->total_in - (float) $totals->total_out, 2);
+                if (abs((float) $register->balance - $expectedBalance) <= 0.01) {
+                    continue;
+                }
+
                 $driftCount += (int) DB::transaction(function () use ($register) {
                     $locked = CashRegister::whereKey($register->id)->lockForUpdate()->first();
                     if (! $locked) {

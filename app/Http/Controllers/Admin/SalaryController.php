@@ -93,18 +93,48 @@ class SalaryController extends Controller
             ->get();
         $createdCount = 0;
 
-        DB::transaction(function () use ($employees, $period, $startOfMonth, $endOfMonth, $request, &$createdCount) {
+        $employeeIds = $employees->pluck('id')->all();
+
+        // Batch pre-fetch existing salaries for this period
+        $existingSalaries = Salary::whereIn('user_id', $employeeIds)
+            ->where('period', $period)
+            ->where('salary_type', 'base_salary')
+            ->pluck('user_id')
+            ->flip();
+
+        // Batch pre-fetch completed drivings grouped by instructor
+        $completedDrivingsGrouped = Driving::whereIn('instructor_id', $employeeIds)
+            ->where('status', 'completed')
+            ->whereBetween('start_time', [$startOfMonth, $endOfMonth])
+            ->get()
+            ->groupBy('instructor_id');
+
+        // Batch pre-fetch theory lesson counts grouped by teacher
+        $theoryLessonCounts = LessonSession::whereIn('teacher_id', $employeeIds)
+            ->whereIn('status', ['finished', 'completed'])
+            ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('teacher_id, COUNT(*) as cnt')
+            ->groupBy('teacher_id')
+            ->pluck('cnt', 'teacher_id');
+
+        DB::transaction(function () use (
+            $employees,
+            $period,
+            $existingSalaries,
+            $completedDrivingsGrouped,
+            $theoryLessonCounts,
+            $request,
+            &$createdCount
+        ) {
             foreach ($employees as $emp) {
+                // Skip if already generated base payroll for this period
+                if (isset($existingSalaries[$emp->id])) {
+                    continue;
+                }
+
                 // Lock the employee so a concurrent run waits and then sees this accrual
-                $emp = User::with('roles')->whereKey($emp->id)->lockForUpdate()->first();
-
-                // Check if already generated base payroll for this period
-                $existing = Salary::where('user_id', $emp->id)
-                    ->where('period', $period)
-                    ->where('salary_type', 'base_salary')
-                    ->first();
-
-                if ($existing) {
+                $emp = User::whereKey($emp->id)->lockForUpdate()->first();
+                if (! $emp) {
                     continue;
                 }
 
@@ -116,10 +146,7 @@ class SalaryController extends Controller
 
                 // 1. Calculate Driving hours for Instructors
                 if ($emp->isInstructor() || $emp->driving_hourly_rate > 0) {
-                    $completedDrivings = Driving::where('instructor_id', $emp->id)
-                        ->where('status', 'completed')
-                        ->whereBetween('start_time', [$startOfMonth, $endOfMonth])
-                        ->get();
+                    $completedDrivings = $completedDrivingsGrouped->get($emp->id, collect());
 
                     foreach ($completedDrivings as $drv) {
                         $diffMinutes = Carbon::parse($drv->start_time)->diffInMinutes(Carbon::parse($drv->end_time));
@@ -131,11 +158,7 @@ class SalaryController extends Controller
 
                 // 2. Calculate Theory lessons for Teachers
                 if ($emp->hasRole('teacher') || $emp->lesson_rate > 0) {
-                    $lessonCount = LessonSession::where('teacher_id', $emp->id)
-                        ->whereIn('status', ['finished', 'completed'])
-                        ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
-                        ->count();
-
+                    $lessonCount = (int) ($theoryLessonCounts[$emp->id] ?? 0);
                     $lessonAmount = $lessonCount * (float) $emp->lesson_rate;
                 }
 

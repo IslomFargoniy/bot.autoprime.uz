@@ -259,13 +259,16 @@ class AttendanceController extends Controller
                 $session->update(['topic' => $validated['topic']]);
             }
 
+            $studentIds = collect($validated['attendances'])->pluck('student_id')->all();
+            $existingAttendances = Attendance::where('lesson_session_id', $session->id)
+                ->whereIn('student_id', $studentIds)
+                ->get()
+                ->keyBy('student_id');
+
             foreach ($validated['attendances'] as $item) {
                 $status = $item['status'];
                 $reason = $item['manual_reason'] ?? null;
-
-                $existing = Attendance::where('lesson_session_id', $session->id)
-                    ->where('student_id', $item['student_id'])
-                    ->first();
+                $existing = $existingAttendances->get($item['student_id']);
 
                 if ($existing) {
                     $isManual = ($existing->status !== $status) ? true : $existing->is_manual;
