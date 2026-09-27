@@ -1,0 +1,71 @@
+name: Build Windows Desktop Installer (.exe)
+
+on:
+  push:
+    branches:
+      - lms
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build_windows_desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build AutoPrime Windows Setup
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Install Flutter Dependencies
+        working-directory: ./desktop
+        run: flutter pub get
+
+      - name: Build Windows Release Binary
+        working-directory: ./desktop
+        run: flutter build windows --release
+
+      - name: Compile Inno Setup Single-File Installer
+        working-directory: ./desktop
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows_installer.iss
+
+      - name: Verify Generated Installer
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path public/downloads/desktop/
+
+      - name: Upload Windows Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AutoPrime-Setup-Windows
+          path: public/downloads/desktop/AutoPrime-Setup-*.exe
+          if-no-files-found: error
+
+      - name: Deploy to Production Server via SCP (if SSH secret available)
+        if: env.SSH_KEY != ''
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        uses: appleboy/scp-action@master
+        with:
+          host: '193.181.213.60'
+          username: 'root'
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: 'public/downloads/desktop/AutoPrime-Setup-*.exe,public/downloads/desktop/version.json'
+          target: '/var/www/lms_autoprim_usr/data/www/lms.autoprime.uz/'
+          strip_components: 0
