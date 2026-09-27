@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { useRef, useState } from 'react';
 import { SharedData } from '@/types/auth';
+import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 
 interface Group {
     id: number;
@@ -46,6 +47,7 @@ export default function GroupShow({ group, students }: PageProps) {
     const isInstructor = auth?.user?.role === 'instructor';
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
 
     const { data, setData, post, errors, reset } = useForm({
         file: null as File | null,
@@ -103,11 +105,9 @@ export default function GroupShow({ group, students }: PageProps) {
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                            <Link href={`/admin/attendance?group_id=${group.id}&action=mark`}>
-                                <CheckSquare className="w-4 h-4 mr-2" />
-                                {t('groups.take_attendance', 'Davomat')}
-                            </Link>
+                        <Button onClick={() => setIsAttendanceOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <CheckSquare className="w-4 h-4 mr-2" />
+                            {t('groups.take_attendance', 'Davomat')}
                         </Button>
                         <Button variant="outline" onClick={() => window.location.href = `/admin/groups/${group.id}/export-students`}>
                             <Download className="w-4 h-4 mr-2" />
@@ -253,6 +253,13 @@ export default function GroupShow({ group, students }: PageProps) {
                     </div>
                 </div>
             </div>
+
+            <GroupAttendanceModal
+                isOpen={isAttendanceOpen}
+                onClose={() => setIsAttendanceOpen(false)}
+                groupId={group.id}
+                groupName={group.name}
+            />
         </div>
     );
 }
