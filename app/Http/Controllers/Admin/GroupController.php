@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\GroupStudentsExport;
 use App\Http\Controllers\Controller;
 use App\Imports\StudentsImport;
 use App\Models\Branch;
+use App\Models\Course;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\BranchSessionService;
@@ -17,8 +19,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class GroupController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function exportStudents(Request $request, Group $group)
     {
+        $user = $request->user();
+        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
+            abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni eksport qila olasiz.');
+        }
+
         $filename = "guruh_{$group->name}_oquvchilar.xlsx";
 
         return Excel::download(new GroupStudentsExport($group, $request->all()), $filename);
@@ -27,9 +36,9 @@ class GroupController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
-        $query = Group::with(['instructor', 'branch'])->orderBy('id', 'desc');
+        $query = Group::with(['instructor', 'branch', 'course'])->orderBy('id', 'desc');
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
@@ -65,11 +74,13 @@ class GroupController extends Controller
             ->get();
 
         $branches = Branch::where('status', 'active')->get();
+        $courses = Course::where('is_active', true)->select(['id', 'name', 'category'])->get();
 
         return Inertia::render('Admin/Groups/Index', [
             'groups' => $groups,
             'instructors' => $instructors,
             'branches' => $branches,
+            'courses' => $courses,
             'filters' => [
                 'search' => $request->search,
                 'instructor_id' => $request->instructor_id,
@@ -81,18 +92,19 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'instructor_id' => 'nullable|exists:users,id',
+            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
             'branch_id' => 'nullable|exists:branches,id',
+            'course_id' => 'nullable|exists:courses,id',
         ]);
 
         $user = $request->user();
-        if ($user->role === 'admin' && $user->branch_id) {
+        if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
         } elseif (empty($validated['branch_id'])) {
             $validated['branch_id'] = $user->branch_id;
@@ -105,14 +117,15 @@ class GroupController extends Controller
 
     public function update(Request $request, Group $group)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'instructor_id' => 'nullable|exists:users,id',
+            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
             'branch_id' => 'nullable|exists:branches,id',
+            'course_id' => 'nullable|exists:courses,id',
         ]);
 
         $group->update($validated);
@@ -122,7 +135,7 @@ class GroupController extends Controller
 
     public function destroy(Group $group, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -134,11 +147,11 @@ class GroupController extends Controller
     public function show(Request $request, Group $group): Response
     {
         $user = $request->user();
-        if ($user->role === 'instructor' && $group->instructor_id !== $user->id) {
+        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
             abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni ko\'rishingiz mumkin.');
         }
 
-        $group->load('instructor');
+        $group->load(['instructor', 'course', 'branch']);
 
         $students = $group->students()
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
@@ -172,7 +185,7 @@ class GroupController extends Controller
 
     public function importStudents(Request $request, Group $group)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
 
@@ -184,6 +197,11 @@ class GroupController extends Controller
         $import = new StudentsImport($group->id, $branchId);
         Excel::import($import, $request->file('file'));
 
-        return redirect()->back()->with('success', "{$import->importedCount} ta o'quvchi muvaffaqiyatli yuklandi");
+        $message = "{$import->importedCount} ta o'quvchi muvaffaqiyatli yuklandi";
+        if ($import->skippedCount > 0) {
+            $message .= " ({$import->skippedCount} ta qator o'tkazib yuborildi: telefon yo'q yoki o'quvchi boshqa filialda)";
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 }

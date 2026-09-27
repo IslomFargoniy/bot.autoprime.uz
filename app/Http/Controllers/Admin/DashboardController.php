@@ -41,11 +41,11 @@ class DashboardController extends Controller
         }
 
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $branchId = BranchSessionService::getActiveBranchId($request);
 
-        $totalStudents = Student::when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+        $totalStudents = Student::when($branchId, fn ($q) => $q->inBranch($branchId))
             ->when($isInstructor, function ($query) use ($user) {
                 $query->whereHas('group', function ($q) use ($user) {
                     $q->where('instructor_id', $user->id);

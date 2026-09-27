@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\DrivingsExport;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendDrivingCreatedNotificationJob;
@@ -11,21 +12,26 @@ use App\Models\Driving;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Services\BranchSessionService;
+use App\Services\DrivingScheduler;
 use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DrivingController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function export(Request $request)
     {
         $filters = $request->all();
         $user = $request->user();
-        if ($user->role === 'instructor') {
+        if ($user->isInstructor()) {
             $filters['instructor_id'] = $user->id;
         } else {
             $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -40,7 +46,7 @@ class DrivingController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Driving::with(['instructor', 'student', 'group', 'review', 'autodrome', 'branch'])
             ->orderBy('start_time', 'desc');
@@ -154,31 +160,62 @@ class DrivingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'instructor_id' => 'required|exists:users,id',
+            'instructor_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'student_ids' => 'required|array',
-            'student_ids.*' => 'exists:students,id',
-            'group_id' => 'nullable|exists:groups,id',
-            'autodrome_id' => 'nullable|exists:autodromes,id',
+            'student_ids.*' => [$this->existsInUserBranch($request, 'students')],
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
+            'vehicle_id' => ['nullable', $this->existsInUserBranch($request, 'vehicles')],
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
         ]);
 
-        foreach ($validated['student_ids'] as $studentId) {
-            $student = Student::find($studentId);
-            $groupId = $student?->group_id ?? ($validated['group_id'] ?? null);
-            $branchId = $student?->branch_id ?? $request->user()->branch_id;
+        if (! User::find($validated['instructor_id'])?->isInstructor()) {
+            return redirect()->back()->withErrors(['instructor_id' => 'Tanlangan xodim instruktor emas.']);
+        }
 
-            $driving = Driving::create([
-                'branch_id' => $branchId,
-                'instructor_id' => $validated['instructor_id'],
-                'student_id' => $studentId,
-                'group_id' => $groupId,
-                'autodrome_id' => $validated['autodrome_id'] ?? null,
-                'start_time' => $validated['start_time'],
-                'end_time' => $validated['end_time'],
-                'status' => 'scheduled',
-            ]);
+        $scheduler = app(DrivingScheduler::class);
 
+        // Auto-detect or validate vehicle
+        $vehicle = ! empty($validated['vehicle_id'])
+            ? Vehicle::find($validated['vehicle_id'])
+            : Vehicle::where('instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+
+        $conflict = $scheduler->conflictMessage(
+            (int) $validated['instructor_id'],
+            $vehicle,
+            $validated['student_ids'],
+            $validated['start_time'],
+            $validated['end_time'],
+        );
+        if ($conflict) {
+            return redirect()->back()->withErrors(['start_time' => $conflict]);
+        }
+
+        // Validate every student before creating anything so a later failure
+        // cannot leave the earlier students booked and notified.
+        $students = Student::with('activeContract.contractType')->whereIn('id', $validated['student_ids'])->get();
+        foreach ($students as $student) {
+            $restriction = $scheduler->studentRestrictionMessage($student, $validated['start_time']);
+            if ($restriction) {
+                return redirect()->back()->withErrors(['student_ids' => $restriction]);
+            }
+        }
+
+        $drivings = DB::transaction(fn () => $students->map(fn (Student $student) => Driving::create([
+            'branch_id' => $student->branch_id ?: $request->user()->branch_id,
+            'instructor_id' => $validated['instructor_id'],
+            'student_id' => $student->id,
+            'group_id' => $student->group_id ?: ($validated['group_id'] ?? null),
+            'contract_id' => $student->activeContract?->id,
+            'vehicle_id' => $vehicle?->id,
+            'autodrome_id' => $validated['autodrome_id'] ?? null,
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'status' => 'scheduled',
+        ])));
+
+        foreach ($drivings as $driving) {
             SendDrivingCreatedNotificationJob::dispatch($driving);
         }
 
@@ -194,13 +231,35 @@ class DrivingController extends Controller
         }
 
         $validated = $request->validate([
-            'autodrome_id' => 'nullable|exists:autodromes,id',
+            'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
             'start_time' => 'sometimes|required|date',
-            'end_time' => 'sometimes|required|date|after:start_time',
+            'end_time' => 'sometimes|required|date',
             'status' => 'sometimes|required|in:scheduled,completed,cancelled',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
+
+        // Compare against the stored value when only one end of the slot changes.
+        $newStart = Carbon::parse($validated['start_time'] ?? $driving->start_time);
+        $newEnd = Carbon::parse($validated['end_time'] ?? $driving->end_time);
+        if ($newEnd->lte($newStart)) {
+            return redirect()->back()->withErrors(['end_time' => 'Tugash vaqti boshlanish vaqtidan keyin bo\'lishi kerak.']);
+        }
+
+        $isRescheduled = ! $newStart->equalTo($driving->start_time) || ! $newEnd->equalTo($driving->end_time);
+        if ($isRescheduled && ($validated['status'] ?? $driving->status) === 'scheduled') {
+            $conflict = app(DrivingScheduler::class)->conflictMessage(
+                (int) $driving->instructor_id,
+                $driving->vehicle,
+                [$driving->student_id],
+                $newStart,
+                $newEnd,
+                $driving->id,
+            );
+            if ($conflict) {
+                return redirect()->back()->withErrors(['start_time' => $conflict]);
+            }
+        }
 
         $oldStatus = $driving->status;
         $oldStartTime = $driving->start_time;
@@ -209,23 +268,25 @@ class DrivingController extends Controller
 
         $driving->update($validated);
 
-        if ($oldStartTime != $driving->start_time) {
+        if (! $driving->start_time->equalTo($oldStartTime)) {
             $driving->update([
                 'reminded_24h_at' => null,
                 'reminded_2h_at' => null,
             ]);
         }
 
-        if ($oldStatus !== $driving->status) {
-            if ($driving->status === 'completed') {
+        $newStatus = $validated['status'] ?? $driving->status;
+
+        if ($oldStatus !== $newStatus) {
+            if ($newStatus === 'completed') {
                 app(TelegramService::class)->sendLessonRatingPrompt($driving);
-            } elseif ($driving->status === 'cancelled') {
+            } elseif ($newStatus === 'cancelled') {
                 app(TelegramService::class)->sendDrivingCancelledNotification($driving);
             }
-        } elseif ($driving->status === 'scheduled' && (
-            $oldStartTime !== $driving->start_time ||
-            $oldEndTime !== $driving->end_time ||
-            $oldAutodromeId !== $driving->autodrome_id
+        } elseif ($newStatus === 'scheduled' && (
+            ! $driving->start_time->equalTo($oldStartTime) ||
+            ! $driving->end_time->equalTo($oldEndTime) ||
+            (int) $oldAutodromeId !== (int) $driving->autodrome_id
         )) {
             app(TelegramService::class)->sendDrivingUpdatedNotification($driving);
         }

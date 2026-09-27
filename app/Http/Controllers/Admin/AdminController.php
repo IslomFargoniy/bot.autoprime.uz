@@ -16,7 +16,7 @@ class AdminController extends Controller
     private function authorizeSuperAdmin(Request $request): void
     {
         $user = $request->user();
-        if ($user->role !== 'superadmin' && $user->id !== 1) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Ushbu bo\'lim faqat Super Admin uchun ajratilgan.');
         }
     }
@@ -108,6 +108,10 @@ class AdminController extends Controller
 
         if ($request->user()->id === $admin->id) {
             return redirect()->back()->withErrors(['message' => 'O\'z hisobingizni o\'chira olmaysiz.']);
+        }
+
+        if ($admin->hasWorkHistory()) {
+            return redirect()->back()->withErrors(['delete' => 'Bu xodimning oylik yoki dars tarixi bor. O\'chirish o\'rniga holatini "nofaol" qiling.']);
         }
 
         $admin->delete();

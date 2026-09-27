@@ -38,7 +38,10 @@ export function LanguageSwitcher() {
                 {languages.map((lang) => (
                     <DropdownMenuItem
                         key={lang.code}
-                        onClick={() => i18n.changeLanguage(lang.code)}
+                        onClick={() => {
+                            i18n.changeLanguage(lang.code);
+                            document.cookie = `locale=${lang.code}; path=/; max-age=31536000; SameSite=Lax`;
+                        }}
                         className={`cursor-pointer gap-2 ${langCode === lang.code
                             ? 'bg-accent font-medium'
                             : ''

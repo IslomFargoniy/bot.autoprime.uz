@@ -5,11 +5,11 @@ use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
 
-test('main admin (id=1 or superadmin) can switch branches via POST /admin/select-branch', function () {
+test('superadmin can switch branches via POST /admin/select-branch', function () {
     $branch1 = Branch::firstOrCreate(['code' => 'b1'], ['name' => 'Filial 1', 'status' => 'active']);
     $branch2 = Branch::firstOrCreate(['code' => 'b2'], ['name' => 'Filial 2', 'status' => 'active']);
 
-    $admin = User::factory()->create(['id' => 1, 'role' => 'admin', 'branch_id' => $branch1->id]);
+    $admin = User::factory()->create(['role' => 'superadmin', 'branch_id' => $branch1->id]);
 
     $group1 = Group::factory()->create(['branch_id' => $branch1->id, 'name' => 'Group B1']);
     $group2 = Group::factory()->create(['branch_id' => $branch2->id, 'name' => 'Group B2']);

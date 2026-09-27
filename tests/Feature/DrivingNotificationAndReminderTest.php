@@ -2,17 +2,16 @@
 
 use App\Jobs\SendDrivingCreatedNotificationJob;
 use App\Jobs\SendDrivingReminderJob;
+use App\Models\Branch;
 use App\Models\Driving;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Services\TelegramService;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use SergiX44\Nutgram\Nutgram;
-
-uses(RefreshDatabase::class);
 
 test('admin driving creation dispatches SendDrivingCreatedNotificationJob', function () {
     Queue::fake();
@@ -184,4 +183,28 @@ test('updating driving start_time resets reminder timestamps', function () {
 
     expect($driving->reminded_24h_at)->toBeNull()
         ->and($driving->reminded_2h_at)->toBeNull();
+});
+
+test('admin driving creation auto-assigns the instructor active vehicle when none is given', function () {
+    Queue::fake();
+
+    $admin = User::factory()->create(['role' => 'admin']);
+    $instructor = User::factory()->create(['role' => 'instructor']);
+    $student = Student::factory()->create();
+    $vehicle = Vehicle::create([
+        'branch_id' => Branch::firstOrCreate(['code' => 'vehicle-branch'], ['name' => 'Avto Filial', 'status' => 'active'])->id,
+        'instructor_id' => $instructor->id,
+        'make_model' => 'Chevrolet Cobalt',
+        'plate_number' => '01A123BC',
+        'status' => 'active',
+    ]);
+
+    $this->actingAs($admin)->post('/admin/drivings', [
+        'instructor_id' => $instructor->id,
+        'student_ids' => [$student->id],
+        'start_time' => now()->addDays(2)->format('Y-m-d H:i:s'),
+        'end_time' => now()->addDays(2)->addHours(2)->format('Y-m-d H:i:s'),
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    expect(Driving::where('student_id', $student->id)->value('vehicle_id'))->toBe($vehicle->id);
 });

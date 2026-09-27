@@ -4,12 +4,14 @@ namespace App\Jobs;
 
 use App\Models\Driving;
 use App\Services\TelegramService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
 
-class SendDrivingReminderJob implements ShouldQueue
+class SendDrivingReminderJob implements ShouldBeUnique, ShouldQueue
 {
     use InteractsWithQueue, Queueable, SerializesModels;
 
@@ -24,6 +26,11 @@ class SendDrivingReminderJob implements ShouldQueue
     public int $backoff = 5;
 
     /**
+     * Seconds the uniqueness lock is held (covers the reminder window).
+     */
+    public int $uniqueFor = 900;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(
@@ -36,25 +43,47 @@ class SendDrivingReminderJob implements ShouldQueue
      */
     public function handle(TelegramService $telegramService): void
     {
-        // Refresh to get latest status in case it was cancelled/completed while in queue
-        $this->driving->refresh();
+        $column = match ($this->type) {
+            '24h' => 'reminded_24h_at',
+            '2h' => 'reminded_2h_at',
+            default => null,
+        };
 
-        if ($this->driving->status !== 'scheduled') {
+        if (! $column) {
             return;
         }
 
-        if ($this->type === '24h') {
-            if ($this->driving->reminded_24h_at !== null) {
-                return;
-            }
-            $telegramService->sendDriving24hReminder($this->driving);
-            $this->driving->update(['reminded_24h_at' => now()]);
-        } elseif ($this->type === '2h') {
-            if ($this->driving->reminded_2h_at !== null) {
-                return;
-            }
-            $telegramService->sendDriving2hReminder($this->driving);
-            $this->driving->update(['reminded_2h_at' => now()]);
+        // Claim the reminder atomically: only one worker can flip the column from
+        // NULL, so concurrent or duplicated jobs never send the same reminder twice.
+        $claimed = Driving::whereKey($this->driving->id)
+            ->where('status', 'scheduled')
+            ->whereNull($column)
+            ->update([$column => now()]);
+
+        if ($claimed === 0) {
+            return;
         }
+
+        $this->driving->refresh();
+
+        try {
+            $this->type === '24h'
+                ? $telegramService->sendDriving24hReminder($this->driving)
+                : $telegramService->sendDriving2hReminder($this->driving);
+        } catch (Throwable $e) {
+            // Release the claim so the retry can send it.
+            Driving::whereKey($this->driving->id)->update([$column => null]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * The command runs every minute while a lesson stays in the reminder window;
+     * keep only one pending job per driving and reminder type.
+     */
+    public function uniqueId(): string
+    {
+        return "{$this->driving->id}:{$this->type}";
     }
 }

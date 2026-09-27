@@ -14,7 +14,7 @@ export function BranchSelector({ branches }: Props) {
     const user = auth?.user;
     if (!user) return null;
 
-    const isSuperAdmin = user.role === 'superadmin' || user.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const rawBranches = branches || (usePage().props.branches as any);
     const availableBranches: Branch[] = Array.isArray(rawBranches)

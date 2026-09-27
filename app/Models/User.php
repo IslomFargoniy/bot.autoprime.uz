@@ -9,12 +9,16 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property int $id
@@ -33,19 +37,104 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $photo_path
  * @property string $role
  * @property string $status
+ * @property float $base_salary
+ * @property float $driving_hourly_rate
+ * @property float $lesson_rate
+ * @property float $salary_balance
+ * @property int|null $branch_id
+ * @property int|null $groups_count
+ * @property-read Branch|null $branch
  */
-#[Fillable(['branch_id', 'name', 'phone', 'telegram_id', 'car_name', 'photo_path', 'role', 'status', 'email', 'password'])]
+#[Fillable([
+    'branch_id',
+    'name',
+    'phone',
+    'telegram_id',
+    'car_name',
+    'photo_path',
+    'role',
+    'status',
+    'email',
+    'password',
+    'base_salary',
+    'driving_hourly_rate',
+    'lesson_rate',
+    'salary_balance',
+])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     protected $appends = ['photo_url'];
+
+    /**
+     * Mirrors the database default so new models know their role before refresh.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'instructor',
+    ];
+
+    /**
+     * Spatie roles are the source of truth for authorization. The `role` column
+     * is kept as the user's single primary-role label, and any change to it is
+     * synced to the Spatie role assignment here so the two can never drift.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (User $user): void {
+            if (! $user->wasRecentlyCreated && ! $user->wasChanged('role')) {
+                return;
+            }
+
+            $user->syncRoles($user->role ? [Role::findOrCreate($user->role, 'web')] : []);
+        });
+    }
 
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Whether the account may sign in (deactivated staff are locked out).
+     */
+    public function isActive(): bool
+    {
+        return $this->status !== 'inactive';
+    }
+
+    /**
+     * Whether deleting this user would cascade-delete payroll or lesson history.
+     * Such staff should be deactivated (status = inactive) instead.
+     */
+    public function hasWorkHistory(): bool
+    {
+        return $this->salaries()->exists()
+            || $this->salaryPayments()->exists()
+            || $this->drivings()->exists()
+            || $this->lessonSessions()->exists();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('superadmin');
+    }
+
+    public function isInstructor(): bool
+    {
+        return $this->hasRole('instructor');
+    }
+
+    /**
+     * Staff other than superadmins only ever work within their own branch.
+     */
+    public function isBranchRestricted(): bool
+    {
+        return ! $this->isSuperAdmin() && $this->branch_id !== null;
     }
 
     public function getPhotoUrlAttribute(): ?string
@@ -68,6 +157,9 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'base_salary' => 'decimal:2',
+            'driving_hourly_rate' => 'decimal:2',
+            'lesson_rate' => 'decimal:2',
         ];
     }
 
@@ -79,11 +171,51 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Group::class, 'instructor_id');
     }
 
+    public function taughtGroups(): HasMany
+    {
+        return $this->hasMany(Group::class, 'teacher_id');
+    }
+
     /**
      * @return HasMany<Driving, $this>
      */
     public function drivings(): HasMany
     {
         return $this->hasMany(Driving::class, 'instructor_id');
+    }
+
+    public function salaries(): HasMany
+    {
+        return $this->hasMany(Salary::class);
+    }
+
+    public function salaryPayments(): HasMany
+    {
+        return $this->hasMany(SalaryPayment::class);
+    }
+
+    public function financialHistories(): MorphMany
+    {
+        return $this->morphMany(FinancialHistory::class, 'entity')->orderBy('transacted_at', 'desc')->orderBy('id', 'desc');
+    }
+
+    public function vehicle(): HasOne
+    {
+        return $this->hasOne(Vehicle::class, 'instructor_id');
+    }
+
+    public function shifts(): HasMany
+    {
+        return $this->hasMany(CashShift::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function lessonSessions(): HasMany
+    {
+        return $this->hasMany(LessonSession::class, 'teacher_id');
     }
 }

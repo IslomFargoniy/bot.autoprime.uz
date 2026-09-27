@@ -44,7 +44,23 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Build Telegram Mini App initData signed with the configured bot token.
+ */
+function signedTelegramInitData(int|string $telegramUserId, ?int $authDate = null, string $botToken = 'test-bot-token'): string
 {
-    // ..
+    config(['services.telegram.bot_token' => $botToken]);
+
+    $fields = [
+        'auth_date' => (string) ($authDate ?? now()->timestamp),
+        'query_id' => 'AAHdF6IQAAAAAN0XohDhrOrc',
+        'user' => json_encode(['id' => (int) $telegramUserId, 'first_name' => 'Test']),
+    ];
+    ksort($fields);
+
+    $dataCheckString = implode("\n", array_map(fn ($key, $value) => "{$key}={$value}", array_keys($fields), $fields));
+    $secretKey = hash_hmac('sha256', $botToken, 'WebAppData', true);
+    $fields['hash'] = hash_hmac('sha256', $dataCheckString, $secretKey);
+
+    return http_build_query($fields, '', '&', PHP_QUERY_RFC3986);
 }

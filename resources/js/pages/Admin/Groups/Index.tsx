@@ -2,11 +2,12 @@ import { useState, useCallback } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, Eye } from 'lucide-react';
+import { Trash2, Edit2, Plus, Search, Eye, CheckSquare, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Branch, SharedData } from '@/types/auth';
 import {
     Dialog,
@@ -23,12 +24,27 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { Filter } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 interface Instructor {
     id: number;
     name: string;
+}
+
+interface Course {
+    id: number;
+    name: string;
+    category?: string;
 }
 
 interface Group {
@@ -38,6 +54,8 @@ interface Group {
     instructor?: Instructor;
     branch_id?: number | null;
     branch?: Branch | null;
+    course_id?: number | null;
+    course?: Course | null;
 }
 
 interface PageProps {
@@ -48,6 +66,7 @@ interface PageProps {
     };
     instructors: Instructor[];
     branches?: Branch[];
+    courses?: Course[];
     filters?: {
         search?: string;
         instructor_id?: string;
@@ -55,11 +74,11 @@ interface PageProps {
     };
 }
 
-export default function GroupsIndex({ groups, instructors, branches = [], filters = {} }: PageProps) {
+export default function GroupsIndex({ groups, instructors, branches = [], courses = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth?.user?.role === 'instructor';
-    const isSuperAdmin = auth?.user?.role === 'superadmin' || auth?.user?.id === 1;
+    const isSuperAdmin = !!auth?.is_super_admin;
 
     const [editing, setEditing] = useState<Group | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -82,6 +101,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
         name: '',
         instructor_id: '',
         branch_id: '' as string | number,
+        course_id: '' as string | number,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -116,6 +136,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
             name: group.name,
             instructor_id: group.instructor_id ? String(group.instructor_id) : '',
             branch_id: group.branch_id ? String(group.branch_id) : '',
+            course_id: group.course_id ? String(group.course_id) : '',
         });
         setShowForm(true);
     };
@@ -147,7 +168,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('groups.title', 'Guruhlar')}</h1>
                 {!isInstructor && (
-                    <Button onClick={() => setShowForm(true)} size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
+                    <Button onClick={() => setShowForm(true)} variant="brand" size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
                         <Plus className="w-4 h-4 md:mr-2" /> 
                         <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
                     </Button>
@@ -171,19 +192,21 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                         <option value="75">75</option>
                         <option value="all">{t('common.all', 'Barchasi')}</option>
                     </select>
-                    <select
-                        className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <SearchableSelect
                         value={instructorId}
-                        onChange={(e) => {
-                            setInstructorId(e.target.value);
-                            applyFilters(search, e.target.value, perPage);
+                        onChange={(val) => {
+                            const nextVal = val ? String(val) : '';
+                            setInstructorId(nextVal);
+                            applyFilters(search, nextVal, perPage);
                         }}
-                    >
-                        <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                        {instructors.map(inst => (
-                            <option key={inst.id} value={inst.id}>{inst.name}</option>
-                        ))}
-                    </select>
+                        options={[
+                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                        ]}
+                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                        className="w-52"
+                        triggerClassName="h-10 text-sm"
+                    />
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
@@ -214,19 +237,20 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                             <div className="grid gap-4 py-4 mt-2">
                                 <div className="space-y-2">
                                     <Label>{t('drivings.instructor', 'Instruktor')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    <SearchableSelect
                                         value={instructorId}
-                                        onChange={(e) => {
-                                            setInstructorId(e.target.value);
-                                            applyFilters(search, e.target.value, perPage);
+                                        onChange={(val) => {
+                                            const nextVal = val ? String(val) : '';
+                                            setInstructorId(nextVal);
+                                            applyFilters(search, nextVal, perPage);
                                         }}
-                                    >
-                                        <option value="">{t('drivings.all_instructors', 'Barcha instruktorlar')}</option>
-                                        {instructors.map(inst => (
-                                            <option key={inst.id} value={inst.id}>{inst.name}</option>
-                                        ))}
-                                    </select>
+                                        options={[
+                                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                                        ]}
+                                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                                        triggerClassName="h-10 text-sm"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('common.pagination', 'Sahifalash')}</Label>
@@ -251,96 +275,140 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
             </div>
 
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
-                <DialogContent>
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editing ? t('common.edit', 'Tahrirlash') : t('groups.new', 'Yangi Guruh')}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <GraduationCap className="w-5 h-5 text-blue-600" />
+                            {editing ? t('common.edit', 'Tahrirlash') : t('groups.new', 'Yangi Guruh')}
+                        </DialogTitle>
                         <DialogDescription className="sr-only">
                             {editing ? t('common.edit', 'Tahrirlash') : t('common.add', 'Qo\'shish')}
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label htmlFor="name">{t('groups.name', 'Nomi')}</Label>
+                            <Label htmlFor="name" required>{t('groups.name', 'Nomi')}</Label>
                             <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} required />
                             {errors.name && <div className="text-destructive text-sm mt-1">{errors.name}</div>}
                         </div>
                         {isSuperAdmin && (
                             <div>
                                 <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
-                                <select 
-                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    value={data.branch_id} 
-                                    onChange={e => setData('branch_id', e.target.value)}
-                                >
-                                    <option value="">{t('branches.branch_optional', 'Filial (Ixtiyoriy)')}</option>
-                                    {branches.map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                <SearchableSelect
+                                    id="branch_id"
+                                    value={data.branch_id ? String(data.branch_id) : ''}
+                                    onChange={(val) => setData('branch_id', val)}
+                                    options={branches.map((b) => ({
+                                        value: b.id,
+                                        label: b.name,
+                                    }))}
+                                    placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                    allowClear
+                                />
                                 {errors.branch_id && <div className="text-destructive text-sm mt-1">{errors.branch_id}</div>}
                             </div>
                         )}
-                        <div>
-                            <Label htmlFor="instructor_id">{t('drivings.instructor', 'Instruktor')}</Label>
-                            <select 
-                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                value={data.instructor_id} 
-                                onChange={e => setData('instructor_id', e.target.value)}
-                            >
-                                <option value="">{t('groups.select_instructor', '-- Tanlang --')}</option>
-                                {instructors.map(inst => (
-                                    <option key={inst.id} value={inst.id}>{inst.name}</option>
-                                ))}
-                            </select>
-                            {errors.instructor_id && <div className="text-destructive text-sm mt-1">{errors.instructor_id}</div>}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label htmlFor="course_id">{t('groups.course', 'LMS Kurs')}</Label>
+                                <SearchableSelect
+                                    id="course_id"
+                                    value={data.course_id ? String(data.course_id) : ''}
+                                    onChange={(val) => setData('course_id', val)}
+                                    options={courses.map((c) => ({
+                                        value: c.id,
+                                        label: `${c.name}${c.category ? ` (${c.category.toUpperCase()})` : ''}`,
+                                    }))}
+                                    placeholder={t('groups.course_optional', 'LMS Kurs (Ixtiyoriy)')}
+                                    allowClear
+                                />
+                                {errors.course_id && <div className="text-destructive text-sm mt-1">{errors.course_id}</div>}
+                            </div>
+                            <div>
+                                <Label htmlFor="instructor_id">{t('drivings.instructor', 'Instruktor')}</Label>
+                                <SearchableSelect
+                                    id="instructor_id"
+                                    value={data.instructor_id ? String(data.instructor_id) : ''}
+                                    onChange={(val) => setData('instructor_id', val)}
+                                    options={instructors.map((inst) => ({
+                                        value: inst.id,
+                                        label: inst.name,
+                                    }))}
+                                    placeholder={t('groups.select_instructor', '-- Tanlang --')}
+                                    allowClear
+                                />
+                                {errors.instructor_id && <div className="text-destructive text-sm mt-1">{errors.instructor_id}</div>}
+                            </div>
                         </div>
                         <div className="flex gap-2 justify-end pt-4">
                             <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
-                            <Button type="submit" disabled={processing}>{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
+                            <Button type="submit" variant="brand" disabled={processing}>{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
                         </div>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-card border rounded-xl shadow-xs overflow-hidden">
                 {/* Desktop Table */}
-                <table className="hidden md:table w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-muted-foreground border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">{t('common.number', '№')}</th>
-                            <th className="px-4 py-3 font-medium">{t('groups.name', 'Guruh nomi')}</th>
-                            <th className="px-4 py-3 font-medium">{t('branches.branch', 'Filial')}</th>
-                            <th className="px-4 py-3 font-medium">{t('drivings.instructor', 'Instruktor')}</th>
-                            {!isInstructor && <th className="px-4 py-3 font-medium text-right">{t('common.actions', 'Amallar')}</th>}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {groups.data.map((item, index) => (
-                            <tr key={item.id} className="hover:bg-muted/30">
-                                <td className="px-4 py-3">{(groups.from || 1) + index}</td>
-                                <td className="px-4 py-3 font-medium">
-                                    <Link href={`/admin/groups/${item.id}`} className="text-blue-600 hover:underline">
-                                        {item.name}
-                                    </Link>
-                                </td>
-                                <td className="px-4 py-3 text-xs">{item.branch?.name || '-'}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</td>
-                                {!isInstructor && (
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                )}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-12">{t('common.number', '№')}</TableHead>
+                                <TableHead>{t('groups.name', 'Guruh nomi')}</TableHead>
+                                <TableHead>{t('branches.branch', 'Filial')}</TableHead>
+                                <TableHead>{t('drivings.instructor', 'Instruktor')}</TableHead>
+                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {groups.data.length === 0 ? (
+                                <TableEmpty colSpan={5} title={t('common.no_data', 'Ma\'lumot topilmadi')} />
+                            ) : (
+                                groups.data.map((item, index) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="text-muted-foreground font-mono">{(groups.from || 1) + index}</TableCell>
+                                        <TableCell className="font-medium">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                                <Link href={`/admin/groups/${item.id}`} className="text-blue-600 hover:underline">
+                                                    {item.name}
+                                                </Link>
+                                                {item.course && (
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-normal px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 w-fit">
+                                                        <GraduationCap className="w-3 h-3" />
+                                                        {item.course.name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-xs">{item.branch?.name || '-'}</TableCell>
+                                        <TableCell className="text-muted-foreground">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end items-center gap-2">
+                                                <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
+                                                    <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
+                                                        <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                                        {t('groups.take_attendance', 'Davomat')}
+                                                    </Link>
+                                                </Button>
+                                                {!isInstructor && (
+                                                    <>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
                 
                 {/* Mobile Cards */}
                 <div className="md:hidden p-3 space-y-3 bg-muted/20">
@@ -351,6 +419,12 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                                     <Link href={`/admin/groups/${item.id}`} className="font-semibold text-blue-600 hover:underline text-lg block">
                                         {item.name}
                                     </Link>
+                                    {item.course && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-normal px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mt-1">
+                                            <GraduationCap className="w-3 h-3" />
+                                            {item.course.name}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             
@@ -359,22 +433,30 @@ export default function GroupsIndex({ groups, instructors, branches = [], filter
                                 <div className="font-medium">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</div>
                             </div>
                             
-                            <div className="flex gap-2 justify-end pt-1">
-                                <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
-                                    <Link href={`/admin/groups/${item.id}`}>
-                                        <Eye className="w-4 h-4" />
+                            <div className="flex items-center justify-between pt-2 border-t mt-2">
+                                <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
+                                    <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
+                                        <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                        {t('groups.take_attendance', 'Davomat')}
                                     </Link>
                                 </Button>
-                                {!isInstructor && (
-                                    <>
-                                        <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </>
-                                )}
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
+                                        <Link href={`/admin/groups/${item.id}`}>
+                                            <Eye className="w-4 h-4" />
+                                        </Link>
+                                    </Button>
+                                    {!isInstructor && (
+                                        <>
+                                            <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

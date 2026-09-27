@@ -14,6 +14,7 @@ export default defineConfig({
             fonts: [
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
+                    preload: false,
                 }),
             ],
         }),
@@ -26,6 +27,7 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+            command: 'php artisan wayfinder:generate 2>/dev/null || true',
         }),
     ],
 });

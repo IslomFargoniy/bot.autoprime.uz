@@ -53,7 +53,7 @@ class FortifyServiceProvider extends ServiceProvider
                     ->orWhereRaw("REPLACE(phone, '+', '') = ?", [$cleanPhone]);
             })->first();
 
-            if ($user && Hash::check($request->password, $user->password)) {
+            if ($user && $user->isActive() && Hash::check($request->password, $user->password)) {
                 return $user;
             }
 

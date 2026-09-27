@@ -19,6 +19,15 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableEmpty,
+} from '@/components/ui/table';
 import { SharedData } from '@/types/auth';
 
 interface TagCount {
@@ -229,7 +238,7 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                 <Star className="w-4 h-4 text-amber-500 fill-current" />
                                 <span>{t('instructors.rating_distribution', 'Baholar taqsimoti')}</span>
                             </h2>
-                            <span className="text-xs text-muted-foreground font-medium">{stats.total_reviews} baho</span>
+                            <span className="text-xs text-muted-foreground font-medium">{stats.total_reviews} {t('instructors.reviews_count', 'baho')}</span>
                         </div>
 
                         <div className="space-y-2.5">
@@ -260,7 +269,7 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                 <TrendingUp className="w-4 h-4 text-primary" />
                                 <span>{t('instructors.criteria_breakdown', 'Baholash mezonlari (Taglar)')}</span>
                             </h2>
-                            <span className="text-xs text-muted-foreground font-medium">{stats.tag_counts.length} tag</span>
+                            <span className="text-xs text-muted-foreground font-medium">{stats.tag_counts.length} {t('instructors.tags_count_suffix', 'ta mezon')}</span>
                         </div>
 
                         {stats.tag_counts.length === 0 ? (
@@ -279,7 +288,7 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                                 }`}>
                                                     {tc.tag}
                                                 </span>
-                                                <span className="text-muted-foreground font-mono">{tc.count} marta ({tc.percentage}%)</span>
+                                                <span className="text-muted-foreground font-mono">{tc.count} {t('common.times', 'marta')} ({tc.percentage}%)</span>
                                             </div>
                                             <div className="h-2 bg-muted rounded-full overflow-hidden">
                                                 <div 
@@ -317,43 +326,44 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-muted/50 text-muted-foreground border-b text-xs">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">№</th>
-                                <th className="px-4 py-3 font-medium">{t('drivings.date_time', 'Sana va Vaqt')}</th>
-                                <th className="px-4 py-3 font-medium">{t('students.title', 'O\'quvchi (Guruh)')}</th>
-                                <th className="px-4 py-3 font-medium">{t('drivings.autodrome', 'Avtodrom')}</th>
-                                <th className="px-4 py-3 font-medium text-center">{t('drivings.status', 'Holat')}</th>
-                                {!isInstructorRole && <th className="px-4 py-3 font-medium">{t('drivings.review', 'Baho / Taglar')}</th>}
-                                {!isInstructorRole && <th className="px-4 py-3 font-medium">{t('drivings.comment', 'Izoh')}</th>}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y text-xs sm:text-sm">
+                {/* Desktop/Tablet Table */}
+                <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-12">№</TableHead>
+                                <TableHead>{t('drivings.date_time', 'Sana va Vaqt')}</TableHead>
+                                <TableHead>{t('students.title', 'O\'quvchi (Guruh)')}</TableHead>
+                                <TableHead>{t('drivings.autodrome', 'Avtodrom')}</TableHead>
+                                <TableHead className="text-center">{t('drivings.status', 'Holat')}</TableHead>
+                                {!isInstructorRole && <TableHead>{t('drivings.review', 'Baho / Taglar')}</TableHead>}
+                                {!isInstructorRole && <TableHead>{t('drivings.comment', 'Izoh')}</TableHead>}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {filteredDrivings.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                                        {t('drivings.no_drivings', 'Mashg\'ulotlar topilmadi')}
-                                    </td>
-                                </tr>
+                                <TableEmpty
+                                    colSpan={isInstructorRole ? 5 : 7}
+                                    icon={Car}
+                                    title={t('drivings.no_drivings', 'Mashg\'ulotlar topilmadi')}
+                                    description={t('drivings.no_drivings_desc', 'Hozircha birorta ham amaliy dars mavjud emas')}
+                                />
                             ) : (
                                 filteredDrivings.map((driving, idx) => (
-                                    <tr key={driving.id} className="hover:bg-muted/30">
-                                        <td className="px-4 py-3 font-medium">{idx + 1}</td>
-                                        <td className="px-4 py-3 font-mono whitespace-nowrap">
+                                    <TableRow key={driving.id}>
+                                        <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
+                                        <TableCell className="font-mono whitespace-nowrap">
                                             {formatDate(driving.start_time)}
-                                        </td>
-                                        <td className="px-4 py-3">
+                                        </TableCell>
+                                        <TableCell>
                                             <div className="font-medium">{driving.student?.full_name || '-'}</div>
                                             {driving.student?.group && (
                                                 <div className="text-xs text-muted-foreground">
                                                     {driving.student.group.name}
                                                 </div>
                                             )}
-                                        </td>
-                                        <td className="px-4 py-3">
+                                        </TableCell>
+                                        <TableCell>
                                             {driving.autodrome ? (
                                                 <div className="flex items-center gap-1 text-xs">
                                                     <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -362,8 +372,8 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                             ) : (
                                                 <span className="text-muted-foreground text-xs">-</span>
                                             )}
-                                        </td>
-                                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                                        </TableCell>
+                                        <TableCell className="text-center whitespace-nowrap">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                                                 driving.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
                                                 driving.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -373,9 +383,9 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                                  driving.status === 'scheduled' ? t('drivings.status_scheduled', 'Belgilangan') :
                                                  t('drivings.status_cancelled', 'Bekor qilingan')}
                                             </span>
-                                        </td>
+                                        </TableCell>
                                         {!isInstructorRole && (
-                                            <td className="px-4 py-3">
+                                            <TableCell>
                                                 {driving.review ? (
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-xs">
@@ -395,10 +405,10 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground font-normal">{t('drivings.no_review', 'Baholanmagan')}</span>
                                                 )}
-                                            </td>
+                                            </TableCell>
                                         )}
                                         {!isInstructorRole && (
-                                            <td className="px-4 py-3 max-w-xs text-xs text-muted-foreground">
+                                            <TableCell className="max-w-xs text-xs text-muted-foreground">
                                                 {driving.review?.comment ? (
                                                     <div className="flex items-start gap-1">
                                                         <MessageSquare className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
@@ -407,13 +417,93 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                                                 ) : (
                                                     <span>-</span>
                                                 )}
-                                            </td>
+                                            </TableCell>
                                         )}
-                                    </tr>
+                                    </TableRow>
                                 ))
                             )}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {/* Mobile Cards Feed */}
+                <div className="md:hidden space-y-3">
+                    {filteredDrivings.length === 0 ? (
+                        <div className="text-center py-8 bg-muted/20 border border-dashed rounded-xl p-4">
+                            <Car className="w-8 h-8 mx-auto text-muted-foreground mb-2 opacity-50" />
+                            <div className="font-medium text-sm">{t('drivings.no_drivings', 'Mashg\'ulotlar topilmadi')}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                                {t('drivings.no_drivings_desc', 'Hozircha birorta ham amaliy dars mavjud emas')}
+                            </div>
+                        </div>
+                    ) : (
+                        filteredDrivings.map((driving, idx) => (
+                            <div key={driving.id} className="bg-card border rounded-xl p-3.5 shadow-2xs space-y-2.5">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] font-mono text-muted-foreground">#{idx + 1}</span>
+                                            <span className="font-semibold text-sm truncate">
+                                                {driving.student?.full_name || '-'}
+                                            </span>
+                                        </div>
+                                        {driving.student?.group && (
+                                            <div className="text-xs text-muted-foreground truncate mt-0.5">
+                                                {driving.student.group.name}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className={`inline-flex shrink-0 items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                                        driving.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                        driving.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
+                                    }`}>
+                                        {driving.status === 'completed' ? t('drivings.status_completed', 'Yakunlangan') :
+                                         driving.status === 'scheduled' ? t('drivings.status_scheduled', 'Belgilangan') :
+                                         t('drivings.status_cancelled', 'Bekor qilingan')}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t text-muted-foreground">
+                                    <div className="flex items-center gap-1 truncate">
+                                        <Clock className="w-3.5 h-3.5 shrink-0" />
+                                        <span className="font-mono text-[11px] truncate">{formatDate(driving.start_time)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 justify-end truncate">
+                                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                        <span className="truncate">{driving.autodrome?.name || '-'}</span>
+                                    </div>
+                                </div>
+
+                                {!isInstructorRole && driving.review && (
+                                    <div className="p-2 bg-muted/40 rounded-lg space-y-1.5 border">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-xs">
+                                                <Star className="w-3.5 h-3.5 fill-current" />
+                                                <span>{driving.review.rating} / 5</span>
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground">{t('drivings.review', 'Baho')}</span>
+                                        </div>
+                                        {driving.review.reason_tags && driving.review.reason_tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {driving.review.reason_tags.map((tag, i) => (
+                                                    <span key={i} className="text-[10px] bg-card px-1.5 py-0.5 rounded border">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {driving.review.comment && (
+                                            <div className="flex items-start gap-1 text-xs text-foreground/80 pt-1">
+                                                <MessageSquare className="w-3 h-3 text-muted-foreground shrink-0 mt-0.5" />
+                                                <span className="text-[11px] italic">"{driving.review.comment}"</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

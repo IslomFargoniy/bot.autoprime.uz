@@ -23,8 +23,8 @@ test('two factor challenge can be rendered', function () {
     $user = User::factory()->withTwoFactor()->create();
 
     $this->post(route('login'), [
-        'email' => $user->email,
-        'password' => 'password',
+        'phone' => $user->phone,
+        'password' => '12345678',
     ]);
 
     $this->get(route('two-factor.login'))

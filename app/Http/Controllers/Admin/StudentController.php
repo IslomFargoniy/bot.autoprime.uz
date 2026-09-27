@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\BranchScopedValidationRules;
 use App\Exports\StudentsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
@@ -15,6 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
+    use BranchScopedValidationRules;
+
     public function export(Request $request)
     {
         $filters = $request->all();
@@ -29,18 +32,13 @@ class StudentController extends Controller
     public function searchApi(Request $request)
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Student::with(['group', 'branch'])->orderBy('full_name', 'asc');
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
-            $query->where(function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)
-                    ->orWhereHas('group', function ($gQ) use ($targetBranchId) {
-                        $gQ->where('branch_id', $targetBranchId);
-                    });
-            });
+            $query->inBranch($targetBranchId);
         }
 
         $search = $request->get('q');
@@ -83,7 +81,7 @@ class StudentController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->role === 'instructor';
+        $isInstructor = $user->isInstructor();
 
         $query = Student::with(['group', 'branch'])
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
@@ -93,12 +91,7 @@ class StudentController extends Controller
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
-            $query->where(function ($q) use ($targetBranchId) {
-                $q->where('branch_id', $targetBranchId)
-                    ->orWhereHas('group', function ($gQ) use ($targetBranchId) {
-                        $gQ->where('branch_id', $targetBranchId);
-                    });
-            });
+            $query->inBranch($targetBranchId);
         }
 
         if ($isInstructor) {
@@ -150,20 +143,23 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
+
+        // Normalize before the unique check so +998/no-prefix variants are one number.
+        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students',
             'telegram_id' => 'nullable|string|unique:students',
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
         $user = $request->user();
-        if ($user->role === 'admin' && $user->branch_id) {
+        if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
         } elseif (empty($validated['branch_id'])) {
             $validated['branch_id'] = $user->branch_id;
@@ -176,15 +172,17 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
         }
+
+        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students,phone,'.$student->id,
             'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
-            'group_id' => 'nullable|exists:groups,id',
+            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
@@ -195,6 +193,14 @@ class StudentController extends Controller
 
     public function show(Student $student, Request $request): Response
     {
+        $user = $request->user();
+        if ($user->isInstructor()) {
+            $isOwnStudent = $student->group?->instructor_id === $user->id
+                || $student->drivings()->where('instructor_id', $user->id)->exists();
+
+            abort_unless($isOwnStudent, 403, 'Siz faqat o\'z o\'quvchilaringizni ko\'ra olasiz.');
+        }
+
         $student->load('group.instructor');
 
         $drivingsQuery = $student->drivings()
@@ -223,10 +229,19 @@ class StudentController extends Controller
             'average_rating' => $avgRating,
         ];
 
+        $student->load(['group.instructor', 'branch', 'contracts.contractType', 'contracts.payments.cashRegister']);
+
+        $financialHistories = $student->financialHistories()
+            ->with(['performedBy'])
+            ->take(50)
+            ->get();
+
         return Inertia::render('Admin/Students/Show', [
             'student' => $student,
             'drivings' => $drivings,
             'stats' => $stats,
+            'contracts' => $student->contracts,
+            'financialHistories' => $financialHistories,
             'filters' => [
                 'status' => $request->status,
                 'per_page' => $request->per_page,
@@ -236,8 +251,14 @@ class StudentController extends Controller
 
     public function destroy(Student $student, Request $request)
     {
-        if ($request->user()->role === 'instructor') {
+        if ($request->user()->isInstructor()) {
             abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
+        }
+
+        if ($student->hasHistory()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Bu o\'quvchining shartnoma, to\'lov yoki dars tarixi bor. O\'chirish o\'rniga holatini o\'zgartiring.',
+            ]);
         }
 
         $student->delete();
