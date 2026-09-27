@@ -20,7 +20,7 @@ import {
     Zap,
     ClipboardList,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatDateTime } from '@/lib/utils';
 import {
     Dialog,
     DialogClose,
@@ -1095,8 +1095,8 @@ export function TestQuiz() {
                                                 ? t('tests.type_mock', 'Ichki Nazorat Imtihoni')
                                                 : att.ticket?.title_uz || `Bilet #${att.ticket_id}`}
                                         </p>
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {new Date(att.created_at).toLocaleString('uz-UZ')} • {Math.floor(att.duration_seconds / 60)} daq
+                                        <p className="text-[10px] text-muted-foreground font-mono">
+                                            {formatDateTime(att.created_at)} • {Math.floor(att.duration_seconds / 60)} daq
                                         </p>
                                     </div>
                                     <div className="text-right">

@@ -37,6 +37,18 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        $dateFormatCallback = function ($date) {
+            $tz = config('app.timezone', 'Asia/Tashkent');
+            if ($date instanceof \DateTimeInterface) {
+                return \Illuminate\Support\Carbon::instance($date)->setTimezone($tz)->format('Y-m-d H:i:s');
+            }
+            return (string) $date;
+        };
+
+        CarbonImmutable::serializeUsing($dateFormatCallback);
+        \Carbon\Carbon::serializeUsing($dateFormatCallback);
+        \Illuminate\Support\Carbon::serializeUsing($dateFormatCallback);
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );

@@ -30,7 +30,7 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
+import { cn, formatDateTime } from '@/lib/utils';
 import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
@@ -962,14 +962,8 @@ export default function TestsIndex({
                                                     </span>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-[11px]">
-                                                {new Date(att.created_at).toLocaleString('uz-UZ', {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
+                                            <TableCell className="text-muted-foreground text-[11px] font-mono">
+                                                {formatDateTime(att.created_at)}
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -1040,7 +1034,7 @@ export default function TestsIndex({
                                     {/* Date */}
                                     <div className="flex justify-between items-center pt-2 border-t text-[11px] text-muted-foreground">
                                         <span>{t('tests.col_date', 'Sana')}:</span>
-                                        <span>{new Date(att.created_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                        <span className="font-mono">{formatDateTime(att.created_at)}</span>
                                     </div>
                                 </div>
                             ))

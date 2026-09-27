@@ -44,6 +44,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
+import { formatDateTime } from '@/lib/utils';
 import {
     Table,
     TableBody,
@@ -1242,7 +1243,7 @@ export default function StaffIndex({
                                                 )}
 
                                                 <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t">
-                                                    <span>{new Date(item.transacted_at).toLocaleDateString('uz-UZ')}</span>
+                                                    <span className="font-mono">{formatDateTime(item.transacted_at)}</span>
                                                     <span>
                                                         {t('staff.balance_after', 'Balans')}: {formatMoney(item.balance_after)}
                                                     </span>
