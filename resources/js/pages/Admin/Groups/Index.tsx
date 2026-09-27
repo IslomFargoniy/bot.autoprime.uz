@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/table';
 import { Filter } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 
 interface Instructor {
     id: number;
@@ -83,6 +84,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
     const [editing, setEditing] = useState<Group | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
+    const [attendanceGroup, setAttendanceGroup] = useState<Group | null>(null);
     
     const [search, setSearch] = useState(filters.search || '');
     const [instructorId, setInstructorId] = useState(filters.instructor_id || '');
@@ -385,11 +387,14 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                         <TableCell className="text-muted-foreground">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end items-center gap-2">
-                                                <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
-                                                    <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
-                                                        <CheckSquare className="w-3.5 h-3.5 mr-1" />
-                                                        {t('groups.take_attendance', 'Davomat')}
-                                                    </Link>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setAttendanceGroup(item)}
+                                                    className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                                >
+                                                    <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                                    {t('groups.take_attendance', 'Davomat')}
                                                 </Button>
                                                 {!isInstructor && (
                                                     <>
@@ -434,11 +439,14 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                             </div>
                             
                             <div className="flex items-center justify-between pt-2 border-t mt-2">
-                                <Button variant="outline" size="sm" asChild className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
-                                    <Link href={`/admin/attendance?group_id=${item.id}&action=mark`}>
-                                        <CheckSquare className="w-3.5 h-3.5 mr-1" />
-                                        {t('groups.take_attendance', 'Davomat')}
-                                    </Link>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setAttendanceGroup(item)}
+                                    className="h-8 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                >
+                                    <CheckSquare className="w-3.5 h-3.5 mr-1" />
+                                    {t('groups.take_attendance', 'Davomat')}
                                 </Button>
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
@@ -464,6 +472,14 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
             </div>
 
             <Pagination links={groups.links} />
+
+            <GroupAttendanceModal
+                isOpen={!!attendanceGroup}
+                onClose={() => setAttendanceGroup(null)}
+                groupId={attendanceGroup?.id}
+                groupName={attendanceGroup?.name}
+                groups={groups.data.map((g) => ({ id: g.id, name: g.name }))}
+            />
         </div>
     );
 }
