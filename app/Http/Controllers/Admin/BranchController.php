@@ -47,7 +47,7 @@ class BranchController extends Controller
             });
         }
 
-        $perPage = $request->get('per_page', 25);
+        $perPage = $request->get('per_page', 15);
         if ($perPage === 'all') {
             $perPage = max($query->count(), 1);
         }

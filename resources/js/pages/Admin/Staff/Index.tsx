@@ -138,7 +138,7 @@ export default function StaffIndex({
     const [selectedRole, setSelectedRole] = useState(filters.role || 'all');
     const [selectedStatus, setSelectedStatus] = useState(filters.status || 'all');
     const [selectedBranch, setSelectedBranch] = useState(filters.branch_id ? String(filters.branch_id) : '');
-    const [perPage, setPerPage] = useState(filters.per_page || '25');
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState<StaffUser | null>(null);

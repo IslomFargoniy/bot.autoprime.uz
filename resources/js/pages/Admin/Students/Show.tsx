@@ -153,7 +153,7 @@ export default function StudentShow({
     const isInstructor = auth.user.role === 'instructor';
     const [activeTab, setActiveTab] = useState<'drivings' | 'finance'>('drivings');
     const [status, setStatus] = useState(filters.status || '');
-    const [perPage, setPerPage] = useState(filters.per_page || '25');
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const formatMoney = (val: number | string | undefined | null) => {
         const num = Number(val || 0);
@@ -349,6 +349,7 @@ export default function StudentShow({
                                 applyFilters(status, e.target.value);
                             }}
                         >
+                            <option value="15">15</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="75">75</option>

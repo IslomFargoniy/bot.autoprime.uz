@@ -25,7 +25,8 @@ class ContractTypeController extends Controller
             });
         }
 
-        $contractTypes = $query->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $contractTypes = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
         $branches = Branch::where('status', 'active')->get();
 
         return Inertia::render('Admin/ContractTypes/Index', [
@@ -33,6 +34,7 @@ class ContractTypeController extends Controller
             'branches' => $branches,
             'filters' => [
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

@@ -42,6 +42,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 
 interface Lead {
     id: number;
@@ -458,6 +459,9 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            <Pagination links={leads.links} />
 
             {/* View Lead Details Modal */}
             <Dialog open={!!viewingLead} onOpenChange={(open) => !open && setViewingLead(null)}>

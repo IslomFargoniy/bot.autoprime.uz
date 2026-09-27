@@ -100,7 +100,7 @@ class StaffController extends Controller
         $totalBaseSalary = (float) (clone $countsQuery)->sum('base_salary');
         $activeCount = (clone $countsQuery)->where('status', 'active')->count();
 
-        $perPage = $request->get('per_page', 25);
+        $perPage = $request->get('per_page', 15);
         if ($perPage === 'all') {
             $perPage = max($query->count(), 1);
         }
@@ -123,7 +123,7 @@ class StaffController extends Controller
                 'role' => $request->role ?? 'all',
                 'status' => $request->status ?? 'all',
                 'branch_id' => $targetBranchId,
-                'per_page' => $request->per_page ?? '25',
+                'per_page' => $request->per_page ?? '15',
             ],
         ]);
     }

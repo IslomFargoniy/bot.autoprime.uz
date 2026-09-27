@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 
 interface VehicleMaintenance {
     id: number;
@@ -347,6 +348,9 @@ export default function VehiclesIndex({
                     </div>
                 ))}
             </div>
+
+            {/* Pagination */}
+            <Pagination links={vehicles.links} />
 
             {/* Vehicle Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

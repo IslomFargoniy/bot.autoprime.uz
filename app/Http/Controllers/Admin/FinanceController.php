@@ -67,7 +67,7 @@ class FinanceController extends Controller
         if ($targetBranchId) {
             $paymentsQuery->where('branch_id', $targetBranchId);
         }
-        $payments = $paymentsQuery->paginate(20, ['*'], 'payments_page')->withQueryString();
+        $payments = $paymentsQuery->paginate(15, ['*'], 'payments_page')->withQueryString();
 
         // 4. Recent Expenses
         $expensesQuery = Expense::with(['cashRegister', 'category', 'user'])
@@ -75,7 +75,7 @@ class FinanceController extends Controller
         if ($targetBranchId) {
             $expensesQuery->where('branch_id', $targetBranchId);
         }
-        $expenses = $expensesQuery->paginate(20, ['*'], 'expenses_page')->withQueryString();
+        $expenses = $expensesQuery->paginate(15, ['*'], 'expenses_page')->withQueryString();
 
         // 5. Cash Transactions (Kassa tarixi / Ledger with Running Balance)
         $transactionsQuery = CashTransaction::with(['cashRegister.branch', 'cashRegister.type', 'user'])
@@ -108,7 +108,7 @@ class FinanceController extends Controller
             $transactionsQuery->whereDate('transacted_at', '<=', $request->input('history_to'));
         }
 
-        $transactions = $transactionsQuery->paginate(25, ['*'], 'transactions_page')->withQueryString();
+        $transactions = $transactionsQuery->paginate(15, ['*'], 'transactions_page')->withQueryString();
 
         // 6. Cash Transfers
         $transfersQuery = CashTransfer::with(['fromCashRegister', 'toCashRegister', 'transferredBy', 'approvedBy'])

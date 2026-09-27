@@ -42,7 +42,7 @@ interface Props {
 export default function Index({ branches, filters }: Props) {
     const { t } = useTranslation();
     const [search, setSearch] = useState(filters.search || '');
-    const [perPage, setPerPage] = useState(filters.per_page || '25');
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
     const [isOpen, setIsOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
 
@@ -139,6 +139,7 @@ export default function Index({ branches, filters }: Props) {
                         }}
                         title={t('common.per_page', 'Sahifada ko\'rsatish')}
                     >
+                        <option value="15">15</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="75">75</option>

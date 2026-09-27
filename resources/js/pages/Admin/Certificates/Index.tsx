@@ -31,6 +31,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import Pagination from '@/components/pagination';
 
 interface Certificate {
     id: number;
@@ -248,6 +249,9 @@ export default function CertificatesIndex({
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            <Pagination links={certificates.links} />
 
             {/* Issue Certificate Modal with 4-Conditions Checklist */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

@@ -33,6 +33,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 
 interface Salary {
     id: number;
@@ -380,6 +381,9 @@ export default function SalariesIndex({
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            <Pagination links={salaries.links} />
 
             {/* Custom Adjustment Modal (Bonus, Fine, Advance) */}
             <Dialog open={showAdjustModal} onOpenChange={setShowAdjustModal}>

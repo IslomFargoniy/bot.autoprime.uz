@@ -48,7 +48,8 @@ class AttendanceController extends Controller
             });
         }
 
-        $attendances = $query->paginate(30)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $attendances = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
 
         $activeSessions = LessonSession::with(['group', 'teacher'])
             ->where('status', 'active')
@@ -82,6 +83,7 @@ class AttendanceController extends Controller
                 'date' => $request->date,
                 'branch_id' => $targetBranchId,
                 'action' => $request->action,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

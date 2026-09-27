@@ -14,6 +14,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 
 interface ContractType {
     id: number;
@@ -205,6 +206,9 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                     ))}
                 </div>
             )}
+
+            {/* Pagination */}
+            <Pagination links={contractTypes.links} />
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

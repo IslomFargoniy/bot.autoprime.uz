@@ -24,6 +24,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import Pagination from '@/components/pagination';
 import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -48,7 +49,11 @@ interface Autodrome {
 }
 
 interface PageProps {
-    autodromes: Autodrome[];
+    autodromes: {
+        data: Autodrome[];
+        links: any[];
+        total?: number;
+    } | Autodrome[];
     branches?: Branch[];
 }
 
@@ -84,6 +89,8 @@ function MapController({ center }: { center: L.LatLng | null }) {
 }
 
 export default function AutodromesIndex({ autodromes, branches = [] }: PageProps) {
+    const autodromesList: Autodrome[] = Array.isArray(autodromes) ? autodromes : (autodromes?.data || []);
+    const autodromesLinks = !Array.isArray(autodromes) ? autodromes?.links : undefined;
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth?.user?.role === 'instructor';
@@ -362,14 +369,14 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {autodromes.length === 0 ? (
+                        {autodromesList.length === 0 ? (
                             <TableEmpty
                                 colSpan={isInstructor ? 6 : 7}
                                 icon={MapPin}
                                 title={t('common.no_data', "Ma'lumot topilmadi")}
                             />
                         ) : (
-                            autodromes.map((item, index) => (
+                            autodromesList.map((item, index) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
                                     <TableCell className="font-medium text-gray-900 dark:text-white">{item.name}</TableCell>
@@ -389,7 +396,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                                                 <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="h-7 w-7 p-0">
                                                     <Edit2 className="w-3.5 h-3.5 text-blue-500" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </Button>
                                             </div>
@@ -404,13 +411,13 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
 
             {/* Mobile Cards Feed */}
             <div className="md:hidden space-y-3">
-                {autodromes.length === 0 ? (
+                {autodromesList.length === 0 ? (
                     <div className="text-center py-8 bg-card border border-dashed rounded-xl p-4">
                         <MapPin className="w-8 h-8 mx-auto text-muted-foreground mb-2 opacity-50" />
                         <div className="font-medium text-sm">{t('common.no_data', "Ma'lumot topilmadi")}</div>
                     </div>
                 ) : (
-                    autodromes.map((item, index) => (
+                    autodromesList.map((item, index) => (
                         <div key={item.id} className="bg-card border rounded-xl p-3.5 shadow-2xs space-y-2.5">
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
@@ -458,6 +465,9 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            {autodromesLinks && <Pagination links={autodromesLinks} />}
         </div>
     );
 }

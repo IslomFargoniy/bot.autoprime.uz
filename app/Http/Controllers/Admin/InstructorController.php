@@ -74,7 +74,7 @@ class InstructorController extends Controller
             }
         };
 
-        $perPage = $request->get('per_page', '25');
+        $perPage = $request->get('per_page', '15');
 
         $items = $query->withCount('groups')
             ->with([

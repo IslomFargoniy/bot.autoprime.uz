@@ -50,7 +50,8 @@ class LeadController extends Controller
             });
         }
 
-        $leads = $query->paginate(30)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $leads = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
 
         $contractTypes = ContractType::where('is_active', true)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -78,6 +79,7 @@ class LeadController extends Controller
                 'stage' => $request->stage,
                 'source' => $request->source,
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

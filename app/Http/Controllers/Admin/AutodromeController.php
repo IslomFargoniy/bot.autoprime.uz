@@ -26,7 +26,8 @@ class AutodromeController extends Controller
             });
         }
 
-        $autodromes = $query->orderBy('name')->get();
+        $perPage = $request->get('per_page', '15');
+        $autodromes = $query->orderBy('name')->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
         $branches = Branch::where('status', 'active')->get();
 
         return Inertia::render('Admin/Autodromes/Index', [
@@ -34,6 +35,7 @@ class AutodromeController extends Controller
             'branches' => $branches,
             'filters' => [
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

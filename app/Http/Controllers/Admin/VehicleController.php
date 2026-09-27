@@ -42,7 +42,8 @@ class VehicleController extends Controller
             });
         }
 
-        $vehicles = $query->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $vehicles = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
 
         $instructors = User::where('role', 'instructor')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -70,6 +71,7 @@ class VehicleController extends Controller
             'filters' => [
                 'search' => $request->search,
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

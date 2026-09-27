@@ -63,7 +63,8 @@ class ContractController extends Controller
             });
         }
 
-        $contracts = $query->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $contracts = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
 
         $students = Student::orderBy('full_name')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -111,6 +112,7 @@ class ContractController extends Controller
                 'payment_status' => $request->payment_status,
                 'has_debt' => $request->boolean('has_debt'),
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

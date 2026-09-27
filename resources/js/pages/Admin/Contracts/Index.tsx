@@ -45,6 +45,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import Pagination from '@/components/pagination';
 import { DatePicker } from '@/components/ui/date-picker';
 
 interface CashRegister {
@@ -522,6 +523,9 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            <Pagination links={contracts.links} />
 
             {/* View Full Contract Details Modal */}
             <Dialog open={!!viewingContract} onOpenChange={(open) => !open && setViewingContract(null)}>

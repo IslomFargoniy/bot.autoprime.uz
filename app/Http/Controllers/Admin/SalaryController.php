@@ -42,7 +42,8 @@ class SalaryController extends Controller
             });
         }
 
-        $salaries = $salariesQuery->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $salaries = $salariesQuery->paginate($perPage === 'all' ? max($salariesQuery->count(), 1) : (int) $perPage)->withQueryString();
 
         $employees = User::where('status', 'active')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -67,6 +68,7 @@ class SalaryController extends Controller
             'filters' => [
                 'period' => $period,
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->per_page,
             ],
         ]);
     }

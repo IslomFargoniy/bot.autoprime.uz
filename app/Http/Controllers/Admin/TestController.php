@@ -47,7 +47,8 @@ class TestController extends Controller
             $query->where('attempt_type', $request->type);
         }
 
-        $attempts = $query->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', '15');
+        $attempts = $query->paginate($perPage === 'all' ? max($query->count(), 1) : (int) $perPage)->withQueryString();
 
         $stats = [
             'total_tickets' => Ticket::count(),
@@ -73,7 +74,12 @@ class TestController extends Controller
             'tickets' => $tickets,
             'signCategories' => $signCategories,
             'roadLines' => $roadLines,
-            'filters' => $request->only(['search', 'status', 'type']),
+            'filters' => [
+                'search' => $request->search,
+                'status' => $request->status,
+                'type' => $request->type,
+                'per_page' => $request->per_page,
+            ],
         ]);
     }
 

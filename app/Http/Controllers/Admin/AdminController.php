@@ -40,7 +40,7 @@ class AdminController extends Controller
             $query->where('branch_id', $targetBranchId);
         }
 
-        $perPage = $request->get('per_page', 25);
+        $perPage = $request->get('per_page', 15);
         if ($perPage === 'all') {
             $perPage = max($query->count(), 1);
         }
