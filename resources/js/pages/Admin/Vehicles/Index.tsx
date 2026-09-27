@@ -339,7 +339,7 @@ export default function VehiclesIndex({
                                 <Button size="sm" variant="ghost" onClick={() => openEdit(v)} className="h-8 w-8 p-0">
                                     <Edit2 className="w-3.5 h-3.5" />
                                 </Button>
-                                <Button size="sm" variant="ghost" onClick={() => handleDelete(v)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
+                                <Button size="sm" variant="ghost" onClick={() => handleDelete(v)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                             </div>

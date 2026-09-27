@@ -197,7 +197,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                                     <Edit2 className="w-3.5 h-3.5 mr-1" />
                                     {t('common.edit', 'Tahrirlash')}
                                 </Button>
-                                <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700">
+                                <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                             </div>

@@ -147,7 +147,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                         className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 shrink-0 ${
                             selectedCourse?.id === c.id
                                 ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60'
+                                : 'bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-border'
                         }`}
                     >
                         <span className="w-5 h-5 rounded-full bg-white/20 dark:bg-white/10 text-center leading-5 text-[11px] font-bold">

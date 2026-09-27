@@ -246,8 +246,8 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             onClick={() => handleStageChange(st)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium border shrink-0 transition-colors ${
                                 (filters.stage || 'all') === st
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                                    : 'bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-border'
                             }`}
                         >
                             {t(`leads.stage_${st}`, st)}
@@ -359,7 +359,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => handleDelete(lead)}
-                                            className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </Button>
@@ -449,7 +449,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => handleDelete(lead)}
-                                    className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </Button>

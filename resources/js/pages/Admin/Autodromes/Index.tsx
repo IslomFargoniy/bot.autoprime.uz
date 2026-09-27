@@ -448,7 +448,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                                         <Edit2 className="w-3.5 h-3.5 text-blue-500" />
                                         <span>{t('common.edit', 'Tahrirlash')}</span>
                                     </Button>
-                                    <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                    <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 gap-1" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
                                         <Trash2 className="w-3.5 h-3.5" />
                                         <span>{t('common.delete', 'O\'chirish')}</span>
                                     </Button>

@@ -170,7 +170,7 @@ export default function CertificatesIndex({
                                         </a>
                                         <a
                                             href={`/certificates/verify/${cert.qr_verify_hash}`}
-                                            className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-xs"
+                                            className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium text-xs transition-colors"
                                             target="_blank"
                                             rel="noreferrer"
                                         >
@@ -226,7 +226,7 @@ export default function CertificatesIndex({
                                 <div className="flex items-center gap-2">
                                     <a
                                         href={`/admin/certificates/${cert.id}/download-pdf`}
-                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 font-medium text-xs"
+                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs transition-colors"
                                         target="_blank"
                                         rel="noreferrer"
                                     >

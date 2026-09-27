@@ -504,7 +504,7 @@ export default function MiniApp({
                                             href={topic.lesson_materials[0].file_url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200"
+                                            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                                         >
                                             <Download className="w-3.5 h-3.5" />
                                             {t('lms.download_pdf', 'PDF Material')}
@@ -589,7 +589,7 @@ export default function MiniApp({
                         <div className="flex gap-2 justify-end">
                             <button
                                 onClick={() => setShowManualModal(false)}
-                                className="px-3 py-2 text-xs rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className="px-3 py-2 text-xs rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                             >
                                 {t('common.cancel', 'Bekor qilish')}
                             </button>
