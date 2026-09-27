@@ -29,6 +29,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { SharedData } from '@/types/auth';
+import { formatDateTime } from '@/lib/utils';
 
 interface TagCount {
     tag: string;
@@ -110,13 +111,7 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
     });
 
     const formatDate = (dateStr: string) => {
-        try {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
-                   date.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
-        } catch {
-            return dateStr;
-        }
+        return formatDateTime(dateStr);
     };
 
     return (

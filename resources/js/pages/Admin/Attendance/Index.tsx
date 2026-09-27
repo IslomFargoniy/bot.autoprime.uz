@@ -37,6 +37,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { formatDateTime } from '@/lib/utils';
 
 interface Attendance {
     id: number;
@@ -450,7 +451,7 @@ export default function AttendanceIndex({
                                         )}
                                     </TableCell>
                                     <TableCell className="text-gray-500">{att.session?.teacher?.name || att.marked_by?.name || '-'}</TableCell>
-                                    <TableCell className="text-gray-400">{att.scanned_at || '-'}</TableCell>
+                                    <TableCell className="text-gray-400 font-mono text-xs">{formatDateTime(att.scanned_at)}</TableCell>
                                 </TableRow>
                             ))
                         )}
@@ -497,7 +498,7 @@ export default function AttendanceIndex({
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('attendance.time', 'Vaqt')}:</span>
-                                    <span className="font-mono text-muted-foreground">{att.scanned_at || '-'}</span>
+                                    <span className="font-mono text-muted-foreground">{formatDateTime(att.scanned_at)}</span>
                                 </div>
                             </div>
 

@@ -42,6 +42,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { useCan } from '@/hooks/use-can';
+import { formatDateTime } from '@/lib/utils';
 
 interface CashRegister {
     id: number;
@@ -805,7 +806,7 @@ export default function FinanceIndex({
                                             <TableRow key={tx.id}>
                                                 <TableCell className="text-gray-400 font-mono text-xs">{idx + 1}</TableCell>
                                                 <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-xs whitespace-nowrap">
-                                                    {tx.transacted_at ? new Date(tx.transacted_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                    {formatDateTime(tx.transacted_at)}
                                                 </TableCell>
                                                 <TableCell className="font-medium whitespace-nowrap">
                                                     <div>{tx.cash_register?.name}</div>
@@ -864,7 +865,7 @@ export default function FinanceIndex({
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {renderCategoryBadge(tx.category)}
                                             <span className="text-[11px] text-gray-400 font-mono">
-                                                {tx.transacted_at ? new Date(tx.transacted_at).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                {formatDateTime(tx.transacted_at)}
                                             </span>
                                         </div>
                                         <div className="text-right shrink-0">
@@ -1201,7 +1202,7 @@ export default function FinanceIndex({
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.transferred_by?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.approved_by?.name || '-'}</TableCell>
-                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{tr.created_at}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 font-mono text-xs whitespace-nowrap">{formatDateTime(tr.created_at)}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
                                                     {tr.status === 'pending' && canApproveTransfers && (
                                                         <div className="inline-flex gap-1.5">
@@ -1260,7 +1261,7 @@ export default function FinanceIndex({
                                             >
                                                 {tr.status === 'approved' ? t('finance.approved', 'Tasdiqlangan') : tr.status === 'pending' ? t('finance.pending', 'Kutilmoqda') : t('finance.rejected', 'Rad etilgan')}
                                             </span>
-                                            <span className="text-[11px] text-gray-400 font-mono">{tr.created_at}</span>
+                                            <span className="text-[11px] text-gray-400 font-mono">{formatDateTime(tr.created_at)}</span>
                                         </div>
                                         <div className="font-mono font-bold text-sm sm:text-base text-gray-900 dark:text-white shrink-0">
                                             {Number(tr.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>

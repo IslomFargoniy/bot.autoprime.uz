@@ -42,6 +42,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { formatDateTime } from '@/lib/utils';
 
 interface Student {
     id: number;
@@ -648,7 +649,7 @@ export default function StudentShow({
                                             return (
                                                 <TableRow key={fh.id}>
                                                     <TableCell className="text-muted-foreground font-mono text-xs">{idx + 1}</TableCell>
-                                                    <TableCell className="text-xs">{new Date(fh.transacted_at).toLocaleDateString('uz-UZ')}</TableCell>
+                                                    <TableCell className="text-xs font-mono">{formatDateTime(fh.transacted_at)}</TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-1.5 text-xs font-medium">
                                                             {isDebit ? (
@@ -718,7 +719,7 @@ export default function StudentShow({
                                             </div>
                                             {fh.description && <div className="text-[11px] text-muted-foreground">{fh.description}</div>}
                                             <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t">
-                                                <span>{new Date(fh.transacted_at).toLocaleDateString('uz-UZ')}</span>
+                                                <span className="font-mono">{formatDateTime(fh.transacted_at)}</span>
                                                 <span>{t('staff.balance_after', 'Balans')}: {formatMoney(fh.balance_after)}</span>
                                             </div>
                                         </div>

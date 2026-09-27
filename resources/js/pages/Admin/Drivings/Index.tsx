@@ -33,6 +33,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { formatDate } from '@/lib/utils';
 
 interface Instructor {
     id: number;
@@ -1029,13 +1030,8 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                         </TableCell>
                                         <TableCell className="text-xs font-medium">{driving.autodrome?.name || '-'}</TableCell>
                                         <TableCell>
-                                            <div className="font-medium text-xs">
-                                                {(() => {
-                                                    const d = new Date(driving.start_time);
-                                                    const startDay = String(d.getDate()).padStart(2, '0');
-                                                    const startMonth = String(d.getMonth() + 1).padStart(2, '0');
-                                                    return `${startDay}-${startMonth}-${d.getFullYear()}`;
-                                                })()}
+                                            <div className="font-medium text-xs font-mono">
+                                                {formatDate(driving.start_time)}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
                                                 {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
@@ -1163,13 +1159,8 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <div>
                                         <span className="text-muted-foreground text-xs block">{t('drivings.date_time', 'Sana / Vaqt')}:</span>
-                                        <div className="font-medium">
-                                            {(() => {
-                                                const d = new Date(driving.start_time);
-                                                const startDay = String(d.getDate()).padStart(2, '0');
-                                                const startMonth = String(d.getMonth() + 1).padStart(2, '0');
-                                                return `${startDay}-${startMonth}-${d.getFullYear()}`;
-                                            })()}
+                                        <div className="font-medium font-mono text-xs">
+                                            {formatDate(driving.start_time)}
                                         </div>
                                         <div className="text-muted-foreground text-xs">
                                             {new Date(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {new Date(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
