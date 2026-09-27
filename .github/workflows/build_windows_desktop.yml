@@ -24,13 +24,14 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
 
       - name: Enable Windows Desktop
         run: flutter config --enable-windows-desktop
 
       - name: Install Inno Setup
-        run: choco install innosetup --no-progress -y
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
 
       - name: Install Flutter Dependencies
         working-directory: ./desktop
@@ -38,7 +39,7 @@ jobs:
 
       - name: Build Windows Release Binary
         working-directory: ./desktop
-        run: flutter build windows --release
+        run: flutter build windows --release -v
 
       - name: Stage Release Files
         working-directory: ./desktop
@@ -47,36 +48,41 @@ jobs:
           New-Item -ItemType Directory -Force -Path "../public/downloads/desktop"
           New-Item -ItemType Directory -Force -Path "installer_source"
           
+          Write-Host "Checking for release build output..."
           if (Test-Path "build/windows/x64/runner/Release") {
+            Write-Host "Found build in build/windows/x64/runner/Release"
             Copy-Item -Path "build/windows/x64/runner/Release/*" -Destination "installer_source" -Recurse -Force
           } elseif (Test-Path "build/windows/runner/Release") {
+            Write-Host "Found build in build/windows/runner/Release"
             Copy-Item -Path "build/windows/runner/Release/*" -Destination "installer_source" -Recurse -Force
           } else {
-            Write-Error "Release build output folder not found!"
+            Get-ChildItem -Path "build" -Recurse
+            throw "Release build output folder not found!"
           }
+          
+          Write-Host "Staged files in installer_source:"
+          Get-ChildItem -Path "installer_source"
 
       - name: Compile Inno Setup Single-File Installer
         working-directory: ./desktop
         shell: pwsh
         run: |
-          if (Get-Command iscc -ErrorAction SilentlyContinue) {
-            iscc windows_installer.iss
-          } elseif (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows_installer.iss
-          } elseif (Test-Path "C:\Program Files\Inno Setup 6\ISCC.exe") {
-            & "C:\Program Files\Inno Setup 6\ISCC.exe" windows_installer.iss
-          } else {
-            $iscc = (Get-ChildItem -Path "C:\Program Files*" -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-            if ($iscc) {
-              & $iscc windows_installer.iss
-            } else {
-              Write-Error "ISCC.exe not found!"
-            }
+          $isccPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $isccPath)) {
+            $isccPath = "C:\Program Files\Inno Setup 6\ISCC.exe"
           }
+          if (-not (Test-Path $isccPath)) {
+            $cmd = Get-Command iscc -ErrorAction SilentlyContinue
+            if ($cmd) { $isccPath = $cmd.Source }
+          }
+          
+          Write-Host "Using Inno Setup compiler: $isccPath"
+          & $isccPath windows_installer.iss
 
       - name: Verify Generated Installer
         shell: pwsh
         run: |
+          Write-Host "Listing files in public/downloads/desktop:"
           Get-ChildItem -Path public/downloads/desktop/
 
       - name: Upload Windows Installer (.exe) Artifact
