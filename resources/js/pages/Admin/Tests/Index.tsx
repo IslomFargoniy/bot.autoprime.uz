@@ -1553,25 +1553,25 @@ export default function TestsIndex({
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
+                                    <div className="flex items-center gap-1 shrink-0">
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="h-8 px-2.5 text-xs"
+                                            title={t('tests.change_image', 'Rasmni almashtirish')}
                                         >
-                                            {t('tests.change_image', 'Almashtirish')}
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </Button>
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={handleRemoveQuestionImage}
-                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            title={t('tests.remove_image', 'Rasmni olib tashlash')}
                                         >
-                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                            {t('tests.remove_image', 'O\'chirish')}
+                                            <Trash2 className="w-3.5 h-3.5" />
                                         </Button>
                                     </div>
                                 </div>
@@ -1749,25 +1749,25 @@ export default function TestsIndex({
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
+                                    <div className="flex items-center gap-1 shrink-0">
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={() => signFileInputRef.current?.click()}
-                                            className="h-8 px-2.5 text-xs"
+                                            title={t('tests.change_image', 'Rasmni almashtirish')}
                                         >
-                                            {t('tests.change_image', 'Almashtirish')}
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </Button>
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={handleRemoveSignImage}
-                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            title={t('tests.remove_image', 'Rasmni olib tashlash')}
                                         >
-                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                            {t('tests.remove_image', 'O\'chirish')}
+                                            <Trash2 className="w-3.5 h-3.5" />
                                         </Button>
                                     </div>
                                 </div>
@@ -1874,25 +1874,25 @@ export default function TestsIndex({
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
+                                    <div className="flex items-center gap-1 shrink-0">
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={() => lineFileInputRef.current?.click()}
-                                            className="h-8 px-2.5 text-xs"
+                                            title={t('tests.change_image', 'Rasmni almashtirish')}
                                         >
-                                            {t('tests.change_image', 'Almashtirish')}
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </Button>
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="sm"
+                                            size="icon-sm"
                                             onClick={handleRemoveRoadLineImage}
-                                            className="h-8 px-2.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            title={t('tests.remove_image', 'Rasmni olib tashlash')}
                                         >
-                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                            {t('tests.remove_image', 'O\'chirish')}
+                                            <Trash2 className="w-3.5 h-3.5" />
                                         </Button>
                                     </div>
                                 </div>
