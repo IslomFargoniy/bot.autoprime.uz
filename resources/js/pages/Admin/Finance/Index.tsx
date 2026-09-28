@@ -709,83 +709,72 @@ export default function FinanceIndex({
             {activeTab === 'history' && (
                 <div className="space-y-4">
                     {/* Filters Bar */}
-                    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                            <div>
-                                <Label htmlFor="hist_reg" className="text-xs mb-1 block">
-                                    {t('finance.cash_register', 'Kassa')}
-                                </Label>
-                                <SearchableSelect
-                                    id="hist_reg"
-                                    value={historyRegId}
-                                    onChange={(val) => setHistoryRegId(val)}
-                                    options={[
-                                        { value: '', label: t('finance.all_registers', 'Barcha kassalar') },
-                                        ...cashRegisters.map((r) => ({
-                                            value: r.id,
-                                            label: r.name,
-                                            sublabel: r.branch?.name || t('finance.superadmin_cash_register', 'Superadmin Bosh kassa'),
-                                        })),
-                                    ]}
-                                    placeholder={t('finance.all_registers', 'Barcha kassalar')}
-                                />
-                            </div>
+                    <div className="bg-card border rounded-xl p-4 shadow-xs">
+                        <form onSubmit={handleFilterHistory} className="flex flex-wrap items-center gap-2">
+                            <SearchableSelect
+                                id="hist_reg"
+                                value={historyRegId}
+                                onChange={(val) => setHistoryRegId(val)}
+                                options={[
+                                    { value: '', label: t('finance.all_registers', 'Barcha kassalar') },
+                                    ...cashRegisters.map((r) => ({
+                                        value: r.id,
+                                        label: r.name,
+                                        sublabel: r.branch?.name || t('finance.superadmin_cash_register', 'Superadmin Bosh kassa'),
+                                    })),
+                                ]}
+                                placeholder={t('finance.all_registers', 'Barcha kassalar')}
+                                className="w-full sm:w-52"
+                                triggerClassName="h-10 text-sm"
+                            />
 
-                            <div>
-                                <Label htmlFor="hist_cat" className="text-xs mb-1 block">
-                                    {t('finance.operation_type', 'Amal turi')}
-                                </Label>
-                                <SearchableSelect
-                                    id="hist_cat"
-                                    value={historyCat}
-                                    onChange={(val) => setHistoryCat(String(val))}
-                                    options={[
-                                        { value: '', label: t('finance.all_categories', 'Barcha amallar') },
-                                        { value: 'payment', label: t('finance.op_payment', 'Kirim: To\'lov') },
-                                        { value: 'expense', label: t('finance.op_expense', 'Chiqim: Xarajat') },
-                                        { value: 'salary', label: t('finance.op_salary', 'Oylik maosh') },
-                                        { value: 'maintenance', label: t('finance.op_maintenance', 'Avtotransport') },
-                                        { value: 'sweep_out', label: t('finance.op_sweep_out', 'Kassani bo\'shatish (Chiqim)') },
-                                        { value: 'sweep_in', label: t('finance.op_sweep_in', 'Kassa bo\'shatishdan (Kirim)') },
-                                        { value: 'transfer_out', label: t('finance.op_transfer_out', 'Transfer (Chiqim)') },
-                                        { value: 'transfer_in', label: t('finance.op_transfer_in', 'Transfer (Kirim)') },
-                                        { value: 'refund', label: t('finance.op_refund', 'Bekor qilish / Qaytarish') },
-                                    ]}
-                                    placeholder={t('finance.all_categories', 'Barcha amallar')}
-                                />
-                            </div>
+                            <SearchableSelect
+                                id="hist_cat"
+                                value={historyCat}
+                                onChange={(val) => setHistoryCat(String(val))}
+                                options={[
+                                    { value: '', label: t('finance.all_categories', 'Barcha amallar') },
+                                    { value: 'payment', label: t('finance.op_payment', 'Kirim: To\'lov') },
+                                    { value: 'expense', label: t('finance.op_expense', 'Chiqim: Xarajat') },
+                                    { value: 'salary', label: t('finance.op_salary', 'Oylik maosh') },
+                                    { value: 'maintenance', label: t('finance.op_maintenance', 'Avtotransport') },
+                                    { value: 'sweep_out', label: t('finance.op_sweep_out', 'Kassani bo\'shatish (Chiqim)') },
+                                    { value: 'sweep_in', label: t('finance.op_sweep_in', 'Kassa bo\'shatishdan (Kirim)') },
+                                    { value: 'transfer_out', label: t('finance.op_transfer_out', 'Transfer (Chiqim)') },
+                                    { value: 'transfer_in', label: t('finance.op_transfer_in', 'Transfer (Kirim)') },
+                                    { value: 'refund', label: t('finance.op_refund', 'Bekor qilish / Qaytarish') },
+                                ]}
+                                placeholder={t('finance.all_categories', 'Barcha amallar')}
+                                className="w-full sm:w-48"
+                                triggerClassName="h-10 text-sm"
+                            />
 
-                            <div>
-                                <Label htmlFor="hist_from" className="text-xs mb-1 block">{t('common.from', 'Dan')}</Label>
-                                <DatePicker
-                                    id="hist_from"
-                                    value={historyFrom}
-                                    onChange={(val) => setHistoryFrom(val)}
-                                    placeholder="YYYY-MM-DD"
-                                    className="h-9 text-xs"
-                                />
-                            </div>
+                            <DatePicker
+                                id="hist_from"
+                                value={historyFrom}
+                                onChange={(val) => setHistoryFrom(val)}
+                                placeholder="YYYY-MM-DD"
+                                className="w-full sm:w-36"
+                            />
 
-                            <div>
-                                <Label htmlFor="hist_to" className="text-xs mb-1 block">{t('common.to', 'Gacha')}</Label>
-                                <DatePicker
-                                    id="hist_to"
-                                    value={historyTo}
-                                    onChange={(val) => setHistoryTo(val)}
-                                    placeholder="YYYY-MM-DD"
-                                    className="h-9 text-xs"
-                                />
-                            </div>
+                            <DatePicker
+                                id="hist_to"
+                                value={historyTo}
+                                onChange={(val) => setHistoryTo(val)}
+                                placeholder="YYYY-MM-DD"
+                                className="w-full sm:w-36"
+                            />
 
-                            <div className="flex gap-2">
-                                <Button type="submit" variant="brand" size="sm" className="h-9 gap-1 flex-1 justify-center">
-                                    <Search className="w-3.5 h-3.5" />
-                                    <span>{t('common.filter', 'Filtrlash')}</span>
+                            <Button type="submit" variant="secondary" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2 h-10" title={t('common.filter', 'Filtrlash')}>
+                                <Search className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">{t('common.filter', 'Filtrlash')}</span>
+                            </Button>
+
+                            {(historyRegId || historyCat || historyFrom || historyTo) && (
+                                <Button type="button" variant="outline" size="icon" onClick={handleResetHistory} className="h-10 w-10 shrink-0" title={t('common.reset', 'Tozalash')}>
+                                    <RotateCcw className="w-4 h-4" />
                                 </Button>
-                                <Button type="button" variant="outline" size="sm" onClick={handleResetHistory} className="h-9 px-3" title={t('common.reset', 'Tozalash')}>
-                                    <RotateCcw className="w-3.5 h-3.5" />
-                                </Button>
-                            </div>
+                            )}
                         </form>
                     </div>
 

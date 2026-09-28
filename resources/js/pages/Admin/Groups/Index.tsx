@@ -185,103 +185,112 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
                 )}
             </div>
             
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                {/* Desktop Filters */}
-                <div className="hidden md:flex gap-2 items-center">
-                    <select
-                        className="flex h-10 w-full md:w-auto items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={perPage}
-                        onChange={(e) => {
-                            setPerPage(e.target.value);
-                            applyFilters(search, instructorId, e.target.value);
-                        }}
-                        title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                    >
-                        <option value="15">15</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="75">75</option>
-                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                    </select>
-                    <SearchableSelect
-                        value={instructorId}
-                        onChange={(val) => {
-                            const nextVal = val ? String(val) : '';
-                            setInstructorId(nextVal);
-                            applyFilters(search, nextVal, perPage);
-                        }}
-                        options={[
-                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
-                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
-                        ]}
-                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
-                        className="w-52"
-                        triggerClassName="h-10 text-sm"
-                    />
-                </div>
-
-                <div className="flex gap-2 w-full md:w-auto">
-                    <form onSubmit={handleSearch} className="flex relative flex-1 md:w-64">
-                        <Input 
-                            placeholder={t('common.search', 'Qidirish...')} 
-                            value={search} 
-                            onChange={e => setSearch(e.target.value)} 
-                            className="pr-8"
-                        />
-                        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
-                            <Search className="w-4 h-4" />
-                        </button>
-                    </form>
-
-                    {/* Mobile Filters Trigger */}
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" size="icon" className="md:hidden shrink-0">
-                                <Filter className="w-4 h-4" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto rounded-t-xl">
-                            <SheetHeader>
-                                <SheetTitle>{t('common.filters', 'Filtrlar')}</SheetTitle>
-                                <SheetDescription>{t('groups.filter_desc', 'Guruhlarni filtrlash')}</SheetDescription>
-                            </SheetHeader>
-                            <div className="grid gap-4 py-4 mt-2">
-                                <div className="space-y-2">
-                                    <Label>{t('drivings.instructor', 'Instruktor')}</Label>
-                                    <SearchableSelect
-                                        value={instructorId}
-                                        onChange={(val) => {
-                                            const nextVal = val ? String(val) : '';
-                                            setInstructorId(nextVal);
-                                            applyFilters(search, nextVal, perPage);
-                                        }}
-                                        options={[
-                                            { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
-                                            ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
-                                        ]}
-                                        placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
-                                        triggerClassName="h-10 text-sm"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                        value={perPage}
-                                        onChange={(e) => {
-                                            setPerPage(e.target.value);
-                                            applyFilters(search, instructorId, e.target.value);
-                                        }}
-                                    >
-                                        <option value="10">10</option>
-                                        <option value="30">30</option>
-                                        <option value="50">50</option>
-                                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                                    </select>
-                                </div>
+            {/* Filters Bar */}
+            <div className="bg-card border rounded-xl p-4 shadow-xs space-y-4 mb-6">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                    {/* Search & Mobile Filter Trigger inline */}
+                    <div className="flex items-center gap-2 flex-1 w-full md:max-w-md">
+                        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                    placeholder={t('common.search', 'Qidirish...')} 
+                                    value={search} 
+                                    onChange={e => setSearch(e.target.value)} 
+                                    className="pl-8"
+                                />
                             </div>
-                        </SheetContent>
-                    </Sheet>
+                            <Button type="submit" variant="secondary" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2">
+                                <Search className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">{t('common.search', 'Qidirish')}</span>
+                            </Button>
+                        </form>
+
+                        {/* Mobile Filters Trigger */}
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="icon" className="md:hidden shrink-0">
+                                    <Filter className="w-4 h-4" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom" className="h-[80vh] overflow-y-auto rounded-t-xl">
+                                <SheetHeader>
+                                    <SheetTitle>{t('common.filters', 'Filtrlar')}</SheetTitle>
+                                    <SheetDescription>{t('groups.filter_desc', 'Guruhlarni filtrlash')}</SheetDescription>
+                                </SheetHeader>
+                                <div className="grid gap-4 py-4 mt-2">
+                                    <div className="space-y-2">
+                                        <Label>{t('drivings.instructor', 'Instruktor')}</Label>
+                                        <SearchableSelect
+                                            value={instructorId}
+                                            onChange={(val) => {
+                                                const nextVal = val ? String(val) : '';
+                                                setInstructorId(nextVal);
+                                                applyFilters(search, nextVal, perPage);
+                                            }}
+                                            options={[
+                                                { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                                ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                                            ]}
+                                            placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                                            triggerClassName="h-10 text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>{t('common.pagination', 'Sahifalash')}</Label>
+                                        <select
+                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                            value={perPage}
+                                            onChange={(e) => {
+                                                setPerPage(e.target.value);
+                                                applyFilters(search, instructorId, e.target.value);
+                                            }}
+                                        >
+                                            <option value="10">10</option>
+                                            <option value="30">30</option>
+                                            <option value="50">50</option>
+                                            <option value="all">{t('common.all', 'Barchasi')}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+
+                    {/* Desktop Filters */}
+                    <div className="hidden md:flex gap-2 items-center">
+                        <SearchableSelect
+                            value={instructorId}
+                            onChange={(val) => {
+                                const nextVal = val ? String(val) : '';
+                                setInstructorId(nextVal);
+                                applyFilters(search, nextVal, perPage);
+                            }}
+                            options={[
+                                { value: '', label: t('drivings.all_instructors', 'Barcha instruktorlar') },
+                                ...instructors.map((inst) => ({ value: inst.id, label: inst.name })),
+                            ]}
+                            placeholder={t('drivings.all_instructors', 'Barcha instruktorlar')}
+                            className="w-52"
+                            triggerClassName="h-10 text-sm"
+                            allowClear
+                        />
+                        <select
+                            className="flex h-10 w-full md:w-auto items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            value={perPage}
+                            onChange={(e) => {
+                                setPerPage(e.target.value);
+                                applyFilters(search, instructorId, e.target.value);
+                            }}
+                            title={t('common.per_page', 'Sahifada ko\'rsatish')}
+                        >
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="75">75</option>
+                            <option value="all">{t('common.all', 'Barchasi')}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 

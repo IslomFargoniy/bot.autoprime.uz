@@ -57,23 +57,20 @@ export default function DashboardIndex({ metrics, chartData, branches = [], filt
             
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('dashboard.title', 'Bosh sahifa')}</h1>
-                <div className="w-full sm:w-auto">
                     <form onSubmit={handleSearch} className="grid grid-cols-[1fr_1fr_auto] sm:flex items-center gap-2 w-full sm:w-auto">
                         <DatePicker
-                            placeholder={t('common.from', 'Dan')}
+                            placeholder="YYYY-MM-DD"
                             value={from}
                             onChange={(val) => setFrom(val)}
                             className="w-full sm:w-36"
-                            title={t('common.from', 'Dan')}
                         />
                         <DatePicker
-                            placeholder={t('common.to', 'Gacha')}
+                            placeholder="YYYY-MM-DD"
                             value={to}
                             onChange={(val) => setTo(val)}
                             className="w-full sm:w-36"
-                            title={t('common.to', 'Gacha')}
                         />
-                        <Button type="submit" size="icon" className="shrink-0" title={t('common.filter', 'Filtrlash')}>
+                        <Button type="submit" variant="secondary" size="icon" className="shrink-0 h-10 w-10" title={t('common.filter', 'Filtrlash')}>
                             <Search className="w-4 h-4" />
                         </Button>
                     </form>

@@ -65,19 +65,17 @@ export default function KPI({ instructors = [], filters = {} }: PageProps) {
                 
                 <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
                     <DatePicker 
-                        placeholder={t('common.date_from', 'Dan')}
+                        placeholder="YYYY-MM-DD"
                         value={fromDate}
                         onChange={(val) => handleFilterDateChange('from', val)}
                         className="w-full sm:w-36"
-                        title={t('common.from', 'Dan')}
                     />
                     
                     <DatePicker 
-                        placeholder={t('common.date_to', 'Gacha')}
+                        placeholder="YYYY-MM-DD"
                         value={toDate}
                         onChange={(val) => handleFilterDateChange('to', val)}
                         className="w-full sm:w-36"
-                        title={t('common.to', 'Gacha')}
                     />
                 </div>
             </div>

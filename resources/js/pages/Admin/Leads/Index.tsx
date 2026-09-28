@@ -280,16 +280,17 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
                 <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
-                        <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <Input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder={t('common.search', 'Qidirish...')}
-                            className="pl-9 h-9 text-xs"
+                            className="pl-9 h-10 text-sm"
                         />
                     </div>
-                    <Button type="submit" variant="secondary" size="sm" className="shrink-0">
-                        {t('common.find', 'Qidiruv')}
+                    <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
+                        <Search className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{t('common.find', 'Qidiruv')}</span>
                     </Button>
                 </form>
             </div>

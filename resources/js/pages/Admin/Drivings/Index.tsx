@@ -590,19 +590,17 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                         )}
 
                         <DatePicker
-                            placeholder={t('common.date_from', 'Dan') + ' YYYY-MM-DD'}
+                            placeholder="YYYY-MM-DD"
                             value={fromDate}
                             onChange={(val) => handleFilterDateChange('from', val)}
                             className="w-36"
-                            title={t('common.from', 'Dan')}
                         />
 
                         <DatePicker
-                            placeholder={t('common.date_to', 'Gacha') + ' YYYY-MM-DD'}
+                            placeholder="YYYY-MM-DD"
                             value={toDate}
                             onChange={(val) => handleFilterDateChange('to', val)}
                             className="w-36"
-                            title={t('common.to', 'Gacha')}
                         />
 
                         <select

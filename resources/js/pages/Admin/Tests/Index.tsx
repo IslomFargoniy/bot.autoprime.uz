@@ -849,14 +849,14 @@ export default function TestsIndex({
             {activeTab === 'attempts' && (
                 <div className="space-y-4">
                     {/* Filters Bar */}
-                    <form onSubmit={handleFilterSubmit} className="bg-card text-card-foreground p-4 rounded-xl border border-border flex flex-wrap items-center gap-3">
+                    <form onSubmit={handleFilterSubmit} className="bg-card text-card-foreground p-4 rounded-xl border border-border flex flex-wrap items-center gap-2 shadow-xs">
                         <div className="relative flex-1 min-w-[200px]">
                             <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                             <Input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder={t('tests.search_student', 'Talaba F.I.O yoki telefoni...')}
-                                className="pl-9 text-xs"
+                                className="pl-9 h-10 text-sm"
                             />
                         </div>
 
@@ -869,9 +869,8 @@ export default function TestsIndex({
                                 { value: 'failed', label: t('tests.filter_failed', 'O\'tolmaganlar') },
                             ]}
                             placeholder={t('tests.filter_all_status', 'Barcha natijalar')}
-                            className="w-44"
-                            size="sm"
-                            triggerClassName="h-9 text-xs"
+                            className="w-48"
+                            triggerClassName="h-10 text-sm"
                         />
 
                         <SearchableSelect
@@ -883,16 +882,16 @@ export default function TestsIndex({
                                 { value: 'ticket_exam', label: t('tests.type_ticket', 'Bilet Mashg\'uloti') },
                             ]}
                             placeholder={t('tests.filter_all_types', 'Barcha turlar')}
-                            className="w-48"
-                            size="sm"
-                            triggerClassName="h-9 text-xs"
+                            className="w-52"
+                            triggerClassName="h-10 text-sm"
                         />
 
-                        <Button type="submit" size="sm" variant="brand" className="text-xs">
+                        <Button type="submit" variant="secondary" className="h-10 px-4">
+                            <Search className="w-4 h-4 mr-1.5" />
                             {t('common.filter', 'Filtrlash')}
                         </Button>
-                        <Button type="button" variant="outline" size="sm" onClick={handleResetFilters} className="text-xs">
-                            <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                        <Button type="button" variant="outline" onClick={handleResetFilters} className="h-10 px-3">
+                            <RotateCcw className="w-4 h-4 mr-1.5" />
                             {t('common.reset', 'Tozalash')}
                         </Button>
                     </form>

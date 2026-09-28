@@ -510,58 +510,61 @@ export default function StaffIndex({
                 })}
             </div>
 
-            {/* Filter & Search Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                <div className="relative sm:col-span-5 md:col-span-5">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                        value={search}
-                        onChange={handleSearchChange}
-                        placeholder={t('staff.search_placeholder', "Ism, telefon, mashina yoki Telegram ID bo'yicha...")}
-                        className="pl-9 h-10 text-sm"
-                    />
-                </div>
-
-                {isSuperAdmin && branches.length > 0 && (
-                    <div className="sm:col-span-4 md:col-span-3">
-                        <SearchableSelect
-                            id="branch_filter"
-                            value={selectedBranch}
-                            onChange={(val) => handleBranchChange(val ? String(val) : '')}
-                            options={[
-                                { value: '', label: t('staff.all_branches', 'Barcha filiallar') },
-                                ...branches.map((b) => ({ value: b.id, label: b.name })),
-                            ]}
-                            placeholder={t('staff.filter_branch', 'Filial')}
-                            allowClear
-                            triggerClassName="h-10 text-sm"
-                        />
+            {/* Filter & Search Bar Card */}
+            <div className="bg-card border rounded-xl p-4 shadow-xs">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                    {/* Search */}
+                    <div className="flex items-center gap-2 flex-1 w-full md:max-w-md">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                value={search}
+                                onChange={handleSearchChange}
+                                placeholder={t('staff.search_placeholder', "Ism, telefon, mashina yoki Telegram ID bo'yicha...")}
+                                className="pl-8 h-10 text-sm"
+                            />
+                        </div>
                     </div>
-                )}
 
-                <div className="sm:col-span-3 md:col-span-2">
-                    <select
-                        value={selectedStatus}
-                        onChange={(e) => handleStatusChange(e.target.value)}
-                        className="w-full h-10 px-3 border rounded-md text-sm bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-                    >
-                        <option value="all">{t('staff.all_statuses', 'Barcha holat')}</option>
-                        <option value="active">{t('staff.active', 'Faol')}</option>
-                        <option value="inactive">{t('staff.inactive', 'Nofaol')}</option>
-                    </select>
-                </div>
+                    {/* Desktop Filters */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        {isSuperAdmin && branches.length > 0 && (
+                            <SearchableSelect
+                                id="branch_filter"
+                                value={selectedBranch}
+                                onChange={(val) => handleBranchChange(val ? String(val) : '')}
+                                options={[
+                                    { value: '', label: t('staff.all_branches', 'Barcha filiallar') },
+                                    ...branches.map((b) => ({ value: b.id, label: b.name })),
+                                ]}
+                                placeholder={t('staff.filter_branch', 'Barcha filiallar')}
+                                className="w-48"
+                                triggerClassName="h-10 text-sm"
+                                allowClear
+                            />
+                        )}
 
-                <div className="sm:col-span-2 md:col-span-2 flex justify-end">
-                    <select
-                        value={perPage}
-                        onChange={handlePerPageChange}
-                        className="h-10 px-3 border rounded-md text-sm bg-background text-foreground"
-                    >
-                        <option value="15">15 {t('common.per_page', '/ sahifa')}</option>
-                        <option value="25">25 {t('common.per_page', '/ sahifa')}</option>
-                        <option value="50">50 {t('common.per_page', '/ sahifa')}</option>
-                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                    </select>
+                        <select
+                            value={selectedStatus}
+                            onChange={(e) => handleStatusChange(e.target.value)}
+                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="all">{t('staff.all_statuses', 'Barcha holat')}</option>
+                            <option value="active">{t('staff.active', 'Faol')}</option>
+                            <option value="inactive">{t('staff.inactive', 'Nofaol')}</option>
+                        </select>
+
+                        <select
+                            value={perPage}
+                            onChange={handlePerPageChange}
+                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="all">{t('common.all', 'Barchasi')}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 

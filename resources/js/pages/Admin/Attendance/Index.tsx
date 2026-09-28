@@ -368,41 +368,39 @@ export default function AttendanceIndex({
             )}
 
             {/* Filters Bar */}
-            <div className="flex flex-wrap items-end gap-3 mb-4 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs">
-                <div className="flex-1 min-w-[200px]">
-                    <Label className="text-[11px] text-gray-500 mb-1 block">{t('attendance.group', 'Guruh')}</Label>
+            <div className="bg-card border rounded-xl p-4 shadow-xs mb-4">
+                <div className="flex flex-wrap items-center gap-2">
                     <SearchableSelect
-                        size="sm"
                         value={filterGroupId}
                         onChange={(val) => handleFilterChange('group_id', val ? String(val) : '')}
                         options={[
                             { value: '', label: t('common.all', 'Barcha guruhlar') },
                             ...groups.map((g) => ({ value: String(g.id), label: g.name })),
                         ]}
-                        placeholder={t('common.all', 'Barcha guruhlar')}
+                        placeholder={t('attendance.all_groups', 'Barcha guruhlar')}
+                        className="w-full sm:w-56"
+                        triggerClassName="h-10 text-sm"
                         allowClear
                     />
-                </div>
-                <div className="w-44">
-                    <Label className="text-[11px] text-gray-500 mb-1 block">{t('attendance.date', 'Sana')}</Label>
                     <DatePicker
+                        placeholder="YYYY-MM-DD"
                         value={filterDate}
                         onChange={(val) => handleFilterChange('date', val)}
-                        className="h-8 text-xs"
+                        className="w-full sm:w-44"
                     />
+                    {(filterGroupId || filterDate) && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={handleClearFilters}
+                            className="h-10 w-10 shrink-0"
+                            title={t('common.clear', 'Tozalash')}
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
-                {(filterGroupId || filterDate) && (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearFilters}
-                        className="h-8 text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                    >
-                        <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                        {t('common.clear', 'Tozalash')}
-                    </Button>
-                )}
             </div>
 
             {/* Attendance Records Table / Desktop & Tablet */}
