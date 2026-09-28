@@ -480,12 +480,12 @@ export default function FinanceIndex({
     };
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden min-w-0">
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
 
             {/* Page Title & Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <h1 className="text-xl sm:text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
+            <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold truncate">{t('finance.title', 'Moliya va Kassalar')}</h1>
                 <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
                     {can('cash_transfers.create') && (
                         <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
@@ -515,7 +515,7 @@ export default function FinanceIndex({
             </div>
 
             {/* Cash Registers Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 min-w-0">
                 {cashRegisters.map((reg) => {
                     const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
                     const canSweep = !isSuperadmin && Number(reg.balance) > 0;
@@ -523,11 +523,11 @@ export default function FinanceIndex({
                     return (
                         <div
                             key={reg.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
+                            className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between min-w-0"
                         >
-                            <div>
+                            <div className="min-w-0">
                                 <div className="flex items-center justify-between gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                    <div className="flex items-center gap-1.5 truncate">
+                                    <div className="flex items-center gap-1.5 truncate min-w-0">
                                         {reg.type?.code === 'cash' ? <DollarSign className="w-3.5 h-3.5 text-amber-500 shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
                                         <span className="font-medium truncate">{reg.type?.name || 'Kassa'}</span>
                                     </div>
@@ -538,7 +538,7 @@ export default function FinanceIndex({
                                         </span>
                                     ) : (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">
-                                            <Building2 className="w-3 h-3 text-gray-500" />
+                                            <Building2 className="w-3 h-3 text-gray-400" />
                                             {reg.branch?.name || t('branches.unknown', 'Filial')}
                                         </span>
                                     )}
@@ -580,56 +580,63 @@ export default function FinanceIndex({
                 })}
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex items-center overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-medium w-full sm:w-max gap-1">
-                <button
-                    onClick={() => setActiveTab('registers')}
-                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
-                        activeTab === 'registers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_registers', 'Kassalar')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('history')}
-                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
-                        activeTab === 'history' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_history', 'Kassa Tarixi')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('payments')}
-                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
-                        activeTab === 'payments' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_payments', 'Kirim To\'lovlar')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('expenses')}
-                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
-                        activeTab === 'expenses' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_expenses', 'Chiqim Xarajatlar')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('transfers')}
-                    className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
-                        activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    {t('finance.tab_transfers', 'Transferlar')}
-                </button>
+            {/* Navigation Tabs - Clean horizontally scrollable wrapper */}
+            <div className="w-full max-w-full overflow-x-auto no-scrollbar pb-0.5">
+                <div className="inline-flex items-center whitespace-nowrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-medium gap-1 min-w-max">
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('registers')}
+                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                            activeTab === 'registers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        {t('finance.tab_registers', 'Kassalar')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('history')}
+                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                            activeTab === 'history' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        {t('finance.tab_history', 'Kassa Tarixi')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('payments')}
+                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                            activeTab === 'payments' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        {t('finance.tab_payments', 'Kirim To\'lovlar')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('expenses')}
+                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                            activeTab === 'expenses' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        {t('finance.tab_expenses', 'Chiqim Xarajatlar')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('transfers')}
+                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                            activeTab === 'transfers' ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        {t('finance.tab_transfers', 'Transferlar')}
+                    </button>
+                </div>
             </div>
 
             {/* Tab: Registers Overview */}
             {activeTab === 'registers' && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-full min-w-0">
                     {/* Desktop Table */}
-                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs w-full max-w-full">
+                        <div className="overflow-x-auto w-full max-w-full">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -708,7 +715,7 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Mobile Registers Card Feed */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
                         {cashRegisters.length === 0 ? (
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
                                 <Wallet className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
@@ -722,10 +729,10 @@ export default function FinanceIndex({
                                 return (
                                     <div
                                         key={reg.id}
-                                        className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs space-y-3"
+                                        className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs space-y-3 min-w-0"
                                     >
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div className="space-y-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2 min-w-0">
+                                            <div className="space-y-1 min-w-0 flex-1">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                                         {reg.type?.name || '-'}
@@ -787,10 +794,10 @@ export default function FinanceIndex({
 
             {/* Tab: Kassa Tarixi (Ledger / Running Balance) */}
             {activeTab === 'history' && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-full min-w-0">
                     {/* Filters Bar */}
-                    <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs">
-                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center gap-2.5">
+                    <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs w-full max-w-full overflow-hidden">
+                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center gap-2.5 min-w-0">
                             <SearchableSelect
                                 id="hist_reg"
                                 value={historyRegId}
@@ -829,7 +836,7 @@ export default function FinanceIndex({
                                 triggerClassName="h-9 sm:h-10 text-xs sm:text-sm"
                             />
 
-                            <div className="grid grid-cols-2 gap-2 w-full lg:w-auto">
+                            <div className="grid grid-cols-2 gap-2 w-full lg:w-auto min-w-0">
                                 <DatePicker
                                     id="hist_from"
                                     value={historyFrom}
@@ -864,8 +871,8 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Desktop & Tablet Transactions Table */}
-                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs w-full max-w-full">
+                        <div className="overflow-x-auto w-full max-w-full">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -936,7 +943,7 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Mobile Transactions Card Feed */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
                         {transactions.data.length === 0 ? (
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
                                 <History className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
@@ -947,10 +954,10 @@ export default function FinanceIndex({
                             transactions.data.map((tx) => (
                                 <div
                                     key={tx.id}
-                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5 min-w-0"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                    <div className="flex items-start justify-between gap-2 min-w-0">
+                                        <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
                                             {renderCategoryBadge(tx.category)}
                                             <span className="text-[11px] text-gray-400 font-mono">
                                                 {formatDateTime(tx.transacted_at)}
@@ -969,12 +976,12 @@ export default function FinanceIndex({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50">
-                                        <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium truncate">
+                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50 gap-2 min-w-0">
+                                        <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium truncate min-w-0 flex-1">
                                             <Wallet className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                             <span className="truncate">{tx.cash_register?.name}</span>
                                             {tx.cash_register?.branch && (
-                                                <span className="text-[10px] text-gray-400">({tx.cash_register.branch.name})</span>
+                                                <span className="text-[10px] text-gray-400 shrink-0">({tx.cash_register.branch.name})</span>
                                             )}
                                         </div>
                                         <div className="text-[11px] shrink-0 text-gray-500 dark:text-gray-400">
@@ -986,8 +993,8 @@ export default function FinanceIndex({
                                     </div>
 
                                     {(tx.description || tx.user?.name) && (
-                                        <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg gap-2">
-                                            <span className="truncate">{tx.description || '-'}</span>
+                                        <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg gap-2 min-w-0">
+                                            <span className="truncate min-w-0 flex-1">{tx.description || '-'}</span>
                                             {tx.user?.name && <span className="shrink-0 font-medium text-gray-600 dark:text-gray-300">{tx.user.name}</span>}
                                         </div>
                                     )}
@@ -1002,10 +1009,10 @@ export default function FinanceIndex({
 
             {/* Tab: Payments */}
             {activeTab === 'payments' && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-full min-w-0">
                     {/* Desktop & Tablet Table */}
-                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs w-full max-w-full">
+                        <div className="overflow-x-auto w-full max-w-full">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -1070,7 +1077,7 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Mobile Payments Card Feed */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
                         {payments.data.length === 0 ? (
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
                                 <ArrowDownRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
@@ -1080,12 +1087,12 @@ export default function FinanceIndex({
                             payments.data.map((p) => (
                                 <div
                                     key={p.id}
-                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5 min-w-0"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                            <div className="font-bold text-sm text-gray-900 dark:text-white">{p.student?.full_name || '-'}</div>
-                                            <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5">
+                                    <div className="flex items-start justify-between gap-2 min-w-0">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="font-bold text-sm text-gray-900 dark:text-white truncate">{p.student?.full_name || '-'}</div>
+                                            <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 truncate">
                                                 <span>#{p.receipt_number}</span>
                                                 {p.contract?.contract_number && (
                                                     <>
@@ -1105,9 +1112,9 @@ export default function FinanceIndex({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
-                                        <div className="truncate">
-                                            <span>{p.cash_register?.name}</span>
+                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 gap-2 min-w-0">
+                                        <div className="truncate min-w-0 flex-1">
+                                            <span className="truncate">{p.cash_register?.name}</span>
                                             {p.received_by?.name && <span className="text-[11px] text-gray-400"> ({p.received_by.name})</span>}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
@@ -1136,10 +1143,10 @@ export default function FinanceIndex({
 
             {/* Tab: Expenses */}
             {activeTab === 'expenses' && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-full min-w-0">
                     {/* Desktop & Tablet Table */}
-                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs w-full max-w-full">
+                        <div className="overflow-x-auto w-full max-w-full">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -1192,7 +1199,7 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Mobile Expenses Card Feed */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
                         {expenses.data.length === 0 ? (
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
                                 <ArrowUpRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
@@ -1202,14 +1209,14 @@ export default function FinanceIndex({
                             expenses.data.map((e) => (
                                 <div
                                     key={e.id}
-                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5 min-w-0"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
+                                    <div className="flex items-start justify-between gap-2 min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
                                                 {e.category?.name || '-'}
                                             </span>
-                                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mt-1">{e.description}</p>
+                                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mt-1 break-words">{e.description}</p>
                                         </div>
                                         <div className="text-right shrink-0">
                                             <div className="font-mono font-bold text-sm sm:text-base text-rose-600 dark:text-rose-400">
@@ -1218,9 +1225,9 @@ export default function FinanceIndex({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
-                                        <div className="truncate">
-                                            <span>{e.cash_register?.name}</span>
+                                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 gap-2 min-w-0">
+                                        <div className="truncate min-w-0 flex-1">
+                                            <span className="truncate">{e.cash_register?.name}</span>
                                             {e.user?.name && <span className="text-[11px] text-gray-400"> ({e.user.name})</span>}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
@@ -1249,10 +1256,10 @@ export default function FinanceIndex({
 
             {/* Tab: Transfers */}
             {activeTab === 'transfers' && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-full min-w-0">
                     {/* Desktop & Tablet Table */}
-                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs w-full max-w-full">
+                        <div className="overflow-x-auto w-full max-w-full">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -1332,7 +1339,7 @@ export default function FinanceIndex({
                     </div>
 
                     {/* Mobile Transfers Card Feed */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
                         {transfers.data.length === 0 ? (
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
                                 <ArrowLeftRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
@@ -1342,10 +1349,10 @@ export default function FinanceIndex({
                             transfers.data.map((tr) => (
                                 <div
                                     key={tr.id}
-                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5"
+                                    className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5 min-w-0"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                    <div className="flex items-start justify-between gap-2 min-w-0">
+                                        <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
                                             <span
                                                 className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                                     tr.status === 'approved'
@@ -1364,19 +1371,19 @@ export default function FinanceIndex({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg">
-                                        <span className="truncate">{tr.from_cash_register?.name}</span>
+                                    <div className="flex items-center gap-2 text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 p-2 rounded-lg min-w-0">
+                                        <span className="truncate min-w-0 flex-1">{tr.from_cash_register?.name}</span>
                                         <ArrowRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                                        <span className="text-blue-600 dark:text-blue-400 truncate">{tr.to_cash_register?.name}</span>
+                                        <span className="text-blue-600 dark:text-blue-400 truncate min-w-0 flex-1">{tr.to_cash_register?.name}</span>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
-                                        <div className="text-[11px] truncate">
+                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 gap-2 min-w-0">
+                                        <div className="text-[11px] truncate min-w-0 flex-1">
                                             <span>{tr.transferred_by?.name || '-'}</span>
                                             {tr.approved_by?.name && <span> → {tr.approved_by.name}</span>}
                                         </div>
                                         {tr.status === 'pending' && canReviewTransfer(tr) && (
-                                            <div className="flex gap-1.5">
+                                            <div className="flex gap-1.5 shrink-0">
                                                 <Button
                                                     size="sm"
                                                     variant="brand"
