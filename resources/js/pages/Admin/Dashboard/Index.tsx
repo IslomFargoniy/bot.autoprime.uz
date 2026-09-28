@@ -57,6 +57,7 @@ export default function DashboardIndex({ metrics, chartData, branches = [], filt
             
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('dashboard.title', 'Bosh sahifa')}</h1>
+                <div className="w-full sm:w-auto">
                     <form onSubmit={handleSearch} className="grid grid-cols-[1fr_1fr_auto] sm:flex items-center gap-2 w-full sm:w-auto">
                         <DatePicker
                             placeholder="YYYY-MM-DD"
