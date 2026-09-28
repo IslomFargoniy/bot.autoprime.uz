@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Award,
     Banknote,
@@ -25,6 +25,7 @@ import { NavUser } from '@/components/nav-user';
 import { useTranslation } from 'react-i18next';
 import { useCan } from '@/hooks/use-can';
 import { isTelegramWebApp } from '@/hooks/use-telegram';
+import { navPermissionsFor } from '@/lib/nav-permissions';
 import {
     Sidebar,
     SidebarContent,
@@ -36,34 +37,17 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import type { NavGroup } from '@/types';
+import type { SharedData } from '@/types/auth';
 
 /**
  * Permission(s) required to see each sidebar entry (any of them is enough).
  * Entries without a mapping are visible to superadmins only.
  */
-const NAV_PERMISSIONS: Record<string, string[]> = {
-    '/admin/dashboard': ['dashboard.view'],
-    '/admin/leads': ['crm.view'],
-    '/admin/contracts': ['contracts.view'],
-    '/admin/contract-types': ['contracts.view', 'contract_types.manage'],
-    '/admin/courses': ['lms.view'],
-    '/admin/groups': ['groups.view'],
-    '/admin/students': ['students.view'],
-    '/admin/attendance': ['attendance.view'],
-    '/admin/tests': ['tickets.manage', 'attempts.view'],
-    '/admin/certificates': ['certificates.view'],
-    '/admin/drivings': ['drivings.view'],
-    '/admin/vehicles': ['fleet.view'],
-    '/admin/autodromes': ['autodromes.manage'],
-    '/admin/instructors': ['users.view'],
-    '/admin/staff': ['users.view'],
-    '/admin/salaries': ['salaries.view'],
-    '/admin/finance': ['finance.view'],
-};
 
 export function AppSidebar() {
     const { t } = useTranslation();
     const can = useCan();
+    const { auth } = usePage<SharedData>().props;
     const { setOpenMobile, isMobile } = useSidebar();
     const [isTg, setIsTg] = useState(false);
 
@@ -215,7 +199,7 @@ export function AppSidebar() {
     const filteredGroups = navGroups
         .map((group) => ({
             ...group,
-            items: group.items.filter((item) => can(...(NAV_PERMISSIONS[item.href as string] ?? ['__superadmin_only__']))),
+            items: group.items.filter((item) => can(...navPermissionsFor(item.href as string))),
         }))
         .filter((group) => group.items.length > 0);
 
@@ -231,7 +215,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/admin/dashboard" onClick={handleLogoClick}>
+                            <Link href={auth.home_url ?? '/dashboard'} onClick={handleLogoClick}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

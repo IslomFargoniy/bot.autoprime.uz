@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\GroupFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,6 +61,19 @@ class Group extends Model
         'end_date' => 'date',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Groups visible to the user: all of them, unless the user works on own
+     * records only (instructor / teacher), then the groups they teach or drive.
+     *
+     * @param  Builder<Group>  $query
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if ($user->worksOnOwnRecordsOnly()) {
+            $query->where(fn (Builder $q) => $q->where('teacher_id', $user->id)->orWhere('instructor_id', $user->id));
+        }
+    }
 
     public function branch(): BelongsTo
     {

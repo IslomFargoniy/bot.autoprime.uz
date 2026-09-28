@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Edit2, Plus, Search, Eye, Download, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -69,8 +70,8 @@ interface PageProps {
 
 export default function StudentsIndex({ students, groups, branches = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth?.user?.role === 'instructor';
     const isSuperAdmin = !!auth?.is_super_admin;
 
     const [editing, setEditing] = useState<Student | null>(null);
@@ -175,7 +176,7 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                         <Download className="w-4 h-4 md:mr-2" />
                         <span className="hidden md:inline">{t('common.export_excel', 'Excel yuklab olish')}</span>
                     </Button>
-                    {!isInstructor && (
+                    {can('students.create') && (
                         <Button onClick={() => setShowForm(true)} variant="brand" className="shrink-0 gap-1.5 md:w-auto md:px-4 md:py-2">
                             <Plus className="w-4 h-4" /> 
                             <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
@@ -392,14 +393,18 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                                                     <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                                 </Link>
                                             </Button>
-                                            {!isInstructor && (
+                                            {(can('students.edit') || can('students.delete')) && (
                                                 <>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    {can('students.edit') && (
+                                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
+                                                    {can('students.delete') && (
+                                                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
                                                 </>
                                             )}
                                         </div>
@@ -453,14 +458,18 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                                         <Eye className="w-4 h-4" />
                                     </Link>
                                 </Button>
-                                {!isInstructor && (
+                                {(can('students.edit') || can('students.delete')) && (
                                     <>
-                                        <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        {can('students.edit') && (
+                                            <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                        {can('students.delete') && (
+                                            <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
                                     </>
                                 )}
                             </div>

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Search, Plus, Edit2, Trash2, CheckCircle2, XCircle, Filter, Download, Loader2, ShoppingCart, X, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
@@ -103,6 +104,7 @@ interface PageProps {
 
 export default function DrivingsIndex({ drivings, instructors, students, groups, autodromes = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const { auth } = usePage().props as unknown as { auth: { user: { id: number; role: string } } };
     const isInstructor = auth.user.role === 'instructor';
 
@@ -436,10 +438,12 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                         <Download className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">{t('common.export_excel', 'Excel yuklab olish')}</span>
                     </Button>
-                    <Button onClick={() => setShowForm(true)} variant="brand" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2">
-                        <Plus className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('drivings.new', 'Yangi mashg\'ulot')}</span>
-                    </Button>
+                    {can('drivings.manage') && (
+                        <Button onClick={() => setShowForm(true)} variant="brand" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2">
+                            <Plus className="w-4 h-4 sm:mr-2" />
+                            <span className="hidden sm:inline">{t('drivings.new', 'Yangi mashg\'ulot')}</span>
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -1085,43 +1089,51 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <div className="flex items-center justify-end gap-1.5">
                                                 {driving.status === 'scheduled' && (
                                                     <>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
-                                                            onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
-                                                            title={t('drivings.complete_action', 'Tugatish')}
-                                                        >
-                                                            <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
-                                                            onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
-                                                            title={t('drivings.cancel_action', 'Bekor qilish')}
-                                                        >
-                                                            <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            className="h-9 w-9 hover:bg-muted"
-                                                            onClick={() => handleEdit(driving)}
-                                                            title={t('common.edit', 'Tahrirlash')}
-                                                        >
-                                                            <Edit2 className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
-                                                            onClick={() => handleDelete(driving)}
-                                                            disabled={isDeleting === driving.id}
-                                                            title={t('common.delete', 'O\'chirish')}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
+                                                        {can('drivings.manage') && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
+                                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
+                                                                title={t('drivings.complete_action', 'Tugatish')}
+                                                            >
+                                                                <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
+                                                            </Button>
+                                                        )}
+                                                        {can('drivings.manage') && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
+                                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
+                                                                title={t('drivings.cancel_action', 'Bekor qilish')}
+                                                            >
+                                                                <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
+                                                            </Button>
+                                                        )}
+                                                        {can('drivings.manage') && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="icon"
+                                                                className="h-9 w-9 hover:bg-muted"
+                                                                onClick={() => handleEdit(driving)}
+                                                                title={t('common.edit', 'Tahrirlash')}
+                                                            >
+                                                                <Edit2 className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        {can('drivings.manage') && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="icon"
+                                                                className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
+                                                                onClick={() => handleDelete(driving)}
+                                                                disabled={isDeleting === driving.id}
+                                                                title={t('common.delete', 'O\'chirish')}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
                                                     </>
                                                 )}
                                                 {driving.status !== 'scheduled' && (
@@ -1205,45 +1217,53 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                 <div className="space-y-2 pt-1">
                                     {driving.status === 'scheduled' && (
                                         <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
-                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
-                                            >
-                                                <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
-                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
-                                            >
-                                                <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
-                                            </Button>
+                                            {can('drivings.manage') && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
+                                                    onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
+                                                >
+                                                    <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
+                                                </Button>
+                                            )}
+                                            {can('drivings.manage') && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="flex-1 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
+                                                    onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
+                                                >
+                                                    <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
+                                                </Button>
+                                            )}
                                         </div>
                                     )}
                                     {driving.status === 'scheduled' && (
                                         <div className="flex justify-end gap-2 pt-1">
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-9 w-9 hover:bg-muted"
-                                                onClick={() => handleEdit(driving)}
-                                                title={t('common.edit', 'Tahrirlash')}
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
-                                                onClick={() => handleDelete(driving)}
-                                                disabled={isDeleting === driving.id}
-                                                title={t('common.delete', 'O\'chirish')}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                            {can('drivings.manage') && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 hover:bg-muted"
+                                                    onClick={() => handleEdit(driving)}
+                                                    title={t('common.edit', 'Tahrirlash')}
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                            {can('drivings.manage') && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-950/40"
+                                                    onClick={() => handleDelete(driving)}
+                                                    disabled={isDeleting === driving.id}
+                                                    title={t('common.delete', 'O\'chirish')}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            )}
                                         </div>
                                     )}
                                 </div>

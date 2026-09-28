@@ -27,11 +27,22 @@ class DrivingController extends Controller
 {
     use BranchScopedValidationRules;
 
+    /**
+     * Instructors only manage their own lessons, even with drivings.manage.
+     */
+    private function ensureOwnDriving(Request $request, Driving $driving): void
+    {
+        $user = $request->user();
+        if ($user->worksOnOwnRecordsOnly() && $driving->instructor_id !== $user->id) {
+            abort(403, 'Siz faqat o\'z mashg\'ulotlaringizni boshqara olasiz.');
+        }
+    }
+
     public function export(Request $request)
     {
         $filters = $request->all();
         $user = $request->user();
-        if ($user->isInstructor()) {
+        if ($user->worksOnOwnRecordsOnly()) {
             $filters['instructor_id'] = $user->id;
         } else {
             $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -46,7 +57,7 @@ class DrivingController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->isInstructor();
+        $isInstructor = $user->worksOnOwnRecordsOnly();
 
         $query = Driving::with(['instructor', 'student', 'group', 'review', 'autodrome', 'branch'])
             ->orderBy('start_time', 'desc');
@@ -102,7 +113,7 @@ class DrivingController extends Controller
 
         $drivings = $query->paginate($perPage)->withQueryString();
 
-        $instructors = User::where('role', 'instructor')
+        $instructors = User::permission('drivings.conduct')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -123,12 +134,8 @@ class DrivingController extends Controller
             });
         }
 
-        if ($isInstructor) {
-            $groupsQuery->where('instructor_id', $user->id);
-            $studentsQuery->whereHas('group', function ($q) use ($user) {
-                $q->where('instructor_id', $user->id);
-            });
-        }
+        $groupsQuery->visibleTo($user);
+        $studentsQuery->visibleTo($user);
 
         $students = $studentsQuery->get();
         $groups = $groupsQuery->get();
@@ -167,8 +174,12 @@ class DrivingController extends Controller
             'end_time' => 'required|date|after:start_time',
         ]);
 
-        if (! User::find($validated['instructor_id'])?->isInstructor()) {
+        if (! User::find($validated['instructor_id'])?->conductsDrivings()) {
             return redirect()->back()->withErrors(['instructor_id' => 'Tanlangan xodim instruktor emas.']);
+        }
+
+        if ($request->user()->worksOnOwnRecordsOnly() && (int) $validated['instructor_id'] !== $request->user()->id) {
+            abort(403, 'Siz faqat o\'zingiz uchun mashg\'ulot rejalashtira olasiz.');
         }
 
         $scheduler = app(DrivingScheduler::class);
@@ -221,6 +232,8 @@ class DrivingController extends Controller
 
     public function update(Request $request, Driving $driving)
     {
+        $this->ensureOwnDriving($request, $driving);
+
         if (in_array($driving->status, ['completed', 'cancelled'])) {
             return redirect()->back()->withErrors([
                 'update' => 'Tugallangan yoki bekor qilingan mashg\'ulotni o\'zgartirish mumkin emas.',
@@ -291,8 +304,10 @@ class DrivingController extends Controller
         return redirect()->back();
     }
 
-    public function destroy(Driving $driving)
+    public function destroy(Request $request, Driving $driving)
     {
+        $this->ensureOwnDriving($request, $driving);
+
         if (in_array($driving->status, ['completed', 'cancelled']) || $driving->review()->exists()) {
             return redirect()->back()->withErrors([
                 'delete' => 'Tugallangan yoki bekor qilingan mashg\'ulotni o\'chirish mumkin emas.',

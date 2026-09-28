@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Building2, Edit2, Plus, Search, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +42,7 @@ interface Props {
 
 export default function Index({ branches, filters }: Props) {
     const { t } = useTranslation();
+    const can = useCan();
     const [search, setSearch] = useState(filters.search || '');
     const [perPage, setPerPage] = useState(filters.per_page || '15');
     const [isOpen, setIsOpen] = useState(false);
@@ -122,10 +124,12 @@ export default function Index({ branches, filters }: Props) {
                         <Building2 className="w-6 h-6 text-primary" />
                         {t('branches.title', 'Filiallar')}
                     </h1>
-                    <Button onClick={openCreateModal} variant="brand" className="gap-1.5 shadow-sm">
-                        <Plus className="w-4 h-4" />
-                        <span>{t('branches.new', 'Yangi filial')}</span>
-                    </Button>
+                    {can('branches.manage') && (
+                        <Button onClick={openCreateModal} variant="brand" className="gap-1.5 shadow-sm">
+                            <Plus className="w-4 h-4" />
+                            <span>{t('branches.new', 'Yangi filial')}</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Search & Filter Bar */}
@@ -199,13 +203,15 @@ export default function Index({ branches, filters }: Props) {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right space-x-1">
-                                            <Button variant="ghost" size="icon" onClick={() => openEditModal(branch)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            {branch.code !== 'main' && (
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(branch)} className="h-8 w-8 text-destructive hover:text-destructive/90">
-                                                    <Trash2 className="w-4 h-4" />
+                                            {can('branches.manage') && (
+                                                <Button variant="ghost" size="icon" onClick={() => openEditModal(branch)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                                    <Edit2 className="w-4 h-4" />
                                                 </Button>
+                                            )}
+                                            {branch.code !== 'main' && (
+                                                (can('branches.manage') ? <Button variant="ghost" size="icon" onClick={() => handleDelete(branch)} className="h-8 w-8 text-destructive hover:text-destructive/90">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button> : null)
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -252,15 +258,17 @@ export default function Index({ branches, filters }: Props) {
                                     </div>
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <Button variant="outline" size="sm" onClick={() => openEditModal(branch)} className="h-8 gap-1 text-xs">
-                                        <Edit2 className="w-3.5 h-3.5" />
-                                        {t('common.edit', 'Tahrirlash')}
-                                    </Button>
+                                    {can('branches.manage') && (
+                                        <Button variant="outline" size="sm" onClick={() => openEditModal(branch)} className="h-8 gap-1 text-xs">
+                                            <Edit2 className="w-3.5 h-3.5" />
+                                            {t('common.edit', 'Tahrirlash')}
+                                        </Button>
+                                    )}
                                     {branch.code !== 'main' && (
-                                        <Button variant="outline" size="sm" onClick={() => handleDelete(branch)} className="h-8 gap-1 text-xs text-destructive border-destructive/30">
+                                        (can('branches.manage') ? <Button variant="outline" size="sm" onClick={() => handleDelete(branch)} className="h-8 gap-1 text-xs text-destructive border-destructive/30">
                                             <Trash2 className="w-3.5 h-3.5" />
                                             {t('common.delete', 'O\'chirish')}
-                                        </Button>
+                                        </Button> : null)
                                     )}
                                 </div>
                             </div>

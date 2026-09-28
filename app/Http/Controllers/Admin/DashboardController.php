@@ -41,16 +41,13 @@ class DashboardController extends Controller
         }
 
         $user = $request->user();
-        $isInstructor = $user->isInstructor();
+        $isInstructor = $user->worksOnOwnRecordsOnly();
 
         $branchId = BranchSessionService::getActiveBranchId($request);
 
         $totalStudents = Student::when($branchId, fn ($q) => $q->inBranch($branchId))
-            ->when($isInstructor, function ($query) use ($user) {
-                $query->whereHas('group', function ($q) use ($user) {
-                    $q->where('instructor_id', $user->id);
-                });
-            })->count();
+            ->visibleTo($user)
+            ->count();
 
         // Ensure reviews only belong to drivings
         $periodAvgRating = Review::whereBetween('created_at', [$fromDate, $toDate])

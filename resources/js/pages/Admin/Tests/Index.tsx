@@ -19,6 +19,7 @@ import {
     UploadCloud,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -133,6 +134,8 @@ export default function TestsIndex({
     filters,
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
+    const canManageTickets = can('tickets.manage');
 
     const [activeTab, setActiveTab] = useState<'attempts' | 'tickets' | 'signs'>('attempts');
     const [search, setSearch] = useState(filters.search || '');
@@ -712,27 +715,31 @@ export default function TestsIndex({
 
                 <div className="flex items-center gap-2 flex-wrap">
                     {activeTab === 'tickets' && (
-                        <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
+                        (canManageTickets ? <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_ticket', '+ Bilet Qo\'shish')}
-                        </Button>
+                        </Button> : null)
                     )}
                     {activeTab === 'signs' && selectedSignCategory === 'lines' && (
-                        <Button onClick={openCreateRoadLineModal} size="sm" variant="brand" className="text-xs">
+                        (canManageTickets ? <Button onClick={openCreateRoadLineModal} size="sm" variant="brand" className="text-xs">
                             <Plus className="w-4 h-4 mr-1.5" />
                             {t('tests.add_road_line', '+ Chiziq Qo\'shish')}
-                        </Button>
+                        </Button> : null)
                     )}
                     {activeTab === 'signs' && selectedSignCategory !== 'lines' && (
                         <>
-                            <Button onClick={openCreateSignModal} size="sm" variant="brand" className="text-xs">
-                                <Plus className="w-4 h-4 mr-1.5" />
-                                {t('tests.add_sign', '+ Belgi Qo\'shish')}
-                            </Button>
-                            <Button onClick={openCreateCategoryModal} variant="outline" size="sm" className="text-xs">
-                                <FolderPlus className="w-4 h-4 mr-1.5" />
-                                {t('tests.add_category', '+ Toifa Qo\'shish')}
-                            </Button>
+                            {canManageTickets && (
+                                <Button onClick={openCreateSignModal} size="sm" variant="brand" className="text-xs">
+                                    <Plus className="w-4 h-4 mr-1.5" />
+                                    {t('tests.add_sign', '+ Belgi Qo\'shish')}
+                                </Button>
+                            )}
+                            {canManageTickets && (
+                                <Button onClick={openCreateCategoryModal} variant="outline" size="sm" className="text-xs">
+                                    <FolderPlus className="w-4 h-4 mr-1.5" />
+                                    {t('tests.add_category', '+ Toifa Qo\'shish')}
+                                </Button>
+                            )}
                         </>
                     )}
                     <Button
@@ -1062,10 +1069,12 @@ export default function TestsIndex({
                             <span className="text-xs text-muted-foreground">
                                 {filteredTickets.length} / {tickets.length} {t('tests.tickets_count', 'ta bilet')}
                             </span>
-                            <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
-                                <Plus className="w-4 h-4 mr-1.5" />
-                                {t('tests.add_ticket', '+ Bilet Qo\'shish')}
-                            </Button>
+                            {canManageTickets && (
+                                <Button onClick={openCreateTicketModal} size="sm" variant="brand" className="text-xs">
+                                    <Plus className="w-4 h-4 mr-1.5" />
+                                    {t('tests.add_ticket', '+ Bilet Qo\'shish')}
+                                </Button>
+                            )}
                         </div>
                     </div>
 
@@ -1083,20 +1092,24 @@ export default function TestsIndex({
                                     </div>
                                     {/* Action Buttons: Clearly visible */}
                                     <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={(e) => openEditTicketModal(tkt, e)}
-                                            className="p-1.5 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                                            title={t('common.edit', 'Tahrirlash')}
-                                        >
-                                            <Pencil className="w-3 h-3" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => handleDeleteTicket(tkt, e)}
-                                            className="p-1.5 rounded-lg bg-muted hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition-colors"
-                                            title={t('common.delete', 'O\'chirish')}
-                                        >
-                                            <Trash2 className="w-3 h-3" />
-                                        </button>
+                                        {canManageTickets && (
+                                            <button
+                                                onClick={(e) => openEditTicketModal(tkt, e)}
+                                                className="p-1.5 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                                                title={t('common.edit', 'Tahrirlash')}
+                                            >
+                                                <Pencil className="w-3 h-3" />
+                                            </button>
+                                        )}
+                                        {canManageTickets && (
+                                            <button
+                                                onClick={(e) => handleDeleteTicket(tkt, e)}
+                                                className="p-1.5 rounded-lg bg-muted hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition-colors"
+                                                title={t('common.delete', 'O\'chirish')}
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1149,14 +1162,14 @@ export default function TestsIndex({
                                     {cat.name_uz} ({cat.signs?.length || 0})
                                 </button>
                                 {selectedSignCategory === cat.id && (
-                                    <button
+                                    (canManageTickets ? <button
                                         type="button"
                                         onClick={() => handleDeleteCategory(cat)}
                                         className="ml-1 text-rose-500 hover:text-rose-700 p-1"
                                         title={t('tests.delete_category', 'Toifani o\'chirish')}
                                     >
                                         <Trash2 className="w-3 h-3" />
-                                    </button>
+                                    </button> : null)
                                 )}
                             </div>
                         ))}
@@ -1173,10 +1186,12 @@ export default function TestsIndex({
                             {t('tests.road_lines_category', 'Yo\'l chiziqlari')} ({roadLines.length})
                         </button>
 
-                        <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-primary hover:bg-accent hover:text-accent-foreground">
-                            <Plus className="w-3.5 h-3.5 mr-1" />
-                            {t('tests.add_category', '+ Toifa')}
-                        </Button>
+                        {canManageTickets && (
+                            <Button onClick={openCreateCategoryModal} variant="ghost" size="sm" className="text-xs text-primary hover:bg-accent hover:text-accent-foreground">
+                                <Plus className="w-3.5 h-3.5 mr-1" />
+                                {t('tests.add_category', '+ Toifa')}
+                            </Button>
+                        )}
                     </div>
 
                     {/* Signs or Lines Grid */}
@@ -1189,20 +1204,24 @@ export default function TestsIndex({
                                   >
                                       {/* Action buttons directly accessible */}
                                       <div className="absolute top-2 right-2 flex items-center gap-1">
-                                          <button
-                                              onClick={() => openEditRoadLineModal(line)}
-                                              className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                                              title={t('common.edit', 'Tahrirlash')}
-                                          >
-                                              <Pencil className="w-3 h-3" />
-                                          </button>
-                                          <button
-                                              onClick={() => handleDeleteRoadLine(line)}
-                                              className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                                              title={t('common.delete', 'O\'chirish')}
-                                          >
-                                              <Trash2 className="w-3 h-3" />
-                                          </button>
+                                          {canManageTickets && (
+                                              <button
+                                                  onClick={() => openEditRoadLineModal(line)}
+                                                  className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                                                  title={t('common.edit', 'Tahrirlash')}
+                                              >
+                                                  <Pencil className="w-3 h-3" />
+                                              </button>
+                                          )}
+                                          {canManageTickets && (
+                                              <button
+                                                  onClick={() => handleDeleteRoadLine(line)}
+                                                  className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                                                  title={t('common.delete', 'O\'chirish')}
+                                              >
+                                                  <Trash2 className="w-3 h-3" />
+                                              </button>
+                                          )}
                                       </div>
 
                                       {line.image_url ? (
@@ -1235,20 +1254,24 @@ export default function TestsIndex({
                                       >
                                           {/* Action buttons directly accessible */}
                                           <div className="absolute top-2 right-2 flex items-center gap-1">
-                                              <button
-                                                  onClick={() => openEditSignModal(sign)}
-                                                  className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                                                  title={t('common.edit', 'Tahrirlash')}
-                                              >
-                                                  <Pencil className="w-3 h-3" />
-                                              </button>
-                                              <button
-                                                  onClick={() => handleDeleteSign(sign)}
-                                                  className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                                                  title={t('common.delete', 'O\'chirish')}
-                                              >
-                                                  <Trash2 className="w-3 h-3" />
-                                              </button>
+                                              {canManageTickets && (
+                                                  <button
+                                                      onClick={() => openEditSignModal(sign)}
+                                                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                                                      title={t('common.edit', 'Tahrirlash')}
+                                                  >
+                                                      <Pencil className="w-3 h-3" />
+                                                  </button>
+                                              )}
+                                              {canManageTickets && (
+                                                  <button
+                                                      onClick={() => handleDeleteSign(sign)}
+                                                      className="p-1.5 rounded-lg bg-muted text-rose-500 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                                                      title={t('common.delete', 'O\'chirish')}
+                                                  >
+                                                      <Trash2 className="w-3 h-3" />
+                                                  </button>
+                                              )}
                                           </div>
 
                                           {sign.image_url ? (
@@ -1296,35 +1319,41 @@ export default function TestsIndex({
                             <div className="flex items-center gap-2 flex-wrap">
                                 {inspectingTicket && (
                                     <>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => openEditTicketModal(inspectingTicket)}
-                                            className="h-8 text-xs border-border text-foreground hover:bg-accent hover:text-accent-foreground"
-                                        >
-                                            <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
-                                            {t('tests.edit_ticket', 'Tahrirlash')}
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => handleDeleteTicket(inspectingTicket)}
-                                            className="h-8 text-xs border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                            {t('tests.delete_ticket', 'O\'chirish')}
-                                        </Button>
+                                        {canManageTickets && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => openEditTicketModal(inspectingTicket)}
+                                                className="h-8 text-xs border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                                            >
+                                                <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                                                {t('tests.edit_ticket', 'Tahrirlash')}
+                                            </Button>
+                                        )}
+                                        {canManageTickets && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleDeleteTicket(inspectingTicket)}
+                                                className="h-8 text-xs border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                                {t('tests.delete_ticket', 'O\'chirish')}
+                                            </Button>
+                                        )}
                                     </>
                                 )}
-                                <Button
-                                    size="sm"
-                                    onClick={openCreateQuestionModal}
-                                    variant="brand"
-                                    className="h-8 text-xs"
-                                >
-                                    <Plus className="w-3.5 h-3.5 mr-1" />
-                                    {t('tests.add_question', '+ Savol Qo\'shish')}
-                                </Button>
+                                {canManageTickets && (
+                                    <Button
+                                        size="sm"
+                                        onClick={openCreateQuestionModal}
+                                        variant="brand"
+                                        className="h-8 text-xs"
+                                    >
+                                        <Plus className="w-3.5 h-3.5 mr-1" />
+                                        {t('tests.add_question', '+ Savol Qo\'shish')}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                         <DialogDescription className="sr-only">Bilet savollarini ko'rish va boshqarish</DialogDescription>
@@ -1356,28 +1385,32 @@ export default function TestsIndex({
                                         </div>
 
                                         <div className="flex items-center gap-1.5 shrink-0">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => openEditQuestionModal(q)}
-                                                className="h-7.5 px-2.5 text-xs text-foreground border-border hover:bg-accent hover:text-accent-foreground"
-                                                title={t('common.edit', 'Tahrirlash')}
-                                            >
-                                                <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
-                                                <span>{t('common.edit', 'Tahrirlash')}</span>
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDeleteQuestion(q)}
-                                                className="h-7.5 px-2.5 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                                                title={t('common.delete', 'O\'chirish')}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                                <span>{t('common.delete', 'O\'chirish')}</span>
-                                            </Button>
+                                            {canManageTickets && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => openEditQuestionModal(q)}
+                                                    className="h-7.5 px-2.5 text-xs text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                                                    title={t('common.edit', 'Tahrirlash')}
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                                                    <span>{t('common.edit', 'Tahrirlash')}</span>
+                                                </Button>
+                                            )}
+                                            {canManageTickets && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteQuestion(q)}
+                                                    className="h-7.5 px-2.5 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                                    title={t('common.delete', 'O\'chirish')}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                                    <span>{t('common.delete', 'O\'chirish')}</span>
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
 

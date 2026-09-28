@@ -1,13 +1,15 @@
 import { Link, usePage } from '@inertiajs/react';
 import { LayoutGrid, Users, CarFront, FolderGit2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useCan } from '@/hooks/use-can';
+import { navPermissionsFor } from '@/lib/nav-permissions';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 
 export function MobileBottomNav() {
     const { t } = useTranslation();
-    const { url, props } = usePage<SharedData>();
-    const isInstructor = props.auth.user.role === 'instructor';
+    const { url } = usePage<SharedData>();
+    const can = useCan();
 
     const navItems = [
         {
@@ -30,12 +32,11 @@ export function MobileBottomNav() {
             href: '/admin/drivings',
             icon: CarFront,
         },
-    ].filter(item => {
-        if (isInstructor) {
-            return ['/admin/dashboard', '/admin/groups', '/admin/students', '/admin/drivings'].includes(item.href);
-        }
-        return true; // For admins, show these 4 quick links as well
-    });
+    ].filter((item) => can(...navPermissionsFor(item.href)));
+
+    if (navItems.length === 0) {
+        return null;
+    }
 
     return (
         <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">

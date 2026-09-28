@@ -33,7 +33,7 @@ class InstructorController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $query = User::with('branch')->where('role', 'instructor')->orderBy('id', 'desc');
+        $query = User::with('branch')->permission('drivings.conduct')->orderBy('id', 'desc');
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
@@ -162,7 +162,7 @@ class InstructorController extends Controller
      */
     private function ensureManageableInstructor(Request $request, User $instructor): void
     {
-        abort_unless($instructor->isInstructor(), 404);
+        abort_unless($instructor->conductsDrivings(), 404);
 
         $currentUser = $request->user();
         if ($currentUser->isBranchRestricted() && $instructor->branch_id !== $currentUser->branch_id) {
@@ -234,10 +234,6 @@ class InstructorController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users',

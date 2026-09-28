@@ -60,7 +60,7 @@ Route::post('/api/telegram-auth', function (Request $request) {
     Auth::login($user, true);
     $request->session()->regenerate();
 
-    $redirectUrl = route('admin.dashboard');
+    $redirectUrl = url($user->homeUrl());
 
     return response()->json(['success' => true, 'redirect' => $redirectUrl]);
 });
@@ -112,12 +112,12 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('admin.dashboard');
+    Route::get('/dashboard', function (Request $request) {
+        return redirect($request->user()->homeUrl());
     })->name('dashboard');
     // Instructor Routes
-    Route::get('/instructor/dashboard', function () {
-        return redirect()->route('admin.dashboard');
+    Route::get('/instructor/dashboard', function (Request $request) {
+        return redirect($request->user()->homeUrl());
     })->name('instructor.dashboard');
     Route::middleware('permission:drivings.manage')->group(function () {
         Route::get('/instructor/driving/create', [InstructorController::class, 'createDriving'])->name('instructor.driving.create');
@@ -156,6 +156,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::resource('admin/instructors', AdminInstructorController::class)->except(['create', 'edit'])
         ->middlewareFor(['index', 'show'], 'permission:users.view')
         ->middlewareFor(['store', 'update', 'destroy'], 'permission:users.manage');
+    Route::put('admin/staff/{staff}/permissions', [StaffController::class, 'updatePermissions'])->middleware('permission:roles.manage')->name('staff.update-permissions');
     Route::resource('admin/staff', StaffController::class)->except(['create', 'edit'])
         ->middlewareFor(['index', 'show'], 'permission:users.view')
         ->middlewareFor(['store', 'update', 'destroy'], 'permission:users.manage');

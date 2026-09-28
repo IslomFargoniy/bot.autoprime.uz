@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Student;
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,11 +15,18 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
 {
     private int $rowNumber = 0;
 
-    public function __construct(public array $filters = []) {}
+    /**
+     * @param  User|null  $viewer  restricts the export to students this user may see
+     */
+    public function __construct(public array $filters = [], public ?User $viewer = null) {}
 
     public function query()
     {
         $query = Student::query()->with(['group', 'drivings.review']);
+
+        if ($this->viewer) {
+            $query->visibleTo($this->viewer);
+        }
 
         if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];

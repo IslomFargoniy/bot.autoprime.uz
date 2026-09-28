@@ -60,6 +60,7 @@ class HandleInertiaRequests extends Middleware
                     ? config('roles.permissions')
                     : ($user?->getAllPermissions()->pluck('name')->values()->all() ?? []),
                 'is_super_admin' => (bool) $user?->isSuperAdmin(),
+                'home_url' => $user?->homeUrl(),
             ],
             'branches' => $branches,
             'filters' => array_merge([

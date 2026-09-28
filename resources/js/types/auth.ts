@@ -32,6 +32,7 @@ export type Auth = {
     user: User;
     permissions: string[];
     is_super_admin: boolean;
+    home_url: string;
 };
 
 export type SharedData = {

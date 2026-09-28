@@ -120,7 +120,7 @@ test('a branch admin cannot manage staff of another branch', function () {
     expect($otherStaff->fresh())->not->toBeNull();
 });
 
-test('a branch admin cannot create a superadmin or place staff in another branch', function () {
+test('the staff page cannot create admins or superadmins nor place staff in another branch', function (string $role) {
     $branchA = Branch::firstOrCreate(['code' => 'auth-a'], ['name' => 'A', 'status' => 'active']);
     $branchB = Branch::firstOrCreate(['code' => 'auth-b'], ['name' => 'B', 'status' => 'active']);
     $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branchA->id]);
@@ -128,9 +128,11 @@ test('a branch admin cannot create a superadmin or place staff in another branch
     $this->actingAs($admin)->post('/admin/staff', [
         'name' => 'Boss',
         'phone' => '+998900000002',
-        'role' => 'superadmin',
+        'role' => $role,
         'password' => 'secret123',
-    ])->assertForbidden();
+    ])->assertSessionHasErrors('role');
+
+    expect(User::where('phone', '+998900000002')->exists())->toBeFalse();
 
     $this->actingAs($admin)->post('/admin/staff', [
         'name' => 'Teacher',
@@ -141,7 +143,7 @@ test('a branch admin cannot create a superadmin or place staff in another branch
     ])->assertRedirect();
 
     expect(User::where('phone', '+998900000003')->value('branch_id'))->toBe($branchA->id);
-});
+})->with(['admin', 'superadmin']);
 
 test('every non-superadmin with a branch is locked to that branch', function (string $role) {
     $branch = Branch::firstOrCreate(['code' => 'lock-branch'], ['name' => 'Lock', 'status' => 'active']);

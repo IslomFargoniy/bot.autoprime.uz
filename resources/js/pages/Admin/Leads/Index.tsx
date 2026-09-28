@@ -22,6 +22,7 @@ import {
     X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -106,6 +107,7 @@ interface PageProps {
 
 export default function LeadsIndex({ leads, contractTypes, groups, branches, filters }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
     const [viewingLead, setViewingLead] = useState<Lead | null>(null);
@@ -250,10 +252,12 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-3">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('leads.title', 'CRM Lidlar')}</h1>
-                <Button onClick={() => setShowCreateModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    <span>{t('common.add', 'Qo\'shish')}</span>
-                </Button>
+                {can('leads.manage') && (
+                    <Button onClick={() => setShowCreateModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        <span>{t('common.add', 'Qo\'shish')}</span>
+                    </Button>
+                )}
             </div>
 
             {/* Filters Bar */}
@@ -358,7 +362,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                             <Eye className="w-3.5 h-3.5" />
                                         </Button>
                                         {lead.stage !== 'contract_signed' && (
-                                            <Button
+                                            (can('contracts.create') ? <Button
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={() => openConvertModal(lead)}
@@ -366,16 +370,18 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                             >
                                                 <UserCheck className="w-3.5 h-3.5 mr-1" />
                                                 {t('leads.convert_button', 'Shartnoma tuzish')}
+                                            </Button> : null)
+                                        )}
+                                        {can('leads.manage') && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDelete(lead)}
+                                                className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
                                             </Button>
                                         )}
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDelete(lead)}
-                                            className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -442,7 +448,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     {t('common.details', 'Batafsil')}
                                 </Button>
                                 {lead.stage !== 'contract_signed' && (
-                                    <Button
+                                    (can('contracts.create') ? <Button
                                         size="sm"
                                         variant="outline"
                                         onClick={() => openConvertModal(lead)}
@@ -450,16 +456,18 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     >
                                         <UserCheck className="w-3.5 h-3.5 mr-1" />
                                         {t('leads.convert_button', 'Shartnoma tuzish')}
+                                    </Button> : null)
+                                )}
+                                {can('leads.manage') && (
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleDelete(lead)}
+                                        className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
                                     </Button>
                                 )}
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleDelete(lead)}
-                                    className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
                             </div>
                         </div>
                     ))
@@ -706,14 +714,14 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                 </Button>
                                 <div className="flex items-center gap-2">
                                     {viewingLead.stage !== 'contract_signed' && (
-                                        <Button
+                                        (can('contracts.create') ? <Button
                                             type="button"
                                             onClick={() => openConvertModal(viewingLead)}
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                         >
                                             <UserCheck className="w-4 h-4 mr-1.5" />
                                             {t('leads.convert_button', 'Shartnoma tuzish')}
-                                        </Button>
+                                        </Button> : null)
                                     )}
                                 </div>
                             </div>

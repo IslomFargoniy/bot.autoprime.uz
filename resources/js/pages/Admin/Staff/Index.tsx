@@ -44,6 +44,9 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
+import { StaffPermissionsDialog } from '@/components/staff-permissions-dialog';
+import type { PermissionCatalog, PermissionMember } from '@/components/staff-permissions-dialog';
+import { useCan } from '@/hooks/use-can';
 import { formatDateTime } from '@/lib/utils';
 import {
     Table,
@@ -73,6 +76,7 @@ interface StaffUser {
     branch_id?: number | null;
     branch?: Branch | null;
     created_at?: string;
+    permissions?: { name: string }[];
 }
 
 interface FinancialHistoryItem {
@@ -103,12 +107,11 @@ interface PageProps {
         all: number;
         instructor: number;
         teacher: number;
-        admin: number;
         reception: number;
         accountant: number;
         kassir: number;
-        superadmin: number;
     };
+    permissionCatalog: PermissionCatalog;
     stats: {
         total_count: number;
         active_count: number;
@@ -127,12 +130,17 @@ export default function StaffIndex({
     staff,
     branches = [],
     roleCounts,
+    permissionCatalog,
     stats,
     filters = {},
 }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isSuperAdmin = !!auth?.is_super_admin;
+    const can = useCan();
+    const canManageStaff = can('users.manage');
+    const canGrantPermissions = can('roles.manage');
+    const [permissionsMember, setPermissionsMember] = useState<PermissionMember | null>(null);
 
     const [search, setSearch] = useState(filters.search || '');
     const [selectedRole, setSelectedRole] = useState(filters.role || 'all');
@@ -396,21 +404,15 @@ export default function StaffIndex({
         { value: 'reception', label: t('roles.reception', 'Reception / Administrator') },
         { value: 'kassir', label: t('roles.kassir', 'Kassir') },
         { value: 'accountant', label: t('roles.accountant', 'Buxgalter') },
-        { value: 'admin', label: t('roles.admin', 'Filial Admini') },
-        ...(isSuperAdmin ? [{ value: 'superadmin', label: t('roles.superadmin', 'Bosh Admin (Superadmin)') }] : []),
     ];
 
     const roleTabs = [
         { key: 'all', label: t('staff.all', 'Barchasi'), count: roleCounts.all },
         { key: 'instructor', label: t('roles.instructor_plural', 'Instruktorlar'), count: roleCounts.instructor },
         { key: 'teacher', label: t('roles.teacher_plural', "O'qituvchilar"), count: roleCounts.teacher },
-        { key: 'admin', label: t('roles.admin_plural', 'Adminlar'), count: roleCounts.admin },
         { key: 'reception', label: t('roles.reception', 'Reception'), count: roleCounts.reception },
         { key: 'accountant', label: t('roles.accountant_plural', 'Buxgalterlar'), count: roleCounts.accountant },
         { key: 'kassir', label: t('roles.kassir_plural', 'Kassirlar'), count: roleCounts.kassir },
-        ...(isSuperAdmin && roleCounts.superadmin > 0
-            ? [{ key: 'superadmin', label: t('roles.superadmin_plural', 'Bosh Adminlar'), count: roleCounts.superadmin }]
-            : []),
     ];
 
     return (
@@ -430,10 +432,10 @@ export default function StaffIndex({
                     </div>
                 </div>
 
-                <Button onClick={openCreateForm} variant="brand" className="gap-2 shadow-xs shrink-0">
+                {canManageStaff && <Button onClick={openCreateForm} variant="brand" className="gap-2 shadow-xs shrink-0">
                     <Plus className="w-4 h-4" />
                     <span>{t('staff.add_staff', "Xodim qo'shish")}</span>
-                </Button>
+                </Button>}
             </div>
 
             {/* KPI Overview Cards */}
@@ -623,7 +625,16 @@ export default function StaffIndex({
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{getRoleBadge(member.role)}</TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap items-center gap-1">
+                                                    {getRoleBadge(member.role)}
+                                                    {(member.permissions?.length ?? 0) > 0 && (
+                                                        <Badge variant="outline" className="text-[10px]">
+                                                            +{member.permissions?.length} {t('staff.extra_permissions', 'ruxsat')}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </TableCell>
                                             <TableCell className="text-xs">
                                                 <div className="flex items-center gap-1 text-muted-foreground">
                                                     <Building2 className="w-3.5 h-3.5" />
@@ -697,15 +708,28 @@ export default function StaffIndex({
                                                     >
                                                         <History className="w-4 h-4" />
                                                     </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleEdit(member)}
-                                                        title={t('common.edit', 'Tahrirlash')}
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </Button>
-                                                    {auth.user.id !== member.id && (
+                                                    {canGrantPermissions && auth.user.id !== member.id && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setPermissionsMember(member)}
+                                                            title={t('staff.permissions_title', 'Ruxsatlar')}
+                                                            className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                                        >
+                                                            <ShieldCheck className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
+                                                    {canManageStaff && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleEdit(member)}
+                                                            title={t('common.edit', 'Tahrirlash')}
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
+                                                    {canManageStaff && auth.user.id !== member.id && (
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
@@ -844,15 +868,28 @@ export default function StaffIndex({
                                                 <History className="w-3.5 h-3.5 text-primary" />
                                                 <span>{t('staff.history', 'Tarix')}</span>
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => handleEdit(member)}
-                                                className="h-8 w-8"
-                                            >
-                                                <Edit2 className="w-3.5 h-3.5" />
-                                            </Button>
-                                            {auth.user.id !== member.id && (
+                                            {canGrantPermissions && auth.user.id !== member.id && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => setPermissionsMember(member)}
+                                                    className="h-8 w-8"
+                                                    title={t('staff.permissions_title', 'Ruxsatlar')}
+                                                >
+                                                    <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                                                </Button>
+                                            )}
+                                            {canManageStaff && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => handleEdit(member)}
+                                                    className="h-8 w-8"
+                                                >
+                                                    <Edit2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            )}
+                                            {canManageStaff && auth.user.id !== member.id && (
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
@@ -1257,6 +1294,7 @@ export default function StaffIndex({
                     </div>
                 </SheetContent>
             </Sheet>
+            <StaffPermissionsDialog member={permissionsMember} catalog={permissionCatalog} onClose={() => setPermissionsMember(null)} />
         </div>
     );
 }

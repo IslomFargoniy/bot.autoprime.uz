@@ -36,6 +36,7 @@ import {
 import { Filter } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import GroupAttendanceModal from '@/components/GroupAttendanceModal';
+import { useCan } from '@/hooks/use-can';
 
 interface Instructor {
     id: number;
@@ -53,6 +54,8 @@ interface Group {
     name: string;
     instructor_id?: number;
     instructor?: Instructor;
+    teacher_id?: number | null;
+    teacher?: Instructor | null;
     branch_id?: number | null;
     branch?: Branch | null;
     course_id?: number | null;
@@ -66,6 +69,7 @@ interface PageProps {
         from?: number;
     };
     instructors: Instructor[];
+    teachers?: Instructor[];
     branches?: Branch[];
     courses?: Course[];
     filters?: {
@@ -75,10 +79,12 @@ interface PageProps {
     };
 }
 
-export default function GroupsIndex({ groups, instructors, branches = [], courses = [], filters = {} }: PageProps) {
+export default function GroupsIndex({ groups, instructors, teachers = [], branches = [], courses = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth?.user?.role === 'instructor';
+    const can = useCan();
+    const canManageGroups = can('groups.manage');
+    const canTakeAttendance = can('attendance.mark_manual');
     const isSuperAdmin = !!auth?.is_super_admin;
 
     const [editing, setEditing] = useState<Group | null>(null);
@@ -102,6 +108,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
     const { data, setData, post, put, delete: destroy, reset, errors, processing } = useForm({
         name: '',
         instructor_id: '',
+        teacher_id: '',
         branch_id: '' as string | number,
         course_id: '' as string | number,
     });
@@ -137,6 +144,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
         setData({
             name: group.name,
             instructor_id: group.instructor_id ? String(group.instructor_id) : '',
+            teacher_id: group.teacher_id ? String(group.teacher_id) : '',
             branch_id: group.branch_id ? String(group.branch_id) : '',
             course_id: group.course_id ? String(group.course_id) : '',
         });
@@ -169,7 +177,7 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
             
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('groups.title', 'Guruhlar')}</h1>
-                {!isInstructor && (
+                {canManageGroups && (
                     <Button onClick={() => setShowForm(true)} variant="brand" size="icon" className="shrink-0 md:w-auto md:px-4 md:py-2">
                         <Plus className="w-4 h-4 md:mr-2" /> 
                         <span className="hidden md:inline">{t('common.add', 'Qo\'shish')}</span>
@@ -342,6 +350,21 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                 />
                                 {errors.instructor_id && <div className="text-destructive text-sm mt-1">{errors.instructor_id}</div>}
                             </div>
+                            <div>
+                                <Label htmlFor="teacher_id">{t('groups.teacher', "O'qituvchi (nazariya)")}</Label>
+                                <SearchableSelect
+                                    id="teacher_id"
+                                    value={data.teacher_id ? String(data.teacher_id) : ''}
+                                    onChange={(val) => setData('teacher_id', val)}
+                                    options={teachers.map((teacher) => ({
+                                        value: teacher.id,
+                                        label: teacher.name,
+                                    }))}
+                                    placeholder={t('groups.select_instructor', '-- Tanlang --')}
+                                    allowClear
+                                />
+                                {errors.teacher_id && <div className="text-destructive text-sm mt-1">{errors.teacher_id}</div>}
+                            </div>
                         </div>
                         <div className="flex gap-2 justify-end pt-4">
                             <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
@@ -361,12 +384,13 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                 <TableHead>{t('groups.name', 'Guruh nomi')}</TableHead>
                                 <TableHead>{t('branches.branch', 'Filial')}</TableHead>
                                 <TableHead>{t('drivings.instructor', 'Instruktor')}</TableHead>
+                                <TableHead>{t('groups.teacher', "O'qituvchi (nazariya)")}</TableHead>
                                 <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {groups.data.length === 0 ? (
-                                <TableEmpty colSpan={5} title={t('common.no_data', 'Ma\'lumot topilmadi')} />
+                                <TableEmpty colSpan={6} title={t('common.no_data', 'Ma\'lumot topilmadi')} />
                             ) : (
                                 groups.data.map((item, index) => (
                                     <TableRow key={item.id}>
@@ -386,8 +410,10 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                         </TableCell>
                                         <TableCell className="text-xs">{item.branch?.name || '-'}</TableCell>
                                         <TableCell className="text-muted-foreground">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</TableCell>
+                                        <TableCell className="text-muted-foreground">{item.teacher?.name || t('common.not_assigned', 'Biriktirilmagan')}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end items-center gap-2">
+                                                {canTakeAttendance && (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -397,7 +423,8 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                                     <CheckSquare className="w-3.5 h-3.5 mr-1" />
                                                     {t('groups.take_attendance', 'Davomat')}
                                                 </Button>
-                                                {!isInstructor && (
+                                                )}
+                                                {canManageGroups && (
                                                     <>
                                                         <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
                                                             <Edit2 className="w-4 h-4" />
@@ -438,8 +465,13 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                 <span className="text-muted-foreground text-xs block">{t('drivings.instructor', 'Instruktor')}:</span>
                                 <div className="font-medium">{item.instructor?.name || t('common.not_assigned', 'Biriktirilmagan')}</div>
                             </div>
+                            <div className="text-sm">
+                                <span className="text-muted-foreground text-xs block">{t('groups.teacher', "O'qituvchi (nazariya)")}:</span>
+                                <div className="font-medium">{item.teacher?.name || t('common.not_assigned', 'Biriktirilmagan')}</div>
+                            </div>
                             
                             <div className="flex items-center justify-between pt-2 border-t mt-2">
+                                {canTakeAttendance && (
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -449,13 +481,14 @@ export default function GroupsIndex({ groups, instructors, branches = [], course
                                     <CheckSquare className="w-3.5 h-3.5 mr-1" />
                                     {t('groups.take_attendance', 'Davomat')}
                                 </Button>
+                                )}
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="icon" asChild title={t('common.view', 'Ko\'rish')}>
                                         <Link href={`/admin/groups/${item.id}`}>
                                             <Eye className="w-4 h-4" />
                                         </Link>
                                     </Button>
-                                    {!isInstructor && (
+                                    {canManageGroups && (
                                         <>
                                             <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
                                                 <Edit2 className="w-4 h-4" />

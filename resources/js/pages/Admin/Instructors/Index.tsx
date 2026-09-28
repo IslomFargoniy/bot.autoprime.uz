@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Edit2, Plus, Search, AlertTriangle, Star, Filter, Download, Eye, User as UserIcon, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import PasswordInput from '@/components/password-input';
 import { Label } from '@/components/ui/label';
@@ -76,8 +77,8 @@ interface PageProps {
 
 export default function InstructorsIndex({ instructors, branches = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth?.user?.role === 'instructor';
     const isSuperAdmin = !!auth?.is_super_admin;
 
     const [editing, setEditing] = useState<Instructor | null>(null);
@@ -200,7 +201,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                         <Download className="w-4 h-4" />
                         <span className="hidden sm:inline">{t('common.download_excel', 'Excel yuklab olish')}</span>
                     </Button>
-                    {!isInstructor && (
+                    {can('users.manage') && (
                         <Button onClick={() => setShowForm(true)} variant="brand" className="gap-2">
                             <Plus className="w-4 h-4" /> 
                             <span>{t('common.add', 'Qo\'shish')}</span>
@@ -514,7 +515,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                                     <Eye className="w-4 h-4" />
                                                 </Button>
                                             </Link>
-                                            {!isInstructor && (
+                                            {can('users.manage') && (
                                                 <>
                                                     <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
                                                         <Edit2 className="w-4 h-4" />
@@ -599,7 +600,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                         <span>{t('common.view', 'Batafsil')}</span>
                                     </Button>
                                 </Link>
-                                {!isInstructor && (
+                                {can('users.manage') && (
                                     <>
                                         <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
                                             <Edit2 className="w-4 h-4" />

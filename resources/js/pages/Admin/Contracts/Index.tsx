@@ -25,6 +25,7 @@ import {
     Laptop,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -136,6 +137,7 @@ interface PageProps {
 
 export default function ContractsIndex({ contracts, students, contractTypes, groups, branches, cashRegisters = [], filters }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showModal, setShowModal] = useState(false);
     const [viewingContract, setViewingContract] = useState<Contract | null>(null);
     const [refundingContract, setRefundingContract] = useState<Contract | null>(null);
@@ -254,10 +256,12 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('contracts.title', 'Shartnomalar')}</h1>
-                <Button onClick={() => setShowModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    <span>{t('common.add', 'Qo\'shish')}</span>
-                </Button>
+                {can('contracts.create') && (
+                    <Button onClick={() => setShowModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        <span>{t('common.add', 'Qo\'shish')}</span>
+                    </Button>
+                )}
             </div>
 
             {/* Filters Bar */}
@@ -387,17 +391,19 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                             >
                                                 <ReceiptText className="w-3.5 h-3.5" />
                                             </Button>
-                                            <a
-                                                href={`/admin/contracts/${c.id}/download-pdf`}
-                                                className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                <Download className="w-3.5 h-3.5 mr-1" />
-                                                PDF
-                                            </a>
+                                            {can('contracts.print') && (
+                                                <a
+                                                    href={`/admin/contracts/${c.id}/download-pdf`}
+                                                    className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    <Download className="w-3.5 h-3.5 mr-1" />
+                                                    PDF
+                                                </a>
+                                            )}
                                             {Number(c.paid_amount) > 0 && (
-                                                <Button
+                                                (can('payments.edit') ? <Button
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={() => openRefund(c)}
@@ -406,16 +412,18 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                 >
                                                     <RotateCcw className="w-3.5 h-3.5 mr-1" />
                                                     {t('contracts.refund', 'Qaytarish')}
+                                                </Button> : null)
+                                            )}
+                                            {can('contracts.edit') && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(c)}
+                                                    className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </Button>
                                             )}
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDelete(c)}
-                                                className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -502,23 +510,27 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     <Eye className="w-3.5 h-3.5 mr-1" />
                                     {t('common.details', 'Batafsil')}
                                 </Button>
-                                <a
-                                    href={`/admin/contracts/${c.id}/download-pdf`}
-                                    className="inline-flex items-center px-2.5 py-1 rounded bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    <Download className="w-3.5 h-3.5 mr-1" />
-                                    PDF
-                                </a>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleDelete(c)}
-                                    className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                {can('contracts.print') && (
+                                    <a
+                                        href={`/admin/contracts/${c.id}/download-pdf`}
+                                        className="inline-flex items-center px-2.5 py-1 rounded bg-muted hover:bg-muted/80 text-foreground text-xs font-medium"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Download className="w-3.5 h-3.5 mr-1" />
+                                        PDF
+                                    </a>
+                                )}
+                                {can('contracts.edit') && (
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleDelete(c)}
+                                        className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     ))
@@ -718,15 +730,17 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         <ReceiptText className="w-3.5 h-3.5 mr-1" />
                                         {t('contracts.payments_history', 'To\'lovlar tarixi')}
                                     </Button>
-                                    <a
-                                        href={`/admin/contracts/${viewingContract.id}/download-pdf`}
-                                        className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <Download className="w-3.5 h-3.5 mr-1.5" />
-                                        {t('common.download_pdf', 'PDF Yuklab olish')}
-                                    </a>
+                                    {can('contracts.print') && (
+                                        <a
+                                            href={`/admin/contracts/${viewingContract.id}/download-pdf`}
+                                            className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <Download className="w-3.5 h-3.5 mr-1.5" />
+                                            {t('common.download_pdf', 'PDF Yuklab olish')}
+                                        </a>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1020,15 +1034,17 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                             {isRefund ? '-' : '+'}{Number(p.amount).toLocaleString('uz-UZ')} UZS
                                                         </TableCell>
                                                         <TableCell className="text-right">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={() => handleDeletePayment(p.id)}
-                                                                title={t('common.delete', "O'chirish")}
-                                                                className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </Button>
+                                                            {can('payments.edit') && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() => handleDeletePayment(p.id)}
+                                                                    title={t('common.delete', "O'chirish")}
+                                                                    className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            )}
                                                         </TableCell>
                                                     </TableRow>
                                                 );

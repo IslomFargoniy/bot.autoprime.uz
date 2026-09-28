@@ -2,6 +2,8 @@
 
 namespace App\Concerns;
 
+use App\Models\User;
+use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -25,5 +27,20 @@ trait BranchScopedValidationRules
         }
 
         return $rule;
+    }
+
+    /**
+     * A rule accepting only a user that holds the given capability permission
+     * (drivings.conduct / lessons.teach), whether through the role or granted.
+     *
+     * @return Closure(string, mixed, Closure(string): void): void
+     */
+    protected function userWithCapability(string $permission, string $message): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($permission, $message): void {
+            if ($value && ! User::find($value)?->checkPermissionTo($permission)) {
+                $fail($message);
+            }
+        };
     }
 }

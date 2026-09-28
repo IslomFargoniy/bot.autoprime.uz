@@ -3,6 +3,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableEmpty } from '@/components/ui/table';
@@ -42,6 +43,7 @@ interface PageProps {
 
 export default function ContractTypesIndex({ contractTypes, branches }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showModal, setShowModal] = useState(false);
     const [editingType, setEditingType] = useState<ContractType | null>(null);
 
@@ -121,10 +123,12 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('contract_types.title', 'Shartnoma Tariflari')}</h1>
-                <Button onClick={openCreate} variant="brand" className="shrink-0">
-                    <Plus className="w-4 h-4 mr-2" />
-                    <span>{t('common.add', 'Qo\'shish')}</span>
-                </Button>
+                {can('contract_types.manage') && (
+                    <Button onClick={openCreate} variant="brand" className="shrink-0">
+                        <Plus className="w-4 h-4 mr-2" />
+                        <span>{t('common.add', 'Qo\'shish')}</span>
+                    </Button>
+                )}
             </div>
 
             {/* Contract Types Grid / Table */}
@@ -137,10 +141,10 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                                 title={t('contract_types.no_tariffs', 'Tariflar mavjud emas')}
                                 description={t('contract_types.no_tariffs_desc', 'Hozircha hech qanday shartnoma tarifi yaratilmagan.')}
                                 action={
-                                    <Button variant="brand" size="sm" onClick={openCreate} className="mt-2">
+                                    (can('contract_types.manage') ? <Button variant="brand" size="sm" onClick={openCreate} className="mt-2">
                                         <Plus className="w-4 h-4 mr-1.5" />
                                         {t('contract_types.add_new', 'Yangi tarif qo\'shish')}
-                                    </Button>
+                                    </Button> : null)
                                 }
                             />
                         </TableBody>
@@ -194,13 +198,17 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                             </div>
 
                             <div className="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-2">
-                                <Button size="sm" variant="outline" onClick={() => openEdit(ct)} className="h-8 text-xs">
-                                    <Edit2 className="w-3.5 h-3.5 mr-1" />
-                                    {t('common.edit', 'Tahrirlash')}
-                                </Button>
-                                <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                {can('contract_types.manage') && (
+                                    <Button size="sm" variant="outline" onClick={() => openEdit(ct)} className="h-8 text-xs">
+                                        <Edit2 className="w-3.5 h-3.5 mr-1" />
+                                        {t('common.edit', 'Tahrirlash')}
+                                    </Button>
+                                )}
+                                {can('contract_types.manage') && (
+                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     ))}

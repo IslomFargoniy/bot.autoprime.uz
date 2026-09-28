@@ -14,6 +14,7 @@ import {
     Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -88,6 +89,7 @@ export default function SalariesIndex({
     filters,
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [period, setPeriod] = useState(filters.period);
 
     // Modals
@@ -220,14 +222,18 @@ export default function SalariesIndex({
                         onChange={(e) => handlePeriodChange(e.target.value)}
                         className="w-36 h-9 text-xs"
                     />
-                    <Button onClick={handleGeneratePayroll} variant="brand" className="text-xs">
-                        <Calculator className="w-4 h-4 mr-1.5" />
-                        {t('salaries.generate_button', '1-Klikda Hisoblash')}
-                    </Button>
-                    <Button onClick={() => setShowAdjustModal(true)} variant="outline" className="text-xs">
-                        <Plus className="w-4 h-4 mr-1.5" />
-                        {t('salaries.add_adjust', 'Bonus / Jarima')}
-                    </Button>
+                    {can('salaries.accrue') && (
+                        <Button onClick={handleGeneratePayroll} variant="brand" className="text-xs">
+                            <Calculator className="w-4 h-4 mr-1.5" />
+                            {t('salaries.generate_button', '1-Klikda Hisoblash')}
+                        </Button>
+                    )}
+                    {can('salaries.accrue') && (
+                        <Button onClick={() => setShowAdjustModal(true)} variant="outline" className="text-xs">
+                            <Plus className="w-4 h-4 mr-1.5" />
+                            {t('salaries.add_adjust', 'Bonus / Jarima')}
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -288,7 +294,7 @@ export default function SalariesIndex({
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {sal.status !== 'paid' && !sal.is_deduction && (
-                                            <Button
+                                            (can('salaries.pay') ? <Button
                                                 size="sm"
                                                 onClick={() => {
                                                     setPayingSalary(sal);
@@ -298,7 +304,7 @@ export default function SalariesIndex({
                                             >
                                                 <Coins className="w-3.5 h-3.5 mr-1" />
                                                 {t('salaries.pay_button', 'To\'lash')}
-                                            </Button>
+                                            </Button> : null)
                                         )}
                                     </TableCell>
                                 </TableRow>
@@ -364,17 +370,19 @@ export default function SalariesIndex({
                             {/* Actions Footer */}
                             {sal.status !== 'paid' && !sal.is_deduction && (
                                 <div className="flex justify-end pt-2 border-t">
-                                    <Button
-                                        size="sm"
-                                        onClick={() => {
-                                            setPayingSalary(sal);
-                                            payForm.setData('amount', String(sal.amount));
-                                        }}
-                                        className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1 w-full sm:w-auto"
-                                    >
-                                        <Coins className="w-3.5 h-3.5" />
-                                        {t('salaries.pay_button', "To'lash")}
-                                    </Button>
+                                    {can('salaries.pay') && (
+                                        <Button
+                                            size="sm"
+                                            onClick={() => {
+                                                setPayingSalary(sal);
+                                                payForm.setData('amount', String(sal.amount));
+                                            }}
+                                            className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1 w-full sm:w-auto"
+                                        >
+                                            <Coins className="w-3.5 h-3.5" />
+                                            {t('salaries.pay_button', "To'lash")}
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </div>

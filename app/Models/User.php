@@ -130,6 +130,89 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * Whether the user conducts driving lessons (instructor role or the
+     * capability granted as an extra permission). Checked on the user's own
+     * permissions so the superadmin gate bypass does not turn admins into instructors.
+     */
+    public function conductsDrivings(): bool
+    {
+        return $this->checkPermissionTo('drivings.conduct');
+    }
+
+    /**
+     * Whether the user teaches theory lessons (teacher role or granted capability).
+     */
+    public function teachesLessons(): bool
+    {
+        return $this->checkPermissionTo('lessons.teach');
+    }
+
+    /**
+     * Instructors and teachers only see and act on their own groups, students
+     * and lessons, even when granted extra permissions.
+     */
+    public function worksOnOwnRecordsOnly(): bool
+    {
+        return $this->hasAnyRole(['instructor', 'teacher']);
+    }
+
+    /**
+     * Whether the group is taught or driven by this user.
+     */
+    public function ownsGroup(?Group $group): bool
+    {
+        return $group !== null && ($group->teacher_id === $this->id || $group->instructor_id === $this->id);
+    }
+
+    /**
+     * Whether the user may see the student: always, unless restricted to own
+     * records, then only students of own groups or own driving lessons.
+     */
+    public function canSeeStudent(Student $student): bool
+    {
+        if (! $this->worksOnOwnRecordsOnly()) {
+            return true;
+        }
+
+        return $this->ownsGroup($student->group)
+            || $student->drivings()->where('instructor_id', $this->id)->exists();
+    }
+
+    /**
+     * Admins and superadmins are not on the payroll.
+     */
+    public function isSalaried(): bool
+    {
+        return ! in_array($this->role, config('roles.unsalaried_roles'), true);
+    }
+
+    /**
+     * The first admin page the user may open, used after login and for the logo.
+     */
+    public function homeUrl(): string
+    {
+        $pages = [
+            'dashboard.view' => '/admin/dashboard',
+            'finance.view' => '/admin/finance',
+            'attendance.view' => '/admin/attendance',
+            'drivings.view' => '/admin/drivings',
+            'students.view' => '/admin/students',
+            'crm.view' => '/admin/leads',
+            'contracts.view' => '/admin/contracts',
+            'salaries.view' => '/admin/salaries',
+            'lms.view' => '/admin/courses',
+        ];
+
+        foreach ($pages as $permission => $url) {
+            if ($this->can($permission)) {
+                return $url;
+            }
+        }
+
+        return '/profile';
+    }
+
+    /**
      * Staff other than superadmins only ever work within their own branch.
      */
     public function isBranchRestricted(): bool

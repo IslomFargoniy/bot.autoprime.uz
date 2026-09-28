@@ -1,7 +1,8 @@
-import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Users, Upload, ArrowLeft, Download, Trash2, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -14,7 +15,6 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useRef, useState } from 'react';
-import { SharedData } from '@/types/auth';
 import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 
 interface Group {
@@ -43,8 +43,9 @@ interface PageProps {
 
 export default function GroupShow({ group, students }: PageProps) {
     const { t } = useTranslation();
-    const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth?.user?.role === 'instructor';
+    const can = useCan();
+    const canImport = can('groups.manage');
+    const canDeleteStudents = can('students.delete');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
@@ -105,10 +106,12 @@ export default function GroupShow({ group, students }: PageProps) {
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button onClick={() => setIsAttendanceOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                            <CheckSquare className="w-4 h-4 mr-2" />
-                            {t('groups.take_attendance', 'Davomat')}
-                        </Button>
+                        {can('attendance.mark_manual') && (
+                            <Button onClick={() => setIsAttendanceOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                <CheckSquare className="w-4 h-4 mr-2" />
+                                {t('groups.take_attendance', 'Davomat')}
+                            </Button>
+                        )}
                         <Button variant="outline" onClick={() => window.location.href = `/admin/groups/${group.id}/export-students`}>
                             <Download className="w-4 h-4 mr-2" />
                             {t('common.export_excel', 'Excel yuklab olish')}
@@ -118,7 +121,7 @@ export default function GroupShow({ group, students }: PageProps) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Import */}
-                    {!isInstructor && (
+                    {canImport && (
                         <div className="lg:col-span-1">
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
@@ -161,7 +164,7 @@ export default function GroupShow({ group, students }: PageProps) {
                     )}
 
                     {/* Right Column - Students List */}
-                    <div className={isInstructor ? 'col-span-full' : 'lg:col-span-2'}>
+                    <div className={canImport ? 'lg:col-span-2' : 'col-span-full'}>
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                             <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{t('groups.students_title', 'Guruh Talabalari')}</h2>
@@ -176,13 +179,13 @@ export default function GroupShow({ group, students }: PageProps) {
                                                 <TableHead>{t('students.full_name', 'F.I.SH')}</TableHead>
                                                 <TableHead>{t('students.phone', 'Telefon')}</TableHead>
                                                 <TableHead className="text-center">{t('students.completed_drivings', 'Tugagan darslar')}</TableHead>
-                                                {!isInstructor && <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>}
+                                                {canDeleteStudents && <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>}
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {students.length === 0 ? (
                                                 <TableEmpty
-                                                    colSpan={isInstructor ? 4 : 5}
+                                                    colSpan={canDeleteStudents ? 5 : 4}
                                                     icon={Users}
                                                     title={t('groups.no_students_in_group', "Guruhda hozircha talabalar yo'q")}
                                                     description={t('groups.no_students_in_group_desc', "Excel orqali talabalarni yuklang")}
@@ -200,7 +203,7 @@ export default function GroupShow({ group, students }: PageProps) {
                                                                 {student.completed_drivings_count || 0}
                                                             </span>
                                                         </TableCell>
-                                                        {!isInstructor && (
+                                                        {canDeleteStudents && (
                                                             <TableCell className="text-right">
                                                                 <Button variant="ghost" size="icon" onClick={() => handleDeleteStudent(student.id)} className="h-8 w-8 text-destructive hover:text-destructive/90">
                                                                     <Trash2 className="w-4 h-4" />
@@ -236,7 +239,7 @@ export default function GroupShow({ group, students }: PageProps) {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                {!isInstructor && (
+                                                {canDeleteStudents && (
                                                     <div className="flex justify-end pt-2 border-t">
                                                         <Button variant="outline" size="sm" onClick={() => handleDeleteStudent(student.id)} className="h-8 gap-1 text-xs text-destructive border-destructive/30">
                                                             <Trash2 className="w-3.5 h-3.5" />

@@ -24,11 +24,24 @@ class AttendanceController extends Controller
 {
     use BranchScopedValidationRules;
 
+    /**
+     * Teachers (and instructors) may only run lessons and journals of their own groups.
+     */
+    private function ensureGroupAccess(Request $request, ?Group $group): void
+    {
+        $user = $request->user();
+        if ($user->worksOnOwnRecordsOnly() && ! $user->ownsGroup($group)) {
+            abort(403, 'Siz faqat o\'z guruhingizda davomat yurita olasiz.');
+        }
+    }
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
+        $user = $request->user();
 
         $query = Attendance::with(['student.group', 'session.teacher', 'markedBy'])
+            ->when($user->worksOnOwnRecordsOnly(), fn ($q) => $q->whereHas('session', fn ($session) => $session->whereIn('group_id', Group::query()->visibleTo($user)->select('id'))))
             ->orderBy('scanned_at', 'desc')
             ->orderBy('created_at', 'desc');
 
@@ -51,17 +64,20 @@ class AttendanceController extends Controller
 
         $activeSessions = LessonSession::with(['group', 'teacher'])
             ->where('status', 'active')
+            ->when($user->worksOnOwnRecordsOnly(), fn ($q) => $q->whereIn('group_id', Group::query()->visibleTo($user)->select('id')))
             ->when($targetBranchId, fn ($q) => $q->where('branch_id', $targetBranchId))
             ->orderBy('started_at', 'desc')
             ->get();
 
         $groups = Group::where('is_active', true)
+            ->visibleTo($user)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
             ->get();
 
         $students = Student::where('status', 'active')
+            ->visibleTo($user)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -97,6 +113,7 @@ class AttendanceController extends Controller
         ]);
 
         $group = Group::findOrFail($validated['group_id']);
+        $this->ensureGroupAccess($request, $group);
 
         $topicTitle = 'Nazariy dars';
         if (! empty($validated['topic_id'])) {
@@ -109,7 +126,8 @@ class AttendanceController extends Controller
         $session = LessonSession::create([
             'branch_id' => $group->branch_id,
             'group_id' => $group->id,
-            'teacher_id' => $request->user()->id,
+            // Lesson credit (payroll) belongs to the group teacher, not whoever started the screen.
+            'teacher_id' => $group->teacher_id ?? $request->user()->id,
             'topic' => $topicTitle,
             'qr_secret_salt' => bin2hex(random_bytes(16)),
             'started_at' => now(),
@@ -122,8 +140,10 @@ class AttendanceController extends Controller
     /**
      * Large TV / Projector presentation screen displaying dynamic HMAC QR code.
      */
-    public function sessionScreen(LessonSession $session): Response
+    public function sessionScreen(Request $request, LessonSession $session): Response
     {
+        $this->ensureGroupAccess($request, $session->group);
+
         $session->load([
             'group' => fn ($q) => $q->withCount('students'),
             'teacher',
@@ -143,8 +163,10 @@ class AttendanceController extends Controller
     /**
      * JSON polling endpoint for rotating QR token every 15-20 seconds.
      */
-    public function getRotatingQr(LessonSession $session): JsonResponse
+    public function getRotatingQr(Request $request, LessonSession $session): JsonResponse
     {
+        $this->ensureGroupAccess($request, $session->group);
+
         if ($session->status !== 'active') {
             return response()->json(['error' => 'Session not active'], 400);
         }
@@ -172,6 +194,7 @@ class AttendanceController extends Controller
         $date = ! empty($validated['date']) ? Carbon::parse($validated['date'])->toDateString() : now()->toDateString();
 
         $group = Group::findOrFail($groupId);
+        $this->ensureGroupAccess($request, $group);
 
         $students = Student::where('group_id', $groupId)
             ->where('status', 'active')
@@ -234,6 +257,7 @@ class AttendanceController extends Controller
         ]);
 
         $group = Group::findOrFail($validated['group_id']);
+        $this->ensureGroupAccess($request, $group);
         $date = Carbon::parse($validated['date'])->toDateString();
 
         DB::transaction(function () use ($validated, $group, $date, $request) {
@@ -310,7 +334,14 @@ class AttendanceController extends Controller
             'manual_reason' => 'required|string|max:255',
         ]);
 
-        $student = Student::findOrFail($validated['student_id']);
+        $student = Student::with('group')->findOrFail($validated['student_id']);
+        $this->ensureGroupAccess($request, $student->group);
+
+        if (! empty($validated['session_id'])
+            && (int) LessonSession::whereKey($validated['session_id'])->value('group_id') !== (int) $student->group_id) {
+            return redirect()->back()->withErrors(['session_id' => 'Talaba bu dars guruhiga tegishli emas.']);
+        }
+
         $date = ! empty($validated['date']) ? Carbon::parse($validated['date'])->toDateString() : now()->toDateString();
 
         $sessionId = $validated['session_id'] ?? null;
@@ -367,8 +398,10 @@ class AttendanceController extends Controller
     /**
      * Finish a LessonSession.
      */
-    public function finishSession(LessonSession $session): RedirectResponse
+    public function finishSession(Request $request, LessonSession $session): RedirectResponse
     {
+        $this->ensureGroupAccess($request, $session->group);
+
         $session->update([
             'status' => 'finished',
             'ended_at' => now(),

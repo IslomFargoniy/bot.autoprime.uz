@@ -480,22 +480,30 @@ export default function FinanceIndex({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
                 <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                    <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
-                        <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
-                        <span className="truncate">{t('finance.empty_registers', 'Kassalarni bo\'shatish')}</span>
-                    </Button>
-                    <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-9 justify-center">
-                        <ArrowDownRight className="w-4 h-4 mr-1.5 shrink-0" />
-                        <span className="truncate">{t('finance.accept_payment', 'To\'lov Qabul Qilish')}</span>
-                    </Button>
-                    <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-9 justify-center">
-                        <ArrowUpRight className="w-4 h-4 mr-1.5 shrink-0" />
-                        <span className="truncate">{t('finance.add_expense', 'Chiqim Qilish')}</span>
-                    </Button>
-                    <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs h-9 justify-center">
-                        <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-                        <span className="truncate">{t('finance.transfer', 'Transfer')}</span>
-                    </Button>
+                    {can('cash_transfers.create') && (
+                        <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
+                            <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('finance.empty_registers', 'Kassalarni bo\'shatish')}</span>
+                        </Button>
+                    )}
+                    {can('payments.create') && (
+                        <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-9 justify-center">
+                            <ArrowDownRight className="w-4 h-4 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('finance.accept_payment', 'To\'lov Qabul Qilish')}</span>
+                        </Button>
+                    )}
+                    {can('expenses.create') && (
+                        <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-9 justify-center">
+                            <ArrowUpRight className="w-4 h-4 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('finance.add_expense', 'Chiqim Qilish')}</span>
+                        </Button>
+                    )}
+                    {can('cash_transfers.create') && (
+                        <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs h-9 justify-center">
+                            <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('finance.transfer', 'Transfer')}</span>
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -548,7 +556,7 @@ export default function FinanceIndex({
                                 </Button>
 
                                 {canSweep && (
-                                    <Button
+                                    (can('cash_transfers.create') ? <Button
                                         type="button"
                                         variant="brand"
                                         size="sm"
@@ -557,7 +565,7 @@ export default function FinanceIndex({
                                     >
                                         <ArrowDownToLine className="w-3.5 h-3.5" />
                                         <span>{t('finance.empty_this_register', 'Bo\'shatish')}</span>
-                                    </Button>
+                                    </Button> : null)
                                 )}
                             </div>
                         </div>
@@ -670,7 +678,7 @@ export default function FinanceIndex({
                                                         {t('finance.view_history', 'Tarix')}
                                                     </Button>
                                                     {canSweep && (
-                                                        <Button
+                                                        (can('cash_transfers.create') ? <Button
                                                             size="sm"
                                                             variant="brand"
                                                             onClick={() => openSweepModal(reg.id)}
@@ -678,7 +686,7 @@ export default function FinanceIndex({
                                                         >
                                                             <ArrowDownToLine className="w-3.5 h-3.5" />
                                                             {t('finance.empty_this_register', 'Bo\'shatish')}
-                                                        </Button>
+                                                        </Button> : null)
                                                     )}
                                                 </TableCell>
                                             </TableRow>
@@ -961,15 +969,17 @@ export default function FinanceIndex({
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.received_by?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{p.paid_at}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => handleDeletePayment(p)}
-                                                        className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                        title={t('common.delete', "O'chirish")}
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </Button>
+                                                    {can('payments.edit') && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => handleDeletePayment(p)}
+                                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                            title={t('common.delete', "O'chirish")}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -1022,15 +1032,17 @@ export default function FinanceIndex({
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className="text-[11px] font-mono">{p.paid_at}</span>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDeletePayment(p)}
-                                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                title={t('common.delete', "O'chirish")}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
+                                            {can('payments.edit') && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleDeletePayment(p)}
+                                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                    title={t('common.delete', "O'chirish")}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -1079,15 +1091,17 @@ export default function FinanceIndex({
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.user?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{e.spent_at || e.expense_date || '-'}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => handleDeleteExpense(e)}
-                                                        className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                        title={t('common.delete', "O'chirish")}
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </Button>
+                                                    {can('expenses.delete') && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => handleDeleteExpense(e)}
+                                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                            title={t('common.delete', "O'chirish")}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -1131,15 +1145,17 @@ export default function FinanceIndex({
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className="text-[11px] font-mono">{e.spent_at || e.expense_date || '-'}</span>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDeleteExpense(e)}
-                                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                title={t('common.delete', "O'chirish")}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
+                                            {can('expenses.delete') && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleDeleteExpense(e)}
+                                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                    title={t('common.delete', "O'chirish")}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

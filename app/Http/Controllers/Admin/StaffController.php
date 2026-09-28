@@ -9,19 +9,20 @@ use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StaffController extends Controller
 {
     /**
-     * Branch-restricted staff may only touch colleagues in their own branch,
-     * and only a superadmin may touch a superadmin account.
+     * The staff page only manages staff roles (admins live on the superadmin-only
+     * admins page), and branch-restricted users only their own branch.
      */
     private function ensureCanAccessStaff(User $currentUser, User $staff): void
     {
-        if ($staff->isSuperAdmin() && ! $currentUser->isSuperAdmin()) {
-            abort(403, 'Bosh admin hisobini faqat Superadmin boshqara oladi.');
+        if (! in_array($staff->role, config('roles.staff_roles'), true)) {
+            abort(403, 'Adminlar faqat Superadmin tomonidan "Adminlar" bo\'limida boshqariladi.');
         }
 
         if ($currentUser->isBranchRestricted() && $staff->branch_id !== $currentUser->branch_id) {
@@ -39,11 +40,11 @@ class StaffController extends Controller
             $targetBranchId = $currentUser->branch_id;
         }
 
-        $query = User::with('branch')
+        $query = User::with(['branch', 'permissions:id,name'])
+            ->whereIn('role', config('roles.staff_roles'))
             ->orderBy('id', 'desc');
 
         if (! $isSuperAdmin) {
-            $query->where('role', '!=', 'superadmin');
             if ($currentUser->branch_id) {
                 $query->where('branch_id', $currentUser->branch_id);
             }
@@ -76,9 +77,8 @@ class StaffController extends Controller
         }
 
         // Role counts for tabs (single aggregated query)
-        $countsQuery = User::query();
+        $countsQuery = User::query()->whereIn('role', config('roles.staff_roles'));
         if (! $isSuperAdmin) {
-            $countsQuery->where('role', '!=', 'superadmin');
             if ($currentUser->branch_id) {
                 $countsQuery->where('branch_id', $currentUser->branch_id);
             }
@@ -96,11 +96,9 @@ class StaffController extends Controller
             'all' => array_sum($groupedCounts),
             'instructor' => $groupedCounts['instructor'] ?? 0,
             'teacher' => $groupedCounts['teacher'] ?? 0,
-            'admin' => $groupedCounts['admin'] ?? 0,
             'reception' => $groupedCounts['reception'] ?? 0,
             'accountant' => $groupedCounts['accountant'] ?? 0,
             'kassir' => $groupedCounts['kassir'] ?? 0,
-            'superadmin' => $isSuperAdmin ? ($groupedCounts['superadmin'] ?? 0) : 0,
         ];
 
         $totalBaseSalary = (float) (clone $countsQuery)->sum('base_salary');
@@ -116,6 +114,7 @@ class StaffController extends Controller
             'staff' => $staff,
             'branches' => $branches,
             'roleCounts' => $roleCounts,
+            'permissionCatalog' => $this->permissionCatalog($currentUser),
             'stats' => [
                 'total_count' => $roleCounts['all'],
                 'active_count' => $activeCount,
@@ -134,13 +133,12 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->isSuperAdmin();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users,phone',
             'telegram_id' => 'nullable|string|max:50|unique:users,telegram_id',
-            'role' => 'required|string|in:instructor,teacher,admin,reception,accountant,kassir,superadmin',
+            'role' => ['required', 'string', Rule::in(config('roles.staff_roles'))],
             'branch_id' => 'nullable|exists:branches,id',
             'status' => 'nullable|in:active,inactive',
             'base_salary' => 'nullable|numeric|min:0',
@@ -150,10 +148,6 @@ class StaffController extends Controller
             'photo' => 'nullable|image|max:5120',
             'password' => 'required|string|min:6',
         ]);
-
-        if ($validated['role'] === 'superadmin' && ! $isSuperAdmin) {
-            abort(403, 'Faqat Bosh Admin superadmin qo\'sha oladi.');
-        }
 
         $branchId = $currentUser->isBranchRestricted()
             ? $currentUser->branch_id
@@ -186,7 +180,6 @@ class StaffController extends Controller
     public function update(Request $request, User $staff)
     {
         $currentUser = $request->user();
-        $isSuperAdmin = $currentUser->isSuperAdmin();
 
         $this->ensureCanAccessStaff($currentUser, $staff);
 
@@ -194,7 +187,7 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users,phone,'.$staff->id,
             'telegram_id' => 'nullable|string|max:50|unique:users,telegram_id,'.$staff->id,
-            'role' => 'required|string|in:instructor,teacher,admin,reception,accountant,kassir,superadmin',
+            'role' => ['required', 'string', Rule::in(config('roles.staff_roles'))],
             'branch_id' => 'nullable|exists:branches,id',
             'status' => 'nullable|in:active,inactive',
             'base_salary' => 'nullable|numeric|min:0',
@@ -204,10 +197,6 @@ class StaffController extends Controller
             'photo' => 'nullable|image|max:5120',
             'password' => 'nullable|string|min:6',
         ]);
-
-        if ($validated['role'] === 'superadmin' && ! $isSuperAdmin) {
-            abort(403, 'Faqat Bosh Admin superadmin rolini biriktira oladi.');
-        }
 
         if ($currentUser->isBranchRestricted()) {
             $validated['branch_id'] = $currentUser->branch_id;
@@ -229,6 +218,96 @@ class StaffController extends Controller
         $staff->update($validated);
 
         return redirect()->back()->with('success', 'Xodim ma\'lumotlari yangilandi.');
+    }
+
+    /**
+     * Grant a staff member permissions of other staff roles on top of their own
+     * role (e.g. a receptionist who also works as a cashier). The role's own
+     * permissions always stay; only the extras are stored as direct permissions.
+     */
+    public function updatePermissions(Request $request, User $staff)
+    {
+        $currentUser = $request->user();
+        $this->ensureCanAccessStaff($currentUser, $staff);
+
+        if ($staff->is($currentUser)) {
+            abort(403, 'O\'zingizga ruxsat bera olmaysiz.');
+        }
+
+        $validated = $request->validate([
+            'permissions' => 'present|array',
+            'permissions.*' => ['string', Rule::in($this->grantablePermissions())],
+        ]);
+
+        $rolePermissions = config("roles.roles.{$staff->role}", []);
+        $requested = array_values(array_diff(array_unique($validated['permissions']), $rolePermissions));
+        $current = $staff->permissions()->pluck('name')->all();
+
+        // Only the permissions being added or removed must be ones the actor may hand out.
+        $changed = array_merge(array_diff($requested, $current), array_diff($current, $requested));
+        $notAllowed = array_diff($changed, $this->permissionsGrantableBy($currentUser));
+        if ($notAllowed !== []) {
+            return redirect()->back()->withErrors(['permissions' => 'Sizda o\'zingizda bo\'lmagan ruxsatni bera olmaysiz: '.implode(', ', $notAllowed)]);
+        }
+
+        $staff->syncPermissions($requested);
+
+        return redirect()->back()->with('success', 'Xodim ruxsatlari yangilandi.');
+    }
+
+    /**
+     * Every permission that belongs to some staff role, i.e. may be granted as an extra.
+     *
+     * @return list<string>
+     */
+    private function grantablePermissions(): array
+    {
+        return array_values(array_unique(array_merge(...array_map(
+            fn (string $role) => config("roles.roles.{$role}", []),
+            config('roles.staff_roles'),
+        ))));
+    }
+
+    /**
+     * Grantable permissions the actor may hand out: those they hold themselves,
+     * plus the instructor / teacher capabilities (a job, not an access right).
+     *
+     * @return list<string>
+     */
+    private function permissionsGrantableBy(User $actor): array
+    {
+        return array_values(array_filter(
+            $this->grantablePermissions(),
+            fn (string $permission) => $actor->isSuperAdmin()
+                || in_array($permission, config('roles.capabilities'), true)
+                || $actor->checkPermissionTo($permission),
+        ));
+    }
+
+    /**
+     * Staff permissions grouped by role for the permission dialog.
+     *
+     * @return array{groups: list<array{role: string, label: string, permissions: list<array{name: string, label: string}>}>, role_permissions: array<string, list<string>>, grantable: list<string>}
+     */
+    private function permissionCatalog(User $actor): array
+    {
+        $labels = config('roles.labels');
+
+        return [
+            'groups' => array_map(fn (string $role) => [
+                'role' => $role,
+                'label' => config("roles.role_labels.{$role}", $role),
+                'permissions' => array_map(
+                    fn (string $permission) => ['name' => $permission, 'label' => $labels[$permission] ?? $permission],
+                    config("roles.roles.{$role}", []),
+                ),
+            ], config('roles.staff_roles')),
+            'role_permissions' => array_map(
+                fn (string $role) => config("roles.roles.{$role}", []),
+                array_combine(config('roles.staff_roles'), config('roles.staff_roles')),
+            ),
+            'grantable' => $this->permissionsGrantableBy($actor),
+        ];
     }
 
     public function show(User $staff, Request $request)

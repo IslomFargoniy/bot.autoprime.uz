@@ -43,7 +43,7 @@ class VehicleController extends Controller
         }
         $vehicles = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
-        $instructors = User::where('role', 'instructor')
+        $instructors = User::permission('drivings.conduct')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })

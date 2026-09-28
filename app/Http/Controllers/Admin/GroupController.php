@@ -21,12 +21,33 @@ class GroupController extends Controller
 {
     use BranchScopedValidationRules;
 
+    /**
+     * Instructors and teachers may only work with groups they drive or teach.
+     */
+    private function ensureGroupAccess(User $user, Group $group): void
+    {
+        if ($user->worksOnOwnRecordsOnly() && ! $user->ownsGroup($group)) {
+            abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlar bilan ishlay olasiz.');
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function groupRules(Request $request): array
+    {
+        return [
+            'name' => 'required|string|max:100',
+            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users'), $this->userWithCapability('drivings.conduct', 'Tanlangan xodim instruktor emas.')],
+            'teacher_id' => ['nullable', $this->existsInUserBranch($request, 'users'), $this->userWithCapability('lessons.teach', 'Tanlangan xodim o\'qituvchi emas.')],
+            'branch_id' => 'nullable|exists:branches,id',
+            'course_id' => 'nullable|exists:courses,id',
+        ];
+    }
+
     public function exportStudents(Request $request, Group $group)
     {
-        $user = $request->user();
-        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
-            abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni eksport qila olasiz.');
-        }
+        $this->ensureGroupAccess($request->user(), $group);
 
         $filename = "guruh_{$group->name}_oquvchilar.xlsx";
 
@@ -36,24 +57,20 @@ class GroupController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->isInstructor();
+        $ownRecordsOnly = $user->worksOnOwnRecordsOnly();
 
-        $query = Group::with(['instructor', 'branch', 'course'])->orderBy('id', 'desc');
+        $query = Group::with(['instructor', 'teacher', 'branch', 'course'])->visibleTo($user)->orderBy('id', 'desc');
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
             $query->where('branch_id', $targetBranchId);
         }
 
-        if ($isInstructor) {
-            $query->where('instructor_id', $user->id);
-        }
-
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%");
         }
 
-        if ($request->filled('instructor_id') && ! $isInstructor) {
+        if ($request->filled('instructor_id') && ! $ownRecordsOnly) {
             $query->where('instructor_id', $request->instructor_id);
         }
 
@@ -61,14 +78,19 @@ class GroupController extends Controller
 
         $groups = $query->paginate($perPage)->withQueryString();
 
-        $instructors = User::where('role', 'instructor')
+        $staffWith = fn (string $capability) => User::permission($capability)
+            ->where('status', 'active')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
-            ->when($isInstructor, function ($q) use ($user) {
+            ->when($ownRecordsOnly, function ($q) use ($user) {
                 $q->where('id', $user->id);
             })
-            ->get();
+            ->orderBy('name')
+            ->get(['id', 'name', 'phone', 'branch_id']);
+
+        $instructors = $staffWith('drivings.conduct');
+        $teachers = $staffWith('lessons.teach');
 
         $branches = Branch::where('status', 'active')->get();
         $courses = Course::where('is_active', true)->select(['id', 'name', 'category'])->get();
@@ -76,6 +98,7 @@ class GroupController extends Controller
         return Inertia::render('Admin/Groups/Index', [
             'groups' => $groups,
             'instructors' => $instructors,
+            'teachers' => $teachers,
             'branches' => $branches,
             'courses' => $courses,
             'filters' => [
@@ -89,16 +112,7 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
-            'branch_id' => 'nullable|exists:branches,id',
-            'course_id' => 'nullable|exists:courses,id',
-        ]);
+        $validated = $request->validate($this->groupRules($request));
 
         $user = $request->user();
         if ($user->isBranchRestricted()) {
@@ -114,16 +128,9 @@ class GroupController extends Controller
 
     public function update(Request $request, Group $group)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        $this->ensureGroupAccess($request->user(), $group);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'instructor_id' => ['nullable', $this->existsInUserBranch($request, 'users')],
-            'branch_id' => 'nullable|exists:branches,id',
-            'course_id' => 'nullable|exists:courses,id',
-        ]);
+        $validated = $request->validate($this->groupRules($request));
 
         $group->update($validated);
 
@@ -132,9 +139,7 @@ class GroupController extends Controller
 
     public function destroy(Group $group, Request $request)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        $this->ensureGroupAccess($request->user(), $group);
 
         $group->delete();
 
@@ -143,12 +148,9 @@ class GroupController extends Controller
 
     public function show(Request $request, Group $group): Response
     {
-        $user = $request->user();
-        if ($user->isInstructor() && $group->instructor_id !== $user->id) {
-            abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlarni ko\'rishingiz mumkin.');
-        }
+        $this->ensureGroupAccess($request->user(), $group);
 
-        $group->load(['instructor', 'course', 'branch']);
+        $group->load(['instructor', 'teacher', 'course', 'branch']);
 
         $students = $group->students()
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
@@ -182,9 +184,7 @@ class GroupController extends Controller
 
     public function importStudents(Request $request, Group $group)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        $this->ensureGroupAccess($request->user(), $group);
 
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',

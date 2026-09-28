@@ -13,6 +13,7 @@ import {
     ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -84,6 +85,7 @@ export default function CertificatesIndex({
     filters,
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showModal, setShowModal] = useState(false);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
@@ -113,10 +115,12 @@ export default function CertificatesIndex({
             {/* Page Title & Action */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('certificates.title', 'Bitiruv Guvohnomalari')}</h1>
-                <Button onClick={() => setShowModal(true)} variant="brand" className="text-xs">
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    {t('certificates.issue_button', 'Guvohnoma Berish')}
-                </Button>
+                {can('certificates.create') && (
+                    <Button onClick={() => setShowModal(true)} variant="brand" className="text-xs">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        {t('certificates.issue_button', 'Guvohnoma Berish')}
+                    </Button>
+                )}
             </div>
 
             {/* Certificates Table / Desktop & Tablet */}
@@ -160,15 +164,17 @@ export default function CertificatesIndex({
                                     <TableCell className="text-gray-600 dark:text-gray-300">{cert.issued_date}</TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">{cert.issued_by?.name || '-'}</TableCell>
                                     <TableCell className="text-right space-x-1">
-                                        <a
-                                            href={`/admin/certificates/${cert.id}/download-pdf`}
-                                            className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            <Download className="w-3.5 h-3.5 mr-1" />
-                                            PDF
-                                        </a>
+                                        {can('certificates.print') && (
+                                            <a
+                                                href={`/admin/certificates/${cert.id}/download-pdf`}
+                                                className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Download className="w-3.5 h-3.5 mr-1" />
+                                                PDF
+                                            </a>
+                                        )}
                                         <a
                                             href={`/certificates/verify/${cert.qr_verify_hash}`}
                                             className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium text-xs transition-colors"
@@ -225,15 +231,17 @@ export default function CertificatesIndex({
                             <div className="flex items-center justify-between pt-2 border-t text-xs">
                                 <span className="text-muted-foreground text-[11px]">{cert.issued_date}</span>
                                 <div className="flex items-center gap-2">
-                                    <a
-                                        href={`/admin/certificates/${cert.id}/download-pdf`}
-                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs transition-colors"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <Download className="w-3.5 h-3.5 mr-1" />
-                                        PDF
-                                    </a>
+                                    {can('certificates.print') && (
+                                        <a
+                                            href={`/admin/certificates/${cert.id}/download-pdf`}
+                                            className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 font-medium text-xs transition-colors"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <Download className="w-3.5 h-3.5 mr-1" />
+                                            PDF
+                                        </a>
+                                    )}
                                     <a
                                         href={`/certificates/verify/${cert.qr_verify_hash}`}
                                         className="inline-flex items-center px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground font-medium text-xs"
@@ -320,21 +328,23 @@ export default function CertificatesIndex({
                                         </div>
 
                                         <div className="shrink-0">
-                                            <Button
-                                                size="sm"
-                                                variant={cand.is_eligible ? 'brand' : 'outline'}
-                                                disabled={!cand.is_eligible}
-                                                onClick={() => {
-                                                    setSelectedCandidate(cand);
-                                                    form.setData('contract_id', String(cand.contract_id));
-                                                }}
-                                                className={`text-xs ${
-                                                    !cand.is_eligible ? 'opacity-50 cursor-not-allowed' : ''
-                                                }`}
-                                            >
-                                                <Award className="w-3.5 h-3.5 mr-1" />
-                                                {t('certificates.select_and_issue', 'Guvohnoma Berish')}
-                                            </Button>
+                                            {can('certificates.create') && (
+                                                <Button
+                                                    size="sm"
+                                                    variant={cand.is_eligible ? 'brand' : 'outline'}
+                                                    disabled={!cand.is_eligible}
+                                                    onClick={() => {
+                                                        setSelectedCandidate(cand);
+                                                        form.setData('contract_id', String(cand.contract_id));
+                                                    }}
+                                                    className={`text-xs ${
+                                                        !cand.is_eligible ? 'opacity-50 cursor-not-allowed' : ''
+                                                    }`}
+                                                >
+                                                    <Award className="w-3.5 h-3.5 mr-1" />
+                                                    {t('certificates.select_and_issue', 'Guvohnoma Berish')}
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 ))

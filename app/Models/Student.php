@@ -104,6 +104,23 @@ class Student extends Model
     }
 
     /**
+     * Students visible to the user: all of them, unless the user works on own
+     * records only, then students of own groups or own driving lessons.
+     *
+     * @param  Builder<Student>  $query
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if (! $user->worksOnOwnRecordsOnly()) {
+            return;
+        }
+
+        $query->where(fn (Builder $q) => $q
+            ->whereIn('group_id', Group::query()->visibleTo($user)->select('id'))
+            ->orWhereHas('drivings', fn (Builder $driving) => $driving->where('instructor_id', $user->id)));
+    }
+
+    /**
      * Canonical phone format (+998XXXXXXXXX) so manual entry, imports and lead
      * conversion all match the same student instead of creating duplicates.
      */
@@ -194,6 +211,9 @@ class Student extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * @return BelongsTo<Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);

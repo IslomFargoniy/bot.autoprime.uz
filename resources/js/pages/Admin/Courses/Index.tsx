@@ -14,6 +14,7 @@ import {
     ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -56,6 +57,7 @@ interface PageProps {
 
 export default function CoursesIndex({ courses }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(courses[0] || null);
 
     // Modals
@@ -132,10 +134,12 @@ export default function CoursesIndex({ courses }: PageProps) {
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('courses.title', 'LMS Kurslar va Materiallar')}</h1>
-                <Button onClick={() => setShowCourseModal(true)} variant="brand" className="text-xs">
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    {t('courses.add_course', 'Kurs Qo\'shish')}
-                </Button>
+                {can('lms.manage_materials') && (
+                    <Button onClick={() => setShowCourseModal(true)} variant="brand" className="text-xs">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        {t('courses.add_course', 'Kurs Qo\'shish')}
+                    </Button>
+                )}
             </div>
 
             {/* Course Category Tabs */}
@@ -169,18 +173,20 @@ export default function CoursesIndex({ courses }: PageProps) {
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedCourse.description || t('courses.no_desc', 'Tavsif berilmagan')}</p>
                         </div>
-                        <Button
-                            size="sm"
-                            variant="brand"
-                            onClick={() => {
-                                topicForm.setData('order_number', (selectedCourse.topics?.length || 0) + 1);
-                                setShowTopicModal(true);
-                            }}
-                            className="text-xs"
-                        >
-                            <Plus className="w-3.5 h-3.5 mr-1" />
-                            {t('courses.add_topic', 'Mavzu Qo\'shish')}
-                        </Button>
+                        {can('lms.manage_materials') && (
+                            <Button
+                                size="sm"
+                                variant="brand"
+                                onClick={() => {
+                                    topicForm.setData('order_number', (selectedCourse.topics?.length || 0) + 1);
+                                    setShowTopicModal(true);
+                                }}
+                                className="text-xs"
+                            >
+                                <Plus className="w-3.5 h-3.5 mr-1" />
+                                {t('courses.add_topic', 'Mavzu Qo\'shish')}
+                            </Button>
+                        )}
                     </div>
 
                     <div className="space-y-3">
@@ -234,15 +240,17 @@ export default function CoursesIndex({ courses }: PageProps) {
                                                 Video
                                             </a>
                                         )}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setSelectedTopicForMaterial(top)}
-                                            className="h-7 text-xs"
-                                        >
-                                            <FileText className="w-3 h-3 mr-1" />
-                                            + PDF
-                                        </Button>
+                                        {can('lms.manage_materials') && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setSelectedTopicForMaterial(top)}
+                                                className="h-7 text-xs"
+                                            >
+                                                <FileText className="w-3 h-3 mr-1" />
+                                                + PDF
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))

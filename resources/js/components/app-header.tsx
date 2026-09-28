@@ -154,7 +154,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <Link
-                        href={(auth as any)?.user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'}
+                        href={auth?.home_url ?? '/dashboard'}
                         className="flex items-center space-x-2"
                     >
                         <AppLogo />

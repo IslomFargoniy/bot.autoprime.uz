@@ -19,7 +19,7 @@ class InstructorsExport implements FromCollection, ShouldAutoSize, WithHeadings,
 
     public function collection()
     {
-        $query = User::where('role', 'instructor')->orderBy('id', 'desc');
+        $query = User::permission('drivings.conduct')->orderBy('id', 'desc');
 
         if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];

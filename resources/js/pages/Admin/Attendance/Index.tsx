@@ -16,6 +16,7 @@ import {
     Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -104,6 +105,7 @@ export default function AttendanceIndex({
     filters,
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showSessionModal, setShowSessionModal] = useState(false);
     const [showManualModal, setShowManualModal] = useState(Boolean(filters.action === 'mark' || filters.group_id));
     const [attendanceMode, setAttendanceMode] = useState<'group' | 'single'>('group');
@@ -321,14 +323,18 @@ export default function AttendanceIndex({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('attendance.title', 'Davomat Jurnali')}</h1>
                 <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => setShowSessionModal(true)} variant="brand" className="text-xs">
-                        <Tv className="w-4 h-4 mr-1.5" />
-                        {t('attendance.start_session_button', 'Dars Ochish (QR Doska)')}
-                    </Button>
-                    <Button onClick={() => setShowManualModal(true)} variant="outline" className="text-xs">
-                        <UserCheck className="w-4 h-4 mr-1.5" />
-                        {t('attendance.manual_mark_button', 'Qo\'lda Belgilash')}
-                    </Button>
+                    {can('attendance.start_session') && (
+                        <Button onClick={() => setShowSessionModal(true)} variant="brand" className="text-xs">
+                            <Tv className="w-4 h-4 mr-1.5" />
+                            {t('attendance.start_session_button', 'Dars Ochish (QR Doska)')}
+                        </Button>
+                    )}
+                    {can('attendance.mark_manual') && (
+                        <Button onClick={() => setShowManualModal(true)} variant="outline" className="text-xs">
+                            <UserCheck className="w-4 h-4 mr-1.5" />
+                            {t('attendance.manual_mark_button', 'Qo\'lda Belgilash')}
+                        </Button>
+                    )}
                 </div>
             </div>
 

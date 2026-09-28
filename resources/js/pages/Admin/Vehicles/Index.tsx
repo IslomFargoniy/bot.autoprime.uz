@@ -15,6 +15,7 @@ import {
     History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -86,6 +87,7 @@ export default function VehiclesIndex({
     filters,
 }: PageProps) {
     const { t } = useTranslation();
+    const can = useCan();
     const [showModal, setShowModal] = useState(false);
     const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
     const [maintainingVehicle, setMaintainingVehicle] = useState<Vehicle | null>(null);
@@ -221,10 +223,12 @@ export default function VehiclesIndex({
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-3 mb-5 md:mb-6">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('vehicles.title', 'Avtopark (Mashinalar)')}</h1>
-                <Button onClick={openCreate} variant="brand" size="sm" className="text-xs shrink-0">
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    <span>{t('vehicles.add_vehicle', 'Mashina Qo\'shish')}</span>
-                </Button>
+                {can('fleet.manage') && (
+                    <Button onClick={openCreate} variant="brand" size="sm" className="text-xs shrink-0">
+                        <Plus className="w-4 h-4 mr-1.5" />
+                        <span>{t('vehicles.add_vehicle', 'Mashina Qo\'shish')}</span>
+                    </Button>
+                )}
             </div>
 
             {/* Vehicles Grid */}
@@ -311,15 +315,17 @@ export default function VehiclesIndex({
 
                         <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-1.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => openMaintenance(v)}
-                                    className="h-8 text-xs text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/60 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                                >
-                                    <Wrench className="w-3.5 h-3.5 mr-1" />
-                                    {t('vehicles.maintenance_button', '+ Xizmat')}
-                                </Button>
+                                {can('fleet.manage') && (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openMaintenance(v)}
+                                        className="h-8 text-xs text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/60 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                                    >
+                                        <Wrench className="w-3.5 h-3.5 mr-1" />
+                                        {t('vehicles.maintenance_button', '+ Xizmat')}
+                                    </Button>
+                                )}
                                 <Button
                                     size="sm"
                                     variant="outline"
@@ -337,12 +343,16 @@ export default function VehiclesIndex({
                                 </Button>
                             </div>
                             <div className="flex gap-0.5">
-                                <Button size="sm" variant="ghost" onClick={() => openEdit(v)} className="h-8 w-8 p-0">
-                                    <Edit2 className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button size="sm" variant="ghost" onClick={() => handleDelete(v)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                {can('fleet.manage') && (
+                                    <Button size="sm" variant="ghost" onClick={() => openEdit(v)} className="h-8 w-8 p-0">
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
+                                {can('fleet.manage') && (
+                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(v)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -682,15 +692,17 @@ export default function VehiclesIndex({
                                                 <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-right whitespace-nowrap">
                                                     {Number(m.cost).toLocaleString('uz-UZ')} UZS
                                                 </span>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => handleDeleteMaintenance(historyVehicle, m)}
-                                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                    title={t('common.delete', 'O\'chirish')}
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </Button>
+                                                {can('fleet.manage') && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleDeleteMaintenance(historyVehicle, m)}
+                                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                        title={t('common.delete', 'O\'chirish')}
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -698,20 +710,22 @@ export default function VehiclesIndex({
                             )}
 
                             <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-700">
-                                <Button
-                                    type="button"
-                                    variant="default"
-                                    size="sm"
-                                    onClick={() => {
-                                        const v = historyVehicle;
-                                        setHistoryVehicle(null);
-                                        openMaintenance(v);
-                                    }}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white"
-                                >
-                                    <Plus className="w-3.5 h-3.5 mr-1" />
-                                    {t('vehicles.add_maintenance', 'Yangi xizmat kiritish')}
-                                </Button>
+                                {can('fleet.manage') && (
+                                    <Button
+                                        type="button"
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => {
+                                            const v = historyVehicle;
+                                            setHistoryVehicle(null);
+                                            openMaintenance(v);
+                                        }}
+                                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                                    >
+                                        <Plus className="w-3.5 h-3.5 mr-1" />
+                                        {t('vehicles.add_maintenance', 'Yangi xizmat kiritish')}
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     variant="outline"

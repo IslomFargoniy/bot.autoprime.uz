@@ -26,13 +26,13 @@ class StudentController extends Controller
             $filters['branch_id'] = $targetBranchId;
         }
 
-        return Excel::download(new StudentsExport($filters), 'oquvchilar.xlsx');
+        return Excel::download(new StudentsExport($filters, $request->user()), 'oquvchilar.xlsx');
     }
 
     public function searchApi(Request $request)
     {
         $user = $request->user();
-        $isInstructor = $user->isInstructor();
+        $ownRecordsOnly = $user->worksOnOwnRecordsOnly();
 
         $query = Student::with(['group', 'branch'])->orderBy('full_name', 'asc');
 
@@ -55,22 +55,21 @@ class StudentController extends Controller
         $otherStudents = filter_var($request->get('other_students'), FILTER_VALIDATE_BOOLEAN);
 
         if ($otherStudents) {
-            $query->where(function ($q) use ($isInstructor, $user) {
+            $query->where(function ($q) use ($ownRecordsOnly, $user) {
                 $q->whereNull('group_id');
-                if ($isInstructor) {
+                if ($ownRecordsOnly) {
                     $q->orWhereHas('group', function ($gQ) use ($user) {
-                        $gQ->where('instructor_id', '!=', $user->id);
+                        $gQ->where(fn ($o) => $o->whereNull('teacher_id')->orWhere('teacher_id', '!=', $user->id))
+                            ->where(fn ($o) => $o->whereNull('instructor_id')->orWhere('instructor_id', '!=', $user->id));
                     });
                 } else {
                     $q->orWhereNotNull('group_id');
                 }
             });
         } elseif ($request->filled('group_id')) {
-            $query->where('group_id', $request->group_id);
-        } elseif ($isInstructor) {
-            $query->whereHas('group', function ($q) use ($user) {
-                $q->where('instructor_id', $user->id);
-            });
+            $query->where('group_id', $request->group_id)->visibleTo($user);
+        } else {
+            $query->visibleTo($user);
         }
 
         $limit = min((int) $request->get('limit', 30), 100);
@@ -81,9 +80,9 @@ class StudentController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isInstructor = $user->isInstructor();
 
         $query = Student::with(['group', 'branch'])
+            ->visibleTo($user)
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
                 $q->where('status', 'completed');
             }])
@@ -92,12 +91,6 @@ class StudentController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
             $query->inBranch($targetBranchId);
-        }
-
-        if ($isInstructor) {
-            $query->whereHas('group', function ($q) use ($user) {
-                $q->where('instructor_id', $user->id);
-            });
         }
 
         if ($request->filled('search')) {
@@ -119,9 +112,8 @@ class StudentController extends Controller
         $groups = Group::when($targetBranchId, function ($q) use ($targetBranchId) {
             $q->where('branch_id', $targetBranchId);
         })
-            ->when($isInstructor, function ($q) use ($user) {
-                $q->where('instructor_id', $user->id);
-            })->get();
+            ->visibleTo($user)
+            ->get();
 
         $branches = Branch::where('status', 'active')->get();
 
@@ -140,10 +132,6 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
-
         // Normalize before the unique check so +998/no-prefix variants are one number.
         $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
 
@@ -169,9 +157,7 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        abort_unless($request->user()->canSeeStudent($student), 403, 'Siz faqat o\'z o\'quvchilaringizni tahrirlay olasiz.');
 
         $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
 
@@ -191,12 +177,7 @@ class StudentController extends Controller
     public function show(Student $student, Request $request): Response
     {
         $user = $request->user();
-        if ($user->isInstructor()) {
-            $isOwnStudent = $student->group?->instructor_id === $user->id
-                || $student->drivings()->where('instructor_id', $user->id)->exists();
-
-            abort_unless($isOwnStudent, 403, 'Siz faqat o\'z o\'quvchilaringizni ko\'ra olasiz.');
-        }
+        abort_unless($user->canSeeStudent($student), 403, 'Siz faqat o\'z o\'quvchilaringizni ko\'ra olasiz.');
 
         $student->load('group.instructor');
 
@@ -253,9 +234,7 @@ class StudentController extends Controller
 
     public function destroy(Student $student, Request $request)
     {
-        if ($request->user()->isInstructor()) {
-            abort(403, 'Instruktorlar faqat mashg\'ulotlar (drivings) bo\'limida amaliyot bajara oladi.');
-        }
+        abort_unless($request->user()->canSeeStudent($student), 403, 'Siz faqat o\'z o\'quvchilaringizni o\'chira olasiz.');
 
         if ($student->hasHistory()) {
             return redirect()->back()->withErrors([

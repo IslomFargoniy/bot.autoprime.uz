@@ -38,12 +38,12 @@ $bot->onCommand('start', function (Nutgram $bot) {
     }
 
     if ($user) {
-        $roleTitle = $user->isInstructor() ? '👨‍🏫 Instruktor' : '👑 Admin';
+        $roleTitle = ($user->conductsDrivings() ? '👨‍🏫 ' : '👑 ').config("roles.role_labels.{$user->role}", 'Xodim');
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(InlineKeyboardButton::make(
                 '🚀 Boshqaruv Panelini ochish',
-                web_app: new WebAppInfo($appUrl.'/admin/dashboard')
+                web_app: new WebAppInfo($appUrl.$user->homeUrl())
             ));
 
         $msg = "📌 <b>Tizimga kirildi: {$roleTitle}</b>\n\nAssalomu alaykum, <b>{$user->name}</b>! AutoPrime tizimiga xush kelibsiz.";
@@ -126,7 +126,7 @@ if (! function_exists('buildDrivingsMessage')) {
         $text = '';
 
         if ($user) {
-            if ($user->isInstructor()) {
+            if ($user->conductsDrivings()) {
                 $text .= "👨‍🏫 <b>Instruktor: {$user->name}</b>\n\n";
 
                 if ($status === 'scheduled') {
@@ -371,7 +371,7 @@ $bot->onContact(function (Nutgram $bot) {
     $user = User::where('phone', $phone)->orWhere('phone', $cleanPhone)->first();
     if ($user) {
         $user->update(['telegram_id' => $telegramId]);
-        $roleTitle = $user->isInstructor() ? '👨‍🏫 Instruktor' : '👑 Admin';
+        $roleTitle = ($user->conductsDrivings() ? '👨‍🏫 ' : '👑 ').config("roles.role_labels.{$user->role}", 'Xodim');
 
         $bot->sendMessage(
             "✅ Muvaffaqiyatli avtorizatsiyadan o'tdingiz!\n\n👤 <b>Ismingiz:</b> {$user->name}\n📌 <b>Siz tizimga <u>{$roleTitle}</u> sifatida kirdingiz.</b>",

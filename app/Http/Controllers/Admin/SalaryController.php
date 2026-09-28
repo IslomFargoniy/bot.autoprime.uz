@@ -44,6 +44,7 @@ class SalaryController extends Controller
         $salaries = $salariesQuery->paginate($this->perPage($request, fn () => $salariesQuery->count()))->withQueryString();
 
         $employees = User::where('status', 'active')
+            ->whereNotIn('role', config('roles.unsalaried_roles'))
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -87,6 +88,7 @@ class SalaryController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         $employees = User::with('roles')
             ->where('status', 'active')
+            ->whereNotIn('role', config('roles.unsalaried_roles'))
             ->when($targetBranchId, fn ($q) => $q->where('branch_id', $targetBranchId))
             ->get();
         $createdCount = 0;
@@ -152,7 +154,7 @@ class SalaryController extends Controller
                 $lessonAmount = 0.0;
 
                 // 1. Calculate Driving hours for Instructors
-                if ($emp->isInstructor() || $emp->driving_hourly_rate > 0) {
+                if ($emp->conductsDrivings() || $emp->driving_hourly_rate > 0) {
                     $completedDrivings = $completedDrivingsGrouped->get($emp->id, collect());
 
                     foreach ($completedDrivings as $drv) {
@@ -164,7 +166,7 @@ class SalaryController extends Controller
                 }
 
                 // 2. Calculate Theory lessons for Teachers
-                if ($emp->hasRole('teacher') || $emp->lesson_rate > 0) {
+                if ($emp->teachesLessons() || $emp->lesson_rate > 0) {
                     $lessonCount = (int) ($theoryLessonCounts[$emp->id] ?? 0);
                     $lessonAmount = $lessonCount * (float) $emp->lesson_rate;
                 }
@@ -213,6 +215,23 @@ class SalaryController extends Controller
     }
 
     /**
+     * Why the actor may not accrue or pay salary for the employee, if anything:
+     * admins are not on the payroll and nobody handles their own pay.
+     */
+    private function payrollRestriction(User $actor, ?User $employee): ?string
+    {
+        if (! $employee || ! $employee->isSalaried()) {
+            return 'Adminlarga oylik hisoblanmaydi.';
+        }
+
+        if ($employee->is($actor)) {
+            return 'O\'zingizga oylik, bonus yoki to\'lov yoza olmaysiz.';
+        }
+
+        return null;
+    }
+
+    /**
      * Accrue bonus or penalty / advance.
      */
     public function storeCustomAdjustment(Request $request): RedirectResponse
@@ -227,6 +246,10 @@ class SalaryController extends Controller
 
         $isDeduction = in_array($validated['type'], ['fine', 'advance']);
         $employee = User::findOrFail($validated['user_id']);
+
+        if ($error = $this->payrollRestriction($request->user(), $employee)) {
+            return redirect()->back()->withErrors(['user_id' => $error]);
+        }
 
         DB::transaction(function () use ($validated, $isDeduction, $employee, $request) {
             $createdSalary = Salary::create([
@@ -282,6 +305,10 @@ class SalaryController extends Controller
 
         if ($salary->is_deduction) {
             return redirect()->back()->withErrors(['amount' => "Ushlab qolish (jarima/avans) yozuvini to'lab bo'lmaydi."]);
+        }
+
+        if ($error = $this->payrollRestriction($request->user(), $salary->user)) {
+            return redirect()->back()->withErrors(['amount' => $error]);
         }
 
         $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
