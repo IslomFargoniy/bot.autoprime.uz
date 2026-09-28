@@ -9,7 +9,10 @@ use App\Models\Question;
 use App\Models\RoadLine;
 use App\Models\Sign;
 use App\Models\SignCategory;
+use App\Models\Student;
 use App\Models\Ticket;
+use App\Services\BranchSessionService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,11 +23,29 @@ use Inertia\Response;
 class TestController extends Controller
 {
     /**
+     * Attempts the user may see: those of the active branch's students, and for
+     * teachers / instructors only their own students'.
+     *
+     * @return Builder<Attempt>
+     */
+    private function visibleAttempts(Request $request): Builder
+    {
+        $user = $request->user();
+        $branchId = BranchSessionService::getActiveBranchId($request);
+
+        return Attempt::query()
+            ->when($branchId, fn (Builder $q) => $q->whereIn('student_id', Student::query()->inBranch($branchId)->select('id')))
+            ->when($user->worksOnOwnRecordsOnly(), fn (Builder $q) => $q->whereIn('student_id', Student::query()->visibleTo($user)->select('id')));
+    }
+
+    /**
      * Display tests dashboard, student attempts, tickets and traffic signs.
      */
     public function index(Request $request): Response
     {
-        $query = Attempt::with(['student.branch', 'ticket'])
+        $visibleAttempts = $this->visibleAttempts($request);
+
+        $query = (clone $visibleAttempts)->with(['student.branch', 'ticket'])
             ->latest('id');
 
         if ($request->filled('search')) {
@@ -52,8 +73,8 @@ class TestController extends Controller
             'total_tickets' => Ticket::count(),
             'total_questions' => Question::count(),
             'total_signs' => Sign::count(),
-            'total_attempts' => Attempt::count(),
-            'passed_attempts' => Attempt::where('is_passed', true)->count(),
+            'total_attempts' => (clone $visibleAttempts)->count(),
+            'passed_attempts' => (clone $visibleAttempts)->where('is_passed', true)->count(),
         ];
 
         $tickets = Ticket::withCount('questions')

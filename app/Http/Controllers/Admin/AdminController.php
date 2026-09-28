@@ -64,7 +64,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users',
             'telegram_id' => 'nullable|string|unique:users',
-            'branch_id' => 'nullable|exists:branches,id',
+            'branch_id' => 'required|exists:branches,id',
             'password' => 'required|string|min:6',
         ]);
 
@@ -84,7 +84,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users,phone,'.$admin->id,
             'telegram_id' => 'nullable|string|unique:users,telegram_id,'.$admin->id,
-            'branch_id' => 'nullable|exists:branches,id',
+            'branch_id' => 'required|exists:branches,id',
             'password' => 'nullable|string|min:6',
         ]);
 

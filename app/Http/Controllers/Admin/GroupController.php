@@ -12,6 +12,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -28,6 +29,26 @@ class GroupController extends Controller
     {
         if ($user->worksOnOwnRecordsOnly() && ! $user->ownsGroup($group)) {
             abort(403, 'Siz faqat o\'zingizga biriktirilgan guruhlar bilan ishlay olasiz.');
+        }
+    }
+
+    /**
+     * An instructor or teacher managing groups must remain the group's
+     * instructor or teacher, otherwise they would lose access to it.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function ensureStaysOwner(User $user, array $validated): void
+    {
+        if (! $user->worksOnOwnRecordsOnly()) {
+            return;
+        }
+
+        $isOwner = (int) ($validated['teacher_id'] ?? 0) === $user->id
+            || (int) ($validated['instructor_id'] ?? 0) === $user->id;
+
+        if (! $isOwner) {
+            throw ValidationException::withMessages(['teacher_id' => 'Guruhga o\'zingizni o\'qituvchi yoki instruktor sifatida biriktiring.']);
         }
     }
 
@@ -113,6 +134,7 @@ class GroupController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate($this->groupRules($request));
+        $this->ensureStaysOwner($request->user(), $validated);
 
         $user = $request->user();
         if ($user->isBranchRestricted()) {
@@ -131,6 +153,7 @@ class GroupController extends Controller
         $this->ensureGroupAccess($request->user(), $group);
 
         $validated = $request->validate($this->groupRules($request));
+        $this->ensureStaysOwner($request->user(), $validated);
 
         $group->update($validated);
 

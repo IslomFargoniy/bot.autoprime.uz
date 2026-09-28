@@ -21,7 +21,7 @@ class ValidateTelegramMiniApp
         // If already authenticated via session, allow the request to proceed.
         // This is necessary for Inertia AJAX requests to work without sending the token every time.
         if (Auth::check()) {
-            if (! $request->user()->isActive()) {
+            if (! $request->user()->canSignIn()) {
                 return $this->rejectInactiveUser($request);
             }
 
@@ -34,7 +34,7 @@ class ValidateTelegramMiniApp
         if (! $initData) {
             if (app()->environment('local') && $request->has('test_telegram_id')) {
                 $user = User::where('telegram_id', $request->query('test_telegram_id'))->first();
-                if ($user && $user->isActive()) {
+                if ($user && $user->canSignIn()) {
                     Auth::login($user);
 
                     return $next($request);
@@ -60,8 +60,8 @@ class ValidateTelegramMiniApp
             return response()->json(['error' => 'Unauthorized. User not found.'], 401);
         }
 
-        if (! $user->isActive()) {
-            return response()->json(['error' => 'Account is deactivated.'], 403);
+        if (! $user->canSignIn()) {
+            return response()->json(['error' => 'Account is deactivated or not assigned to a branch.'], 403);
         }
 
         Auth::login($user);
@@ -76,9 +76,9 @@ class ValidateTelegramMiniApp
         $request->session()->regenerateToken();
 
         if ($request->wantsJson()) {
-            return response()->json(['error' => 'Account is deactivated.'], 403);
+            return response()->json(['error' => 'Account is deactivated or not assigned to a branch.'], 403);
         }
 
-        return redirect()->route('login')->withErrors(['phone' => 'Hisobingiz faolsizlantirilgan.']);
+        return redirect()->route('login')->withErrors(['phone' => 'Hisobingiz faolsizlantirilgan yoki filialga biriktirilmagan.']);
     }
 }

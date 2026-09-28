@@ -10,8 +10,8 @@ use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
 
 test('admin can view vehicles page with cash registers and maintenances', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b1'], ['name' => 'Test Branch', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $vehicle = Vehicle::create([
         'branch_id' => $branch->id,
         'plate_number' => '01AAA111',
@@ -26,8 +26,8 @@ test('admin can view vehicles page with cash registers and maintenances', functi
 });
 
 test('admin can create vehicle maintenance without cash register', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b2'], ['name' => 'Test Branch 2', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $vehicle = Vehicle::create([
         'branch_id' => $branch->id,
         'plate_number' => '01BBB222',
@@ -56,8 +56,8 @@ test('admin can create vehicle maintenance without cash register', function () {
 });
 
 test('admin can create vehicle maintenance with cash register which creates expense and decrements balance', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b3'], ['name' => 'Test Branch 3', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,
@@ -98,8 +98,8 @@ test('admin can create vehicle maintenance with cash register which creates expe
 });
 
 test('admin cannot create maintenance if cash register has insufficient balance', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b4'], ['name' => 'Test Branch 4', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,
@@ -128,8 +128,8 @@ test('admin cannot create maintenance if cash register has insufficient balance'
 });
 
 test('admin can delete maintenance which refunds cash register and deletes expense', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'test-b5'], ['name' => 'Test Branch 5', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $type = CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true]);
     $register = CashRegister::create([
         'branch_id' => $branch->id,

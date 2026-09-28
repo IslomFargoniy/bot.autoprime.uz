@@ -1013,19 +1013,15 @@ export default function StaffIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="staff_branch">
+                                <Label htmlFor="staff_branch" required>
                                     {t('branches.branch', 'Filial')}
                                 </Label>
                                 <SearchableSelect
                                     id="staff_branch"
                                     value={data.branch_id}
                                     onChange={(val) => setData('branch_id', val ? String(val) : '')}
-                                    options={[
-                                        { value: '', label: t('branches.central_branch', 'Bosh markaz (Filialsiz)') },
-                                        ...branches.map((b) => ({ value: b.id, label: b.name })),
-                                    ]}
+                                    options={branches.map((b) => ({ value: b.id, label: b.name }))}
                                     placeholder={t('branches.branch', 'Filial')}
-                                    allowClear
                                     triggerClassName="h-10 text-sm"
                                 />
                                 {errors.branch_id && <p className="text-xs text-rose-500">{errors.branch_id}</p>}

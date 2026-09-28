@@ -108,6 +108,16 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * Whether the account may sign in: it must be active and, unless it is a
+     * superadmin, assigned to a branch. A branchless staff account would
+     * otherwise see every branch, so it stays locked out until assigned.
+     */
+    public function canSignIn(): bool
+    {
+        return $this->isActive() && ($this->branch_id !== null || $this->isSuperAdmin());
+    }
+
+    /**
      * Whether deleting this user would cascade-delete payroll or lesson history.
      * Such staff should be deactivated (status = inactive) instead.
      */
@@ -213,11 +223,12 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
-     * Staff other than superadmins only ever work within their own branch.
+     * Staff other than superadmins only ever work within their own branch
+     * (a branch is mandatory for them, see canSignIn()).
      */
     public function isBranchRestricted(): bool
     {
-        return ! $this->isSuperAdmin() && $this->branch_id !== null;
+        return ! $this->isSuperAdmin();
     }
 
     public function getPhotoUrlAttribute(): ?string

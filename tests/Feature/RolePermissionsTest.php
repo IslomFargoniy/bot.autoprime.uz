@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\Attempt;
 use App\Models\Branch;
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
+use App\Models\CashTransfer;
+use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Driving;
 use App\Models\Group;
 use App\Models\LessonSession;
@@ -21,6 +25,34 @@ beforeEach(function () {
 function staffMember(string $role, array $attributes = []): User
 {
     return User::factory()->create(['role' => $role, 'branch_id' => test()->branch->id, ...$attributes]);
+}
+
+function roleRegister(Branch $branch, float $balance): CashRegister
+{
+    $register = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true])->id,
+        'name' => 'Kassa '.fake()->unique()->numerify('###'),
+        'balance' => 0,
+        'is_active' => true,
+    ]);
+    if ($balance > 0) {
+        $register->deposit($balance, 'initial', 'Boshlang\'ich qoldiq');
+    }
+
+    return $register->fresh();
+}
+
+function roleContract(Branch $branch, Student $student, User $creator): Contract
+{
+    $type = ContractType::firstOrCreate(['name' => 'Rol Kurs'], ['branch_id' => $branch->id, 'category' => 'B', 'price' => 3000000, 'is_active' => true]);
+
+    return Contract::create([
+        'branch_id' => $branch->id, 'student_id' => $student->id, 'contract_type_id' => $type->id,
+        'created_by_user_id' => $creator->id, 'contract_number' => 'ROL-'.fake()->unique()->numerify('#####'),
+        'contract_date' => now()->toDateString(), 'total_amount' => 3000000, 'final_amount' => 3000000,
+        'debt_amount' => 3000000, 'status' => 'active', 'payment_status' => 'unpaid',
+    ]);
 }
 
 test('admins and superadmins do not appear on the staff page and cannot be edited there', function () {
@@ -174,3 +206,72 @@ test('staff without the dashboard land on their first permitted page', function 
     'teacher' => ['teacher', '/admin/attendance'],
     'reception' => ['reception', '/admin/dashboard'],
 ]);
+
+test('the sender of a cash transfer cannot approve or reject it themselves', function () {
+    $sender = staffMember('accountant');
+    $from = roleRegister($this->branch, 1000000);
+    $to = roleRegister($this->branch, 0);
+    $transfer = CashTransfer::create([
+        'from_cash_register_id' => $from->id, 'to_cash_register_id' => $to->id, 'amount' => 400000,
+        'status' => 'pending', 'sent_by_user_id' => $sender->id,
+    ]);
+
+    $this->actingAs($sender)->post("/admin/finance/transfer/{$transfer->id}/approve")->assertSessionHasErrors('transfer');
+    $this->actingAs($sender)->post("/admin/finance/transfer/{$transfer->id}/reject")->assertSessionHasErrors('transfer');
+    expect($transfer->fresh()->status)->toBe('pending');
+
+    $this->actingAs(staffMember('accountant'))->post("/admin/finance/transfer/{$transfer->id}/approve")->assertSessionHasNoErrors();
+    expect($transfer->fresh()->status)->toBe('approved')
+        ->and((float) $to->fresh()->balance)->toEqual(400000.0);
+});
+
+test('test attempts are limited to the branch and to a teacher\'s own students', function () {
+    $teacher = staffMember('teacher');
+    $ownGroup = Group::create(['name' => 'Test guruh', 'branch_id' => $this->branch->id, 'teacher_id' => $teacher->id]);
+    $otherBranch = Branch::firstOrCreate(['code' => 'roles-b'], ['name' => 'Boshqa filial', 'status' => 'active']);
+
+    $attemptFor = fn (Student $student) => Attempt::create([
+        'student_id' => $student->id, 'attempt_type' => 'random_mock', 'is_passed' => true, 'started_at' => now(), 'finished_at' => now(),
+    ]);
+    $own = $attemptFor(Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $ownGroup->id]));
+    $sameBranch = $attemptFor(Student::factory()->create(['branch_id' => $this->branch->id]));
+    $foreign = $attemptFor(Student::factory()->create(['branch_id' => $otherBranch->id]));
+
+    $ids = fn (User $user) => collect($this->actingAs($user)->get('/admin/tests')->assertSuccessful()->viewData('page')['props']['attempts']['data'])->pluck('id')->sort()->values()->all();
+
+    expect($ids($this->admin))->toBe(collect([$own->id, $sameBranch->id])->sort()->values()->all())
+        ->and($ids($teacher))->toBe([$own->id])
+        ->and($foreign->id)->not->toBeIn($ids($this->admin));
+});
+
+test('a teacher with extra student permissions can only place students into own groups', function () {
+    $teacher = staffMember('teacher');
+    $teacher->givePermissionTo(['students.create', 'students.edit']);
+    $ownGroup = Group::create(['name' => 'Mening', 'branch_id' => $this->branch->id, 'teacher_id' => $teacher->id]);
+    $otherGroup = Group::create(['name' => 'Begona', 'branch_id' => $this->branch->id, 'teacher_id' => staffMember('teacher')->id]);
+
+    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Ali', 'phone' => '+998901110001', 'group_id' => $otherGroup->id])
+        ->assertSessionHasErrors('group_id');
+    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Vali', 'phone' => '+998901110002'])
+        ->assertSessionHasErrors('group_id');
+    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Soli', 'phone' => '+998901110003', 'group_id' => $ownGroup->id])
+        ->assertSessionHasNoErrors();
+
+    $student = Student::where('phone', '+998901110003')->firstOrFail();
+    $this->actingAs($teacher)->put("/admin/students/{$student->id}", ['full_name' => 'Soli', 'phone' => $student->phone, 'group_id' => $otherGroup->id])
+        ->assertSessionHasErrors('group_id');
+
+    expect($student->fresh()->group_id)->toBe($ownGroup->id);
+});
+
+test('a teacher with contract permissions only sees contracts of own students', function () {
+    $teacher = staffMember('teacher');
+    $teacher->givePermissionTo(['contracts.view', 'contracts.print']);
+    $ownGroup = Group::create(['name' => 'Shartnoma guruh', 'branch_id' => $this->branch->id, 'teacher_id' => $teacher->id]);
+    $own = roleContract($this->branch, Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $ownGroup->id]), $this->admin);
+    $other = roleContract($this->branch, Student::factory()->create(['branch_id' => $this->branch->id]), $this->admin);
+
+    $this->actingAs($teacher)->get('/admin/contracts')
+        ->assertInertia(fn ($page) => $page->where('contracts.data', fn ($rows) => collect($rows)->pluck('id')->all() === [$own->id]));
+    $this->actingAs($teacher)->get("/admin/contracts/{$other->id}/download-pdf")->assertForbidden();
+});

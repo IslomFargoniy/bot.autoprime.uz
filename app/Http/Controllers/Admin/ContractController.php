@@ -34,6 +34,7 @@ class ContractController extends Controller
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
         $query = Contract::with(['student', 'contractType', 'group', 'branch', 'createdBy', 'payments.cashRegister', 'payments.receivedBy'])
+            ->when($request->user()->worksOnOwnRecordsOnly(), fn ($q) => $q->whereIn('student_id', Student::query()->visibleTo($request->user())->select('id')))
             ->orderBy('created_at', 'desc');
 
         if ($targetBranchId) {
@@ -65,6 +66,7 @@ class ContractController extends Controller
         $contracts = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $students = Student::orderBy('full_name')
+            ->visibleTo($request->user())
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -130,6 +132,7 @@ class ContractController extends Controller
 
         $contractType = ContractType::findOrFail($validated['contract_type_id']);
         $student = Student::findOrFail($validated['student_id']);
+        $this->ensureCanSeeStudent($request, $student);
         $branchId = $validated['branch_id'] ?? $student->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $total = (float) $contractType->price;
@@ -176,8 +179,10 @@ class ContractController extends Controller
         return redirect()->back()->with('success', "Shartnoma tuzildi: #{$contract->contract_number}");
     }
 
-    public function downloadPdf(Contract $contract)
+    public function downloadPdf(Request $request, Contract $contract)
     {
+        $this->ensureCanSeeStudent($request, $contract->student);
+
         $contract->load(['student', 'contractType', 'group', 'branch', 'payments']);
 
         $pdf = Pdf::loadView('pdf.contract', [
@@ -192,6 +197,8 @@ class ContractController extends Controller
 
     public function update(Request $request, Contract $contract): RedirectResponse
     {
+        $this->ensureCanSeeStudent($request, $contract->student);
+
         $validated = $request->validate([
             'status' => 'sometimes|required|in:active,completed,cancelled,frozen',
             'terms' => 'nullable|string',
@@ -204,8 +211,10 @@ class ContractController extends Controller
         return redirect()->back()->with('success', 'Shartnoma yangilandi.');
     }
 
-    public function destroy(Contract $contract): RedirectResponse
+    public function destroy(Request $request, Contract $contract): RedirectResponse
     {
+        $this->ensureCanSeeStudent($request, $contract->student);
+
         if ($contract->payments()->exists()) {
             return redirect()->back()->withErrors([
                 'delete' => 'Ushbu shartnoma bo\'yicha to\'lovlar qabul qilingan. Uni o\'chirish mumkin emas.',
@@ -219,6 +228,8 @@ class ContractController extends Controller
 
     public function refund(Request $request, Contract $contract): RedirectResponse
     {
+        $this->ensureCanSeeStudent($request, $contract->student);
+
         $validated = $request->validate([
             'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
             'amount' => 'required|numeric|min:1|max:9999999999',

@@ -191,6 +191,7 @@ class FinanceController extends Controller
         }
 
         $contract = Contract::with('student')->findOrFail($validated['contract_id']);
+        $this->ensureCanSeeStudent($request, $contract->student);
         if ($contract->status === 'cancelled') {
             return redirect()->back()->withErrors([
                 'contract_id' => "Bekor qilingan shartnomaga to'lov qabul qilib bo'lmaydi.",
@@ -336,10 +337,25 @@ class FinanceController extends Controller
     }
 
     /**
+     * Four-eyes rule: the sender of a transfer may not approve or reject it
+     * (superadmins excepted, there is nobody above them to approve).
+     */
+    private function isOwnTransfer(Request $request, CashTransfer $transfer): bool
+    {
+        $user = $request->user();
+
+        return ! $user->isSuperAdmin() && $transfer->sent_by_user_id === $user->id;
+    }
+
+    /**
      * Approve cash transfer.
      */
     public function approveTransfer(Request $request, CashTransfer $transfer): RedirectResponse
     {
+        if ($this->isOwnTransfer($request, $transfer)) {
+            return redirect()->back()->withErrors(['transfer' => 'O\'zingiz yuborgan o\'tkazmani boshqa xodim tasdiqlashi kerak.']);
+        }
+
         try {
             $approved = DB::transaction(function () use ($transfer, $request) {
                 // Re-read under lock so a double click cannot move the money twice.
@@ -382,6 +398,10 @@ class FinanceController extends Controller
      */
     public function rejectTransfer(Request $request, CashTransfer $transfer): RedirectResponse
     {
+        if ($this->isOwnTransfer($request, $transfer)) {
+            return redirect()->back()->withErrors(['transfer' => 'O\'zingiz yuborgan o\'tkazmani boshqa xodim ko\'rib chiqishi kerak.']);
+        }
+
         $rejected = DB::transaction(function () use ($transfer, $request) {
             $lockedTransfer = CashTransfer::whereKey($transfer->id)->lockForUpdate()->first();
             if (! $lockedTransfer || $lockedTransfer->status !== 'pending') {
@@ -558,8 +578,10 @@ class FinanceController extends Controller
     /**
      * Delete a payment, adjust the cash register balance, and recalculate contract finances.
      */
-    public function destroyPayment(Payment $payment): RedirectResponse
+    public function destroyPayment(Request $request, Payment $payment): RedirectResponse
     {
+        $this->ensureCanSeeStudent($request, $payment->student);
+
         try {
             DB::transaction(function () use ($payment) {
                 // Lock the contract first (same order as payments/refunds) and re-read the

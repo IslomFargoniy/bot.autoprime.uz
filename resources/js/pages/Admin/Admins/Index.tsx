@@ -296,17 +296,13 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
+                            <Label htmlFor="branch_id" required>{t('branches.branch', 'Filial')}</Label>
                             <SearchableSelect
                                 id="branch_id"
                                 value={data.branch_id}
                                 onChange={(val) => setData('branch_id', val ? String(val) : '')}
-                                options={[
-                                    { value: '', label: t('branches.branch_optional', 'Filial (Ixtiyoriy)') },
-                                    ...branches.map((b) => ({ value: b.id, label: b.name })),
-                                ]}
-                                placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
-                                allowClear
+                                options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                                placeholder={t('branches.branch', 'Filial')}
                                 triggerClassName="h-10 text-sm"
                             />
                             {errors.branch_id && <p className="text-sm text-destructive">{errors.branch_id}</p>}

@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\Student;
 use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,19 @@ use Maatwebsite\Excel\Facades\Excel;
 class StudentController extends Controller
 {
     use BranchScopedValidationRules;
+
+    /**
+     * Instructors and teachers may only put students into their own groups,
+     * otherwise the student would leave their reach or land in a colleague's group.
+     */
+    private function ensureAssignableGroup(Request $request, int|string|null $groupId): void
+    {
+        $user = $request->user();
+
+        if ($user->worksOnOwnRecordsOnly() && ! $user->ownsGroup($groupId ? Group::find($groupId) : null)) {
+            throw ValidationException::withMessages(['group_id' => 'O\'quvchini faqat o\'z guruhingizga biriktira olasiz.']);
+        }
+    }
 
     public function export(Request $request)
     {
@@ -143,6 +157,8 @@ class StudentController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
+        $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
+
         $user = $request->user();
         if ($user->isBranchRestricted()) {
             $validated['branch_id'] = $user->branch_id;
@@ -168,6 +184,8 @@ class StudentController extends Controller
             'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
+
+        $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
 
         $student->update($validated);
 

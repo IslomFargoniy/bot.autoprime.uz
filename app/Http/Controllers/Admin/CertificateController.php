@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Certificate;
 use App\Models\Contract;
+use App\Models\Student;
 use App\Services\BranchSessionService;
 use App\Services\CertificateEligibilityService;
 use App\Services\DocumentNumberService;
@@ -25,7 +26,10 @@ class CertificateController extends Controller
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
+        $ownStudents = $request->user()->worksOnOwnRecordsOnly() ? Student::query()->visibleTo($request->user())->select('id') : null;
+
         $query = Certificate::with(['student', 'contract.contractType', 'issuedBy', 'branch'])
+            ->when($ownStudents, fn ($q) => $q->whereIn('student_id', $ownStudents))
             ->orderBy('issued_date', 'desc');
 
         if ($targetBranchId) {
@@ -46,6 +50,7 @@ class CertificateController extends Controller
         // Candidates: students with active contracts
         $activeContracts = Contract::with(['student', 'contractType', 'group'])
             ->where('status', 'active')
+            ->when($ownStudents, fn ($q) => $q->whereIn('student_id', $ownStudents))
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -98,6 +103,7 @@ class CertificateController extends Controller
 
         $contract = Contract::with(['student', 'contractType'])->findOrFail($validated['contract_id']);
         $student = $contract->student;
+        $this->ensureCanSeeStudent($request, $student);
         if (! $student) {
             return redirect()->back()->withErrors([
                 'contract_id' => 'Shartnomaga biriktirilgan o\'quvchi topilmadi.',
@@ -176,8 +182,10 @@ class CertificateController extends Controller
     /**
      * Download PDF Certificate.
      */
-    public function downloadPdf(Certificate $certificate)
+    public function downloadPdf(Request $request, Certificate $certificate)
     {
+        $this->ensureCanSeeStudent($request, $certificate->student);
+
         $certificate->load(['student', 'contract.contractType', 'branch', 'issuedBy']);
 
         $pdf = Pdf::loadView('pdf.certificate', [

@@ -8,8 +8,8 @@ use App\Models\Student;
 use App\Models\User;
 
 test('admin can fetch group attendances roster', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'main'], ['name' => 'Asosiy Filial', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $group = Group::create([
         'name' => 'Test Guruh',
         'branch_id' => $branch->id,
@@ -48,8 +48,8 @@ test('admin can fetch group attendances roster', function () {
 });
 
 test('admin can mark group attendance in bulk', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'main'], ['name' => 'Asosiy Filial', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $group = Group::create([
         'name' => 'Test Guruh Bulk',
         'branch_id' => $branch->id,
@@ -111,8 +111,8 @@ test('admin can mark group attendance in bulk', function () {
 });
 
 test('admin can mark single student manually even without session_id', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
     $branch = Branch::firstOrCreate(['code' => 'main'], ['name' => 'Asosiy Filial', 'status' => 'active']);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => $branch->id]);
     $group = Group::create([
         'name' => 'Test Guruh Single',
         'branch_id' => $branch->id,

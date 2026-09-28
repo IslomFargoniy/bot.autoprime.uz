@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
+import type { SharedData } from '@/types/auth';
 import { useTranslation } from 'react-i18next';
 import {
     Plus,
@@ -103,6 +104,7 @@ interface CashTransfer {
     to_cash_register?: { name: string };
     amount: number | string;
     status: 'pending' | 'approved' | 'rejected';
+    sent_by_user_id?: number | null;
     transferred_by?: { name: string };
     approved_by?: { name: string };
     created_at: string;
@@ -152,7 +154,10 @@ export default function FinanceIndex({
 }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
-    const canApproveTransfers = can('cash_transfers.approve');
+    const { auth } = usePage<SharedData>().props;
+    // The sender may not review their own transfer (superadmins excepted), mirroring the backend.
+    const canReviewTransfer = (transfer: CashTransfer) =>
+        can('cash_transfers.approve') && (auth.is_super_admin || transfer.sent_by_user_id !== auth.user.id);
     const [activeTab, setActiveTab] = useState<'registers' | 'history' | 'payments' | 'expenses' | 'transfers'>('registers');
 
     // Modals
@@ -1220,7 +1225,7 @@ export default function FinanceIndex({
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{tr.approved_by?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-400 dark:text-gray-500 font-mono text-xs whitespace-nowrap">{formatDateTime(tr.created_at)}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
-                                                    {tr.status === 'pending' && canApproveTransfers && (
+                                                    {tr.status === 'pending' && canReviewTransfer(tr) && (
                                                         <div className="inline-flex gap-1.5">
                                                             <Button
                                                                 size="sm"
@@ -1295,7 +1300,7 @@ export default function FinanceIndex({
                                             <span>{tr.transferred_by?.name || '-'}</span>
                                             {tr.approved_by?.name && <span> → {tr.approved_by.name}</span>}
                                         </div>
-                                        {tr.status === 'pending' && canApproveTransfers && (
+                                        {tr.status === 'pending' && canReviewTransfer(tr) && (
                                             <div className="flex gap-1.5">
                                                 <Button
                                                     size="sm"

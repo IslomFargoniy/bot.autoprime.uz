@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 abstract class Controller
@@ -29,5 +30,18 @@ abstract class Controller
         }
 
         return min((int) $perPage, self::MAX_PER_PAGE);
+    }
+
+    /**
+     * Instructors and teachers only work with their own students, even when
+     * granted extra permissions (contracts, payments, certificates...).
+     */
+    protected function ensureCanSeeStudent(Request $request, ?Student $student): void
+    {
+        $user = $request->user();
+
+        if ($user->worksOnOwnRecordsOnly() && ($student === null || ! $user->canSeeStudent($student))) {
+            abort(403, 'Siz faqat o\'z o\'quvchilaringiz bilan ishlay olasiz.');
+        }
     }
 }

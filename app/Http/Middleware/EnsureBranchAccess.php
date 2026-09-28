@@ -14,13 +14,19 @@ class EnsureBranchAccess
      * Reject requests where a branch-restricted user targets a route-bound
      * record that belongs to a different branch. Records without a branch
      * (shared/global data) remain accessible. A submitted branch_id is pinned
-     * to the user's own branch.
+     * to the user's own branch, and staff without a branch are locked out.
      *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
+
+        // Branch scoping treats "no branch" as "all branches", so staff without a
+        // branch would see every branch. Only superadmins may work unassigned.
+        if ($user && ! $user->isSuperAdmin() && $user->branch_id === null) {
+            abort(403, 'Sizga filial biriktirilmagan. Iltimos, Superadmin bilan bog\'laning.');
+        }
 
         if ($user && $user->isBranchRestricted()) {
             foreach ($request->route()?->parameters() ?? [] as $parameter) {
