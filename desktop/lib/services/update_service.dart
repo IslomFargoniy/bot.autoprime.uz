@@ -69,12 +69,14 @@ class UpdateService {
         await Process.start(savePath, ['/SILENT'], mode: ProcessStartMode.detached);
         exit(0);
       } else if (Platform.isMacOS) {
-        await OpenFile.open(savePath);
+        await Process.run('open', [savePath]);
         exit(0);
       }
 
       return true;
     } catch (e) {
+      // ignore: avoid_print
+      print('UpdateService downloadAndInstall error: $e');
       return false;
     }
   }

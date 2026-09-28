@@ -1,11 +1,11 @@
 {
-    "version": "1.0.1",
-    "build_number": 2,
+    "version": "1.0.2",
+    "build_number": 3,
     "release_date": "2026-09-28",
     "is_mandatory": false,
-    "download_url_windows": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.1.exe",
-    "download_url_macos": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.1.dmg",
+    "download_url_windows": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.2.exe",
+    "download_url_macos": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.2.dmg",
     "file_size_mb": 25,
-    "changelog_uz": "AutoPrime LMS Desktop v1.0.1\n• Yagona faol sessiya (Single device active session) himoyasi va Heartbeat integratsiyasi",
-    "changelog_ru": "AutoPrime LMS Desktop v1.0.1\n• Yagona faol sessiya (Single device active session) himoyasi va Heartbeat integratsiyasi"
+    "changelog_uz": "AutoPrime LMS Desktop v1.0.2\n• Yuklab olish xatoliklarini ko'rsatish va macOS/Windows yangilash mexanizmi takomillashtirildi",
+    "changelog_ru": "AutoPrime LMS Desktop v1.0.2\n• Yuklab olish xatoliklarini ko'rsatish va macOS/Windows yangilash mexanizmi takomillashtirildi"
 }

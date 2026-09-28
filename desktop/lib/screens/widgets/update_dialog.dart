@@ -115,6 +115,31 @@ class UpdateDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // Error message if any
+            if (updateProv.downloadError != null && !updateProv.isDownloading) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        updateProv.downloadError!,
+                        style: const TextStyle(fontSize: 11, color: AppColors.error),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // Progress or Action button
             if (updateProv.isDownloading) ...[
               LinearProgressIndicator(
