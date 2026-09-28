@@ -1,0 +1,134 @@
+[
+    {
+        "id": "1.1",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/7d534932e0adb240812b155a87999a72.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Davomiy yakka chiziq (yo'lning chetida ishlatiladigan chiziqlar bundan mustasno)"
+    },
+    {
+        "id": "1.2",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/af007a00ed22d434897baffd7a1b240d.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yo'l qatnov qismining chetida joylashgan davomiy bir yo'nalishli chiziq"
+    },
+    {
+        "id": "1.3",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/851a7dd9d852d931dcc173ae778fe8c4.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Davomiy juft chiziq"
+    },
+    {
+        "id": "1.4",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/ec5760191b1fc83a75be1c9032b357fe.jpg",
+        "color": "Sariq",
+        "description": "Davomiy yakka chiziq"
+    },
+    {
+        "id": "1.5",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/59522b318ba4cb3fb7436565eb0ee3e9.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yakka uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 1:3 ga teng"
+    },
+    {
+        "id": "1.6",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/eae45a15d65e3b0edd5a5ffdb92ba535.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yakka uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 3:1 ga teng"
+    },
+    {
+        "id": "1.7",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/4a6a596fec9a58a186bb145d9da227eb.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yakka uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 1:1 ga teng"
+    },
+    {
+        "id": "1.8",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/1eb5785e0b0c54fb6cfc656b10149e4f.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Keng yakka uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 1:3 ga teng"
+    },
+    {
+        "id": "1.9",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/6d7b1c841d488a5860db865dc4a1036b.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Juft uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 3:1 ga teng"
+    },
+    {
+        "id": "1.10",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/38b96491c0e265db3cc256f8c23af0d4.jpg",
+        "color": "Sariq",
+        "description": "Yakka uzuq chiziq, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 1:1 ga teng"
+    },
+    {
+        "id": "1.11",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/db0e157681a075783a058b7c007a0e5c.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yakka davomiy chiziq va yakka uzuq chiziq birlashmasi, shtrix uzunligi va shtrixlar o'rtasidagi masofa nisbati 3:1 ga teng"
+    },
+    {
+        "id": "1.12",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/f50c8e24ec9c2699016f2b0bfb82d35c.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Davomiy yakka chiziq, 0,4 m kenglikda"
+    },
+    {
+        "id": "1.13",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/f55c9dcacb7fc9d50189af5ce8d137cd.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Teng yonli uchburchaklardan tashkil topgan chiziq"
+    },
+    {
+        "id": "1.14.1",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/b42125e54e7d0fff088438cfc2458a6a.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Yo'lda qatnov qismining o'qi bo'ylab joylashgan bir xil rangdagi davomiy chiziqlar"
+    },
+    {
+        "id": "1.14.2",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/1deec847e5eed8f64d5860e5c691f0d2.jpg",
+        "color": "Oq, sariq - doimiy gorizontal belgilash uchun",
+        "description": "Yo'lda qatnov qismining o'qi bo'ylab joylashgan har xil rangda keluvchi davomiy chiziqlar"
+    },
+    {
+        "id": "1.14.2 (yo'nalishli)",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/4314c561878b47147d072928b3fcf8f9.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Piyoda o'tish joyini anglatadi. Marker o'qlari piyodalarning harakatlanish yo'nalishini ko'rsatadi"
+    },
+    {
+        "id": "1.14.3",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/80f3c55554759943bbb3ce4b9f0fac02.png",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Piyodalar o'tish joyining chegarasida joylashgan ikkita uzuq chiziq"
+    },
+    {
+        "id": "1.15",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/d4e2fd64f499dae18c8fdc31a9911508.jpg",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "Velosiped yo'lining chegarasida joylashgan, kvadratlardan iborat ikkita uzuq chiziq"
+    },
+    {
+        "id": "1.17",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/b41059e78fd631608faf1fb8d20ec763.jpg",
+        "color": "Sariq",
+        "description": "Yo'lning qatnov qismi chetida joylashgan davomiy yakka zig-zagsimon chizi"
+    },
+    {
+        "id": "1.21",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/f081074ad1297b1b750b28cfeba4f3f3.png",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "\"STOP\" yozuvi tasviri"
+    },
+    {
+        "id": "1.23",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/6dae64780da261a3ee509341296e82bc.png",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "\"А\" harfi tasviri"
+    },
+    {
+        "id": "1.31",
+        "image_url": "http://uzavtoyolbelgi.uz/uploads/image/0d6f8cd0fbba22c6c12648b03fc571c5.png",
+        "color": "Oq - doimiy gorizontal belgilash uchun. To'q sariq yoki sariq - vaqtinchalik gorizontal belgilash uchun",
+        "description": "\"MAKTAB\" yozuvi tasviri"
+    }
+]

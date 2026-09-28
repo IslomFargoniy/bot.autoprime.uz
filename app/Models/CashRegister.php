@@ -166,7 +166,7 @@ class CashRegister extends Model
 
             if ((float) $locked->balance < $amount) {
                 throw new \InvalidArgumentException(
-                    "Tanlangan '{$locked->name}' kassasida yetarli mablag' mavjud emas (Mavjud: " . number_format((float) $locked->balance, 0, '', ' ') . " UZS, So'ralgan: " . number_format($amount, 0, '', ' ') . " UZS)."
+                    "Tanlangan '{$locked->name}' kassasida yetarli mablag' mavjud emas (Mavjud: ".number_format((float) $locked->balance, 0, '', ' ')." UZS, So'ralgan: ".number_format($amount, 0, '', ' ').' UZS).'
                 );
             }
 
@@ -224,7 +224,7 @@ class CashRegister extends Model
 
             if ((float) $fromLocked->balance < $amount) {
                 throw new \InvalidArgumentException(
-                    "Chiqim kassasida ({$fromLocked->name}) yetarli mablag' mavjud emas (Mavjud: " . number_format((float) $fromLocked->balance, 0, '', ' ') . " UZS)."
+                    "Chiqim kassasida ({$fromLocked->name}) yetarli mablag' mavjud emas (Mavjud: ".number_format((float) $fromLocked->balance, 0, '', ' ').' UZS).'
                 );
             }
 
@@ -307,4 +307,3 @@ class CashRegister extends Model
         ]);
     }
 }
-

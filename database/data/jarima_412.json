@@ -1,0 +1,330 @@
+{
+    "title": "O‘zbekistonda YHQ buzilishi uchun jarimalar 2026",
+    "date": "28.01.2026",
+    "brv_amount": 412000,
+    "brv_description": "Bazaviy hisoblash miqdori (BRV). Barcha jarimalar BRVga bog‘langan.",
+    "discount_days": 15,
+    "discount_percent": 50,
+    "payment_deadline_regular": 30,
+    "payment_deadline_camera": 60,
+    "cancellation_if_no_decision_days": 17,
+    "categories": [
+        {
+            "name": "Asosiy jarimalar",
+            "items": [
+                {
+                    "name": "Xavfsizlik kamarini taqmaslik",
+                    "bhm": 0.5,
+                    "summa": 206000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 103000,
+                    "penalty_points": 0,
+                    "description": "Haydovchi uchun",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Aptechka, avariya belgisi yoki texko‘rik yo‘qligi",
+                    "bhm": 0.5,
+                    "summa": 206000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 103000,
+                    "penalty_points": 0,
+                    "description": "Tekshiruvda aniqlansa",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Hujjatsiz boshqarish",
+                    "bhm": 1,
+                    "summa": 412000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 206000,
+                    "penalty_points": 0,
+                    "description": "Haydovchilik guvohnomasi yoki texpasport",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Sug‘urtasiz boshqarish",
+                    "bhm": 1,
+                    "summa": 412000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 206000,
+                    "penalty_points": 0,
+                    "description": "OSAGO majburiy",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Qizil chiroqda o‘tish",
+                    "bhm": 2,
+                    "summa": 824000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 412000,
+                    "penalty_points": 1,
+                    "description": "Svetofor va chorrahalar",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Noto‘g‘ri to‘xtash / parkovka",
+                    "bhm": 2,
+                    "summa": 824000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 412000,
+                    "penalty_points": 0.2,
+                    "description": "Ruxsat etilmagan joylarda",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Telefonni qo‘lda ishlatish",
+                    "bhm": 3,
+                    "summa": 1236000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 618000,
+                    "penalty_points": 0,
+                    "description": "Hands-free’siz",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Davlat raqamisiz boshqarish",
+                    "bhm": 5,
+                    "summa": 2060000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 1030000,
+                    "penalty_points": 1,
+                    "description": "Takrorlansa — mashina ushlanishi mumkin",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Piyodaga yo‘l bermaslik",
+                    "bhm": 1,
+                    "summa": 412000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 206000,
+                    "penalty_points": 0,
+                    "description": "Kamera yoki inspektor orqali",
+                    "additional_penalty": ""
+                }
+            ]
+        },
+        {
+            "name": "Tezlik oshirish",
+            "items": [
+                {
+                    "name": "20 km/soatgacha (birinchi marta)",
+                    "bhm": 1,
+                    "summa": 412000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 206000,
+                    "penalty_points": 0.5,
+                    "description": "",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "20 km/soatgacha (takroran)",
+                    "bhm": 5,
+                    "summa": 2060000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0.5,
+                    "description": "",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "20 km/soatgacha (3-marta)",
+                    "bhm": 15,
+                    "summa": 6180000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0.5,
+                    "description": "3-marta — 1 yilga huquqdan mahrum",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "20–40 km/soat (birinchi marta)",
+                    "bhm": 5,
+                    "summa": 2060000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 1,
+                    "description": "",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "20–40 km/soat (takroran)",
+                    "bhm": 15,
+                    "summa": 6180000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 1,
+                    "description": "Huquqdan mahrum etilishi mumkin",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "40 km/soatdan yuqori (birinchi marta)",
+                    "bhm": 9,
+                    "summa": 3708000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 1.5,
+                    "description": "",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "40 km/soatdan yuqori (takroran)",
+                    "bhm": 25,
+                    "summa": 10300000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 2,
+                    "description": "2 yilgacha huquqdan mahrum",
+                    "additional_penalty": ""
+                }
+            ]
+        },
+        {
+            "name": "Maxsus qoidabuzarliklar",
+            "items": [
+                {
+                    "name": "Jamoat transporti yo‘laklarida harakatlanish",
+                    "bhm": 0,
+                    "summa": 0,
+                    "summa_min": 375000,
+                    "summa_max": 1125000,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Mast holda boshqarish",
+                    "bhm": 25,
+                    "summa": 0,
+                    "summa_min": 0,
+                    "summa_max": 10300000,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "10 300 000 so‘mgacha va 3 yilgacha huquqdan mahrum",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Noto‘g‘ri tonirovka",
+                    "bhm": 25,
+                    "summa": 0,
+                    "summa_min": 0,
+                    "summa_max": 10300000,
+                    "discount_summa": 0,
+                    "penalty_points": 0.5,
+                    "description": "10 300 000 so‘mgacha",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Qarama-qarshi yo‘lakka chiqish",
+                    "bhm": 10,
+                    "summa": 4120000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 1,
+                    "description": "4 120 000 so‘m (10 BRV)",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Yo‘l belgisi yoki uzluksiz chiziqni kesib o‘tish",
+                    "bhm": 1,
+                    "summa": 412000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "412 000 so‘m",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Ruxsatsiz ovozli yoki yorug‘lik moslamalari",
+                    "bhm": 3,
+                    "summa": 1236000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0.2,
+                    "description": "1 236 000 so‘mgacha",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Maxsus signallarni noqonuniy o‘rnatish",
+                    "bhm": 1,
+                    "summa": 0,
+                    "summa_min": 412000,
+                    "summa_max": 1236000,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "412 000 – 1 236 000 so‘m",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Davlat raqamini yashirish",
+                    "bhm": 1,
+                    "summa": 0,
+                    "summa_min": 412000,
+                    "summa_max": 1236000,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "412 000 – 1 236 000 so‘m",
+                    "additional_penalty": ""
+                }
+            ]
+        },
+        {
+            "name": "YTH holatlari",
+            "items": [
+                {
+                    "name": "Yengil tan jarohati yoki katta moddiy zarar",
+                    "bhm": 7,
+                    "summa": 2884000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "2 884 000 so‘mgacha yoki 3 yilgacha huquqdan mahrum",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Faqat transport vositalari shikastlangan",
+                    "bhm": 0,
+                    "summa": 1680000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 0,
+                    "description": "1 680 000 so‘mdan boshlab",
+                    "additional_penalty": ""
+                },
+                {
+                    "name": "Hodisa joyidan qochish",
+                    "bhm": 15,
+                    "summa": 6180000,
+                    "summa_min": 0,
+                    "summa_max": 0,
+                    "discount_summa": 0,
+                    "penalty_points": 2,
+                    "description": "6 180 000 so‘m yoki qamoq / huquqdan mahrum",
+                    "additional_penalty": ""
+                }
+            ]
+        }
+    ]
+}

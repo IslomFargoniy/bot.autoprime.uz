@@ -1,0 +1,3148 @@
+[
+    {
+        "title": "Bilet 1",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Yengil avtomobilning tormoz yo‘li tormoz tizimiga ega\nbo‘lmagan tirkama bilan harakatlanayotganda qanday\no‘zgaradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "A) Kamayadi, chunki tirkama harakatlanishga qo‘shimcha\nqarshilik ko‘rsatadi", "is_correct": 0 },
+                    { "content": "B) O‘zgarmaydi.", "is_correct": 0 },
+                    { "content": "C) Ortadi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi tartibga solinmagan\npiyodalar o'tish joyiga\nyaqinlashayotganlik haqida\nogohlantiradi?",
+                "image_url": "questions/2.jpg",
+                "answers": [
+                    { "content": "A) \"A\" va \"Б\"", "is_correct": 0 },
+                    { "content": "B) \"A\"", "is_correct": 1 },
+                    { "content": "C) Hammasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Old chiroqlar va orqa gabarit chiroqlari ishlamayotgan transport\nvositasi harakatini davom ettirishi taqiqlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "A) Faqat yetarli ko'rinmaslikda", "is_correct": 0 },
+                    { "content": "B) Faqat kunning qorong'i vaqtida", "is_correct": 0 },
+                    { "content": "C) Barcha javoblarda ko'rsatilgan holatlarda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qatnov qismi yo'l chiziqlari bilan ajratilgan bo'lsa haydovchilar\nqanday holatlarda qat'iy bo'laklar bo'yicha harakatlanishlari kerak?\nF1. Faqat harakatlanish bo'laklari uzliksiz sidirg'a chiziqlar bilan",
+                "image_url": "",
+                "answers": [
+                    { "content": "B) Faqat harakatlanish serqatnov bo'lganda", "is_correct": 0 },
+                    { "content": "C) Barcha holatlarda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chorrahdan birinchi\nbo'lib kesib o'tadi",
+                "image_url": "questions/5.jpg",
+                "answers": [
+                    { "content": "A) Ko'k avtomobil", "is_correct": 0 },
+                    { "content": "B) Yashil avtomobil", "is_correct": 1 },
+                    { "content": "C) Qizil avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadan ikkinchi bo'lib qaysi\ntransport vositasi kesib o'tadi?",
+                "image_url": "questions/6.jpg",
+                "answers": [
+                    { "content": "A) Yashil avtomobil tramvay bilan\nbir vaqtda", "is_correct": 1 },
+                    { "content": "B) Yashil avtomobil", "is_correct": 0 },
+                    { "content": "C) Qizil avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko'rsatilgan belgilardan\nqaysilarining talabi bevosita\no`rnatilgan joyidan kuchga\nkiradi?",
+                "image_url": "questions/7.jpg",
+                "answers": [
+                    { "content": "A) Faqat Б", "is_correct": 0 },
+                    { "content": "B) А va Б", "is_correct": 1 },
+                    { "content": "C) Hammasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Tartibga solinmagan chorrahada\nqaysi belgi albatta to'xtashni\ntalab qiladi?",
+                "image_url": "questions/8.jpg",
+                "answers": [
+                    { "content": "A) Faqat harakatlanish bo'laklari uzliksiz sidirg'a chiziqlar bilan\najratilgan bo'lsa", "is_correct": 0 },
+                    { "content": "A) Faqat А", "is_correct": 0 },
+                    { "content": "B) Faqat Б", "is_correct": 1 },
+                    { "content": "C) Б va В", "is_correct": 0 },
+                    { "content": "D) Hammasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Asosiy yo`l –",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "A) Tuproqli yo'lga nisbatan qattiq qoplamali (asfalt va sement-betonli,\ntosh va shunga o'xshash qoplamali)",
+                        "is_correct": 1
+                    },
+                    { "content": "B) Toshli yo'lga nisbatan asfalt qoplamali yo'l", "is_correct": 0 },
+                    { "content": "C) Ikki bo'lakli yo'lga nisbatan uch yoki undan ko'p bo'lakli yo'l", "is_correct": 0 },
+                    { "content": "D) Barcha javoblar to'g'ri", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi transport vositalari yo'nalishli transport vositalari hisoblanadi?",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "A) Belgilangan yo'nalishi va bekatlari bo'lgan, yo'lovchi tashish\nuchun mo'ljallangan umum foydalanishdagi transport vositalalari",
+                        "is_correct": 1
+                    },
+                    { "content": "B) Avtobuslar", "is_correct": 0 },
+                    { "content": "C) Yo'lovchilarni tashuvchi istalgan transport vositalari", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 2",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qo'l oyoq uchlari (tirsakdan past qismi, boldir) sinishida transport shinalari yoki ularni qo'lda\nyasash uchun vositalar bo'lmasa birinchi tibbiy yordam qanday ko'rsatiladi?",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Qo'llarni tana bo'ylab cho'zgan holda tanaga bog'lash, oyoqlarni orasiga yumshoq\nmato qo'yib bir-biriga bog‘lash",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Qo'llarni tirsakdan bukib, ro`molga osgan holda tanaga bog'lash, oyoqlarni orasiga\nalbatta yumshoq mato qo'yib bir-biriga bog‘lash",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F3. Qo'llarni tirsakdan bukib, ro`molga osgan holda tanaga bog'lash, oyoqlarni bir-biriga\nyaxshilab jipslab tekkazib bog‘lash",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Qaysi rasmdagi\navtomobil haydovchisi\nyuk tashish qoidasini\nbuzayapti?",
+                "image_url": "questions/12.jpg",
+                "answers": [
+                    { "content": "F1. \"Б\"", "is_correct": 0 },
+                    { "content": "F2. \"A\"", "is_correct": 0 },
+                    { "content": "F3. \"A\" , \"Б\"", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi holatlarda aholi punktlarida tovushli ishoralardan foydalanish\nmumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat zarur bo`lgan hollarda yo'l-transport hodisasining oldini\nolish uchun", "is_correct": 1 },
+                    { "content": "F2. Faqat boshqa haydovchilarni quvib o'tish haqida ogohlantirish\nuchun", "is_correct": 0 },
+                    { "content": "F3. Barcha javoblarda ko'rsatilgan holatlarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadan uchinchi bo'lib\nqaysi avtomobil kesib o'tadi?",
+                "image_url": "questions/14.jpg",
+                "answers": [
+                    { "content": "F1. Yashil avtomobil", "is_correct": 0 },
+                    { "content": "F2. Qizil avtomobil", "is_correct": 1 },
+                    { "content": "F3. Ko'k avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadan birinchi bo'lib qaysi\ntransport vositasi kesib o'tadi?",
+                "image_url": "questions/15.jpg",
+                "answers": [
+                    { "content": "F1. Yashil avtomobil", "is_correct": 1 },
+                    { "content": "F2. Ko'k avtomobil", "is_correct": 0 },
+                    { "content": "F3. Qizil avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu \"50\" yozuvli yo'l belgisi\nnimani bildradi?",
+                "image_url": "questions/16.jpg",
+                "answers": [
+                    { "content": "F1. Yo'l yoki marshrut raqamini", "is_correct": 0 },
+                    { "content": "F2. Yo'lning ushbu qismida tavsiya\nberilgan tezlikni", "is_correct": 0 },
+                    { "content": "F3. Yo'lning ushbu qismida ruxsat\nberilgan eng yuqori tezlikni", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko'rsatilgan belgilardan qaysi biri ruxsat\netilgan to'la vazni 3,5 tonnadan\noshmaydigan yuk avtomobillariga\nharakatlanishga ruxsat beradi?",
+                "image_url": "questions/17.jpg",
+                "answers": [
+                    { "content": "F1. А va В", "is_correct": 1 },
+                    { "content": "F2. А va Б", "is_correct": 0 },
+                    { "content": "F3. В", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko'rsatilgan belgilardan qaysi biri\ntexnik tavsifnomasiga yoki holatiga\nko'ra tezligi soatiga 40 kilometrdan\nkam bo'lgan transport vositalarining\nharakatlanishini taqiqlaydi?",
+                "image_url": "questions/18.jpg",
+                "answers": [
+                    { "content": "F1. Faqat А", "is_correct": 1 },
+                    { "content": "F2. Faqat В", "is_correct": 0 },
+                    { "content": "F3. А va Б", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Turar joy dahalarida piyodalar yo'lning qaysi qismida\nharakatlanishilari kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat trotuar bo'yicha", "is_correct": 0 },
+                    { "content": "F2. Qatnov qismi chetida bir qator bo'lib", "is_correct": 0 },
+                    { "content": "F3. Trotuardan yoki qatnov qismidan", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ruxsat etilgan to'la vazni bu - ...",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Transport vositasining yuki, haydovchi va yo`lovchilari bilan birgalikdagi vazni", "is_correct": 0 },
+                    {
+                        "content": "F2. Aslahalangan transport vositasining ishlab chiqargan korxona tomonidan\nbelgilangan, yuksiz, haydovchisiz va yo’lovchilarsiz eng yuqori vazni (o’lchovi)",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Aslahalangan transport vositasining ishlab chiqargan korxona tomonidan\nbelgilangan, yuk, haydovchi va yo'lovchilari bilan birgalikdagi eng yuqori vazni\n(o’lchovi)",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 3",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "To'la vazni 3,5 tonnadan oshmaydigan yuk avtomobillarini quyidagilar\nbilan jihozlanmagan bo'lsa ham foydalanishga ruxsat etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tibbiyot qutichasi", "is_correct": 0 },
+                    { "content": "F2. O't o'chirgich", "is_correct": 0 },
+                    { "content": "F3. Majburiy to'xtaganini bildiruvchi belgi (yoki miltillovchi qizil chiroq)", "is_correct": 0 },
+                    { "content": "F4. O'zi yurib ketishidan saqlovchi, g'ildirak diametriga muvofiq (kamida\n2ta) tirgak", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi holatlarda jabrlanuvchiga yurak-o'pka reanimatsiyasini boshlash\nkerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yurak sohasida og'riq sezilganda va nafas olish qiyinlashganda", "is_correct": 0 },
+                    { "content": "F2. Hushidan ketishda, nafas olish faoliyatidan qat'iy nazar", "is_correct": 0 },
+                    { "content": "F3. Hushidan ketishda, nafas olish faoliyati va qon aylanishi to'xtaganda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Kunning yorug' vaqtida\nharakatlanayotgan qaysi rasmdagi\navtomobil haydovchisi yuk tashish\nqoidasini buzayapti?",
+                "image_url": "questions/23.jpg",
+                "answers": [
+                    { "content": "F1. Faqat А", "is_correct": 0 },
+                    { "content": "F2. Har ikki rasmda", "is_correct": 0 },
+                    { "content": "F3. Hech kim buzmayapti", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Avtomagistralda to'xtashga ruxsat etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat qatnov qismini chetini bildiruvchi chiziqdan chetda", "is_correct": 0 },
+                    { "content": "F2. 5.15 yoki 6.11 yo'l belgilari bilan belgilangan maxsus to'xtab turish\nmaydonchalarida", "is_correct": 1 },
+                    { "content": "F3. Qatnov qismini chetda barcha joyda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahani ikkinchi bo'lib\nkesib o'tadi",
+                "image_url": "questions/25.jpg",
+                "answers": [
+                    { "content": "F1. Tramvay", "is_correct": 0 },
+                    { "content": "F2. Mototsikl", "is_correct": 0 },
+                    { "content": "F3. Avtomobil", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chorrahadan oxirgi bo'lib qaysi\ntransport vositasi kesib o'tadi",
+                "image_url": "questions/26.jpg",
+                "answers": [
+                    { "content": "F1. Velosiped", "is_correct": 0 },
+                    { "content": "F2. Avtobus", "is_correct": 0 },
+                    { "content": "F3. Avtomobil", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Agar piyodalar o'tish joylaridan keyin tirbandlik paydo bo'lsa\nhaydovchi qayerga to'xtashi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Bevosita piyodalar o'tish joyi oldida", "is_correct": 1 },
+                    { "content": "F2. Piyodalar o'tish joyida, agar piyodalar bo'lmasa", "is_correct": 0 },
+                    { "content": "F3. Piyodalar o'tish joyiga 5 m yetmasdan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko'rsatilgan qaysi yo'l belgisi yengil\nyo'nalishsiz taksilarga yo'lovchilarni\ntushirish-chiqarish (yuklarni ortish-\ntushirish) vaqtida ta'sir qilmaydi?",
+                "image_url": "questions/28.jpg",
+                "answers": [
+                    { "content": "F1. Faqat \"A\"", "is_correct": 0 },
+                    { "content": "F2. Faqat \"Б\"", "is_correct": 0 },
+                    { "content": "F3. Faqat \"Б\" \"C\" \"Д\"", "is_correct": 0 },
+                    { "content": "F4. Hammasi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Bu qo'shimcha-axborot yo'l belgisi\nqaysi yo'l belgisi bilan birgalikda\nqo'llaniladi?",
+                "image_url": "questions/29.jpg",
+                "answers": [
+                    { "content": "F1. А", "is_correct": 0 },
+                    { "content": "F2. Б", "is_correct": 1 },
+                    { "content": "F3. С", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Trotuar va piyodalar yo'lkasi bo'lmaganda bolalar guruhini\nyo'lda qanday tartibda olib yurish mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Qatnov qismi chetidan katta yoshdagilar kuzatuvida\nolib yurishga ruxsat etiladi", "is_correct": 0 },
+                    { "content": "F2. Yo'l yoqasidan faqat kunduzi va katta yoshdagilar\nkuzatuvida olib yurishga ruxsat etiladi", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 4",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Harakatlanish bo'lagidagi\nuchburchak shaklidagi chiziq",
+                "image_url": "questions/31.jpg",
+                "answers": [
+                    { "content": "F1. Yo'lning xavfli qismini bildiradi", "is_correct": 0 },
+                    { "content": "F2. Yo'l berishingiz kerak bo'lgan\njoy yaqinlashayotganligi haqida\nogohlantiradi", "is_correct": 1 },
+                    { "content": "F3. To'xtashingiz zarur bo'lgan\njoyni bildiradi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Siz to'g'ri yo'lga harakatlanayotib to'satdan yo'lning qisman katta bo'lmagan\nsirpanchiq qismiga duch keldingiz. Bunda qanday ehtiyot choralarini ko'rasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobilni ohista to'xtatish", "is_correct": 0 },
+                    { "content": "F2. Rulni burib sirpanchiqdan chiqib ketish", "is_correct": 0 },
+                    { "content": "F3. Harakat yo'nalishini va tezlikni o'zgartirmasdan ehtiyotkorlik bilan o'tib\nketish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Mexanik transport vositalarini shatakka olishda egiluvchan ulagichga\nkamidan nechta ogohlantiruvchi qurilma o'rnatiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Kamida ikkita", "is_correct": 1 },
+                    { "content": "F2. Kamida uchta", "is_correct": 0 },
+                    { "content": "F3. Kamida bitta", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Temir yo'l kesishmalari va ularga yaqin joylarda quvib o'tishga tegishli\nqanday yo'l harakati qoidalari amal qiladi ?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Temir yo'l kesishmalarida va ularga 100 m dan kam masofa qolganda\nquvib o`tish taqiqlanadi", "is_correct": 1 },
+                    { "content": "F2. Quvib o`tish faqat temir yo'l kesishmalaridan keyin taqiqlanadi", "is_correct": 0 },
+                    {
+                        "content": "F3. Temir yo'l kesishmalarida va ularga 100 m dan kam masofa qolganda\nva temir yo`l keshimalaridan keyin 100 metr davomida quvib o’tish\ntaqiqlanadi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Sariq avtomobil chorrahani\nnechanchi bo'lib kesib o'tadi?",
+                "image_url": "questions/35.jpg",
+                "answers": [
+                    { "content": "F1. Uchinchi bo'lib", "is_correct": 0 },
+                    { "content": "F2. Ikkinchi bo'lib", "is_correct": 0 },
+                    { "content": "F3. Oxirgi bo'lib", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Turar joy dahasidan yo'lga chiqishda yo'l berish zarur:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. O'ng tomondan yaqinlashib kelayotgan transport vositalariga", "is_correct": 0 },
+                    { "content": "F2. Chap tomondan yaqinlashib kelayotgan transport vositalariga", "is_correct": 0 },
+                    { "content": "F3. Ko'k rangli yalt-yalt etuvchi chiroqcha-mayoqcha yoqilgan\ntransport vositalariga", "is_correct": 0 },
+                    { "content": "F4. Barcha transport vositalariga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Svetofor ishoralari imtiyoz belgilari talablariga zid kelgan hollarda:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Haydovchilar svetofor ishoralariga amal qilishlari kerak", "is_correct": 1 },
+                    { "content": "F2. Haydovchilar imtiyoz belgilariga amal qilishlari kerak", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko'rsatilgan belgilardan qaysi\nbiri faqat shu belgi\no'rnatilgan bo'lakka ta'sir\nqiladi?",
+                "image_url": "questions/38.jpg",
+                "answers": [
+                    { "content": "F1. Б va В", "is_correct": 0 },
+                    { "content": "F2. Faqat Б", "is_correct": 0 },
+                    { "content": "F3. Faqat А", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo'lovchilarga taqiqlanadi:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Transport vositalari harakatlanayotgan vaqtda haydovchi\nboshqaishdan chalg'itish va unga xalaqit berish",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Harakatlanayotgan bortli yuk avtomobillarida tik turish,\nbortlarda yoki undan yuqori yuk ustida o’tirish",
+                        "is_correct": 0
+                    },
+                    { "content": "F3. Transport vositasi harakatlanayotgan vaqtda uning eshini ochish", "is_correct": 0 },
+                    { "content": "F4. Barcha ko'rsatilgan javoblar to'g'ri", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Harakatlanish tasmasi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo‘lning relssiz transport vositalari harakati uchun mo‘ljallangan qismi", "is_correct": 0 },
+                    {
+                        "content": "F2. Yo‘lning yonma-yon joylashgan qatnov qismlarini ajratuvchi, transport vositalari\nharakatlanishi yoki to’xtashi uchun mo’jallanmagan, yo’l sathidan baland va (yoki) 1,1\nyotiq chizig’i bilan belgilangan qismi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Avtomobillarning bir qator bo‘lib harakatlanishi uchun yetarlicha keng bo‘lgan, yo‘l\nchiziqlari bilan belgilangan yoki belgilanmagan yo’l qatnov qismining har qanday\nbo’ylama bo’lagi",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 5",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "M toifadagi transport vositalari bu:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Kamida to'rt g'ildirakka ega bo'lgan va yo'lovchilarni tashish uchun\nfoydalaniladigan mexanik transport vositalari",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Yuk tashish uchun mo'ljallangan, eng katta vazni 3,5 t dan\noshmaydigan avtotransport vositalari",
+                        "is_correct": 0
+                    },
+                    { "content": "F3. Tirkamalar (yarim tirkamalar ham)", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi rasmdagi\navtomobil haydovchisi\nyuk tashish qoidasini\nbuzayapti?",
+                "image_url": "questions/42.jpg",
+                "answers": [
+                    { "content": "F1. А", "is_correct": 1 },
+                    { "content": "F2. Б", "is_correct": 0 },
+                    { "content": "F3. А va Б", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "O'ng tomondagi yondosh hududan\nfoydalanib qayrilib olishning\nko'rsatilgan qaysi usuli harakat\nxavfsizligini ta'minlaydi:",
+                "image_url": "questions/43.jpg",
+                "answers": [
+                    { "content": "F1. Faqat chap tomondagi suratda", "is_correct": 1 },
+                    { "content": "F2. Faqat o'ng tomondagi suratda", "is_correct": 0 },
+                    { "content": "F3. Har ikki suratda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahani oxirgi bo'lib qaysi\ntransport vositasi kesib o'tadi",
+                "image_url": "questions/44.jpg",
+                "answers": [
+                    { "content": "F1. Ko'k avtomobil", "is_correct": 0 },
+                    { "content": "F2. Qizil avtomobil", "is_correct": 1 },
+                    { "content": "F3. Yashil avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Balandlika yo'l chetida to'siq mavjud\nbo'lganda to'xtagan avtomobilni\njoyidan g'ildirab ketishini oldini olish\nuchun oldingi g'ildiraklarni burib\nqo'yish usuli qaysi javobda to'g'ri:",
+                "image_url": "questions/45.jpg",
+                "answers": [
+                    { "content": "F1. А ва Г", "is_correct": 0 },
+                    { "content": "F2. Б ва В", "is_correct": 0 },
+                    { "content": "F3. А ва В", "is_correct": 1 },
+                    { "content": "F4. Б ва Г", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chapga burilayotgan sariq\navtomobil haydovchisi qaysi\nbo'lakni egallashi kerak?",
+                "image_url": "questions/46.jpg",
+                "answers": [
+                    { "content": "F1. O'ng bo'lakni", "is_correct": 0 },
+                    { "content": "F2. Chap bo'lakni", "is_correct": 0 },
+                    { "content": "F3. O'rta bo'lakni", "is_correct": 0 },
+                    { "content": "F4. Istalgan bo'lakni", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi yo'l belgilari yo'nalishsiz transport\nvositalariga chapga burilishni taqiqlaydi?",
+                "image_url": "questions/47.jpg",
+                "answers": [
+                    { "content": "F1. Faqat \"A\"", "is_correct": 0 },
+                    { "content": "F2. \"A\" va \"Б\"", "is_correct": 0 },
+                    { "content": "F3. \"A\" va \"B\"", "is_correct": 1 },
+                    { "content": "F4. Hammasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo'l belgisi qanday\nnomlanadi:",
+                "image_url": "questions/48.jpg",
+                "answers": [
+                    { "content": "F1. Xavfli yuk tashiyotgan transport\nvositasining harakati taqiqlangan", "is_correct": 1 },
+                    { "content": "F2. Katta o'lchamli yuklarni tashish\ntaqiqlangan", "is_correct": 0 },
+                    { "content": "F3. Yuk avtomobillari bilan quvib\no'tish taqiqlangan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo'lning qatnov qismi-...",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo'lning relssiz transport vositalari harakati uchun\nmo'ljallagan qismi", "is_correct": 1 },
+                    { "content": "F2. Yo'lning transport vositalari harakati uchun mo'ljallagan qismi", "is_correct": 0 },
+                    { "content": "F3. Yo'lning avtomobillar harakati uchun mo'ljallagan qismi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Haydovchi yo'lning relssiz transport vositalari harakatlanayotgan bo'laklar\nsonini belgilaydigan chiziqlar yoki yo'l belgilari bo'lmasa, bo'laklar sonini\nqanday aniqlash kerak?",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Qantov qismining kengligi, transport vositalari orasidagi zarur yonlama\noraliq masofani va ularning gabarit o’lchamlarini hisobga olgan holda o’zi\naniqlidi",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Bunday yo'lni ikki bo'lakli qarama qarshi harakat tashkil qilingan yo'l deb\nqabul qilish kerak",
+                        "is_correct": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 6",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qaysi javobda orqaga harakatlanish taqiqlangan joylar ko`rsatilgan?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Piyodalarning o'tish joyida", "is_correct": 0 },
+                    { "content": "F2. Tunnellarda", "is_correct": 0 },
+                    { "content": "F3. Chorrahalarda", "is_correct": 0 },
+                    { "content": "F4. Barcha javoblar to'g'ri", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Shatakka olingan avtobusda odam tashishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat beriladi", "is_correct": 0 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 1 },
+                    { "content": "F3. Faqat o'tirgan holda tashishga ruxsat beriladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "108 km/s tezlikda harakatlanayotgan avtomobil 1 sekundda\nqancha masofani bosib o`tadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 15 m", "is_correct": 0 },
+                    { "content": "F2. 25 m", "is_correct": 0 },
+                    { "content": "F3. 30 m", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chap tomondagi yondosh hududdan\nfoydalanib qayrilib olishning\nko'rsatilgan qaysi usuli harakat\nxavfsizligini ta'minlaydi:",
+                "image_url": "questions/54.jpg",
+                "answers": [
+                    { "content": "F1. Faqat chap tomondagi rasmda", "is_correct": 0 },
+                    { "content": "F2. Faqat o'ng tomondagi rasmda", "is_correct": 1 },
+                    { "content": "F3. Ikkisida ham", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadan oxirgi bo'lib qaysi\ntransport vositasi kesib o'tadi:",
+                "image_url": "questions/55.jpg",
+                "answers": [
+                    { "content": "F1. Qizil avtomobil", "is_correct": 0 },
+                    { "content": "F2. Oq avtomobil sariq bilan bir\nvaqtda", "is_correct": 1 },
+                    { "content": "F3. Sariq avtomobil", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yengil avtomobil burilishda ag'darilib ketishga qarshi turg'unroq:",
+                "image_url": "questions/57.jpg",
+                "answers": [
+                    { "content": "F1. Yo'lovchisiz va yuksiz", "is_correct": 1 },
+                    { "content": "F2. Yo'lovchisiz, biroq yuqori yukxonasidagi yuki bilan", "is_correct": 0 },
+                    { "content": "F3. Yo'lovchilari va yuksiz", "is_correct": 0 },
+                    { "content": "F4. Yo'lovchi va yuki bilan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi transport vositasiga\nharakatlanish taqiqlangan?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Motosiklga", "is_correct": 0 },
+                    { "content": "F2. Hech kimga taqiqlanmagam", "is_correct": 0 },
+                    { "content": "F3. Yuk avtomobiliga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Piyodalar to'xtab turgan avtobus va trolleybusning qaysi\ntomonidan yo'lni kesib o'tishlari kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Oldi tomonidan", "is_correct": 0 },
+                    { "content": "F2. Orqa tomonidan", "is_correct": 1 },
+                    { "content": "F3. Istalgan tomonidan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo'l belgisi:",
+                "image_url": "questions/59.jpg",
+                "answers": [
+                    { "content": "F1. Qatnov qismida to'suvchi qurilma\nborligini bildiradi", "is_correct": 0 },
+                    { "content": "F2. Temir yo'l kesishmasi oldida to'suvchi\nqurilma borligini bildiradi", "is_correct": 1 },
+                    { "content": "F3. Chorraha oldida to'suvchi qurilma\nborligini bildiradi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Haydovchi o'zidan oldinda harakatlanayotgan transport vositasi bilan\nqancha oraliq masofa saqlab harakatlanishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 20 m", "is_correct": 0 },
+                    { "content": "F2. 50 m", "is_correct": 0 },
+                    {
+                        "content": "F3. Haydovchi o'zidan oldinda harakatlanayotgan transport vositasi\nkeskin tormoz berganida to'qnashib ketmasligi kafolatini beradigan\ndarajada oraliq masofani saqlash kerak",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 7",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Rasmda ko'rsatilgan chorahha-...",
+                "image_url": "questions/61.jpg",
+                "answers": [
+                    { "content": "F1. Tartibga solinmagan, teng ahamiyatga\nega bo'lmagan yo'llar kesishgan chorraha", "is_correct": 0 },
+                    { "content": "F2. Tartibga solinmagan, teng ahamiyatga\nega bo'lgan yo'llar kesishgan chorraha", "is_correct": 0 },
+                    { "content": "F3. Tartibga solingan chorraha", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Avtomobil haydovchisi qayrilib\nolmoqchi:",
+                "image_url": "questions/62.jpg",
+                "answers": [
+                    { "content": "F1. Chorrahaga birinchi bo'lib o'tadi", "is_correct": 0 },
+                    { "content": "F2. Tramvayga yo'l berib qayrilib\noladi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo`lning xavfli burilishlarida oldingi uzatmali avtomobilning orqa o`qi yon tomonga\nsirpanayotganda siz qanday harakat qilasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Gaz berishni kamaytirib rul chambaragi bilan boshqaruvni barqarorlashtirasiz", "is_correct": 0 },
+                    { "content": "F2. Tormozlab turib rul chambaragini sirpangan tomonga burasiz", "is_correct": 0 },
+                    {
+                        "content": "F3. Gaz pedalini ohista bosib, avtomobilni rul chambaragini to`g`irlab, avtomobil\nsirpanishdan olib chiqib ketasiz",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F4. Gaz pedalini ko`proq bosib, avtomobilni rul chambaragini o`zgartirmasdan\nsirpanishdan olib chiqasiz",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Avtomobilning ABS tizimi burilishda sirpanish va yonga siljishni oldini\noladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobil faqat sirpanish ehtimolining oldini oladi", "is_correct": 0 },
+                    { "content": "F2. Avtomobil faqat yonga siljish ehtimolining oldini oladi", "is_correct": 0 },
+                    { "content": "F3. Avtomobil sirpanish va yonga sirpanishini oldini olmaydi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Motosikl haydovchisi qo`lini\nyuqoriga ko`tarib nima haqida\naxborot berayapti:",
+                "image_url": "questions/65.jpg",
+                "answers": [
+                    { "content": "F1. Harakatni davom ettirish haqida", "is_correct": 0 },
+                    { "content": "F2. O'ngga burilmoqchi ekanligi\nhaqida", "is_correct": 0 },
+                    { "content": "F3. To'xtash haqida", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo'l to'sig'iga chizilgan tik chiziq\nnimani bildiradi?",
+                "image_url": "questions/66.jpg",
+                "answers": [
+                    { "content": "F1. Temir yo`l kesishmasiga\nyaqinlashayotganlik haqida", "is_correct": 0 },
+                    { "content": "F2. Xavfli chorrahaga\nyaqinlashayotganlik haqida", "is_correct": 0 },
+                    {
+                        "content": "F3. Yo'lning kichik rauisli\nburilish, tik nishablik va boshqa\nxavfli joylarda yo'l to'siqlarining\nyon yuzalarini bildiradi",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Qaysi belgilar axborot-ko'rsatkich\nbelgilari?",
+                "image_url": "questions/67.jpg",
+                "answers": [
+                    { "content": "F1. 1 va 2", "is_correct": 0 },
+                    { "content": "F2. 3 va 4", "is_correct": 0 },
+                    { "content": "F3. 2 va 3", "is_correct": 1 },
+                    { "content": "F4. 1 va 4", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi yo'l belgilari\nyo'lning tor qismida\nhaydovchiga ustunlik\nberadi?",
+                "image_url": "questions/68.jpg",
+                "answers": [
+                    { "content": "F1. Faqat \"B\"", "is_correct": 0 },
+                    { "content": "F2. \"A\" va \"B\"", "is_correct": 0 },
+                    { "content": "F3. \"Б\" va \"B\"", "is_correct": 0 },
+                    { "content": "F4. \"Б\" va \"Г\"", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu yo'l belgilari qanday\nmaqsadda qo'llaniladi?",
+                "image_url": "questions/69.jpg",
+                "answers": [
+                    { "content": "F1. Majburiy tarzda tezlikni\nkamaytirish uchun", "is_correct": 1 },
+                    { "content": "F2. Keskin tormoz berish uchun", "is_correct": 0 },
+                    { "content": "F3. Ehtiyot choralarini ko'rish uchun", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi yo'lning kichik radiusli xavfli\nburilish joyiga yaqinlashayotganlik\nhaqida ogohlantiradi?",
+                "image_url": "questions/70.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 0 },
+                    { "content": "F2. 2", "is_correct": 0 },
+                    { "content": "F3. 3", "is_correct": 0 },
+                    { "content": "F4. 4", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 8",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Rasmda ko'rsatilgan chorhha-...",
+                "image_url": "questions/71.jpg",
+                "answers": [
+                    { "content": "F1. Tartibga solinmagan, teng ahamiyatga\nega bo'lmagan yo'llar kesishadigan\nchorraha", "is_correct": 1 },
+                    { "content": "F2. Tartibga solinmagan, teng ahamiyatga\nega bo'lgan yo'llar kesishadigan chorraha", "is_correct": 0 },
+                    { "content": "F3. Tartibga solingan chorraha", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Aylanma harakatlanish chorrahasida:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Harakatlanayotgan transport vositalari aylanaga kirib kelayotgan\ntransport vositalariga nisbatan ustunlikka (imtiyozga) ega",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Harakatlanayotgan transport vositalariga nisbatan aylanaga kirib\nkelayotgan transport vositalari ustunlikka (imtiyozga) ega",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Ushbu qo'shimcha yo'l belgisi bildiradi :",
+                "image_url": "questions/73.jpg",
+                "answers": [
+                    {
+                        "content": "F1. Belgi ta'sir oralig'ida to'xtagan transport vositalari\nmajburiy evakuatsiya qilinishini ko'rsatadi",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Belgi ta'sir oralig'ida to'xtagan transport vositalarini\nevakuatsiya qilinish ruxsat etilganligini bildiradi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Belgi ta'sir oralig'ida to'xtagan transport vositalarini\nevakuatsiya qilin taqiqlanganligini bildiradi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Qaysi belgi ikkinchi darajali yo'l bilan\ntutashuvni bildiradi?",
+                "image_url": "questions/74.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 0 },
+                    { "content": "F2. 2", "is_correct": 1 },
+                    { "content": "F3. 3", "is_correct": 0 },
+                    { "content": "F4. 4", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Agar avtomobilning o`ng g`ildiraklari nam qoplamali yo`l yoqasiga chiqib\nqolsa, tavsiya etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobilni tormozlash va to`liq to`xtatish", "is_correct": 0 },
+                    { "content": "F2. Avtomobilni tormozlab, yo`lning qatnov qismiga ohista ravon burish", "is_correct": 0 },
+                    { "content": "F3. Avtomobilni tormozlamasdan yo`lning qatnov qismiga ohista ravon\nburish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi rasmda ajratuvchi mintaqa\nko'rsatilgan?",
+                "image_url": "questions/76.jpg",
+                "answers": [
+                    { "content": "F1. hech qaysi", "is_correct": 1 },
+                    { "content": "F2. В", "is_correct": 0 },
+                    { "content": "F3. А va Б", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu qo'shimcha axborot yo'l belgisi:",
+                "image_url": "questions/77.jpg",
+                "answers": [
+                    { "content": "F1. Ob'yektgacha bo'lgan masofani\nbildiradi", "is_correct": 1 },
+                    { "content": "F2. Belgining ta'sir oralig'ini bildiradi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko'k avtomobil chorahhani\nkesib o'tadi:",
+                "image_url": "questions/78.jpg",
+                "answers": [
+                    { "content": "F1. Birinchi bo'lib", "is_correct": 0 },
+                    { "content": "F2. Ikkinchi bo'lib", "is_correct": 0 },
+                    { "content": "F3. Oxirgi bo'lib", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Turar joy dahalarida qanday eng katta tezlikda\nharakatlanishga ruxsat etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 5 km/s", "is_correct": 0 },
+                    { "content": "F2. 20 km/s", "is_correct": 1 },
+                    { "content": "F3. 30 km/s", "is_correct": 0 },
+                    { "content": "F4. 40 km/s", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo'nalishli bo'lmagan transport vositalari \"A\" xarfi\nbilan belgilangan o'ng bo'lakda qaysi holatlarda\nharakatlanishlari mumkin?",
+                "image_url": "questions/80.jpg",
+                "answers": [
+                    { "content": "F1. O'nga burilishda", "is_correct": 0 },
+                    { "content": "F2. Yo'lovchilarni chiqarish va tushirishda", "is_correct": 0 },
+                    { "content": "F3. Yuqoridagi barcha holatlarda aragda\nyo'nalishli transport vositalariga xalaqit bermasa", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 9",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qaysi rasmda ikkita qatnov qismiga\nega bo`lgan yo'l ko'rsatilgan?",
+                "image_url": "questions/81.jpg",
+                "answers": [
+                    { "content": "F1. \"A\" rasmda", "is_correct": 0 },
+                    { "content": "F2. \"Б\" rasmda", "is_correct": 0 },
+                    { "content": "F3. Hech qaysi rasmda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu yo'l nechta qatnov\nqismiga ega?",
+                "image_url": "questions/82.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 1 },
+                    { "content": "F2. 2", "is_correct": 0 },
+                    { "content": "F3. 3", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Bu vaziyatda siz o`ngga burilayotib,\nSiz:",
+                "image_url": "questions/83.jpg",
+                "answers": [
+                    { "content": "F1. Faqat transport vositalariga yo'l\nberasiz", "is_correct": 0 },
+                    { "content": "F2. Barcha qatnov qismidagi\npiyodalarga yo'l berasiz", "is_correct": 0 },
+                    {
+                        "content": "F3. Harakat yo;nalishi boyicha va\nburilayotgan ko'chani kesib o'tayotgan\npiyodalarga hamda boshqa transport\nvositalariga yo’l barasiz",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Yuk avtomobili haydovchisiga qaysi\nyo'nalishda harakatlanishga ruxsat\nberiladi?",
+                "image_url": "questions/84.jpg",
+                "answers": [
+                    { "content": "F1. To'g'riga va o'ngga", "is_correct": 1 },
+                    { "content": "F2. O'ngga chapga va orqaga", "is_correct": 0 },
+                    { "content": "F3. Faqat o'ngga", "is_correct": 0 },
+                    { "content": "F4. Barcha yo'nalishlarga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi transport vositalariga\nharakatlanishga ruxsat berilgan?",
+                "image_url": "questions/85.jpg",
+                "answers": [
+                    { "content": "F1. Motosikl va yengil avtomobilga\nto'g'riga va o'nga", "is_correct": 0 },
+                    { "content": "F2. Motosiklga o'nga va yengil avtomobilga\nbarcha yo'nalishlarga", "is_correct": 0 },
+                    { "content": "F3. Yengil avtomobilga to'g'riga va o'nga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "N1 toifadagi avtotransport vositalarining boshqaruv qurilmasidagi\nqanday eng katta lyuft yig'indisiga yo'l qo'yiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 10 gradus", "is_correct": 0 },
+                    { "content": "F2. 20 gradus", "is_correct": 1 },
+                    { "content": "F3. 25 gradus", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu svetafor qaysi\nyo'nalishda harakatlanishga\nruxsat beradi?",
+                "image_url": "questions/87.jpg",
+                "answers": [
+                    { "content": "F1. Faqat chapga", "is_correct": 0 },
+                    { "content": "F2. To'g'riga va chapga", "is_correct": 0 },
+                    { "content": "F3. To'g'riga va o'ngga", "is_correct": 1 },
+                    { "content": "F4. Faqat o'ngga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi brlgi yo'lning ko'rsatilgan\nyo'nalishida oxiri berk ko'chaligini\nbildiradi",
+                "image_url": "questions/88.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 0 },
+                    { "content": "F2. 2", "is_correct": 0 },
+                    { "content": "F3. 3", "is_correct": 0 },
+                    { "content": "F4. 4", "is_correct": 1 },
+                    { "content": "F5. 5", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Miltillovchi sariq ishorali svetofor:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tartibga solinmagan chorraha yoki piyodalar o'tish joyi\nborligidan xabardor qiladi", "is_correct": 1 },
+                    { "content": "F2. Tartibga solingan chorraha borligidan xabardor qiladi", "is_correct": 0 },
+                    { "content": "F3. Svetafor chirog'i almashuvidan xabardor qiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi ikkinchi darajali yo'l\nbilan kesishuvni bildiradi?",
+                "image_url": "questions/90.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 1 },
+                    { "content": "F2. 2", "is_correct": 0 },
+                    { "content": "F3. 3", "is_correct": 0 },
+                    { "content": "F4. 4", "is_correct": 0 },
+                    { "content": "F5. 5", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 10",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "To`xtash qoidasini qaysi transport\nvositasining haydovchisi buzdi?",
+                "image_url": "questions/91.jpg",
+                "answers": [
+                    { "content": "F1. Har ikkala haydovchi ham", "is_correct": 0 },
+                    { "content": "F2. Faqat ko`k avtomobil\nhaydovchisi", "is_correct": 0 },
+                    { "content": "F3. Faqat qizil avtomobil\nhaydovchisi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu vaziyatda siz o`ngga bo`lakda\nharakatlanmoqdasiz, sizning\nbo`lagingizda qayta tizilayotgan\ntransport vositasiga yo`l berishingiz\nkerakmi?",
+                "image_url": "questions/92.jpg",
+                "answers": [
+                    { "content": "F1. Kerak emas", "is_correct": 1 },
+                    { "content": "F2. Kerak", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo`l belgisi qaysi transport vositalarining\nharakatlanishini taqiqlanadi?",
+                "image_url": "questions/93.jpg",
+                "answers": [
+                    { "content": "F1. Ruxsat etilgan to`la vazni 3,5 tonnadan ortiq\nbo`lgan yuk avtomobillarini", "is_correct": 0 },
+                    { "content": "F2. Xavfli yuk tashiyotgan transport vositalarining\nharakatlanishini", "is_correct": 1 },
+                    { "content": "F3. Portlovchi va tez alangalanuvchi yukni\ntashiyotgan transport vositalarining harakatlanishi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sanab o`tilgan qaysi hollarda egiluvchan ulagichda\nshatakka olish taqiqlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat tog`li yo`llarda", "is_correct": 0 },
+                    { "content": "F2. Faqat sirpanchiq yo`lda", "is_correct": 1 },
+                    { "content": "F3. Kunning qorong`i vaqtida va yetarlicha ko`rinmaslik\nsharoitida", "is_correct": 0 },
+                    { "content": "F4. Barcha sanab o`tilgan hollarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qizil avtomobil chorrahani\nnechanchi bo`lib kesib o`tadi?",
+                "image_url": "questions/95.jpg",
+                "answers": [
+                    { "content": "F1. Oxirgi bo`lib", "is_correct": 1 },
+                    { "content": "F2. Ikkinchi bo`lib", "is_correct": 0 },
+                    { "content": "F3. Birinchi bo`lib", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu vaziyatda siz:",
+                "image_url": "questions/96.jpg",
+                "answers": [
+                    { "content": "F1. To`xtamasdan harakatni davom\nettirishingiz mumkin", "is_correct": 0 },
+                    { "content": "F2. Belgi oldida to`xtashingiz va\nsvetaforning ruxsat beruvchi\nishorasini kutishingiz kerak", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Bu joyda yo`lovchilarni chiqarish yoki\ntushirish maqsadida to`xtash\nmumkinmi?",
+                "image_url": "questions/97.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F1. Yo'q", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qanday hollarda sizga 50 km/s\ndan yuqori tezlikda harakatlanish\ntaqiqlangan?",
+                "image_url": "questions/98.jpg",
+                "answers": [
+                    { "content": "F1. Faqat qatnov qismi nam\nbo`lsa", "is_correct": 1 },
+                    { "content": "F2. Har qanday holatda ham", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi to`siqni o`ng yoki chap\ntomonidan chetlab o`tishga ruxsat\netilishini bildiradi?",
+                "image_url": "questions/99.jpg",
+                "answers": [
+                    { "content": "F1. 1", "is_correct": 0 },
+                    { "content": "F2. 2", "is_correct": 0 },
+                    { "content": "F3. 3", "is_correct": 0 },
+                    { "content": " F4. 4", "is_correct": 0 },
+                    { "content": " F5. 5", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "\"Imtiyoz\" atamasiga tegishli ta`rifni ko`rsating....",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l harakati qatnashchilariga nisbatan imtiyozi bo‘lgan boshqa yo‘l harakati\nqatnashchisining harakat yo‘nalishi yoki tezligini o‘zgartirishga majbur etishi\nmumkin bo‘lgan hollarda harakatni davom ettirmasligini yoki boshlamasligini,\nbiror-bir manyovr bajarishi mumkin emasligini bildiruvchi talab",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Mo‘ljallangan yo‘nalishda boshqa yo‘l harakati qatnashchilariga nisbatan\noldin harakatlanish huquqi",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 11",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Shokning belgilari qanday?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Teri va shilliq qavatining oqarishi", "is_correct": 0 },
+                    { "content": "F2. Kuchli ter ajralishi", "is_correct": 0 },
+                    { "content": "F3. Og`iz qurishi, chanqoqlik, nafas olishning tezlashuvi", "is_correct": 0 },
+                    { "content": "F4. Es-hushning noaniqligi, behush holati", "is_correct": 0 },
+                    { "content": "F5. Yuqoridagi barcha holatlar", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Agar avtomobilning o`ng g`ildiraklari nam qoplamali yo`l yoqasiga chiqib\nqolsa, tavsiya etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobilni tormozlash va to`liq to`xtatish", "is_correct": 0 },
+                    { "content": "F2. Avtomobilni tormozlab, yo`lning qatnov qismiga ohista ravon burish", "is_correct": 0 },
+                    { "content": "F3. Avtomobilni tormozlamasdan yo`lning qatnov qismiga ohista ravon\r\nburish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo‘l harakati xavfsizligini ta’minlash - ...",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l-transport hodisalarining kelib chiqish sabablarini oldini olishga,\r\nularning og‘ir oqibatlarini kamaytirishga qaratilgan faoliyat",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Transport vositalari va piyodalarning harakatlanishi uchun qurilgan yoki\r\nmoslashtirilgan yer bo‘lagi yoxud suniy inshoot yuzasi. Yo‘l avtomobil va\r\nshahar elektr transporti yo‘llarini hamda trotuarlarni o‘z ichiga oladi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Ushbu ko`rsatilgan holatda\nkim yo`l berishi kerak?",
+                "image_url": "questions/104.jpg",
+                "answers": [
+                    { "content": "F1. Avtomobil haydovchisi", "is_correct": 0 },
+                    { "content": "F2. Motosikl haydovchisi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tik nishablikda dvigatel bilan tormozlashda qiyalikka nisbatan qanday\nuzatma tanlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Nishablik qancha qiya bo`lsa uzatma pog`onasi shuncha yuqori\r\ntanlanadi", "is_correct": 0 },
+                    { "content": "F2. Nishablik qancha qiya bo`lsa uzatma pog`onasi shuncha past\r\ntanlanadi", "is_correct": 1 },
+                    { "content": "F3. Pog`onalarni nishablikka aloqasi yo`q", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi haydovchiga kesib\no`tilayotgan yo`lda harakatlanayotgan\ntransport vositalariga yo`l berishi\nlozimligini bildiradi?",
+                "image_url": "questions/106.jpg",
+                "answers": [
+                    { "content": "F1. А", "is_correct": 0 },
+                    { "content": "F2. Б", "is_correct": 0 },
+                    { "content": "F3. В", "is_correct": 0 },
+                    { "content": "F4. Г", "is_correct": 0 },
+                    { "content": "F5. Б va Г", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tumanga qarshi old chiroqlrni qorong`i vaqtda, yo`lning\nyoritilmagan qismlarida uzoqni yoki yaqinni yorituvchi chiroqlar\nbilan birga qo`llash mumkinmi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Mumkin", "is_correct": 1 },
+                    { "content": "F2. Mumkin emas", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgilardan qaysi biri\noldinda yo`l qoplamasi istida\nsun`iy notekislik borligi haqida\nogohlantiradi?",
+                "image_url": "questions/108.jpg",
+                "answers": [
+                    { "content": "F1. А", "is_correct": 0 },
+                    { "content": "F2. В", "is_correct": 1 },
+                    { "content": "F3. С", "is_correct": 0 },
+                    { "content": "F4. А va С", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ajratuvchi mintaqa - ...",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo‘lning relssiz transport vositalari harakati uchun mo‘ljallangan qismi", "is_correct": 0 },
+                    {
+                        "content": "F2. Avtomobillarning bir qator bo‘lib harakatlanishi uchun yetarlicha keng bo‘lgan, yo‘l\nchiziqlari bilan belgilangan yoki belgilanmagan yo‘l qatnov qismining har qanday bo‘ylama\nbo‘lagi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Yo‘lning yonma-yon joylashgan qatnov qismlarini ajratuvchi, transport vositalari\nharakatlanishi yoki to‘xtashi uchun mo‘ljallanmagan, yo‘l sathidan baland va (yoki) 1.1\nyotiq chizig‘i bilan belgilangan qismi",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Aholi punkti\" atamasi nimani bildiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Kirish va chiqish yo`llari 5.22 - 5.25 belgilari bilan belgilangan\nhududni", "is_correct": 1 },
+                    { "content": "F2. Aholi yashaydigan hududni", "is_correct": 0 },
+                    { "content": "F3. Shahar, qishloq joylari hududini", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 12",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Muskul va paylarning ezilishi hamda cho`zilishi alomatlari qanday?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Jarohatlangan joyda og`riq seziladi.", "is_correct": 0 },
+                    {
+                        "content": "F2. Jarohatlangan joyda shish paydo bo`ladi, og`riq seziladi, ba`zan\nshu joyda mayda kapillyar qon tomirlari yorilib, qon quyilishi\nnatijasida ko‘karish paydo bo‘ladi.",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Aylanma harakatlanish chorrahasida:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Harakatlanayotgan transport vositalari aylanaga kirib kelayotgan\ntransport vositalariga nisbatan ustunlikka (imtiyozga) ega",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Harakatlanayotgan transport vositalariga nisbatan aylanaga kirib\nkelayotgan transport vositalari ustunlikka (imtiyozga) ega",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Ushbu qo`shimcha axborot yo`l belgisi\nbildiradi:",
+                "image_url": "questions/113.jpg",
+                "answers": [
+                    {
+                        "content": "F1. Barcha turdagi transport vositalarining\nto`xtab turish uchun yo`lning qatnov qismida,\ntrotuar yoniga qo’yish usulini",
+                        "is_correct": 1
+                    },
+                    { "content": "F2. Yengil avtomobillarning to`xtab turish joyini", "is_correct": 0 },
+                    { "content": "F3. Mexanik transport vositalarining to`xtab\nturish joyini", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chapga burilayotgan haydovchi kesishayotgan yo`lning qatnov\nqismidan o`tayotgan piyodalarga yo`l berishi kerakmi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ha, barcha hollarda o`tkazishi kerak", "is_correct": 1 },
+                    { "content": "F2. Ha, agarda piyodalar o`tish joyi bo`lsa", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu chorrahada avtobus\nhaydovchisi kimga yo`l\nberishi kerak?",
+                "image_url": "questions/115.jpg",
+                "answers": [
+                    { "content": "F1. Hech kimga", "is_correct": 0 },
+                    { "content": "F2. Qizil avtomobilga", "is_correct": 0 },
+                    { "content": "F3. Ko`k avtomobilga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "M2 toifadagi avtotransport vositalarining boshqaruv qurilmasidagi\nqanday eng katta lyuft yig`indisiga yo`l qo`yiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 10°", "is_correct": 0 },
+                    { "content": "F2. 20°", "is_correct": 1 },
+                    { "content": "F3. 25°", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Agar avtomobilning o`ng g`ildiraklari nam qoplamali yo`l yoqasiga chiqib\nqolsa, tavsiya etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobilni tormozlash va to`liq to`xtatish", "is_correct": 0 },
+                    { "content": "F2. Avtomobilni tormozlab, yo`lning qatnov qismiga ohista ravon burish", "is_correct": 0 },
+                    { "content": "F3. Avtomobilni tormozlamasdan yo`lning qatnov qismiga ohista ravon\nburish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi rasmda ajratuvchi mintaqa\nbor bo`lgan yo`l ko`rsatilgan?",
+                "image_url": "questions/118.jpg",
+                "answers": [
+                    { "content": "F1. Chapda", "is_correct": 0 },
+                    { "content": "F2. O`ngda", "is_correct": 1 },
+                    { "content": "F3. Har ikkisida", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Kunning qorong`i vaqtida harakatlanayotgan transport vositasining\nhaydovchisi tezlikni tanlashda qanday eng asosiy hal qiluvchi omilni\ne`tiborga olishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo`l harakati qoidalari o`rnatilgan tezlik chegaralarini", "is_correct": 0 },
+                    { "content": "F2. Transport vositasining texnik tavsifnomasida ko`rsatilgan tezlik\nchegarasini", "is_correct": 0 },
+                    { "content": "F3. Ko`rinish sharoitini", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Turar joy dahalarida qanday eng katta tezlikda\nharakatlanishga ruxsat etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 5 km/s", "is_correct": 0 },
+                    { "content": "F2. 20 km/s", "is_correct": 1 },
+                    { "content": "F3. 30 km/s", "is_correct": 0 },
+                    { "content": "F4. 40 km/s", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 13",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Bosh miya jarohatlanganda, miya chayqalganda yoki bo`yin qismi jarohatlanganda\nbirinchi yordam ko`rsatish:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Jarohatlangan odamni qattiq va tekis zambilga solib, bo'yin qismi tagiga qattiq\nyostiqcha qo'yib, qo‘zg‘atmasdan, mahkam bog‘lab shifoxonaga yuboriladi.",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Jarohatlangan odamni yonboshlatib yotqizib, bo’yin qismi tagiga qattiq yostiqcha\nqo'yib, mahkam bog‘lab shifoxonaga yuboriladi.",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Jarohatlangan odamni tinchlantirish, jarohatlangan joy sohasini sovuq suv, muz\nqo'yish yo'llari bilan sovitish, og‘riqni susaytirish va qon ketishini kamaytirish",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Yo`lning xavfli burilishlarida oldingi uzatmali avtomobilning orqa o`qi yon tomonga\nsirpanayotganda siz qanday harakat qilasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Gaz berishni kamaytirib rul chambaragi bilan boshqaruvni barqarorlashtirasiz", "is_correct": 0 },
+                    { "content": "F2. Tormozlab turib rul chambaragini sirpangan tomonga burasiz", "is_correct": 0 },
+                    {
+                        "content": "F3. Gaz pedalini ohista bosib avtomobilni rul chambaragini to‘g‘rilab avtomobilni\nsirpanishdan olib chiqib ketasiz",
+                        "is_correct": 1
+                    },
+                    { "content": "F4. Gaz pedalini ko‘proq bosib rul chambaragini o‘zgartirmasdan sirpanishdan olib\nchiqasiz", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo`l belgisi nimani bildiradi?",
+                "image_url": "questions/123.jpg",
+                "answers": [
+                    { "content": "F1. Xavfli yuktashiyotgan transport\nvositalari harakatini taqiqlaydi", "is_correct": 1 },
+                    { "content": "F2. Og‘ir yuk tashiyotgan transport\nvositalari harakatini taqiqlaydi", "is_correct": 0 },
+                    {
+                        "content": "F3. Portlovchi va tez alangalanadigan yuk\ntashiyotgan transport vositalari harakatini\ntaqiqlaydi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Haydovchining o`rtacha reaksiya vaqti deb qabul qilingan:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Taxminan 0,2 sekund", "is_correct": 0 },
+                    { "content": "F2. Taxminan 1 sekund", "is_correct": 1 },
+                    { "content": "F3. Taxminan 5 sekund", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu chorrahada haydovchi orqaga\nharakatlanib ko`rsatilgan manyovrni\nbajarishga ruxsat etiladimi?",
+                "image_url": "questions/125.jpg",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 0 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu tik chiziq nimani bildiradi?",
+                "image_url": "questions/126.jpg",
+                "answers": [
+                    { "content": "F1. Temir yo‘l kesishmasiga\nyaqinlashganlik haqida", "is_correct": 0 },
+                    { "content": "F2. Xavfli chorrahaga\nyaqinlashganlik haqida", "is_correct": 0 },
+                    {
+                        "content": "F3. Yo‘lning kichik radiusli burilish,\ntik nishablik va boshqa xavfli\njoylarda yo‘l to‘siqlarining yon\nyuzalarini bildiradi",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Qaysi yo‘l belgilari\nyo‘lning tor qismida\nxaydovchiga ustunlik\nberadi?",
+                "image_url": "questions/127.jpg",
+                "answers": [
+                    { "content": "F1. Faqat В", "is_correct": 0 },
+                    { "content": "F2. А va В", "is_correct": 0 },
+                    { "content": "F3. Faqat Д", "is_correct": 1 },
+                    { "content": "F4. Faqat С", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo`l belgisi qanday\nmaqsadda qo`llaniladi?",
+                "image_url": "questions/128.jpg",
+                "answers": [
+                    { "content": "F1. Majburiy tarzda tezlikni\nkamaytirish uchun", "is_correct": 0 },
+                    { "content": "F2. To‘xtamasdan o‘tishni\ntaqiqlaydi", "is_correct": 1 },
+                    { "content": "F3. Ehtiyot choralarini ko‘rish\nuchun", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "M3 toifadagi avtotransport vositalarining boshqaruv\nqurilmasidagi qanday eng katta lyuft yig`indisiga yo`l qo`yiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 10°", "is_correct": 0 },
+                    { "content": "F2. 20°", "is_correct": 1 },
+                    { "content": "F3. 25°", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yondosh hudud bu - ...",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Bevosita yo‘lga tutashgan va transport vositalari o‘tib ketishi uchun\nmo‘ljallanmagan hudud (hovlilar, turar joy dahalari, avtomobil to‘xtab turish\njoylari, yonilg‘i quyish shoxobchalari, korxona va shunga o‘xshashlar).",
+                        "is_correct": 1
+                    },
+                    { "content": "F2. Yo‘llarning o‘zaro bir sathda kesishadigan, tutashadigan va ayriladigan joyi", "is_correct": 0 },
+                    { "content": "F3. Yo‘lning relssiz transport vositalari harakati uchun mo‘ljallangan qismi", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 14",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qorin bo‘shlig‘i jarohatlangan odamga ovqat, suv, dori - darmon\nberish mumkinmi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tezlik ortishi bilan haydovchining ko‘rish maydoni qanday\no‘zgaradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Kengayadi", "is_correct": 0 },
+                    { "content": "F2. O‘zgarmaydi", "is_correct": 0 },
+                    { "content": "F3. Torayadi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Mexanik transport vositasi - bu. . .",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Odamlarni, yuklarni tashishga yoki maxsus ishlarni bajarishga mo‘ljallangan\nqurilma", "is_correct": 0 },
+                    {
+                        "content": "F2. Mexanik transport vositasi tarkibida harakatlanishga mo‘‘jallangan, dvigatel\nbilan jihozlanmagan transport vositasi. Bu atama yarim tirkama va uzaytiriladigan\ntirkamalarga ham taaluqlidir",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Dvigatel bilan harakatga keltiriladigan transport vositasi (mopeddan tashqari).\nBu atama barcha traktor va o‘zi yurar moslamalarga ham taalluqlidir",
+                        "is_correct": 1
+                    }
+                ]
+            },
+            {
+                "content": "Yengil avtomobilga qaysi\nyo‘nalishlarda harakatlanishga\nruxsat etiladi?",
+                "image_url": "questions/134.jpg",
+                "answers": [
+                    { "content": "F1. Faqat to‘g‘riga", "is_correct": 0 },
+                    { "content": "F2. Faqat o‘ng va chapga", "is_correct": 0 },
+                    { "content": "F3. Istalgan yo‘nalishda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu holatda ko‘k avtomobil\nhaydovchisi kimga yo‘l berishi lozim?",
+                "image_url": "questions/135.jpg",
+                "answers": [
+                    { "content": "F1. Faqat avtobusga", "is_correct": 0 },
+                    { "content": "F2. Hech kimga", "is_correct": 1 },
+                    { "content": "F3. Faqat yengil avtomobilga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Tormoz yo‘li deb nimaga aytiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Haydovchi biron bir havfni aniqlab, avtomobilni to‘liq\nto‘xtatguncha bosib o‘tgan masofasi", "is_correct": 0 },
+                    { "content": "F2. Haydovchi tormoz tepkisini bosgandan to avtomobil to‘liq\nto‘xtaguncha bosib o‘tilgan masofa", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu belgilardan qaysi biri\n«Notekis yo‘q» deb nomlanadi?",
+                "image_url": "questions/137.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 0 },
+                    { "content": "F3. «C»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Aholi punktlaridan tashqarida tirkamali yuk avtomobillari qanday\nyuqori tezlik bilan harakatlanishi mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 80 km/s", "is_correct": 0 },
+                    { "content": "F2. 70 km/s", "is_correct": 1 },
+                    { "content": "F3. 90 km/s", "is_correct": 0 },
+                    { "content": "F4. 60 km/s", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgi nimani bildiradi?",
+                "image_url": "questions/139.jpg",
+                "answers": [
+                    { "content": "F1. Oldinda tik balandlik borligini", "is_correct": 0 },
+                    { "content": "F2. Oldinda ko‘tarma ko‘prik\nborligini", "is_correct": 0 },
+                    { "content": "F3. Sun’iy yo‘l notekisligini", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo‘l harakati qoidalariga ko‘ra yo‘l belgilari nechta guruhga\nbo‘linadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 5 ta", "is_correct": 0 },
+                    { "content": "F2. 6 ta", "is_correct": 0 },
+                    { "content": "F3. 7 ta", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 15",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Venoz qon ketish alomatlarini ko‘rsating:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Qon tomirlaridan pushti rangli qon kuchli pulsatsiya bilan\notilib chiqadi", "is_correct": 0 },
+                    { "content": "F2. Qon tomirlaridan to‘q qizil rangdagi qon sizib oqib chiqadi", "is_correct": 1 },
+                    { "content": "F3. Mayda qon tomirlaridan ichki a’zolarga qonning oqib\nchiqishi kuzatiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "G‘ildiraklarni yo‘l bilan ilashishi yo‘qolgana (kuchli yomg‘ir, sel yoki\nsuv toshgan yo‘l qismlari) haydovchi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tezlikni oshirishi lozim", "is_correct": 0 },
+                    { "content": "F2. Tormoz tepkisini keskin bosish bilan tezlikni kamaytirish lozim", "is_correct": 0 },
+                    { "content": "F3. Dvigatel bilan tormozlash orqali tezlikni kamaytirishi lozim", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Turar joy dahalaridan chiqishda haydovchilar:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Boshqa harakat qatnashchilariga yo‘l berishi kerak", "is_correct": 1 },
+                    { "content": "F2. Boshqa harakat qatnashchilariga nisbatan\nimtiyozga ega", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgilardan qaysi biri, bir yoki\nbir nechta bo‘laklarda harakatlanish\nyo‘nalishi qarama-qarshi tomonga\no‘zgarishi mumkin bo‘lgan yo‘l\nqismining boshlanishini biliradi?",
+                "image_url": "questions/144.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «Б»", "is_correct": 0 },
+                    { "content": "F3. «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chorrahada qaysi avtomobil yo‘l\nberishi kerak?",
+                "image_url": "questions/145.jpg",
+                "answers": [
+                    { "content": "F1. Ko‘k avtomobil", "is_correct": 0 },
+                    { "content": "F2. Qizil avtomobil", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tumanga qarshi chiroqlarni qorong‘i vaqtda yo‘lning\nyoritilmagan qisimlarida uzoqni yorituvchi chiroqlar bilan birga\nqo‘llash mumkinmi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 1 },
+                    { "content": "F2. Yo‘q", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yengil avtomobil tirkamasi burilishda qanday trayektoriya bo‘yicha\nharakatlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Burilish markaziga nisbatan avtomobil trayektoriyasidan\ntashqarida", "is_correct": 0 },
+                    { "content": "F2. Avtomobil burilish trayektoriyasi bo‘yicha", "is_correct": 0 },
+                    { "content": "F3. Burilish markaziga nisbatan avtomobil trayektoriyasidan\nichkarida", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi temir yo‘l kesishmasini\nto‘suvchi qurilma bilan jihozlanganligi\nhaqida ogohlantiradi?",
+                "image_url": "questions/148.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 0 },
+                    { "content": "F3. «C»", "is_correct": 1 },
+                    { "content": "F4. «Д»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Agar biror bir to‘siq sababli qarama-qarshi yo‘nalishlarda\nharakatlanish qiyin bo‘lsa kim yo‘l berishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. To‘siq bo‘lmagan tomondagi haydovchi", "is_correct": 0 },
+                    { "content": "F2. To‘siq o‘z tomonida bo‘lgan haydovchi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "«Imtiyoz» atamasiga tegishli tarifni ko‘rsating:",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l harakati qatnashchilariga nisbatan imtiyozi bo‘lgan boshqa yo‘l harakati\nqatnashchisining harakat yo‘nalishi yoki tezligini o‘zgartirishga majbur etishi\nmumkin bo‘lgan hollarda harakatni davom ettirmasligi yoki boshlamasligi,\nbiror-bir manyovr bajarishi mumkin emasligini bildiruvchi talab.",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Mo‘ljallangan yo‘nalishda boshqa yo‘l harakati qatnashchilariga nisbatan\noldin harakatlanish huquqi",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 16",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Arterial qon ketish alomatlarini ko‘rsating:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Qon tomirlaridan pushti rangli qon kuchli pulsatsiya bilan\notilib chiqadi", "is_correct": 1 },
+                    { "content": "F2. Qon tomirlaridan to‘q qizil rangdagi qon sizib oqib chiqadi", "is_correct": 0 },
+                    { "content": "F3. Mayda qon tomirlaridan ichki a’zolarga qonning oqib chiqishi\nkuzatiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Avtomobilni qanday boshqarish usuli yonilg‘i sarfini tejaydi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Shiddat bilan tezlanish oxista va sekinlashish bilan", "is_correct": 0 },
+                    { "content": "F2. Ohista (ravon) tezlanish va shiddat bilan sekinlashish bilan", "is_correct": 0 },
+                    { "content": "F3. Ohista (ravon) tezlanish va ohista sekinlashish bilan", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko‘rsatilgan qaysi belgi\nyo‘lning o‘ta sirpanchiq\nbo‘lgan qismini bildiradi?",
+                "image_url": "questions/153.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. «А» va «В»", "is_correct": 0 },
+                    { "content": "Faqat «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chap qo‘lni yonga cho‘zish yoki o‘ng qo‘lni tirsakdan to‘g‘ri\nburchak ostida bukib, Yuqoriga ko‘tarish ishorasi nimani bildiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Chapga burilishni yoki qayrilib olishni", "is_correct": 1 },
+                    { "content": "F2. O‘ngga burilish yoki qayrilib olishni", "is_correct": 0 },
+                    { "content": "F3. To‘xtashi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu holatda qaysi transport\nvositasi yo‘l berishi kerak?",
+                "image_url": "questions/155.jpg",
+                "answers": [
+                    { "content": "F1. Yengil avtomobil", "is_correct": 0 },
+                    { "content": "F2. Yuk avtomobili", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi svetaforning (tartibga\nsoluvchining) taqiqlovchi\nishorasida transport vositalari\nto‘xtaydigan joyni bildiradi?",
+                "image_url": "questions/156.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «Б»", "is_correct": 0 },
+                    { "content": "F3. «В»", "is_correct": 1 },
+                    { "content": "F4. «Г»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sekinlashish bo‘lagi bo‘lgan yo‘llarda burilmoqchi bo‘lgan\nhaydovchi qachon tezlikni kamaytirishi lozim?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Sekinlashish bo‘lagiga o‘tguncha", "is_correct": 0 },
+                    { "content": "F2. Sekinlashish bo‘lagiga o‘tgach", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi falokatli holatlar uchun\nkirish yo‘lini bildiradi?",
+                "image_url": "questions/158.jpg",
+                "answers": [
+                    { "content": "F1. «А» va «Д»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 1 },
+                    { "content": "F3. «C»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qattiq ulagichda shatakka olingan avtobusda yoki\ntrolleybusda odam tashishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Taqiqlanadi", "is_correct": 1 },
+                    { "content": "F2. Ruxsat etiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Quyudagi izoh qaysi atamaga tegishli? Texnik nuqson, tashilayotgan\nyuk, haydovchi va yo‘lovchining holati, yo‘ldagi biror to‘siq tufayli xavf\nyuzaga kelganda yoxud ob-havo sharoitiga bog‘liq holda transport\nvositasi harakatini to‘xtatish.",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo‘l-transport hodisasi", "is_correct": 0 },
+                    { "content": "F2. Yo‘l xarakati xavfsizligini ta’minlash", "is_correct": 0 },
+                    { "content": "F3. Majburiy to‘xtash", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 17",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Bosh miya jarohatlanishining quidagi alomatlar bilan xarakterlanadi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Hushdan ketish bir necha soniyadan bir necha soatgacha bo‘lishi\nmumkin", "is_correct": 0 },
+                    { "content": "F2. Qayt qilish bir ikki marta, og‘ir holatlarda ko‘proq bo‘lishi mumkin", "is_correct": 0 },
+                    {
+                        "content": "F3. Amneziya - xotiraning yo‘qolishi/ sodir bo‘lgan jarohatlanish bilan\nbog‘liq va hayotidagi ba’zi voqealar xotirasidan o‘chadi",
+                        "is_correct": 0
+                    },
+                    { "content": "F4. Yuqoridagi barcha holatlar", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tik nishabliklarda dvigatel bilan tormozlashda qiyalikka nisbatan qanday\nuzatma tanlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Nishablik qancha qiya bo‘lsa uzatma pog‘onasi shuncha yuqori\ntanlanadi", "is_correct": 0 },
+                    { "content": "F2. Nishablik qancha qiya bo‘lsa uzatma pog‘onasi shuncha past tanlanadi", "is_correct": 1 },
+                    { "content": "F3. Pog‘onalarni tanlashning nishablikka aloqasi yo‘q", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadan tashqaridagi tartibga solinmagan velosiped\nyo‘lkasi bilan yo‘l kesishmasida kim yo‘l berishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Transport vositalari haydovchilari", "is_correct": 0 },
+                    { "content": "F2. Velosiped yo‘lkasidan harakatlanayotgan velosiped va\nmoped haydovchilari", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Hayvonlarni yo‘lda haydab borishga qoidaga\nko‘ra ruxsat etiladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Kunning yorug‘ vaqtida", "is_correct": 1 },
+                    { "content": "F2. Kunning qorong‘i vaqtida", "is_correct": 0 },
+                    { "content": "F3. Istalgan vaqtda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu holatda qaysi transport\nvositasi yo‘l berishi kerak?",
+                "image_url": "questions/165.jpg",
+                "answers": [
+                    { "content": "F1. Yengil avtomobil", "is_correct": 0 },
+                    { "content": "F2. Avtobus", "is_correct": 1 },
+                    { "content": "F3. Hech kim", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgilar yuk avtomobillarida\nquvib o‘tish taqiqlangan\nhududning oxirini bildiradi?",
+                "image_url": "questions/166.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 0 },
+                    { "content": "F3. Faqat «А» , «Б»", "is_correct": 0 },
+                    { "content": "F4. «А», «Б», «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Svetaforning miltillovchi sariq ishorasi nima haqida\nogohlantiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Harakatlanishga ruxsat beradi", "is_correct": 0 },
+                    { "content": "F2. Chorraha tartibga solinmaganligi to‘g‘risida", "is_correct": 0 },
+                    { "content": "F3. Barcha javoblar to‘g‘ri", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Transport vositalarini qatnov qimining kengaytirilmagan joylarida\nqanday tartibda to‘xtash va to‘xtab turishga ruxsat etiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Burchak ostida", "is_correct": 0 },
+                    { "content": "F2. Parallel ravishda", "is_correct": 1 },
+                    { "content": "F3. Istalgan usulda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi to‘xtash chizig‘i oldida, u\nbo‘maganda, kesib o‘tiladigan qatnov\nqismining chetida to‘xtamasdan\nharakatlanishni taqiqlaydi?",
+                "image_url": "questions/169.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «Б»", "is_correct": 1 },
+                    { "content": "F3. «Б» ва «В»", "is_correct": 0 },
+                    { "content": "F4. «А» ва «Г»", "is_correct": 0 },
+                    { "content": "F5. «Г»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘l harakati xavfsizligini ta’minlash -",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l-transport hodisalarining kelib chiqish sabablarini oldini\nolishga, ularning og‘ir oqibatlarini kamaytirishga qaratilgan faoliyat",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Yo‘llarda harakatni boshqarish bo‘yicha huquqiy, tashkiliy-\ntexnikaviy tadbirlar va boshqaruv harakatlari majmui",
+                        "is_correct": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 18",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Shokning belgilari:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Teri va shilliq qavatlarning oqarishi", "is_correct": 0 },
+                    { "content": "F2. Kuchli ter ajralishi", "is_correct": 0 },
+                    { "content": "F3. Og‘iz qurishi, chanqoqlik, nafas olishning tezlashuvi", "is_correct": 0 },
+                    { "content": "F4. Es - hushning noaniqligi, behush holat", "is_correct": 0 },
+                    { "content": "F5. Yuqoridagi barcha holatlar", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Quvib o‘tishga taalluqli\nbelgilarni ko‘rsating?",
+                "image_url": "questions/172.jpg",
+                "answers": [
+                    { "content": "F1. «А» va «В»", "is_correct": 0 },
+                    { "content": "F2. «В» va «C»", "is_correct": 0 },
+                    { "content": "F3. «А» va «C»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Avtomobillarning bir qator bo‘lib harakatlanishi uchun yetarlicha keng\nbo‘lgan, yo‘l chiziqlari bilan belgilangan yoki belgilanmagan yo‘l qatnov\nqismining har qanday bo‘ylama bo‘lagi nima deb ataladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Qatnov qismi", "is_correct": 0 },
+                    { "content": "F2. Harakatlanish bo‘lagi", "is_correct": 1 },
+                    { "content": "F3. Yo‘l yoqasi", "is_correct": 0 },
+                    { "content": "F4. Yondosh hudud", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi velosiped\nyo‘lkasini ko‘rsatadi?",
+                "image_url": "questions/174.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 0 },
+                    { "content": "F3. «C»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu chorrahada kim yo‘l beradi?",
+                "image_url": "questions/175.jpg",
+                "answers": [
+                    { "content": "F1. Ko‘k avtomobil", "is_correct": 0 },
+                    { "content": "F2. Mototsikl va sariq avtomobil", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Xavfsiz oraliq masofani ko‘rsating:",
+                "image_url": "questions/176.jpg",
+                "answers": [
+                    { "content": "F1. «А» ва «В»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 0 },
+                    { "content": "F3. «Б»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu belgi qaysi turdagi transport\nvositalarini to‘xtamasdan\no‘tishlarini taqiqlaydi?",
+                "image_url": "questions/177.jpg",
+                "answers": [
+                    { "content": "F1. Yuk avtomobillarini", "is_correct": 0 },
+                    { "content": "F2. Yengil avtomobillarini", "is_correct": 0 },
+                    { "content": "F3. Barcha turdagi transport\nvositalarini", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Agar haydovchi keskin tormoz bermasdan harakatini to‘xtata\nolmasa, svetaforning yashil ishorasidan keyin yongan sariq\nishorasida harakatni davom ettirishga ruxsat beriladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 1 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgi «Xavfli yuk tashiyotgan\ntransport vositalarining\nharakatlanishi taqiqlangan» deb\nnomlanadi?",
+                "image_url": "questions/179.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «В»", "is_correct": 0 },
+                    { "content": "F3. «C»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chorraha - bu ...",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Bevosita yo‘lga tutashgan va transport vositalari o‘tib ketishi uchun\nmo‘ljallanmagan hudud (hovlilar, turar joy dahalari, avtomobil to‘xtab turish\njoylari, yonilg‘i quyish shaxobchalari, korxona va shunga o‘xshashlar)",
+                        "is_correct": 0
+                    },
+                    { "content": "F2. Yo‘lning o‘zaro bir sathda kesishadigan, tutashadigan va ayriladigan joyi", "is_correct": 1 },
+                    { "content": "F3. Yo‘llarning relissiz transport vositalari harakati uchun mo‘ljallangan qismi", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 19",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Bosh miya jarohatlanishining asosiy alomatlari:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Hushdan ketish bir necha soniyadan bir necha soatgacha bo‘lishi\nmumkin", "is_correct": 0 },
+                    { "content": "F2. Qayt qilish bir - ikki marta, og‘ir holatlarda ko‘proq bo‘lishi mumkin", "is_correct": 0 },
+                    {
+                        "content": "F3. Amneziya - xotiraning yo‘qolishi, sodir bo‘lgan jarohatlanish bilan bog‘liq\nva hayotidan ba’zi voqealar xotirasidan o‘chadi",
+                        "is_correct": 0
+                    },
+                    { "content": "F4. Yuqoridagi barcha holatlar", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "G‘ildiraklarni yo‘l bilan ilashishi yo‘qolganda (kuchli yomg‘ir, sel yoki suv\ntoshgan yo‘l qisimlari) haydovchi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tezlikni oshirishi lozim", "is_correct": 0 },
+                    { "content": "F2. Tormoz tepkisini keskin bosish bilan tezlikni kamaytirishi lozim", "is_correct": 0 },
+                    { "content": "F3. Dvigatel bilan tormozlash orqali tezlikni kamaytirishi lozim", "is_correct": 1 },
+                    { "content": "F4. Barcha sanab o`tilgan hollarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Piyodalar yo‘lkasi - bu . . .",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l qatnov qismining piyodalar kesib o‘tishi uchun mo‘ljallangan, 5.16.1, 5.16.2\nyo‘l belgilari va 1.14.1-1.14.3 yo‘l chiziqlari bilan ajratilgan bo‘lagi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Yo‘lning piyodalar harakatlanishi uchun mo‘ljallangan va transport vositalari\nharakati taqiqlangan qismi",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F3. Qatnov qismiga tutashgan yoki undan maysazor, ariq, maxsus to‘siqlar bilan\najratilgan va piyodalarning harakatlanishi uchun mo‘ljallangan yo‘l qismi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Qaysi belgi yo‘lning tor qisimlarida\nro‘paradan kelayotgan transport vositasiga\nyo‘l berish lozimligini bildiradi?",
+                "image_url": "questions/184.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 1 },
+                    { "content": "F2. «Б»", "is_correct": 0 },
+                    { "content": "F3. «Б» va «В»", "is_correct": 0 },
+                    { "content": "F4. «А» va «Г»", "is_correct": 0 },
+                    { "content": "F5. «Г»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘lning qiyaliklarida qisqa muddatga to‘xtagan mexanik\nuzatmali avtomobilni joyidan to‘satdan harakatlanib ketishini\noldini olish uchun:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. To‘xtab turish tormozidan foydalanish lozim", "is_correct": 1 },
+                    { "content": "F2. Birinchi uzatmani yoki orqa uzatmani ulash lozim", "is_correct": 0 },
+                    { "content": "F3. Uzatmalar qutisi richagini neytral holatga o‘tkazish lozim", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "To‘xtab turish tormoz tizimi N toifadagi avtotransport vositalarini\naslahalangan holatda qanday qiyalikda harakatsiz holatda ushlab tura\nolmasa foydalanish taqiqlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 25 foizdan kam bo‘lgan", "is_correct": 0 },
+                    { "content": "F2. 16 foizdan kam bo‘lgan", "is_correct": 0 },
+                    { "content": "F3. 31 foizdan kam bo‘lgan", "is_correct": 1 },
+                    { "content": "F4. 20 foizdan kam bo‘lgan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgilardan qaysi biri\nhaydovchining shu joydagi yashash\nyoki ishlash joyiga yetib borishiga\nmonelik qilmaydi?",
+                "image_url": "questions/187.jpg",
+                "answers": [
+                    { "content": "F1. «A»", "is_correct": 0 },
+                    { "content": "F2. «B»", "is_correct": 0 },
+                    { "content": "F3. «C»", "is_correct": 1 },
+                    { "content": "F4. «B» va «C»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko‘rsatilgan yo‘l belgilaridan qaysi\nbiri taqiqlovchi belgilar ilgari\nkiritgan barcha cheklovlarni bekor\nqiladi?",
+                "image_url": "questions/188.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «В»", "is_correct": 1 },
+                    { "content": "F2. «А» va «Б»", "is_correct": 0 },
+                    { "content": "F3. «В» va «Г»", "is_correct": 0 },
+                    { "content": "F4. Barchasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi rasmdagi yo‘l ajratuvchi\nmintaqa ega?",
+                "image_url": "questions/189.jpg",
+                "answers": [
+                    { "content": "F1. Har ikkisida", "is_correct": 0 },
+                    { "content": "F2. O‘ng tarafdagisida", "is_correct": 1 },
+                    { "content": "F3. Chap tarafdagisida", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu ko‘rsatilgan yo‘llar\nnechtadan qatnov qismiga ega?",
+                "image_url": "questions/190.jpg",
+                "answers": [
+                    { "content": "F1. Bittadan", "is_correct": 0 },
+                    { "content": "F2. Ikkitadan", "is_correct": 0 },
+                    { "content": "F3. To‘rttadan", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 20",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Yo‘l-transport hodisasi-",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Transport vositasining yo‘lda harakatlanishi jarayonida ro‘y bergan,\nfuqarolarning halok bo‘lishiga yoki sog‘lig‘iga zarar yetishiga, transport\nvositalari, inshootlar, yuklarning shikastlanishi yoxud boshqa moddiy\nzarar yetishiga sabab bo‘lgan hodisa",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Yo‘l harakati qatnashchilarining yo‘l-transport hodisalari va ularning\noqibatlaridan himoyalanganlik darajasini aks ettiruvchi yo‘l harakati holati",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Quyidagi belgilardan qaysi biri\nhaydovchini boshqa xavf-xatarlar\nto‘g‘risida ogohlantiradi?",
+                "image_url": "questions/192.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 0 },
+                    { "content": "F3. Faqat «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Moped haydovchilariga ruxsat beriladi:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat yo‘lning chetki o‘ng bo‘lagida o‘ng tomonidan bir qator\nbo‘lib harakatlanishga", "is_correct": 0 },
+                    { "content": "F2. Faqat yo‘l yoqasidan harakatlanishga, agar piyodalarga xalaqit\nbermasa", "is_correct": 0 },
+                    { "content": "F3. Barcha sanab o‘tilgan hollarga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Harakatlanishga ruxsat berilgan:",
+                "image_url": "questions/194.jpg",
+                "answers": [
+                    { "content": "F1. Qizil, ko‘k, yashil va sariq\navtomobilga", "is_correct": 0 },
+                    { "content": "F2. Qizil va sariq avtomobilga", "is_correct": 0 },
+                    { "content": "F3. Qizil, sariq va yashil\navtomobilga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Siz chorrahadan chapga\nburilishda qaysi transport\nvositasiga yo‘l berishingiz lozim?",
+                "image_url": "questions/195.jpg",
+                "answers": [
+                    { "content": "F1. Avtobusga", "is_correct": 0 },
+                    { "content": "F2. Yengil avtomobilga", "is_correct": 0 },
+                    { "content": "F3. Hech kimga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Svetaforning qizil yoki sariq ishoralari bilan bir vaqtda yongan qo‘shimcha\ntarmoqning yo‘naltirgichli yashil ishorasi yo‘nalishida harakatlanayotgan\ntransport vositasining haydovchisi kimga yo‘l berishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Boshqa yo‘nalishlarda harakatlanayotgan transport vositalariga yo‘l\nberishi kerak", "is_correct": 1 },
+                    { "content": "F2. O‘ngdan kelayotgan transport voistalariga", "is_correct": 0 },
+                    { "content": "F3. Qarama-qarshi yo‘nalishda to‘g‘riga yoki o‘ngga harakatlanayotgan\ntransport vositalariga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Avtomobilni qanday boshqarish usuli yonilg‘i sarfini tejaydi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Shiddat bilan tezlanish va ohista (ravon) sekinlashish bilan", "is_correct": 0 },
+                    { "content": "F2. Ohista (ravon) tezlanish va shiddat bilan sekinlashish bilan", "is_correct": 0 },
+                    { "content": "F3. Ohista (ravon) tezlanish va ohista sekinlashish bilan", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu yotiq chiziq nimani\nbildiradi?",
+                "image_url": "questions/198.jpg",
+                "answers": [
+                    { "content": "F1. Velosiped yo‘lkasini", "is_correct": 0 },
+                    { "content": "F2. Sun’iy yo‘l notekisligini", "is_correct": 1 },
+                    { "content": "F3. Yo‘nalishli taksilar\nto‘xtaydigan joyni", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgi . . .",
+                "image_url": "questions/199.jpg",
+                "answers": [
+                    { "content": "F1. Oldinda harakatlanish serqatnovligi\nhaqida ogohlantiradi", "is_correct": 0 },
+                    { "content": "F2. Oldinda transport vositalarining\ntirbandligi haqida ogohlantiradi", "is_correct": 1 },
+                    {
+                        "content": "F3. Oldinda transport vositalari orasida\nxafiz oraliqni ta’minlash lozimligi haqida\nogohlantiradi",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Piyodalar o‘tish joyi - bu ...",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Yo‘l qatnov qismining piyodalar kesib o‘tishi uchun mo‘ljallangan, 5.16.1,\n5.16.2 yo‘l belgilari va 1.14.1-1.14.3 yo‘l chiziqlari bilan ajratilgan bo‘lagi",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F2. Yo‘lning piyodalar harkatlanishi uchun mo‘ljallangan va transport vositalari\nharakati taqiqlangan qismi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F3. Qatnov qismiga tutashgan yoki undan maysazor, ariq, maxsus to‘siqlar bilan\najratilgan va piyodalarning harakatlanishi uchun mo‘ljallangan yo‘l qismi",
+                        "is_correct": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 21",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "To‘xtab turish qoidasini kim buzdi?",
+                "image_url": "questions/201.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 1 },
+                    { "content": "F3. «А» va «Б»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Aholi punktlariga tegishli yo‘l harakati qoidalari qayerdan boshlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Aholi punkti nomini ko‘rsatuvchi oq rangli 5.22 belgisidan boshlab", "is_correct": 1 },
+                    { "content": "F2. Aholi punkiti nomoni ko‘rsatuvchi oq 5.22 yoki 5.24 havorang\nrangli belgidan boshlab", "is_correct": 0 },
+                    { "content": "F3. Yo‘l yuzidagi qurilma va inshootlardan boshlab", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Burilish ko‘rsatkichi bilan berilayotgan ogohlantiruvchi ishora\nqachon to‘xtatilishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Manyovr bajarishdan oldin", "is_correct": 0 },
+                    { "content": "F2. Manyovr bajargandan so‘ng darhol", "is_correct": 1 },
+                    { "content": "F3. Manyovr bajarayotganda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi yo‘l belgilari qayrilib olishga\nruxsat beradi?",
+                "image_url": "questions/204.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «Б»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б» va «Г»", "is_correct": 0 },
+                    { "content": "F3. Faqat «А», «Б» va «В»", "is_correct": 0 },
+                    { "content": "F4. Barchasi", "is_correct": 1 },
+                    { "content": "F5. Faqat «Г», «Б» va «В»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo‘l belgisi ta’sir oralig‘ida\nsizga odam tushirish (chiqarish)ga\nyoki yuk ortish (tushurish)ga ruxsat\netiladimi?",
+                "image_url": "questions/205.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 1 },
+                    { "content": "F2. Yo‘q", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yengil avtomobilda qaysi\nyo‘nalishlarda harakatlanishga\nruxsat etiladi?",
+                "image_url": "questions/206.jpg",
+                "answers": [
+                    { "content": "F1. Faqat to‘g‘riga", "is_correct": 0 },
+                    { "content": "F2. Faqat o‘ngga va chapga", "is_correct": 0 },
+                    { "content": "F3. Istalgan yo‘nalishda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Quruq ob-obhavo sharoitida asfalt-beton qoplamali yo‘lda\nharakatlanayotgan haydovchi yomg‘ir tomchilab qolganda nima\nqilishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tezlikni kamaytirish va extiyot bo‘lishi kerak", "is_correct": 1 },
+                    { "content": "F2. Tezlikni o‘zgartirmasdan harakatni davom ettirish", "is_correct": 0 },
+                    { "content": "F3. Yomg‘ir tezlashib ketmasdan tezroq harakat qilishi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yoqilg‘i bilan ta’minlash tepkisini keskin tezlikni oshirish uchun\nbosayotganda, avtomobil sirpanishni boshlasa haydovchi qanday\nharakat qilishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tepkini yanada kuchliroq bosish", "is_correct": 0 },
+                    { "content": "F2. Tepkiga ta’sir etuvchi kuchni o‘zgartirmaslik", "is_correct": 0 },
+                    { "content": "F3. Tepkiga ta’sir etuvchi kuchni kamaytirish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tormoz tizimi ishlamaydigan avtomobilning vazni sizning\navtomobilingiz vaznini yarmidan ortiq bo‘lsa, uni shatakka olishingizga\nruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 0 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 1 },
+                    { "content": "F3. Faqat 30km/soat tezlikda ruxsat etiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘nalishli transport vositasi\nbekatidan tashqarida yo‘l chetidan\nqo‘zg‘alayotgan yo‘nalishli transport\nvositasiga yo‘l berishingiz kerakmi?",
+                "image_url": "questions/210.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 22",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Piyodalar to‘xtab turgan avtobus va trolleybusning qaysi\ntomonidan yo‘lni kesib o‘tishlari kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Oldi tomonidan", "is_correct": 0 },
+                    { "content": "F2. Orqa tomonidan", "is_correct": 1 },
+                    { "content": "F3. Istalgan tomonidan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sizga ko‘rsatilgan joyda yengil\navtomobilda to‘xtashga ruxsat\netiladimi?",
+                "image_url": "questions/212.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yonlama oraliq masofani tanlashda tezlikning dahli bormi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yonlama oraliq masofani tanlashni tezlikka aloqasi yo‘q", "is_correct": 0 },
+                    { "content": "F2. Tezlik oshganda yonlama oraliq masofani oshirish kerak", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu vaziyatda quvib o‘tishdan\nso‘ng siz o‘rta bo‘lakda qolishingiz\nmumkinmi?",
+                "image_url": "questions/214.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Cheklangan ko‘rinish sharoitida orqaga harakatlanishda harakat\nxavfsizligini ta’minlash uchun:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tovushli signal berishi", "is_correct": 0 },
+                    { "content": "F2. Falokat yorug‘lik ishoralarini yoqish", "is_correct": 0 },
+                    { "content": "F3. Boshqa shaxslar yordamidan foydalanish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu holatda siz bajarishingiz lozim:",
+                "image_url": "questions/216.jpg",
+                "answers": [
+                    { "content": "F1. Belgi oldida to‘xtash", "is_correct": 0 },
+                    { "content": "F2. To‘xtash chizig‘i oldida to‘xtash", "is_correct": 1 },
+                    { "content": "F3. Boshqa transport vositalari\nbo‘lmasa, horrahadan to‘xtamasdan\no‘tib ketish", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Kunning yorug‘ vaqtida aholi punktlaridan tashqarida quvib\no‘tilayotgan transport vositasi haydovchisining e’tiborini qanday jalb\nqilasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat tovushli ishoralarni qo‘llab", "is_correct": 0 },
+                    { "content": "F2. Faqat chiroqlarni yoqib-o‘chirish bilan", "is_correct": 0 },
+                    { "content": "F3. Sanab o‘tilgan barcha usul bilan va ularni birgalikda qo‘llash bilan", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo‘lning qanday qismida harakatlanganda kuchli yonlama\nshamol xavfi ortadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ochiq joyda harakatlanganda", "is_correct": 0 },
+                    { "content": "F2. Yo‘lning yopiq qismida harakatlanganda", "is_correct": 0 },
+                    { "content": "F3. Yo‘lning yopiq qismidan ochiq qismiga chiqishda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Uzoq davom etadigan keng ravon yo‘lda avtomobilni yuqori\ntezlikda boshqarganda haydovchiga tezlik qanday qabul qilinadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Aslidagidan sekin harakatlanayotganga o‘xshaydi", "is_correct": 1 },
+                    { "content": "F2. Aslidagidan tez harakatlanayotganga o‘xshaydi", "is_correct": 0 },
+                    { "content": "F3. Tezlikni qabul qilish o‘zgarmaydi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Nosoz transport vositasini shatakka olgan yengil avtomobil\nsalonida odam tashishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 1 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 23",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Ushbu holatda sizga temir yo‘l\nkesishmasiga chiqishga ruxsat\netiladimi?",
+                "image_url": "questions/221.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Ha, yaqinlashib kelayotgan\npoyezd yo‘q bo‘lsa", "is_correct": 0 },
+                    { "content": "F3. Taqiqlanadi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko‘k avtomobil chapga\nburilmoqchi. Kimga yo‘l berishi\nkerak?",
+                "image_url": "questions/222.jpg",
+                "answers": [
+                    { "content": "F1. Faqat avtobusga", "is_correct": 0 },
+                    { "content": "F2. Faqat yuk avtomobiliga", "is_correct": 0 },
+                    { "content": "F3. Har ikki transport vositasiga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yengil avtomobilning orqa oynasiga parda yoki chiypardalar\no‘rnatish mumkinmi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Taqiqlanadi", "is_correct": 0 },
+                    { "content": "F2. Ruxsat etiladi, agarda ikki tomonda orqani ko‘rsatuvchi\nko‘zgusi bo‘lsa", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Chorrahaning ko‘rsatilgan joyida sizga\nto‘xtashga ruxsat etiladimi?",
+                "image_url": "questions/224.jpg",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 0 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 1 },
+                    {
+                        "content": "F3. Ruxsat etiladi, agarda sizning\ntransport vositangiz bilan sidirg‘a chiziq\norasidagi masofa 3 metrdan ortiq bo‘lsa",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Siz ro‘paradan yaqinlashayotgan\nyuk avtomobiliga yo‘l berishingiz\nkerakmi?",
+                "image_url": "questions/225.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Transport vositasi qiyalikda joyidan qo‘zg‘alishda to‘xtab turish\ntormoz dastagini qay vaqtda tushirishni boshlash kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Harakatni boshlashdan avval", "is_correct": 0 },
+                    { "content": "F2. Harakatni boshlagandan so‘ng", "is_correct": 0 },
+                    { "content": "F3. harakatni boshlash bilan bir vaqtda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "90 km/soat tezlikda harakatlanayotgan transport vositasi\n1sekundda qancha masofani bosib o‘tadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 15 m", "is_correct": 0 },
+                    { "content": "F2. 25 m", "is_correct": 1 },
+                    { "content": "F3. 35 m", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Avtomobilning ABS tizimi burilishda sirpanish va yonga siljishni\noldini oladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobilni faqat sirpanish ehtimolining oldini oladi", "is_correct": 0 },
+                    { "content": "F2. Avtomobilni faqat yonga siljish ehtimolining oldini oladi", "is_correct": 0 },
+                    { "content": "F3. Avtomobilni sirpanish va yonga siljish ehtimolining oldini\nolmaydi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko‘rsatilgan qaysi joyda siz avtomobilni\nqoidaga binoan to‘xtatishingiz mumkin?",
+                "image_url": "questions/229.jpg",
+                "answers": [
+                    { "content": "F1. Фақат «А»", "is_correct": 0 },
+                    { "content": "F2. Фақат «Б»", "is_correct": 1 },
+                    { "content": "F3. Фақат «Б» ва «В»", "is_correct": 0 },
+                    { "content": "F4. Ҳеч қайсисида", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Shatakka olingan avtomobilni falokat yorug‘lik ishoralari nosoz\nbo‘lganda transport vositasi qanday belgilanishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Gabarit chiroqlarini yoqish", "is_correct": 0 },
+                    { "content": "F2. Orqa tumanga qarshi chiroqlarini yoqish", "is_correct": 0 },
+                    {
+                        "content": "F3. Shatakka olingan transport vositasi orqa tomoniga falokat\nsababli to‘xtash belgisini o‘rnatish",
+                        "is_correct": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 24",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Ko‘rsatilgan yo‘l belgilaridan qaysi biri\nruxsat etilgan to‘la vazni 3,5 tonnadan\nkam bo‘lgan yuk avtomobiliga o‘ngga\nharakatlanishni buyuradi?",
+                "image_url": "questions/231.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 1 },
+                    { "content": "F3. «А» va «Б»", "is_correct": 0 },
+                    { "content": "F4. «Б» va «В»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sanab o‘tilgan qaysi hollarda haydovchi orqadagi vaziyatni\ne’tiborga olishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat keskin tormoz berishda", "is_correct": 0 },
+                    { "content": "F2. Faqat nam qoplama yoki yaxmalakli yo‘llarda tormoz\nberganda", "is_correct": 0 },
+                    { "content": "F3. Har qanday tormozlashda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Tuman sharoitida, agar ko‘rinish masofasi 300 metrdan kam\nbo‘lsa kunduzgi chiroqlarni yoqish yetarlimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yetarli", "is_correct": 0 },
+                    { "content": "F2. Yetarli emas", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "«Quvib o‘tish» atamasi nimani bildiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Bir va bir nechta transport vositalaridan o‘zib ketish", "is_correct": 0 },
+                    {
+                        "content": "F2. Egallab turgan bo‘lakdan qarama-qarshi harakat bo‘lagiga chiqib bir yoki\nbir nechta transport vositalaridan o‘zib ketish va dastlab egallab turgan\nbo‘lagiga qaytish",
+                        "is_correct": 1
+                    },
+                    {
+                        "content": "F3. Egallagan harakatlanish bo‘lagidan chiqib, oldinda harakatlanayotgan\ntransport vositasidan o‘zib ketish",
+                        "is_correct": 0
+                    }
+                ]
+            },
+            {
+                "content": "Kunning qorong‘i vaqtida va bulutli ob-havoda ro‘paradan\nkelayotgan avtomobil tezligi qanday tuyuladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Aslidagidan kam tezlikda tuyuladi", "is_correct": 1 },
+                    { "content": "F2. Aslidagidan katta tezlikda tuyuladi", "is_correct": 0 },
+                    { "content": "F3. Tezlikni qabul qilish o‘zgarmaydi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Tormoz tizimiga ega bo‘lmagan tirkama bilan harakatlanayotganda\nyengil avtomobilni tormoz yo‘li qanday o‘zgaradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tirkama qo‘shimcha qarshilikka ega bo‘lgani uchun tormoz\nyo‘li kamayadi", "is_correct": 0 },
+                    { "content": "F2. Tormoz yo‘li uzayadi", "is_correct": 1 },
+                    { "content": "F3. Tormoz yo‘li o‘zgarmaydi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘lning keskin burilishida yuzaga keladigan sirpanishning oldini olish uchun\nhaydovchi nima qilishi kerak?",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Burilishdan oldin tezlikni kamaytirib, avtomobilni erkin harakatlanishi uchun\nilashma tepkisini bosishi",
+                        "is_correct": 0
+                    },
+                    {
+                        "content": "F2. Burilishdan oldin tezlikni kamaytirish, kerak bo‘lsa uzatmalar pog‘onasini\npasaytirish, burilishdan o‘tayotganda tezlikni oshirmaslik va avtomobilni keskin\ntormozlamaslik",
+                        "is_correct": 1
+                    },
+                    { "content": "F3. Sanab o‘tilgan har ikki usulni qo‘llashga ruxsat etiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qattiq yoki egiluvchan ulagichda shatakka olingan yuk\navtomobilining kabinasida odam tashishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 1 },
+                    { "content": "F2. Taqiqlanadi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahaga kirishda siz:",
+                "image_url": "questions/239.jpg",
+                "answers": [
+                    { "content": "F1. Mototsiklga yo‘l berishingiz\nkerak", "is_correct": 0 },
+                    { "content": "F2. Har ikkisiga ham yo‘l\nberishingiz kerak", "is_correct": 1 },
+                    { "content": "F3. Birinchi o‘tish huquqiga egasiz", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi yo‘l belgisi barcha\ntransport vositalarining\nharakatini istisnosiz taqiqlaydi?",
+                "image_url": "questions/240.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «Б»", "is_correct": 1 },
+                    { "content": "F3. «В»", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 25",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Sanab o‘tilgan qaysi transport vositalarini o‘t o‘chirgichsiz tasarruf\netishga ruxsat etiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Avtomobillarni", "is_correct": 0 },
+                    { "content": "F2. Avtobuslarni", "is_correct": 0 },
+                    { "content": "F3. Barcha mototsikllarni", "is_correct": 1 },
+                    { "content": "F4. Faqat yon kajavasiz mototsikllarni", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Kunning yorug‘ vaqtida aholi punktlaridan tashqarida siz quvib\no‘tayotgan transport vositasi haydovchisining e’tiborini qanday jalb\nqilasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat tovush ishorasi bilan", "is_correct": 0 },
+                    { "content": "F2. Faqat yorug‘lik faralar qisqa-qisqa yoqib o‘chirish bilan", "is_correct": 0 },
+                    { "content": "F3. Sanab o‘tilgan barcha usullar bilan va ularni birga qo‘llash bilan", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi qo‘shimcha axborot\nbelgilari birga qo‘llanilganda\nbelgilarning ta’sir oralig‘ini\nko‘rsatadi?",
+                "image_url": "questions/243.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 0 },
+                    { "content": "F3. «Б» va «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Birinchi uzatmada uzoq tezlanishda yurish yoqilg‘i sarfiga\nqanday ta’sir etadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yoqilg‘i sarfi ortadi", "is_correct": 1 },
+                    { "content": "F2. Yoqilg‘i sarfi kamayadi", "is_correct": 0 },
+                    { "content": "F3. Yoqilg‘i sarfi o‘zgarmaydi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi yo‘l belgisi piyodalar\nyo‘lkasini bildiradi?",
+                "image_url": "questions/245.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «Б»", "is_correct": 1 },
+                    { "content": "F2. Faqat «Б» va «В»", "is_correct": 0 },
+                    { "content": "F3. Barcha belgilar", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi holatda siz majburiy to‘xtashni amalga oshirasiz?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Piyodalar o‘tish joyi oldida piyodalarga yo‘l berish uchun to‘xtab", "is_correct": 0 },
+                    { "content": "F2. Texnik nozozlik tufayli yo‘lning harakat qismida", "is_correct": 1 },
+                    { "content": "F3. Har ikki sanab o‘tilgan holda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi belgilarda qarama-qarshi\nharakatlanishda o‘tib ketsh qiyin\nbo‘lsa, siz yo‘l berishingiz kerak?",
+                "image_url": "questions/247.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «В»", "is_correct": 0 },
+                    { "content": "F2. «А» va «В»", "is_correct": 1 },
+                    { "content": "F3. «Б» va «В»", "is_correct": 0 },
+                    { "content": "F4. «Б» va «Г»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi hollarda sizga harakatni davom ettirish taqiqlanadi, hatto\nta’mirlash ustaxonasiga ham, agarda faralar va orqa gabarit\nchiroqlar nosoz bo‘lsa ?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat yetarlicha ko‘rinmaslik sharoitida", "is_correct": 0 },
+                    { "content": "F2. Kunning qorong‘i vaqtida", "is_correct": 0 },
+                    { "content": "F3. Har ikkala sanab o‘tilgan holatda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qanday hollarda yo‘lning burilish qismlarida yengil\navtomobil ag‘darilishga qarshi turg‘unroq?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yuksiz va yo‘lovchilarsiz", "is_correct": 1 },
+                    { "content": "F2. Yo‘lovchilar bilan yuksiz", "is_correct": 0 },
+                    { "content": "F3. Yo‘lovchilarsiz, yuqori yukxonasida yuki bilan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Kunning qorong‘u vaqtida aholi punktlarida yo‘ning yoritilgan\nqismida siz qanday tashqi yoritish chiroqlaridan foydalanishingiz\nkerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Gabarit chiroqlardan", "is_correct": 0 },
+                    { "content": "F2. Yaqinni yorituvchi chiroqlardan", "is_correct": 1 },
+                    { "content": "F3. Yaqinni yoki uzoqni yorituvchi chiroqlardan", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 26",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qaysi transport vositasining haydovchisi\nqoidani buzib burilmoqda?",
+                "image_url": "questions/251.jpg",
+                "answers": [
+                    { "content": "F1. Faqat yengil avtomobil haydovchisi", "is_correct": 0 },
+                    { "content": "F2. Faqat mototsikl haydovchisi", "is_correct": 0 },
+                    { "content": "F3. Ikkisi ham buzmoqda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu yo‘lda sizga yo‘l belgisidan\nkeyin qaysi bo‘laklarda\nharakatlanishga ruxsat beriladi?",
+                "image_url": "questions/252.jpg",
+                "answers": [
+                    { "content": "F1. Istalgan bo‘lakdan", "is_correct": 0 },
+                    { "content": "F2. O‘ng bo‘lakdan", "is_correct": 1 },
+                    { "content": "F3. Faqat chap bo‘lakdan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi yo‘l belgilari chapga burilishni\ntaqiqlaydi?",
+                "image_url": "questions/253.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «А» va «Б»", "is_correct": 0 },
+                    { "content": "F3. Faqat «А» va «Г»", "is_correct": 1 },
+                    { "content": "F4. Barchasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘l transport hodisasiga dahldor haydovchilar birinchi navbatda nima\nqilishlari kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo‘lning harakat qismini bo‘shatishlari kerak", "is_correct": 0 },
+                    {
+                        "content": "F2. Transport vositasini darhol to‘xtatishi, avariya ishoralarini yoqishi\nva avariya sababli to‘xtash belgisini o‘rnatishi",
+                        "is_correct": 1
+                    },
+                    { "content": "F3. Sodir etilgan hodisa xaqida YHXXga xabar berishi kerak", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Piyodalar turar joy dahasida qayerda harakatlanishlari mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat tratuarda", "is_correct": 0 },
+                    { "content": "F2. Faqat qatnov qismidan", "is_correct": 0 },
+                    { "content": "F3. Tratuarda, hamda qatnov qismida", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Quvib o‘tishni bajarayotganda chapga burilishni ko‘rsatuvchi\nchiroqni qachon o‘chirishingiz kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Manyovrni tugallagach, darhol", "is_correct": 1 },
+                    { "content": "F2. Quvib o‘tilayotgan transport vositasidan o‘zib ketgandan\nso‘ng istalgan vaqtda", "is_correct": 0 },
+                    { "content": "F3. O‘z ixtiyoringizga havola", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Chorrahadagi uzuq-uzuq\nchiziqlar nimani bildiradi?",
+                "image_url": "questions/257.jpg",
+                "answers": [
+                    { "content": "F1. Majburiy harakatni", "is_correct": 0 },
+                    { "content": "F2. Chorrahada harakatlanish\nbo‘lagini chegarasini", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qanday alomatlar charchash belgilari hisoblanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Uyquchanlik, bo‘shashish, diqqatning susayishi", "is_correct": 1 },
+                    { "content": "F2. Zo‘riqish, asabiylashish", "is_correct": 0 },
+                    { "content": "F3. Bosh aylanishi, ko‘zlarga qum kirgan kabi achishish, terlash alomati", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Siz yengil avtomobildan qaysi jihozlar mavjud bo‘lmaganda\nfoydalanishingiz mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tibbiy quticha", "is_correct": 0 },
+                    { "content": "F2. O‘t o‘chirgich", "is_correct": 0 },
+                    { "content": "F3. Falokat to‘xtash belgisi", "is_correct": 0 },
+                    { "content": "F4. G‘ildirab ketishga qarshi moslama", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Kunning yorug‘ vaqtida quyidagi hollarda yaqinni yorituvchi chiroqlar\nyoqilishi kerak:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yo‘lovchilarni tashiyotgan avtobus va yo‘nalishli transport vositalarida", "is_correct": 0 },
+                    { "content": "F2. Barcha sanab o‘tilgan hollarda", "is_correct": 1 },
+                    { "content": "F3. Xavfli, katta o‘lchamli va og‘ir vaznli yuklarni tashishda", "is_correct": 0 },
+                    { "content": "F4. Mototsikl va mopedlarda", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 27",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Qaysi yo‘nalishda harakatlanishni\ndavom ettirishingiz mumkin?",
+                "image_url": "questions/261.jpg",
+                "answers": [
+                    { "content": "F1. Faqat chapga", "is_correct": 0 },
+                    { "content": "F2. Chapga va orqaga qayrilib olishga", "is_correct": 0 },
+                    { "content": "F3. O‘ngga, chapga va orqaga qayrilib olishga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "72 km/soat tezlikda harakatlanayotgan transport vositasi 1 sekundda\nqancha masofani bosib o‘tadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 15 m", "is_correct": 0 },
+                    { "content": "F2. 20 m", "is_correct": 1 },
+                    { "content": "F3. 25 m", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qaysi hollarda transport vositasidan foydalanish taqiqlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Yonilg‘i darajasini ko‘rsatish qurilmasi ishlamaydi", "is_correct": 0 },
+                    { "content": "F2. O‘t oldirish tizimi nosoz", "is_correct": 0 },
+                    { "content": "F3. Dvigatel qiyinchilik bilan ishga tushadi", "is_correct": 0 },
+                    { "content": "F4. Tovush signallari ishlamaydi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Kunning yorug‘ vaqtida aholi punktlarida quvib o‘tilayotgan transport vositasi\nhaydovchisining e’tiborini jalb qilish uchun mumkin:",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tovush signalidan foydalanish", "is_correct": 0 },
+                    {
+                        "content": "F2. Faqat yaqinni yorituvchi chiroqni uzoqni yorituvchi chiroqqa qisqa muddat orasida o‘tkazish bilan ishora berish",
+                        "is_correct": 1
+                    },
+                    { "content": "F3. Faqat birgalikda yorug‘lik ishoralari bilan birga tovush signallarini qo‘llash", "is_correct": 0 },
+                    { "content": "F4. Sanab o‘tilganlarning barchasidan foydalanish", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Svetafor ishoralari qaysi guruh yo‘l belgilarini bekor qiladi\n(miltillovchi sariq ishoradan tashqari)?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Imtiyoz belgilari", "is_correct": 1 },
+                    { "content": "F2. Taqiqlovchi belgilar", "is_correct": 0 },
+                    { "content": "F3. Buyuruvchi belgilar", "is_correct": 0 },
+                    { "content": "F4. Barcha sanab o‘tilganlari", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo‘l chizig‘i sizga qanday\nmanyovr bajarishni taqiqlaydi?",
+                "image_url": "questions/266.jpg",
+                "answers": [
+                    { "content": "F1. Quvib o‘tishni", "is_correct": 0 },
+                    { "content": "F2. Aylanib o‘tishni", "is_correct": 0 },
+                    { "content": "F3. Qayralib olishni", "is_correct": 0 },
+                    { "content": "F4. Sanab o‘tilgan barcha manevrlarga ruxsat beriladi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu belgi axborot beradi:",
+                "image_url": "questions/267.jpg",
+                "answers": [
+                    { "content": "F1. Siz o‘ngga yoki chapga burilishingiz kerakligini ko‘rsatadi", "is_correct": 0 },
+                    { "content": "F2. Chorrahadan o‘ngga va chapga bir tomonlama harakat tashkil qilingan", "is_correct": 0 },
+                    { "content": "F3. Reversiv harakatlanish yo‘liga chiqish haqida", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "M3 toifadagi avtotransport vositalarining boshqaruv qurilmasidagi\nqanday eng katta lyuft yig‘indisiga yo‘l qo‘yiladi :",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 10°", "is_correct": 0 },
+                    { "content": "F2. 20°", "is_correct": 1 },
+                    { "content": "F3. 25°", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sizga ruxsat etilgan to‘la vazni 3,5\ntonnadan ortiq yuk avtomobilida\nharakatlanish:",
+                "image_url": "questions/269.jpg",
+                "answers": [
+                    { "content": "F1. Faqat to‘g‘riga", "is_correct": 1 },
+                    { "content": "F2. To‘g‘riga va o‘ngga", "is_correct": 0 },
+                    { "content": "F3. Barcha yo‘nalishlarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "108 km/s tezlikda harakatlanayotgan transport vositasi\n1 sekundda qancha masofani bosib o‘tadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 15 m", "is_correct": 0 },
+                    { "content": "F2. 25 m", "is_correct": 0 },
+                    { "content": "F3. 30 m", "is_correct": 1 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 28",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Ko‘rsatilgan qaysi belgi reversiv harakat\nboshlanishi haqida axborot beradi?",
+                "image_url": "questions/271.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 0 },
+                    { "content": "F2. «Б»", "is_correct": 0 },
+                    { "content": "F3. «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Shatakka olib harakatlanishingiz mumkin:",
+                "image_url": "questions/272.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A» yo‘nalishi bo‘yicha", "is_correct": 1 },
+                    { "content": "F2. Faqat «B» yo‘nalish bo‘yicha", "is_correct": 0 },
+                    { "content": "F3. Ko‘rsatilgan barcha yo‘nalish bo‘yicha", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo‘l belgisi chorrahaga\nyaqinlashayotganlik to‘g‘risida\nogohlantiradi, bunda Siz:",
+                "image_url": "questions/273.jpg",
+                "answers": [
+                    { "content": "F1. Birinchi bo‘lib o‘tish huquqiga egasiz", "is_correct": 0 },
+                    { "content": "F2. Kesib o‘tayotgan yo‘ldagi transport vositalariga yo‘l berishingiz kerak", "is_correct": 0 },
+                    { "content": "F3. Faqatgina o‘ng tomondan yaqinlashib kelayotgan transport vositalariga yo‘l berishingiz kerak", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Haydovchiga transport vositasini boshqarish vaqtida telefondan\nfoydalanishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etiladi", "is_correct": 0 },
+                    { "content": "F2. Qo‘lni ishlatmasdan texnik vosilalardan foydalanish gaplashishga ruxsat etiladi", "is_correct": 1 },
+                    { "content": "F3. 20 km/s tezlikda harakatlanayotganda ruxsat etiladi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Agar avtomobil antiblokirovkali (ABS) tormoz tizimi bilan jihozlangan\nbo‘lsa keskin tormoz berishni qanday amalga oshirish kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tormoz tepkisini uzub-uzub bosish yo‘li bilan", "is_correct": 0 },
+                    {
+                        "content": "F2. Tormoz tepkisini oxirigacha bosish va avtomobilni to‘liq to‘xtaguncha tepkini qo‘yib yubormaslik",
+                        "is_correct": 1
+                    },
+                    { "content": "F3. To‘xtab turish tormozi tizimini qo‘llash yo‘li bilan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Tumanga qarshi chiroqlar va orqa tumanga qarshi chiroqlar birga\nyoqilishi mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Cheklangan ko‘rinish sharoitida", "is_correct": 0 },
+                    { "content": "F2. Yetarlicha ko‘rinmaslik sharoitida", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Yo‘l harakati qoidalari bo‘yicha\n«yonlama oraliq masofa»ni ko‘rsating:",
+                "image_url": "questions/277.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «А»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 0 },
+                    { "content": "F3. Faqat «В»", "is_correct": 0 },
+                    { "content": "F4. «А» va «В»", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu ko‘rsatilgan vaziyatda sizga hovliga orqa\nbilan kirib qayrilib olishga ruxsat beriladimi?",
+                "image_url": "questions/278.jpg",
+                "answers": [
+                    { "content": "F1. Har qanday hollarda ruxsat beriladi", "is_correct": 0 },
+                    { "content": "F2. Ruxsat beriladi agarda bunda harakatning boshqa ishtirokchilariga halaqit berilmasa", "is_correct": 1 },
+                    { "content": "F3. Taqiqlanadi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Haydovchi chapga burilishda qaysi\nyo‘nalish bo‘yicha qoidani buzmoqda?",
+                "image_url": "questions/279.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A» yo‘nalishi bo‘yicha", "is_correct": 0 },
+                    { "content": "F2. Faqat «B» yo‘nalishi bo‘yicha", "is_correct": 0 },
+                    { "content": "F3. Ko‘rsatilgan barcha yo‘nalish bo‘yicha", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko‘rsatilgan belgilardan qaysi\nbiri yo‘lning ko‘rinish\nmasofasi cheklangan joylarda\nmajburan to‘xtagan transport\nvositalarini belgilash uchun\nqo‘llaniladi?",
+                "image_url": "questions/280.jpg",
+                "answers": [
+                    { "content": "F1. «А»", "is_correct": 1 },
+                    { "content": "F2. «Б»", "is_correct": 0 },
+                    { "content": "F3. «В»", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 29",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Chorrahaga kirganingizda tartibga soluvchi qo‘lini yuqoriga\nko‘tardi, sizga harakatlanishga ruxsat etiladimi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Ruxsat etilmaydi", "is_correct": 0 },
+                    { "content": "F2. Ruxsat etiladi, agarda siz o‘ngga buriladigan bo‘lsangiz", "is_correct": 0 },
+                    { "content": "F3. Ruxsat etiladi", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ko‘rsatilgan qaysi belgilar sizga\nyashash manzilingizga avtomobilda\no‘tishga ruxsat beradi?",
+                "image_url": "questions/282.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A»", "is_correct": 0 },
+                    { "content": "F2. Faqat «B»", "is_correct": 0 },
+                    { "content": "F3. Faqat «A» va «B»", "is_correct": 1 },
+                    { "content": "F4. Barchasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Qanday hollarda aholi punktlarida tovush moslamalaridan\nfoydalanishga ruxsat etiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Quvib o‘tishda ogohlantirish uchun", "is_correct": 0 },
+                    { "content": "F2. Yo‘l-transport hodisasining oldini olish uchun", "is_correct": 1 },
+                    { "content": "F3. Har ikkala sanab o‘tilgan hollarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yuk avtomobili haydovchisi\nto‘xtab turish qoidasini buzdimi?",
+                "image_url": "questions/284.jpg",
+                "answers": [
+                    { "content": "F1. Buzdi", "is_correct": 1 },
+                    { "content": "F2. Buzmadi, agar uning ruxsat etilgan to‘liq vazni 3,5 tonnadan oshmasa", "is_correct": 0 },
+                    { "content": "F3. Xato qilmadi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ko ‘rsatilgan yo‘l\nbelgilaridan qaysi biri faqat\nyo‘l qop lamasinam\nbo‘lganda ta’sir etadi?",
+                "image_url": "questions/285.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A»", "is_correct": 1 },
+                    { "content": "F2. Faqat «A» va «Б»", "is_correct": 0 },
+                    { "content": "F3. Barchasi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Yo‘lning sirpanchiq qismida rul chambaragini keskin burganda hosil\nbo‘ladigan sirpanishning oldini olish uchun haydovchi qanday ehtiyot\nchoralarini ko‘rishi kerak?",
+                "image_url": "",
+                "answers": [
+                    {
+                        "content": "F1. Rul chambaragini zudlik bilan sirpanayotgan tomonga burish va tezda\navtomobilni harakat yo‘nalishini to‘g‘irlab olish",
+                        "is_correct": 1
+                    },
+                    { "content": "F2. Ilashmani uzish", "is_correct": 0 },
+                    { "content": "F3. Tormoz tepkisini bosish", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sanab o‘tilgan qaysi holatda transport vositasidan\nfoydalanishga ruxsat etiladi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tashqi yoritgich asboblari ifloslangan bo‘lsa", "is_correct": 0 },
+                    { "content": "F2. Yorituvchi chiroq nurining yo‘nalishi buzilgan bo‘lsa", "is_correct": 0 },
+                    { "content": "F3. Old qismida - oq yoki sariq rangli tumanga qarshi faralar\no‘rnatilgan bo‘lsa", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Transport vositalari qattiq ulagichda shatakka olinganda shatakka olgan\nva shatakka olingan transport vositalari orasidagi masofa qancha\nbo‘lishi kerak?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. 4 metrdan oshmasligi", "is_correct": 1 },
+                    { "content": "F2. 4 metrdan 6 metrgacha", "is_correct": 0 },
+                    { "content": "F3. Qoidalarda belgilanmagan", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Turar joy dahalarida qanday harakatlar taqiqlangan?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat o‘quv mashg‘ulotlarini bajarish", "is_correct": 0 },
+                    { "content": "F2. Faqat dvigatel ishlab turganda to‘xtab turish", "is_correct": 0 },
+                    { "content": "F3. Barcha sanab o‘tilgan hollarda", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi haydovchi to‘xtab turish\nqoidasini buzdi?",
+                "image_url": "questions/290.jpg",
+                "answers": [
+                    { "content": "F1. Mototsikl haydovchisi", "is_correct": 0 },
+                    { "content": "F2. Trotuardato‘xtab turgan avtomobil haydovchisi", "is_correct": 1 },
+                    { "content": "F3. Hech kim buzmadi", "is_correct": 0 }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Bilet 30",
+        "description": "",
+        "is_active": 1,
+        "questions": [
+            {
+                "content": "Yo‘lda «TO‘XTASh», yozuvi ko‘rinishidagi yo‘l chizig‘i nimani bildiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Tartibga solingan chorrahada to‘xtash chizig‘iga\nyaqinlashayotganligi xaqida ogohlantiradi", "is_correct": 0 },
+                    {
+                        "content": "F2. To‘xtash chizig‘i va «To‘xtamasdan harakatlanish taqiqlanadi» yo‘l\nbelgisi o‘rnatilgan yo‘l qismiga yaqinlashayotganligini bildiradi",
+                        "is_correct": 1
+                    },
+                    { "content": "F3. «Yo‘l bering» yo‘l belgisiga yaqinlashayotganligini bildiradi", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu yo‘l nechta harakatlanish\nbo‘lagiga ega?",
+                "image_url": "questions/292.jpg",
+                "answers": [
+                    { "content": "F1. Bitta harakatlanish bo‘lagiga", "is_correct": 0 },
+                    { "content": "F2. Ikkita harakatlanish bo‘lagiga", "is_correct": 1 },
+                    { "content": "F3. Uchta harakatlanish bo‘lagiga", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu belgilardan qaysi biri bir\ntomonlama xarakat tashkil qilingan\nyo‘lning boshida o‘pnatiladi?",
+                "image_url": "questions/293.jpg",
+                "answers": [
+                    { "content": "F1. Faqat «A»", "is_correct": 0 },
+                    { "content": "F2. Faqat «Б»", "is_correct": 1 },
+                    { "content": "F3. «Б» va «Г»", "is_correct": 0 },
+                    { "content": "F4. «Б» yoki «В»", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Sanab o‘tilgan qaysi hollarda egiluvchan ulagichda shatakka olish\ntaqiqlanadi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat tog‘li yo‘llarda", "is_correct": 0 },
+                    { "content": "F2. Yo‘l yaxmalak, sirpanchiq bo‘lgan hollarda", "is_correct": 1 },
+                    { "content": "F3. Kunning qorong‘i vaqtida va yetarli ko‘rinmaslik sharoitida", "is_correct": 0 },
+                    { "content": "F4. Barcha sanab o‘tilgan hollarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Ushbu ko‘rsatilgan holatda\nmototsikl haydovchisi sizga yo‘l\nberishi kerakmi?",
+                "image_url": "questions/295.jpg",
+                "answers": [
+                    { "content": "F1. Yo‘q", "is_correct": 0 },
+                    { "content": "F2. Ha", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Qaysi hollarda yo‘lning harakatlanish bo‘lagini ajratuvchi\nuzuq-uzuq chiziqni bosib o‘tish mumkin?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Faqat qayta tizilishda", "is_correct": 1 },
+                    { "content": "F2. Yo‘lda boshqa transport vositalari bo‘lmasa", "is_correct": 0 },
+                    { "content": "F3. Barcha sanab o‘tilgan hollarda", "is_correct": 0 }
+                ]
+            },
+            {
+                "content": "Siz chorrahadan chapga\nburilmoqchisiz. Ushbu vaziyatda\nkimga yo‘l berasiz?",
+                "image_url": "questions/297.jpg",
+                "answers": [
+                    { "content": "F1. Faqat avtobusga", "is_correct": 0 },
+                    { "content": "F2. Faqat qizil avtomobilga", "is_correct": 0 },
+                    { "content": "F3. Hech kimga", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Siz chorrahadan to‘g‘riga o‘tmoqchisiz.\nUshbu vaziyatda Sizning harakatingiz?",
+                "image_url": "questions/298.jpg",
+                "answers": [
+                    { "content": "F1. Chorrahaga birinchi kirgan qizil\navtomobilga yo‘l berish", "is_correct": 0 },
+                    { "content": "F2. Qizil avtomobil yo‘l berayotganiga\nishonch xosil qilib chorrahadan birinchi\no‘tish", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Ushbu joyda avtomobilni to‘xtab\nturish uchun qo‘yishga ruxsat\netiladimi?",
+                "image_url": "questions/299.jpg",
+                "answers": [
+                    { "content": "F1. Ha", "is_correct": 0 },
+                    { "content": "F2. Yo‘q", "is_correct": 1 }
+                ]
+            },
+            {
+                "content": "Svetaforning yashil miltillovchi ishorasi nimani bildiradi?",
+                "image_url": "",
+                "answers": [
+                    { "content": "F1. Svetafor nosozligini", "is_correct": 0 },
+                    { "content": "F2. Harakatga ruxsat beradi va tez orada taqiqlovchi ishora yonishi to‘g‘risida axborot beradi", "is_correct": 1 },
+                    { "content": "F3. Harakatni davom ettirishni taqiqlaydi", "is_correct": 0 }
+                ]
+            }
+        ]
+    }
+]

@@ -13,14 +13,14 @@ class ImportTestData extends Command
      *
      * @var string
      */
-    protected $signature = 'tests:import {--source-db=p24_temp : Source database name}';
+    protected $signature = 'tests:import {--source-db= : Optional source database name}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import tickets, questions, answers, signs, and road_lines from temporary database';
+    protected $description = 'Import all 130 tickets, 1,300 questions, answers, signs, and road_lines from JSON datasets or temporary database';
 
     /**
      * Execute the console command.
@@ -29,18 +29,270 @@ class ImportTestData extends Command
     {
         $sourceDb = $this->option('source-db');
 
-        $this->info("Importing test and exam data from database `{$sourceDb}`...");
-
-        // 1. Verify source tables exist
-        $tables = DB::select("SHOW TABLES FROM `{$sourceDb}`");
-        if (empty($tables)) {
-            $this->error("No tables found in `{$sourceDb}`.");
-
-            return Command::FAILURE;
+        if (! empty($sourceDb)) {
+            $tables = DB::select("SHOW TABLES FROM `{$sourceDb}`");
+            if (! empty($tables)) {
+                return $this->importFromDatabase($sourceDb);
+            }
+            $this->warn("Database `{$sourceDb}` not found. Falling back to JSON dataset files in database/data/...");
         }
 
-        // 2. Import Sign Categories
-        $this->info('1/5 Importing Sign Categories...');
+        return $this->importFromJsonFiles();
+    }
+
+    /**
+     * Import tickets, questions, signs, and lines from JSON data files.
+     */
+    protected function importFromJsonFiles(): int
+    {
+        $this->info('Starting test and exam import from JSON dataset (database/data/)...');
+
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF;');
+        }
+
+        // 1. Truncate
+        DB::table('answers')->truncate();
+        DB::table('questions')->truncate();
+        DB::table('tickets')->truncate();
+        DB::table('signs')->truncate();
+        DB::table('sign_categories')->truncate();
+        DB::table('road_lines')->truncate();
+
+        $now = now();
+
+        // 2. Sign Categories & Signs
+        $this->info('1/4 Importing Sign Categories and Signs...');
+        $signsFile = database_path('data/yol_belgilari_full.json');
+        if (file_exists($signsFile)) {
+            $categoriesData = json_decode(file_get_contents($signsFile), true) ?: [];
+            $categoryId = 1;
+            $signId = 1;
+            $signsBatch = [];
+
+            foreach ($categoriesData as $catData) {
+                $catName = $catData['category'] ?? "Belgilar guruhi {$categoryId}";
+                $currentCatId = $categoryId++;
+                $slug = Str::slug($catName) ?: "cat-{$currentCatId}";
+
+                DB::table('sign_categories')->insert([
+                    'id' => $currentCatId,
+                    'name_uz' => $catName,
+                    'name_ru' => $catName,
+                    'name_krill' => $catName,
+                    'name_en' => $catName,
+                    'slug' => $slug,
+                    'order' => $currentCatId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+
+                $signs = $catData['signs'] ?? [];
+                foreach ($signs as $sIndex => $sData) {
+                    $sContent = $sData['content'] ?? "Belgi {$signId}";
+                    $sNumber = (string) ($sIndex + 1);
+
+                    if (preg_match('/^([\d\.\w]+)\s+(.+)$/u', $sContent, $matches)) {
+                        $sNumber = trim($matches[1]);
+                        $sContent = trim($matches[2]) ?: $sNumber;
+                    }
+
+                    $signsBatch[] = [
+                        'id' => $signId++,
+                        'category_id' => $currentCatId,
+                        'sign_number' => $sNumber,
+                        'name_uz' => $sContent,
+                        'name_ru' => $sContent,
+                        'name_krill' => $sContent,
+                        'name_en' => $sContent,
+                        'description_uz' => $sContent,
+                        'description_ru' => $sContent,
+                        'description_krill' => $sContent,
+                        'description_en' => $sContent,
+                        'image_url' => $sData['image_url'] ?? null,
+                        'order' => $sIndex + 1,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+
+            foreach (array_chunk($signsBatch, 50) as $chunk) {
+                DB::table('signs')->insert($chunk);
+            }
+            $this->info('   Imported '.($categoryId - 1).' categories and '.count($signsBatch).' signs.');
+        }
+
+        // 3. Road Lines
+        $this->info('2/4 Importing Road Lines...');
+        $linesFile = database_path('data/yol_chiziqlari_full.json');
+        if (file_exists($linesFile)) {
+            $linesData = json_decode(file_get_contents($linesFile), true) ?: [];
+            $lineId = 1;
+            $linesBatch = [];
+
+            foreach ($linesData as $lData) {
+                $lineNumber = $lData['id'] ?? (string) $lineId;
+                $desc = $lData['description'] ?? '';
+                $color = $lData['color'] ?? '';
+                $fullDesc = trim("{$desc} ({$color})");
+
+                $linesBatch[] = [
+                    'id' => $lineId++,
+                    'line_number' => $lineNumber,
+                    'name_uz' => "Yo'l chizig'i {$lineNumber}",
+                    'name_ru' => "Дорожная разметка {$lineNumber}",
+                    'name_krill' => "Йўл чизиғи {$lineNumber}",
+                    'name_en' => "Road line {$lineNumber}",
+                    'description_uz' => $fullDesc,
+                    'description_ru' => $fullDesc,
+                    'description_krill' => $fullDesc,
+                    'description_en' => $fullDesc,
+                    'image_url' => $lData['image_url'] ?? null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            foreach (array_chunk($linesBatch, 50) as $chunk) {
+                DB::table('road_lines')->insert($chunk);
+            }
+            $this->info('   Imported '.count($linesBatch).' road lines.');
+        }
+
+        // 4. Tickets, Questions and Answers
+        $this->info('3/4 Importing 130 Tickets and 1,300 Questions...');
+        $avtoFile = database_path('data/avtoimtihon_1190.json');
+        $eavtoFile = database_path('data/e-avtomaktab_1190-1300.json');
+
+        $avtoQuestions = file_exists($avtoFile) ? json_decode(file_get_contents($avtoFile), true) : [];
+        $eavtoQuestions = file_exists($eavtoFile) ? json_decode(file_get_contents($eavtoFile), true) : [];
+
+        $allQuestions = array_merge($avtoQuestions ?: [], $eavtoQuestions ?: []);
+        $ticketChunks = array_chunk($allQuestions, 10);
+
+        $ticketId = 1;
+        $questionId = 1;
+        $answerId = 1;
+
+        $ticketsBatch = [];
+        $questionsBatch = [];
+        $answersBatch = [];
+
+        foreach ($ticketChunks as $index => $chunk) {
+            $ticketNumber = $index + 1;
+            $currentTicketId = $ticketId++;
+
+            $ticketsBatch[] = [
+                'id' => $currentTicketId,
+                'ticket_number' => $ticketNumber,
+                'title_uz' => "{$ticketNumber}-Bilet",
+                'title_ru' => "Билет №{$ticketNumber}",
+                'title_krill' => "{$ticketNumber}-Билет",
+                'title_en' => "Ticket #{$ticketNumber}",
+                'description' => "Haydovchilik guvohnomasi imtihoni uchun {$ticketNumber}-bilet savollari",
+                'is_active' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            foreach ($chunk as $qIndex => $qData) {
+                $currentQuestionId = $questionId++;
+                $qNumber = $qIndex + 1;
+                $content = $qData['content'] ?? "Savol {$qNumber}";
+                $description = $qData['description'] ?? null;
+                $imageUrl = $qData['image_url'] ?? null;
+
+                $questionsBatch[] = [
+                    'id' => $currentQuestionId,
+                    'ticket_id' => $currentTicketId,
+                    'question_number' => $qNumber,
+                    'question_uz' => $content,
+                    'question_ru' => $content,
+                    'question_krill' => $content,
+                    'question_en' => $content,
+                    'description_uz' => $description,
+                    'description_ru' => $description,
+                    'description_krill' => $description,
+                    'description_en' => $description,
+                    'image_url' => $imageUrl,
+                    'audio_url_uz' => null,
+                    'audio_url_ru' => null,
+                    'audio_url_krill' => null,
+                    'audio_url_en' => null,
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+
+                $answers = $qData['answers'] ?? [];
+                foreach ($answers as $aIndex => $aData) {
+                    $aContent = $aData['content'] ?? '';
+                    $isCorrect = (bool) ($aData['is_correct'] ?? false);
+
+                    $answersBatch[] = [
+                        'id' => $answerId++,
+                        'question_id' => $currentQuestionId,
+                        'answer_uz' => $aContent,
+                        'answer_ru' => $aContent,
+                        'answer_krill' => $aContent,
+                        'answer_en' => $aContent,
+                        'is_correct' => $isCorrect,
+                        'order' => $aIndex + 1,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+        }
+
+        foreach (array_chunk($ticketsBatch, 50) as $chunk) {
+            DB::table('tickets')->insert($chunk);
+        }
+        foreach (array_chunk($questionsBatch, 50) as $chunk) {
+            DB::table('questions')->insert($chunk);
+        }
+        foreach (array_chunk($answersBatch, 50) as $chunk) {
+            DB::table('answers')->insert($chunk);
+        }
+
+        $this->info('4/4 Summary verification...');
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON;');
+        }
+
+        $ticketsCount = DB::table('tickets')->count();
+        $questionsCount = DB::table('questions')->count();
+        $answersCount = DB::table('answers')->count();
+        $signsCount = DB::table('signs')->count();
+        $categoriesCount = DB::table('sign_categories')->count();
+        $roadLinesCount = DB::table('road_lines')->count();
+
+        $this->info('🎉 Test Data Import Completed Successfully!');
+        $this->table(['Entity', 'Count'], [
+            ['Tickets (Biletlar)', $ticketsCount],
+            ['Questions (Savollar)', $questionsCount],
+            ['Answers (Javoblar)', $answersCount],
+            ['Traffic Signs (Belgilar)', $signsCount],
+            ['Sign Categories', $categoriesCount],
+            ['Road Lines (Chiziqlar)', $roadLinesCount],
+        ]);
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Legacy import from external DB schema.
+     */
+    protected function importFromDatabase(string $sourceDb): int
+    {
+        $this->info("Importing test and exam data from database `{$sourceDb}`...");
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('sign_categories')->truncate();
         $sourceCats = DB::table("{$sourceDb}.sign_categories")->orderBy('id')->get();
@@ -57,10 +309,7 @@ class ImportTestData extends Command
                 'updated_at' => $cat->updated_at ?? now(),
             ]);
         }
-        $this->info('   Imported '.count($sourceCats).' sign categories.');
 
-        // 3. Import Signs
-        $this->info('2/5 Importing Signs...');
         DB::table('signs')->truncate();
         $sourceSigns = DB::table("{$sourceDb}.signs")->orderBy('id')->get();
         foreach ($sourceSigns as $s) {
@@ -91,10 +340,7 @@ class ImportTestData extends Command
                 'updated_at' => $s->updated_at ?? now(),
             ]);
         }
-        $this->info('   Imported '.count($sourceSigns).' signs.');
 
-        // 4. Import Road Lines
-        $this->info('3/5 Importing Road Lines...');
         DB::table('road_lines')->truncate();
         $sourceRoadLines = DB::table("{$sourceDb}.road_lines")->orderBy('id')->get();
         foreach ($sourceRoadLines as $rl) {
@@ -102,7 +348,7 @@ class ImportTestData extends Command
 
             DB::table('road_lines')->insert([
                 'id' => $rl->id,
-                'number' => $rl->title ?: (string) $rl->id,
+                'line_number' => $rl->title ?: (string) $rl->id,
                 'name_uz' => $rl->title ?: 'Yo\'l chizig\'i '.$rl->id,
                 'name_ru' => $rl->title ?: 'Yo\'l chizig\'i '.$rl->id,
                 'name_krill' => $rl->title ?: 'Yo\'l chizig\'i '.$rl->id,
@@ -116,10 +362,7 @@ class ImportTestData extends Command
                 'updated_at' => $rl->updated_at ?? now(),
             ]);
         }
-        $this->info('   Imported '.count($sourceRoadLines).' road lines.');
 
-        // 5. Import Tickets
-        $this->info('4/5 Importing Tickets...');
         DB::table('tickets')->truncate();
         $sourceTickets = DB::table("{$sourceDb}.tickets")->orderBy('id')->get();
         foreach ($sourceTickets as $t) {
@@ -137,10 +380,7 @@ class ImportTestData extends Command
                 'updated_at' => $t->updated_at ?? now(),
             ]);
         }
-        $this->info('   Imported '.count($sourceTickets).' tickets.');
 
-        // 6. Import Questions & Answers
-        $this->info('5/5 Importing Questions and Answers...');
         DB::table('questions')->truncate();
         DB::table('answers')->truncate();
 
@@ -179,18 +419,11 @@ class ImportTestData extends Command
                 'created_at' => $q->created_at ?? now(),
                 'updated_at' => $q->updated_at ?? now(),
             ];
-
-            if (count($questionsBatch) >= 200) {
-                DB::table('questions')->insert($questionsBatch);
-                $questionsBatch = [];
-            }
         }
-        if (! empty($questionsBatch)) {
-            DB::table('questions')->insert($questionsBatch);
+        foreach (array_chunk($questionsBatch, 50) as $chunk) {
+            DB::table('questions')->insert($chunk);
         }
-        $this->info('   Imported '.count($sourceQuestions).' questions.');
 
-        // Answers
         $sourceAnswers = DB::table("{$sourceDb}.answers")->orderBy('id')->get();
         $answersBatch = [];
         $questionAnswerOrder = [];
@@ -216,16 +449,10 @@ class ImportTestData extends Command
                 'created_at' => $a->created_at ?? now(),
                 'updated_at' => $a->updated_at ?? now(),
             ];
-
-            if (count($answersBatch) >= 500) {
-                DB::table('answers')->insert($answersBatch);
-                $answersBatch = [];
-            }
         }
-        if (! empty($answersBatch)) {
-            DB::table('answers')->insert($answersBatch);
+        foreach (array_chunk($answersBatch, 50) as $chunk) {
+            DB::table('answers')->insert($chunk);
         }
-        $this->info('   Imported '.count($sourceAnswers).' answers.');
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 

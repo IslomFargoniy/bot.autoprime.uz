@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../providers/quiz_provider.dart';
+import '../../providers/update_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/localization.dart';
 import '../quiz/desktop_quiz_screen.dart';
@@ -144,6 +145,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Spacer(),
           const Divider(color: AppColors.borderDark, height: 1),
 
+          // Check for Updates button
+          Consumer<UpdateProvider>(
+            builder: (context, updateProv, _) {
+              return ListTile(
+                onTap: () => updateProv.checkForUpdatesManual(context, lang),
+                leading: updateProv.isChecking
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                      )
+                    : const Icon(Icons.system_update_alt_rounded, color: AppColors.primary, size: 20),
+                title: Text(
+                  updateProv.isChecking
+                      ? AppStrings.tr('checking_updates', lang)
+                      : AppStrings.tr('check_updates', lang),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white70),
+                ),
+              );
+            },
+          ),
+
           // Logout button
           ListTile(
             onTap: () => auth.logout(),
@@ -235,6 +258,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
 
           const Spacer(),
+
+          // Check for Updates Pill Button in Header
+          Consumer<UpdateProvider>(
+            builder: (context, updateProv, _) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Tooltip(
+                  message: AppStrings.tr('check_updates', lang),
+                  child: InkWell(
+                    onTap: () => updateProv.checkForUpdatesManual(context, lang),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgDark,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.borderDark),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (updateProv.isChecking)
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            )
+                          else
+                            const Icon(Icons.system_update_alt_rounded, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            updateProv.isChecking
+                                ? AppStrings.tr('checking_updates', lang)
+                                : AppStrings.tr('check_updates', lang),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
 
           // Language Switcher
           Container(

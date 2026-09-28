@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $reference_type
  * @property int|null $reference_id
  * @property int|null $performed_by_user_id
- * @property \Illuminate\Support\Carbon $transacted_at
+ * @property Carbon $transacted_at
  * @property-read Model $entity
  * @property-read Model|null $reference
  * @property-read User|null $performedBy

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -45,11 +46,12 @@ class AppServiceProvider extends ServiceProvider
             if ($date instanceof \DateTimeInterface) {
                 return \Illuminate\Support\Carbon::instance($date)->setTimezone($tz)->format('Y-m-d H:i:s');
             }
+
             return (string) $date;
         };
 
         CarbonImmutable::serializeUsing($dateFormatCallback);
-        \Carbon\Carbon::serializeUsing($dateFormatCallback);
+        Carbon::serializeUsing($dateFormatCallback);
         \Illuminate\Support\Carbon::serializeUsing($dateFormatCallback);
 
         DB::prohibitDestructiveCommands(

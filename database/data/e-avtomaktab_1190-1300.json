@@ -1,0 +1,2366 @@
+[
+    {
+        "id": 3291,
+        "content": "Ushbu transport vositasiga chorraha orqali qaysi yo'nalishlar bo'yicha harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.4 «To'g'riga va o'ngga harakatlanish» buyuruvchi belgisi o'rnatilgan. Ushbu belgi faqat ko'rsatilgan yo'nalishlarda harakatlanishga ruxsat beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1220.jpg",
+        "answers": [
+            {
+                "content": "Faqat to'g'riga va o'ngga",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat to'g'riga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat chapga va qayrilib olishga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat o'ngga",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha yo'nalishlarga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3292,
+        "content": "Qaysi avtomobil haydovchisiga burilishga ruxsat etilgan?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» belgisi qayrilib olishni taqiqlamaydi. 3.19 «Qayrilib olish taqiqlangan» belgisi esa chapga burilishni taqiqlamaydi. Shuning uchun har ikkala haydovchi o'z harakatini amalga oshirishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1221.jpg",
+        "answers": [
+            {
+                "content": "Oq avtomobil haydovchisiga",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil avtomobil haydovchisiga",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisiga ruxsat etilgan",
+                "is_correct": 1
+            },
+            {
+                "content": "Har ikkisiga taqiqlangan",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3293,
+        "content": "Ushbu belgi qanday nomlanadi?",
+        "description": "YHQ: 5.15 «To'xtab turish joyi» belgisi ostidagi 7.23 belgisi to'xtab turish joyi yer ustida joylashganligini bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1222.jpg",
+        "answers": [
+            {
+                "content": "To'xtab turish joyi",
+                "is_correct": 0
+            },
+            {
+                "content": "Pullik to'xtab turish joyi",
+                "is_correct": 0
+            },
+            {
+                "content": "Yer usti avtomobil qo'yish joyi",
+                "is_correct": 1
+            },
+            {
+                "content": "Yer osti avtomobil qo‘yish joyi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3294,
+        "content": "Qaysi yo‘nalishda harakatlanish taqiqlanadi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahadan oldin o'rnatilganda, u chorrahada o'ngga, chapga va qayrilib olishni taqiqlaydi (faqat to'g'riga ruxsat beradi).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1223.jpg",
+        "answers": [
+            {
+                "content": "Faqat chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat to‘g‘riga",
+                "is_correct": 0
+            },
+            {
+                "content": "O‘ngga, chapga va orqaga qayrilib olishga",
+                "is_correct": 1
+            },
+            {
+                "content": "Chapga va orqaga qayrilib olishga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3295,
+        "content": "Siz chorrahadan chapga burilmoqchisiz, kimga yo‘l berishingiz kerak?",
+        "description": "YHQ: Teng ahamiyatli yo'llar chorrahasida chapga burilayotgan haydovchi qarama-qarshi tomondan to'g'riga kelayotgan va o'ngga burilayotgan barcha transport vositalariga yo'l berishi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1224.jpg",
+        "answers": [
+            {
+                "content": "Traktorga",
+                "is_correct": 0
+            },
+            {
+                "content": "Mikroavtobusga",
+                "is_correct": 0
+            },
+            {
+                "content": "Birinchi o‘tish huquqiga egaman",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkala transportga",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3296,
+        "content": "Ushbu joyda quvib o‘tishga ruxsat beriladimi?",
+        "description": "YHQ: Tartibga solinmagan chorrahalarda asosiy yo'ldan harakatlanib kelayotgan transport vositalariga quvib o'tishga ruxsat beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1225.jpg",
+        "answers": [
+            {
+                "content": "Oldindagi transport vositasi tezligi 40 km\/s dan kam bo‘lsa",
+                "is_correct": 0
+            },
+            {
+                "content": "Ruxsat beriladi",
+                "is_correct": 1
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3297,
+        "content": "Kemiruvchi va sudralib yuruvchi hayvonlar qaysi javobda ko‘rsatilgan?",
+        "description": "Rasmda 2-sonli (kemiruvchilar) va 3-sonli (sudralib yuruvchilar) ogohlantiruvchi belgilari ushbu hayvonlar chiqib qolish xavfini bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1226.jpg",
+        "answers": [
+            {
+                "content": "3",
+                "is_correct": 0
+            },
+            {
+                "content": "2",
+                "is_correct": 0
+            },
+            {
+                "content": "4",
+                "is_correct": 0
+            },
+            {
+                "content": "2 va 3",
+                "is_correct": 1
+            },
+            {
+                "content": "1",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3298,
+        "content": "Qaysi belgi piyodalar o‘tish joyini bildiradi?",
+        "description": "YHQ: 2-raqamli belgi (5.16.1) bevosita piyodalar o'tish joyini bildiradi. 1-belgi bu ogohlantiruvchi belgi bo'lib, o'tish joyiga yaqinlashayotganlikni bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1227.jpg",
+        "answers": [
+            {
+                "content": "1",
+                "is_correct": 0
+            },
+            {
+                "content": "3",
+                "is_correct": 0
+            },
+            {
+                "content": "2",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3299,
+        "content": "Qaysi rasmda quvib o‘tish ko‘rsatilgan?",
+        "description": "YHQ: Quvib o'tish — egallagan bo'lagidan chiqib, oldindagi transport vositasidan o'zib ketish va keyinchalik yana o'z bo'lagiga qaytishdir. Faqat birinchi rasmda bu manevr to'liq tasvirlangan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1228.jpg",
+        "answers": [
+            {
+                "content": "Faqat birinchi rasmda",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat birinchi, ikkinchi va to‘rtinchi rasmlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat birinchi va ikkinchi rasmlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat birinchi va uchinchi rasmlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha rasmlarda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3300,
+        "content": "Asosiy yo‘l:",
+        "description": "YHQ: 2.1 «Asosiy yo'l» va 2.3.1 «Ikkinchi darajali yo'l bilan kesishuv» belgilari yo'lning asosiy ekanligini tasdiqlaydi. Bu belgilar yuqorigi ikkala rasmda tasvirlangan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1229.jpg",
+        "answers": [
+            {
+                "content": "Faqat yuqori chapdagi rasmda",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat yuqori o‘ngdagi rasmda",
+                "is_correct": 0
+            },
+            {
+                "content": "Yuqoridagi ikkala rasmda",
+                "is_correct": 1
+            },
+            {
+                "content": "Barcha rasmlarda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3301,
+        "content": "Ushbu qo‘shimcha axborot belgisi qaysi yo‘l belgisi bilan qo‘llaniladi?",
+        "description": "YHQ: 7.4.3 «Transport vositasining turi» qo'shimcha axborot belgisi (yengil avtomobil va ruxsat etilgan to'la vazni 3.5 t gacha bo'lgan yuk avtomobillari) taqiqlovchi yoki buyuruvchi belgilar bilan birga keladi. Rasmda 4-raqamdagi belgi bilan qo'llanilishi nazarda tutilgan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1230.jpg",
+        "answers": [
+            {
+                "content": "1",
+                "is_correct": 0
+            },
+            {
+                "content": "3",
+                "is_correct": 0
+            },
+            {
+                "content": "4",
+                "is_correct": 1
+            },
+            {
+                "content": "2",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3302,
+        "content": "Ushbu transport vositasi qaysi toifaga kiradi?",
+        "description": "YHQ: M1 toifasi — yo'lovchilarni tashish uchun mo'ljallangan va haydovchi o'rnidan tashqari o'rindiqlar soni 8 tadan oshmaydigan avtotransport vositalaridir.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1231.jpg",
+        "answers": [
+            {
+                "content": "N1",
+                "is_correct": 0
+            },
+            {
+                "content": "М1",
+                "is_correct": 1
+            },
+            {
+                "content": "O1",
+                "is_correct": 0
+            },
+            {
+                "content": "M2",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3303,
+        "content": "Ushbu belgi qanday nomlanadi?",
+        "description": "YHQ: Ushbu xavfli yuk belgisi «Organik peroksidlar»ni bildiradi (sariq va qizil fonli olov belgisi).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1203_1.jpg",
+        "answers": [
+            {
+                "content": "Oksidlovchi moddalar",
+                "is_correct": 0
+            },
+            {
+                "content": "Tez alangalanadigan gazlar va suyuqliklar",
+                "is_correct": 0
+            },
+            {
+                "content": "Organik peroksidlar",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3304,
+        "content": "Rasmda ko’rsatilgan vaziyatda avtomobil haydovchisi harakatni davom ettirishi kerakmi?",
+        "description": "YHQ: Tartibga soluvchi (militsioner) o'ng qo'lini oldinga qaratib tursa va unga chap yon bilan kelayotgan bo'lsangiz, barcha yo'nalishlarda harakatlanishga ruxsat beriladi. Shuning uchun «Ha» deb javob beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1204_2.jpg",
+        "answers": [
+            {
+                "content": "Yo’q",
+                "is_correct": 0
+            },
+            {
+                "content": "Ha",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3305,
+        "content": "Quyidagi yo’l belgilaridan qaysilari qo’shimcha axborot belgilari hisoblanadi?",
+        "description": "YHQ: Rasmda keltirilgan barcha belgilar (shakl va mazmuniga ko'ra) qo'shimcha axborot (tablichka) guruhiga kiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1205_1.jpg",
+        "answers": [
+            {
+                "content": "2 va 3",
+                "is_correct": 0
+            },
+            {
+                "content": "1 va 2",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha belgilar",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3306,
+        "content": "Qaysi javobda chorrahadan o’tish navbari to’g’ri ko’rsatilgan?",
+        "description": "YHQ: Tartibga solinmagan chorrahada, agar hamma teng yo'lda bo'lsa, o'ngdan kelayotgan transportga yo'l beriladi. Oq avtomobil velosipedga, qizil esa oqqa yo'l beradi. Ketma-ketlik: Velosiped, Oq, Qizil.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1206.jpg",
+        "answers": [
+            {
+                "content": "Velosiped, oq avtomobil, qizil avtomobil",
+                "is_correct": 1
+            },
+            {
+                "content": "Velosiped, qizil avtomobil, oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil avtomobil, oq avtomobil, velosiped",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3307,
+        "content": "Imtiyoz belgilari qaysi joylarda harakatlanish navbatini belgilaydi?",
+        "description": "YHQ: Imtiyoz belgilari chorrahalarda, yo'l qismlarining kesishuv joylarida hamda yo'lning tor qismlarida harakatlanish navbatini belgilaydi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Faqat yo’lning tor qismlarida",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat chorrahalarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikki ko’rsatilgan javoblar to’g’ri",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3308,
+        "content": "Quyidagi 3.24 “Yuqori tezlik cheklangan” yo’l belgisining ta’sirini qaysi belgilar bekor qiladi?",
+        "description": "YHQ: 3.25 «Yuqori tezlik cheklangan hududning oxiri» yoki 3.31 «Barcha cheklovlarning oxiri» kabi belgilar uning ta'sirini bekor qiladi. Rasmda ko'rsatilgan variantlar ichida barcha tegishli bekor qiluvchi belgilar jamlangan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1208_1.jpg",
+        "answers": [
+            {
+                "content": "Faqat ikkinchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha javoblar to’g’ri",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat to’rtinchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat uchinchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat birinchisi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3309,
+        "content": "Ushbu belgilardan qaysi biri qayrilib olishga ruxsat beradi?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» (1) belgisi qayrilib olishni taqiqlamaydi. 4.1.3 «Chapga harakatlanish» (2) belgisi qayrilib olishga ruxsat beradi. 5.33 «Qayrilib olish joyi» (3) belgisi ham ruxsat beradi. Demak, barchasi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1209_1.jpg",
+        "answers": [
+            {
+                "content": "Faqat 1 va 2",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat 2 va 3",
+                "is_correct": 0
+            },
+            {
+                "content": "Barchasi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3310,
+        "content": "Qaysi avtomobil haydovchisi chorrahada burilish qoidasini buzdi?",
+        "description": "YHQ: Burilishdan oldin haydovchi o'sha yo'nalishdagi chetki holatni egallashi shart. Rasmda qizil avtomobil ikkinchi bo'lakdan o'ngga, ko'k avtomobil esa chetki chapda turmasdan chapga burilayotgan bo'lsa, har ikkisi qoidani buzgan bo'ladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1210_2.jpg",
+        "answers": [
+            {
+                "content": "Qizil avtomobil haydovchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Ko’k avtomobil haydovchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisi ham buzdi",
+                "is_correct": 1
+            },
+            {
+                "content": "Har ikkisi ham buzmadi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3311,
+        "content": "Qaysi yo’nalishlarda qayrilib olishga ruxsat beradi?",
+        "description": "YHQ: 5.33 «Qayrilib olish joyi» belgisi o'rnatilgan joyda chapga burilish taqiqlanadi, ammo ko'rsatilgan trayektoriyalar bo'ylab qayrilib olishga ruxsat beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1211_2.jpg",
+        "answers": [
+            {
+                "content": "Faqat B va C yo’nalish bo’ylab",
+                "is_correct": 1
+            },
+            {
+                "content": "Barcha yo’nalish bo’ylab",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat C yo’nalish bo’ylab",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3312,
+        "content": "Quyidagi joyda to’xtashga ruxsat beriladimi?",
+        "description": "YHQ: Yo'lning qatnov qismi chetida sidirg'a chiziq bo'lsa, to'xtagan transport vositasi va ushbu chiziq orasidagi masofa kamida 3 metr bo'lishi kerak. Aks holda boshqa transportlar o'tishiga xalaqit beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1212_2.jpg",
+        "answers": [
+            {
+                "content": "Ruxsat beriladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 0
+            },
+            {
+                "content": "To’xtagan transport vositasi bilan sidirg’a chiziq orasidagi masofa 3 metrdan ko’p bo’lsa ruxsat beriladi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3313,
+        "content": "Qaysi transport vositasi qoidani buzmoqda?",
+        "description": "YHQ: To'xtash va to'xtab turish taqiqlangan hududlarda yoki yo'l chiziqlari talabi buzilgan holatda transport vositalari qoidabuzar hisoblanadi. Rasmda 1.1 sidirg'a chizig'ini bosib to'xtagan bo'lsa, har ikkalasi buzgan bo'lishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1213_1.jpg",
+        "answers": [
+            {
+                "content": "Yashil buzdi",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq buzdi",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkalasi buzmadi",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkalasi buzdi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3314,
+        "content": "Qaysi avtomobilga qayrilib olish taqiqlanadi?",
+        "description": "YHQ: 3.19 «Qayrilib olish taqiqlangan» belgisi faqat qayrilib olishni taqiqlaydi. 4.1.1 «To'g'riga harakatlanish» belgisi esa faqat to'g'riga ruxsat beradi. Vaziyatga qarab cheklov belgilanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1214_1.jpg",
+        "answers": [
+            {
+                "content": "Ikkala avtomobilga",
+                "is_correct": 1
+            },
+            {
+                "content": "Yashil avtomobilga",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq avtomobilga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3315,
+        "content": "Quyidagi holatda qizil avtomobilga quvib o‘tishga ruxsat beriladimi?",
+        "description": "YHQ: Chorrahalarda (asosiy yo'lda bo'lmagan hollarda), piyodalar o'tish joylarida va ko'rinish cheklangan joylarda quvib o'tish taqiqlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1215_1.jpg",
+        "answers": [
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Ruxsat beriladi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3316,
+        "content": "Avtomobillar harakatlanayotgan qatnov qismida nechta harakatlanish tasmasi bor?",
+        "description": "YHQ: Harakatlanish tasmalari soni yo'l chiziqlari yoki belgilar orqali, ular bo'lmaganda esa haydovchilar tomonidan transport vositasining kengligini hisobga olgan holda aniqlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1216_1.jpg",
+        "answers": [
+            {
+                "content": "Bitta tasma",
+                "is_correct": 0
+            },
+            {
+                "content": "Uchta tasma",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkita tasma",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3317,
+        "content": "Qaysi yo‘nalishda harakatlanishga ruxsat beriladi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahadan keyin o'rnatilgan bo'lsa, u keyingi chorrahagacha ta'sir qiladi, lekin o'ngga (hovlilarga) burilishni taqiqlamaydi. Chorrahada esa faqat to'g'riga (Б) ruxsat beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1217_1.jpg",
+        "answers": [
+            {
+                "content": "A va Б",
+                "is_correct": 0
+            },
+            {
+                "content": "Б va B",
+                "is_correct": 0
+            },
+            {
+                "content": "Б",
+                "is_correct": 1
+            },
+            {
+                "content": "Barcha yo’nalishlarda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3318,
+        "content": "Odamlarni quyidagi hollarda tashishga ruxsat etaladi:",
+        "description": "YHQ: Odamlarni yuk tashiladigan tirkamalarda, traktorlarda, tirkama-uychalarda va yuk avtomobillarining yukxonasida (maxsus jihozlanmagan bo'lsa) tashish taqiqlanadi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Tirkama-uychada",
+                "is_correct": 0
+            },
+            {
+                "content": "Yuk tashiladigan tirkamalarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha hollarda tashish taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Traktorlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Bolalarni yuk avtomobillarning yukxonasida",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3319,
+        "content": "Agar yo‘l belgilari va chiziqlari boshqa yo‘nalishni ko‘rsatmagan bo‘lsa, haydovchilar ajratuvchi bo‘lagi bo‘lmagan ikki tomonlama harakat tashkil etilgan yo‘llardagi (Ko‘prik, yo‘l o‘tkazgich ustunlari va shunga o‘xshashlar)ni qaysi tomonidan aylanib o‘tishlari kerak?",
+        "description": "YHQ: Yo'l o'rtasidagi to'siqlar, ustunlar va boshqa inshootlar, agar belgilar boshqacha tartibni belgilamagan bo'lsa, faqat o'ng tomondan aylanib o'tilishi shart.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Chap tomondan",
+                "is_correct": 0
+            },
+            {
+                "content": "O’ng va chap tomondan",
+                "is_correct": 0
+            },
+            {
+                "content": "O’ng tomondan",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3320,
+        "content": "To‘xtash deb nimaga aytiladi?",
+        "description": "YHQ: To'xtash — transport vositasi harakatini 10 daqiqagacha bo'lgan muddatga (shuningdek, yo'lovchilarni chiqarish-tushirish yoki yuk ortish-tushirish uchun ko'proq vaqtga ham) atayin to'xtatishdir.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Transport vositasiga yo’lovchilarni chiqarish yoki tushirish, yuk ortish yoki tushirish bilan bog’liq bo’lmagan hollarda harakatni 10 daqiqadan ko’proq vaqtga atayin to’xtatish",
+                "is_correct": 0
+            },
+            {
+                "content": "Transport vositasi harakatini 10 daqiqagacha bo’lgan muddatga to’xtatish (harakatsiz holatga keltirish)",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3321,
+        "content": "To‘xtab turish deb nimaga aytiladi?",
+        "description": "YHQ 1-bob: To‘xtab turish — transport vositasining harakatini yo‘lovchilarni chiqarish yoki tushirish, yuk ortish yoki tushirish bilan bog‘liq bo‘lmagan sabablarga ko‘ra 10 daqiqadan ko‘proq vaqtga atayin to‘xtatishidir.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Transport vositasi harakatini 10 daqiqagacha bo’lgan muddatga to’xtatish (harakatsiz holatga keltirish)",
+                "is_correct": 0
+            },
+            {
+                "content": "Transport vositasiga yo’lovchilarni chiqarish yoki tushirish, yuk ortish yoki tushirish bilan bog’liq bo’lmagan hollarda harakatni 10 daqiqadan ko’proq vaqtga atayin to’xtatish",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3322,
+        "content": "Transport vositalarini boshqarishni dastlabki o‘rgatish (boshlang‘ich mashg‘ulot) qayerda amalga oshiriladi?",
+        "description": "YHQ 25-bob: Transport vositalarini boshqarishni o‘rgatish yopiq maydonchalarda yoki avtodromlarda amalga oshirilishi kerak.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Aholi punktlarida",
+                "is_correct": 0
+            },
+            {
+                "content": "Turar joy dahalarida",
+                "is_correct": 0
+            },
+            {
+                "content": "Yopiq maydonchalarda yoki avtodromlarda",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3323,
+        "content": "Qaysi belgida haydovchiga quvib o‘tish taqiqlanadi?",
+        "description": "YHQ: 3.20 «Quvib o'tish taqiqlangan» (1) va 3.22 «Yuk avtomobillarida quvib o'tish taqiqlangan» (2) belgilari o'rnatilgan joylarda quvib o'tish taqiqlanadi. 3-belgi esa quvib o'tish taqiqlangan hudud tugaganini bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1223_1.jpg",
+        "answers": [
+            {
+                "content": "1 va 2",
+                "is_correct": 1
+            },
+            {
+                "content": "2 va 3",
+                "is_correct": 0
+            },
+            {
+                "content": "Barchasida taqiqlanadi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3324,
+        "content": "Yo‘nalishli transport vositalariga bekatlardan tashqari joylarda yo‘lovchi olish va tushirishga (yo‘nalishli taksilar bundan mustasno) ruxsat etiladimi?",
+        "description": "YHQ: Yo'nalishli transport vositalari (avtobus, trolleybus) faqat belgilangan bekatlarda yo'lovchi to'xtashi va tushirishi shart.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3325,
+        "content": "Avtomobil haydovchisiga qaysi yo‘nalish bo‘yicha harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.3 «Chapga harakatlanish» belgisi o'rnatilgan bo'lib, u faqat chapga va qayrilib olishga ruxsat beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1225_1.jpg",
+        "answers": [
+            {
+                "content": "Barcha yo’nalishlarga",
+                "is_correct": 0
+            },
+            {
+                "content": "O’ngga va chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat chapga",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3326,
+        "content": "Qizil mashina haydovchisi o‘tib ketayotgan mashina orqasida to‘xtagan bo‘lsa, “STOP” belgisida ham to‘xtashi kerakmi?",
+        "description": "YHQ: 2.5 «To'xtamasdan harakatlanish taqiqlangan» belgisi talabiga ko'ra, har bir haydovchi bevosita to'xtash chizig'i (yoki belgi) oldida to'xtashi shart. Oldindagi mashina orqasida to'xtash hisobga olinmaydi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1226_2.jpg",
+        "answers": [
+            {
+                "content": "Ha",
+                "is_correct": 1
+            },
+            {
+                "content": "Yo’q",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3327,
+        "content": "Qaysi yo‘nalishlarda harakat qilish mumkin?",
+        "description": "YHQ: 4.1.3 «Chapga harakatlanish» belgisi va chap qatorni egallab turgan transport vositasi faqat chapga va qayrilib olishga ruxsat oladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1227_2.jpg",
+        "answers": [
+            {
+                "content": "Barcha yo’nalishlarda harakatlanishga ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "To’g’riga va chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha yo’nalishlarda harakatlanish taqiqlanadi",
+                "is_correct": 0
+            },
+            {
+                "content": "Chapga va qayrilib olish",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3328,
+        "content": "Yengil avtomobil qaysi yo‘nalish bo‘yicha to‘g‘ri burilmoqda?",
+        "description": "YHQ: O'ngga burilishda transport vositasi qatnov qismining chetki o'ng bo'lagiga (2-trayektoriya) tushishi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1228_2.jpg",
+        "answers": [
+            {
+                "content": "2",
+                "is_correct": 1
+            },
+            {
+                "content": "1 va 2",
+                "is_correct": 0
+            },
+            {
+                "content": "1",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3329,
+        "content": "Chapga burilish sizga qaysi trayektoriya bo‘yicha amalga oshirishga ruxsat etiladi?",
+        "description": "YHQ: Chapga burilishda qarama-qarshi harakatlanish bo'lagiga chiqib ketmaslik sharti bilan istalgan bo'lakka kirish mumkin. Shuning uchun ko'rsatilgan har ikkala trayektoriya ham to'g'ri.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1229_1.jpg",
+        "answers": [
+            {
+                "content": "Faqat Б trayektoriya bo’yicha",
+                "is_correct": 0
+            },
+            {
+                "content": "Ko’rsatilgan trayektoriyalardan istalgan biri bo’yicha",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat A trayektoriya bo’yicha",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3330,
+        "content": "Avtomobil haydovchisi qaysi yo‘nalishlarda harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahaning birinchi qatnov qismiga ta'sir qiladi. Demak A yo'nalish taqiqlangan, B (ikkinchi qatnov qismidan keyin) bo'yicha harakatlanish mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1230_2.jpg",
+        "answers": [
+            {
+                "content": "Barchasi",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat А va B",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat B",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat A",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3331,
+        "content": "Ko‘k avtomobil haydovchisi qaysi yo‘nalish bo‘yicha qoidani buzib burilmoqda?",
+        "description": "YHQ: Burilishdan oldin haydovchi qatnov qismining tegishli chetki holatini egallashi shart. Ko'k avtomobil o'ng bo'lakda turib chapga (A) va qayrilib olishga (B) harakat qilishi qoidabuzarlik hisoblanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1231_2.jpg",
+        "answers": [
+            {
+                "content": "Har ikki yo’nalish bo’yicha qoidani buzmoqda",
+                "is_correct": 1
+            },
+            {
+                "content": "Har ikki yo’nalish bo’yicha qoidani buzmayapti",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat B",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat А",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3332,
+        "content": "Aholi punktlaridan tashqarida qaysi avtomobil to‘xtab turish qoidasini buzmadi?",
+        "description": "YHQ: Aholi punktlaridan tashqarida yo'lning chap tomonida to'xtash va to'xtab turish taqiqlanadi (faqat o'ng tomonda yo'l yoqasida ruxsat etiladi). Shuning uchun faqat o'ng yo'l yoqasida turgan avtomobil qoidaga amal qilgan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1232_1.jpg",
+        "answers": [
+            {
+                "content": "Qizil avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil va oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Ko’k avtomobil",
+                "is_correct": 1
+            },
+            {
+                "content": "Barcha avtomobillar to’xtab turish qoidasini buzdi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3333,
+        "content": "Qaysi avtomobil haydovchisi svetoforning taqiqlovchi ishorasida to‘g‘ri to‘xtadi?",
+        "description": "YHQ: Haydovchi svetoforning taqiqlovchi ishorasida to'xtash chizig'i (Stop-liniya) oldida to'xtashi kerak. Chiziqdan o'tib ketish qoidabuzarlikdir.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1233_1.jpg",
+        "answers": [
+            {
+                "content": "2-rasmda",
+                "is_correct": 1
+            },
+            {
+                "content": "1-rasmda",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkala rasmda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3334,
+        "content": "O‘quv muddati yakunida A toifadagi mototransport vositasini boshqarish huquqiga ega bo‘lish uchun necha yoshga to‘lgan shaxslarga imtihon topshirishga ruxsat etiladi?",
+        "description": "O'zbekiston Respublikasi qonunchiligiga ko'ra, mototransport vositalarini (A toifa) boshqarish huquqi 18 yoshga to'lgan shaxslarga beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1234.jpg",
+        "answers": [
+            {
+                "content": "18 yoshga",
+                "is_correct": 1
+            },
+            {
+                "content": "16 yoshga",
+                "is_correct": 0
+            },
+            {
+                "content": "17 yoshga",
+                "is_correct": 0
+            },
+            {
+                "content": "15 yoshga",
+                "is_correct": 0
+            },
+            {
+                "content": "14 yoshga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3336,
+        "content": "Qaysi transport vositasi harakatni davom ettirishi mumkin?",
+        "description": "YHQ: Tartibga soluvchi qo'llarini yon tomonga tushirgan yoki yoygan holatda, uning yon tomonlaridan harakatlanayotgan transportlarga to'g'riga va o'ngga yurishga ruxsat beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1236.jpg",
+        "answers": [
+            {
+                "content": "Ikkala avtomobil",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat ko’k avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Hech biri",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3337,
+        "content": "Qaysi rasmda piyodalarning tashkiliy jamlanmasi yo‘lning qatnov qismida qoidani buzmay harakatlanmoqda?",
+        "description": "YHQ: Piyodalarning tashkiliy jamlanmasi qatnov qismining o'ng tomonida, transport vositalari harakati yo'nalishi bo'ylab, qatorda 4 kishidan ortiq bo'lmagan holda harakatlanishi kerak.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1237.jpg",
+        "answers": [
+            {
+                "content": "2",
+                "is_correct": 1
+            },
+            {
+                "content": "1",
+                "is_correct": 0
+            },
+            {
+                "content": "1, 2",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3338,
+        "content": "Vazirlar Mahkamasining 172-sonli qaroriga muvofiq, Yo‘l harakati qoidalari nechta banddan iborat?",
+        "description": "O'zbekiston Respublikasining 2022-yilda qabul qilingan yangi tahrirdagi Yo'l harakati qoidalari jami 216 ta banddan iborat.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "216",
+                "is_correct": 1
+            },
+            {
+                "content": "186",
+                "is_correct": 0
+            },
+            {
+                "content": "220",
+                "is_correct": 0
+            },
+            {
+                "content": "184",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3339,
+        "content": "Mexanik transport vositasining egasi yonida haydovchilik guvohnomasi bo‘lmaganida qanday hujjat bilan boshqarishga ruxsat etiladi?",
+        "description": "YHQ: Haydovchi yonida biometrik pasporti yoki ID-kartasi bo'lgan taqdirda, transport vositasini boshqarish huquqini beruvchi hujjatlarni (guvohnoma, texpasport) o'zi bilan olib yurishi shart emas (elektron tizim orqali tekshiriladi).",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Biometrik pasport yoki ID karta",
+                "is_correct": 1
+            },
+            {
+                "content": "Biometrik pasport",
+                "is_correct": 0
+            },
+            {
+                "content": "ID karta",
+                "is_correct": 0
+            },
+            {
+                "content": "Egalik huquqi",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha javoblar to'g'ri",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3340,
+        "content": "Faqat belgilangan yo‘nalishli transport vositalariga qatnov qisimda ajratilgan tasmasida boshqa turdagi transport vositalari harakatlanishga ruxsat etiladimi?",
+        "description": "YHQ: Maxsus ajratilgan tasmada boshqa transport vositalarining harakatlanishi taqiqlanadi (ayrim istisnolar — taksi va maxsus xizmatlardan tashqari).",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat belgilangan yo‘nalishli transport vositasining harakatlanish vaqti tugaganida ruxsat etiladi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3341,
+        "content": "Bir yo‘nalishda harakatlanayotgan (burilishga kirishmagan) relssiz transport vositasidan o‘zib ketishga ruxsat beriladi:",
+        "description": "YHQ: Bir yo'nalishli ko'p tasmali yo'llarda o'zib ketish (chap bo'lak bo'sh bo'lsa) chap tomondan amalga oshiriladi. Biroq, burilishga kirishmagan transportdan chapdan o'zib ketish qoidadir.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Faqat chap tomondan",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat o‘ng tomondan",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikki tomondan",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3342,
+        "content": "Qaysi yo‘nalish bo‘yicha harakatlanishga ruxsat berilgan?",
+        "description": "YHQ: 4.1.4 «To'g'riga va o'ngga harakatlanish» buyuruvchi belgisi faqat ko'rsatilgan yo'nalishlarda harakatlanishga ruxsat beradi. Shuning uchun B (to'g'riga) va C (o'ngga) yo'nalishlariga ruxsat etiladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1242.jpg",
+        "answers": [
+            {
+                "content": "B va C",
+                "is_correct": 1
+            },
+            {
+                "content": "Hamma yo‘nalishlarga",
+                "is_correct": 0
+            },
+            {
+                "content": "A va B",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3343,
+        "content": "Avtomobil qaysi yo‘nalishda qayrilib olishiga ruxsat beriladi?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» belgisi faqat chapga burilishni taqiqlaydi, lekin qayrilib olishga ruxsat beradi. Shuningdek, 1.1 sidirg'a chizig'ini kesib o'tish taqiqlanganligi sababli, faqat uzuq-uzuq chiziq bor joydan (A) qayrilib olish mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1243.jpg",
+        "answers": [
+            {
+                "content": "B yo‘nalishga",
+                "is_correct": 0
+            },
+            {
+                "content": "A yo‘nalishga",
+                "is_correct": 1
+            },
+            {
+                "content": "Har ikki yo‘nalishga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3344,
+        "content": "Rasmda ko‘rsatilgan vaziyatda avtomobil haydovchisi harakatni davom ettirishi kerakmi?",
+        "description": "YHQ: Tartibga soluvchining o'ng qo'li oldinga cho'zilgan holatida unga chap yon bilan kelayotgan transportlarga barcha yo'nalishlarda harakatlanishga ruxsat beriladi. Shuning uchun javob: Ha.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1244_1.jpg",
+        "answers": [
+            {
+                "content": "Ha",
+                "is_correct": 1
+            },
+            {
+                "content": "Yo‘q",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3345,
+        "content": "Chorrahadan o‘tish navbatini ko‘rsating:",
+        "description": "YHQ: Tartibga solinmagan teng ahamiyatli yo'llar chorrahasida o'ngdan kelayotgan transportga yo'l beriladi. Oq avtomobil velosipedga, qizil esa oqqa yo'l berishi shart. Navbat: Velosiped, oq, qizil.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1245.jpg",
+        "answers": [
+            {
+                "content": "Qizil avtomobil, oq avtomobil, velosiped",
+                "is_correct": 0
+            },
+            {
+                "content": "Velosiped, qizil avtomobil, oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Velosiped, oq avtomobil, qizil avtomobil",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3346,
+        "content": "Harakat tezligi 40 km\/soatdan oshmaydigan transport vositasiga qatnov qismining o‘ng qatoridan chiqishga qachon ruxsat etiladi?",
+        "description": "YHQ: Sekin harakatlanuvchi transportlar o'ng chetki bo'lakda yurishi kerak, lekin chapga burilish, qayrilib olish, quvib o'tish yoki to'siqni aylanib o'tishda bo'lakni o'zgartirishlari mumkin.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Chapga burilish yoki qayrilib olish uchun qayta tizilishda",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha sanab o‘tilgan hollarda",
+                "is_correct": 1
+            },
+            {
+                "content": "Aylanib o‘tishda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3347,
+        "content": "Svetoforning asosiy yashil ishorasiga yo‘naltirgich (yo‘naltirgichlar)ning shakli tushirilgan bo‘lsa, haydovchilarga nima haqida axborot beradi?",
+        "description": "YHQ 5.3-band: Svetoforning asosiy ishorasidagi qora yo'naltirgich shakli haydovchini qo'shimcha tarmoq (sektsiya) borligi haqida va asosiy ishora yonganda qaysi yo'nalishlarda harakatlanish mumkinligi haqida ogohlantiradi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Svetofor ishlamayotganligi to‘g‘risida axborot beradi",
+                "is_correct": 0
+            },
+            {
+                "content": "Svetoforning qo‘shimcha tarmog‘i borligi haqida axborot beradi",
+                "is_correct": 1
+            },
+            {
+                "content": "Yaqin orada yashil ishorasi yonishi haqida axborot beradi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3348,
+        "content": "Avtomobillarga qaysi yo‘nalishlarda harakatlanishga ruxsat beriladi?",
+        "description": "YHQ: Tartibga soluvchi (militsioner) yon tomonga qarab turganda (yoki qo'llari yoyilganda), uning yonidan kelayotganlarga to'g'riga va o'ngga ruxsat. Ko'k avtomobil to'g'riga, qizil avtomobil esa chapga burilishi taqiqlanadi (qizilga to'xtash ishorasi berilmoqda).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1248.jpg",
+        "answers": [
+            {
+                "content": "Ko‘kka to‘g‘riga, qizilga chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisiga ham ko‘rsatilgan yo‘nalishlarda ruxsat beriladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizilga chapga, ko‘kka taqiqlaydi",
+                "is_correct": 0
+            },
+            {
+                "content": "Hech biriga ruxsat etilmaydi (Vaziyatga ko'ra ko'k to'g'riga o'tishi mumkin)",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3349,
+        "content": "Velosipeddan foydalanishda yo‘lovchi tashish qaysi hollarda ruxsat etiladi?",
+        "description": "YHQ 166-band: Velosipedda faqat 7 yoshgacha bo‘lgan bolalarni, ular uchun maxsus jihozlangan o‘rindiqda tashishga ruxsat etiladi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Faqat 7 yoshgacha bo‘lgan bolalarni maxsus o‘rindiqda tashish mumkin",
+                "is_correct": 1
+            },
+            {
+                "content": "Har qanday yo‘lovchini tashish mumkin",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat kattalar uchun ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Hech qachon ruxsat etilmaydi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3350,
+        "content": "Ushbu avtomobil qaysi yo‘nalishlarda harakatlanishga ruxsat beriladi?",
+        "description": "YHQ: 5.10.1 «Bir tomonlama harakatlanadigan yo'l» belgisi. Chapga burilish (2) taqiqlanadi, chunki bu qarama-qarshi yo'nalishga kirishni anglatishi mumkin (belgi talabiga ko'ra). Rasmga ko'ra to'g'riga, o'ngga va orqaga qayrilib olish trayektoriyalari tahlil qilinadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1250.jpg",
+        "answers": [
+            {
+                "content": "Birinchi, uchinchi va to‘rtinchi yo‘nalishlarda",
+                "is_correct": 1
+            },
+            {
+                "content": "Birinchi, ikkinchi va uchinchi yo‘nalishlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha yo‘nalishlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat birinchi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3351,
+        "content": "Ushbu avtomobilga ko‘rsatilgan yo‘nalishlardan qaysi biriga harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» belgisi faqat chapga burilishni taqiqlaydi, lekin qayrilib olishga ruxsat beradi. Biroq, agar yo'l chiziqlari (sidirg'a) ruxsat bermasa, har ikkalasi taqiqlanishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1251.jpg",
+        "answers": [
+            {
+                "content": "Faqat qayrilib olishga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkala yo‘nalishga ham harakatlanish taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Ikkala yo‘nalishga ham harakatlanishga ruxsat etiladi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3352,
+        "content": "Qaysi javobda \"avariya holatini yuzaga keltirish\" atamasi ta’rifi to‘g‘ri ko‘rsatilgan?",
+        "description": "YHQ: Avariya holatini yuzaga keltirish — yo‘l harakati qatnashchilarini o‘z xavfsizligini ta'minlash uchun harakat yo‘nalishi yoki tezligini keskin o‘zgartirishga majbur qilishdir.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Yo‘l-transport hodisalarining kelib chiqish sabablarining oldini olishga, ularning og‘ir oqibatlarini kamaytirishga qaratilgan faoliyat",
+                "is_correct": 0
+            },
+            {
+                "content": "Yo‘l harakatining boshqa qatnashchilarini harakat yo‘nalishi yoki tezligini keskin o‘zgartirishga, shuningdek, o‘z xavfsizligini yoxud boshqa fuqarolar xavfsizligini ta’minlash uchun o‘zga choralarni ko‘rishga majbur qilish",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3353,
+        "content": "Avtobus haydovchisiga bu joyda odam tushirishga ruxsat etiladimi?",
+        "description": "YHQ: 3.27 «To'xtash taqiqlangan» belgisi ta'sir doirasida faqat belgilangan yo'nalishli transport vositalariga (avtobus, yo'nalishli taksi) bekatlarda to'xtashga ruxsat etiladi. Rasmda bekat bo'lmasa, taqiqlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1253.jpg",
+        "answers": [
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Agar avtobus belgilangan yo‘nalishli bo‘lsa ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3354,
+        "content": "Qaysi transport vositalari o‘ngga harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: Svetoforning qo'shimcha tarmog'i (sektsiyasi) yonganda, ushbu yo'nalish bo'ylab harakatlanayotgan barcha transport vositalari (tramvay va avtomobil) harakatni davom ettirishi mumkin, lekin boshqalarga yo'l berish sharti bilan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1254.jpg",
+        "answers": [
+            {
+                "content": "Tramvayga",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisiga",
+                "is_correct": 1
+            },
+            {
+                "content": "Yengil avtomobilga",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3355,
+        "content": "Qizil avtomobil kimga yo‘l berishi kerak?",
+        "description": "YHQ: Tartibga solinmagan teng ahamiyatli bo'lmagan chorrahada, \"Yo'l bering\" belgisi ostidagi yo'nalish sxemasiga ko'ra, asosiy yo'ldagilarga (yuk mashinasi va traktorga) yo'l berilishi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1255.jpg",
+        "answers": [
+            {
+                "content": "Hech kimga",
+                "is_correct": 0
+            },
+            {
+                "content": "Yuk mashinasiga",
+                "is_correct": 0
+            },
+            {
+                "content": "Traktorga",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkala transport vositasiga",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3356,
+        "content": "Avtomobilga qaysi yo‘nalishlarda harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.2 «O'ngga harakatlanish» buyuruvchi belgisi faqat o'ngga burilishga ruxsat beradi (1-yo'nalish).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1256.jpg",
+        "answers": [
+            {
+                "content": "2-yo‘nalishda",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisiga ham ruxsat beriladi",
+                "is_correct": 0
+            },
+            {
+                "content": "1-yo‘nalishda",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3357,
+        "content": "Individual harakatlanish vositalarini necha yoshdan boshqarishga ruxsat beriladi?",
+        "description": "YHQ: Yangi qoidalarga ko'ra, skuter, elektrosamokat kabi individual harakatlanish vositalarini yo'llarda boshqarish 14 yoshdan ruxsat etiladi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "16",
+                "is_correct": 0
+            },
+            {
+                "content": "14",
+                "is_correct": 1
+            },
+            {
+                "content": "12",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3358,
+        "content": "Qaysi rasmda sariq avtomobil haydovchisi qizil avtomobilga yo‘l berishi kerak?",
+        "description": "YHQ: Harakatlanishni boshlayotgan yoki bo'lakni o'zgartirayotgan haydovchi harakatlanib kelayotgan boshqa transportlarga yo'l berishi shart. O'ngdan kelayotgan (o'ng qo'l qoidasi) holatlari ham inobatga olinadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1258.jpg",
+        "answers": [
+            {
+                "content": "Ikkala rasmda",
+                "is_correct": 1
+            },
+            {
+                "content": "Birinchi rasmda",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkinchi rasmda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3359,
+        "content": "Qaysi avtomobil haydovchisi yo‘l berishi kerak?",
+        "description": "YHQ: Bo'lakni o'zgartirmoqchi bo'lgan haydovchi (oq chiziqni kesib o'tayotgan) o'z bo'lagida to'g'ri ketayotgan transportga yo'l berishi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1259.jpg",
+        "answers": [
+            {
+                "content": "Ko‘k avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil avtomobil",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3360,
+        "content": "Qaysi belgida qayrilishga ruxsat etiladi?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» (a) qayrilib olishni taqiqlamaydi. 4.1.3 «Chapga yurish» (b) va 5.33 «Qayrilib olish joyi» (c) ham ruxsat beradi. Demak barchasi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1260.jpg",
+        "answers": [
+            {
+                "content": "b",
+                "is_correct": 0
+            },
+            {
+                "content": "a, b, c",
+                "is_correct": 1
+            },
+            {
+                "content": "c",
+                "is_correct": 0
+            },
+            {
+                "content": "a",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3361,
+        "content": "Miltillovchi qizil ishora?",
+        "description": "YHQ: Svetofordagi miltillovchi qizil ishora (asosan temir yo'l kesishmalarida) harakatlanishni qat'iyan taqiqlaydi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Keskin tormoz bermasdan to‘xtashga ulgura olmaydigan haydovchilarga harakatlanishni davom ettirishga ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Harakatlanishga ruxsat beradi",
+                "is_correct": 0
+            },
+            {
+                "content": "Harakatni taqiqlaydi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3362,
+        "content": "Ushbu belgi nimani bildiradi?",
+        "description": "YHQ: 1.14 «Tik balandlik» ogohlantiruvchi belgisi yo'lning ko'tarilish qismiga yaqinlashayotganlikni bildiradi (foiz ko'rsatkichi tepaga qarab o'sib boradi).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1262.jpg",
+        "answers": [
+            {
+                "content": "Tik nishablik",
+                "is_correct": 0
+            },
+            {
+                "content": "Tik balandlik",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3363,
+        "content": "Miniladigan uy hayvonlarini boshqarishga necha yoshdan ruxsat etiladi?",
+        "description": "YHQ 164-band: Yo'llarda ulovli aravalarni (chanalarni) boshqarish, hayvonlarni minish yoki haydab borish 14 yoshga to'lgan shaxslarga ruxsat etiladi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "14 yosh",
+                "is_correct": 1
+            },
+            {
+                "content": "18 yosh",
+                "is_correct": 0
+            },
+            {
+                "content": "16 yosh",
+                "is_correct": 0
+            },
+            {
+                "content": "12 yosh",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3364,
+        "content": "Velosipedni boshqarishga necha yoshdan ruxsat etiladi?",
+        "description": "YHQ 164-band: Velosipedni yo'llarda boshqarish 14 yoshga to'lgan shaxslarga ruxsat etiladi. (14 yoshgacha bo'lganlarga faqat turar-joy dahalari va yopiq maydonlarda ruxsat).",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "14 yosh",
+                "is_correct": 1
+            },
+            {
+                "content": "12 yosh",
+                "is_correct": 0
+            },
+            {
+                "content": "16 yosh",
+                "is_correct": 0
+            },
+            {
+                "content": "18 yosh",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3365,
+        "content": "Qizil avtomobil qaysi yo‘nalishlarda qayrilib olishga ruxsat beriladi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahadan oldin o'rnatilganda qayrilib olishni taqiqlaydi. Agar belgi chorrahadan keyin o'rnatilgan bo'lsa, u faqat keyingi chorrahagacha ta'sir qiladi. Rasmga ko'ra, sidirg'a chiziqlar mavjud bo'lsa, har ikki yo'nalishda taqiqlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1265.jpg",
+        "answers": [
+            {
+                "content": "Ikkala yo‘nalishlarda ham qayrilib olish taqiqlangan",
+                "is_correct": 1
+            },
+            {
+                "content": "Birinchi yo‘nalishda",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkinchi yo‘nalishda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3366,
+        "content": "Qaysi yo‘nalish bo‘yicha chapga burilishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahaga o'rnatilgan bo'lsa, u chorrahada chapga burilish va qayrilib olishni taqiqlaydi. Faqat to'g'riga ruxsat bor.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1266.jpg",
+        "answers": [
+            {
+                "content": "Faqat 2-yo‘nalish",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikki yo‘nalishlarga taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Barcha yo‘nalishlarga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat 1-yo‘nalish",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3367,
+        "content": "Qaysi avtomobil haydovchisi qoidani buzmay harakatlanmoqda?",
+        "description": "YHQ: 3.20 «Quvib o'tish taqiqlangan» belgisi mavjud joyda, 1.1 sidirg'a chizig'ini kesib o'tib quvib o'tish qoidabuzarlikdir. O'ngdagi rasmda quvib o'tish tugallangan yoki ruxsat etilgan hudud bo'lishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1267.jpg",
+        "answers": [
+            {
+                "content": "Chapdagi rasmda",
+                "is_correct": 0
+            },
+            {
+                "content": "O‘ngdagi rasmda",
+                "is_correct": 1
+            },
+            {
+                "content": "Ikkala rasmda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3368,
+        "content": "Yo‘l chiziqlari nechta guruhdan iborat?",
+        "description": "YHQ: Yo'l chiziqlari 2 ta guruhdan iborat: Gorizontal (yo'l yuzasiga chizilgan) va Vertikal (yo'l inshootlariga chizilgan).",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "2 ta",
+                "is_correct": 1
+            },
+            {
+                "content": "4 ta",
+                "is_correct": 0
+            },
+            {
+                "content": "3 ta",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3369,
+        "content": "Qizil avtomobil haydovchisi yaqinlashib kelayotgan poyezdni o‘tkazib yuborish uchun to‘g‘ri to‘xtadimi?",
+        "description": "YHQ 116-band: Temir yo'l kesishmasida to'xtash chizig'i yoki belgisi bo'lmaganda, eng yaqin relsdan kamida 10 metr masofada to'xtash shart. Rasmda masofa saqlanmagan bo'lsa, noto'g'ri.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1269.jpg",
+        "answers": [
+            {
+                "content": "Noto‘g‘ri to‘xtadi",
+                "is_correct": 1
+            },
+            {
+                "content": "To‘g‘ri to‘xtadi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3370,
+        "content": "Qaysi avtomobil haydovchisi qoidani buzmasdan harakatlanmoqda?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahadan keyin o'rnatilgan bo'lsa, u hovlilarga o'ngga burilishni taqiqlamaydi, lekin chapga burilishni taqiqlaydi. Ko'k avtomobil o'ngga burilayotgan bo'lsa, u qoidaga amal qilmoqda.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1270_1.jpg",
+        "answers": [
+            {
+                "content": "Ko‘k avtomobil haydovchisi",
+                "is_correct": 1
+            },
+            {
+                "content": "Qizil avtomobil haydovchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkala avtomobil haydovchilari",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkala avtomobil haydovchilari qoidani buzmoqda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3371,
+        "content": "Yondosh hududlardan yo‘lga chiqish joylarida yoki yo‘lning dala, o‘rmon yo‘llari va boshqa doimiy harakatlanish, o‘tib ketish uchun mo‘ljallanmagan yo‘llar bilan kesishgan (tutashgan) joylarida, ularning oldida tegishli belgilar o‘rnatilmagan bo‘lsa, bu belgilarning ta’siri yo‘qoladimi?",
+        "description": "YHQ: Taqiqlovchi belgilarning ta'siri chorrahalarda tugaydi. Biroq, yondosh hududlar, dala yoki o'rmon yo'llari bilan kesishish chorraha hisoblanmaydi, shuning uchun belgining ta'siri yo'qolmaydi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1271.jpg",
+        "answers": [
+            {
+                "content": "Yo‘qoladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Yo‘qolmaydi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3372,
+        "content": "Aholi yashash joylaridan tashqaridagi ikki tomonlama harakat tashkil etilgan ikki tasmali yo‘llarda tezligini soatiga 50 kilometrdan oshirishi mumkin bo‘lmagan, shuningdek, uzunligi 7 metrdan ortiq bo‘lgan transport vositalarining haydovchilari o‘zi va oldida harakatlanayotgan transport vositasi orasida qancha masofani saqlashlari kerak?",
+        "description": "YHQ 10-bob, 75-band: Bunday transport vositalari haydovchilari ularni quvib o‘tayotgan transport vositalari ilgari egallagan qatoriga bemalol qayta tizilishi uchun imkon beradigan masofani saqlashlari kerak.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "3 metr",
+                "is_correct": 0
+            },
+            {
+                "content": "Haydovchi o‘zidan oldinda harakatlanayotgan transport vositasi keskin tormoz berganda, to‘qnashib ketmaslik kafolatini beradigan darajadagi oraliq masofani",
+                "is_correct": 0
+            },
+            {
+                "content": "Ularni quvib o‘tayotgan transport vositalari oldin egallagan qatoriga bemalol qayta tizilishi uchun imkon beradigan masofani saqlashlari kerak",
+                "is_correct": 1
+            },
+            {
+                "content": "5 metr",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3373,
+        "content": "Ushbu belgi o‘rnatiladi:",
+        "description": "YHQ: 7.15 «Ko'zi ojiz piyodalar» qo'shimcha axborot belgisi ko'zi ojiz piyodalar yo'lni kesib o'tish ehtimoli yuqori bo'lgan joylarda 1.20 yoki 5.16.1-5.16.2 belgilari bilan birga o'rnatiladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1273.jpg",
+        "answers": [
+            {
+                "content": "“Bolalar uyi” yoki oromgohlari oldidan o‘tgan yo‘l qismlarida o‘rnatiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Maktab yoki maktabgacha ta’lim muassasalari oldida",
+                "is_correct": 0
+            },
+            {
+                "content": "Ko‘zi ojiz piyodalar harakatlanish ehtimoli ko‘p bo‘lgan yo‘l qismlarida o‘rnatiladi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3374,
+        "content": "Velosipedchilarga velosiped yo‘lkasi bo‘lganda qatnov qismidan harakatlanishga ruxsat etiladimi?",
+        "description": "YHQ 165-band: Agar velosiped yo'lkasi bo'lsa, velosipedchilarning yo'lning qatnov qismida harakatlanishi taqiqlanadi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Boshqa harakat qatnashchilariga xalaqit bermasa ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            },
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3375,
+        "content": "Ushbu yo‘l belgisi chorrahalarda o‘nga burilayotgan relesiz transport vositalariga svetoforning qaysi ishorasida harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: Svetoforning qizil ishorasi yonida o'rnatilgan o'ngga burilish ko'rsatkichi (konturli strelka) haydovchiga qizil chiroqda ham, boshqa qatnashchilarga xalaqit bermagan holda o'ngga burilishga ruxsat beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1275.jpg",
+        "answers": [
+            {
+                "content": "Yashil ishora",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil ishora",
+                "is_correct": 1
+            },
+            {
+                "content": "Ko'rsatilgan barchasi",
+                "is_correct": 0
+            },
+            {
+                "content": "Sariq ishora",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3376,
+        "content": "Ko‘rsatilgan yo‘l belgilarining qaysi birida eng kam tezlikda harakatlanish kerak?",
+        "description": "YHQ: 3.24 (chapda) — yuqori tezlikni cheklaydi, 4.7 (o'ngda) — eng kam tezlikni belgilaydi. Savol mazmuniga ko'ra, cheklov o'rnatilgan (3.24) belgisida belgilangan miqdordan oshmaslik (ya'ni pastroq tezlikda yurish) talab etiladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1276.jpg",
+        "answers": [
+            {
+                "content": "Har ikkisida",
+                "is_correct": 0
+            },
+            {
+                "content": "Chapdagi belgida",
+                "is_correct": 1
+            },
+            {
+                "content": "O'ngdagi belgida",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3377,
+        "content": "Ushbu yo‘l belgisi qanday nomlanadi?",
+        "description": "YHQ: 7.2.1 «Shanba, yakshanba va bayram kunlari» qo'shimcha axborot belgisi asosiy belgining aynan dam olish kunlari amal qilishini bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1277.jpg",
+        "answers": [
+            {
+                "content": "Ish kunlari",
+                "is_correct": 0
+            },
+            {
+                "content": "Hafta kunlari",
+                "is_correct": 0
+            },
+            {
+                "content": "Shanba, yakshanba va bayram kunlari",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3378,
+        "content": "Qaysi transport vositasi o‘ngga to‘g‘ri burilmoqda?",
+        "description": "YHQ: O'ngga burilishda haydovchi chetki o'ng bo'lakni egallashi va burilishni o'ng chetki bo'lakka amalga oshirishi shart. Faqat o'ng chetki tasmadagi avtomobil qoidaga amal qilmoqda.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1278_1.jpg",
+        "answers": [
+            {
+                "content": "Barchasi to‘g‘ri burilmoqda",
+                "is_correct": 0
+            },
+            {
+                "content": "Mototsikl",
+                "is_correct": 0
+            },
+            {
+                "content": "Sariq va yashil avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq avtomobil",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3379,
+        "content": "Yuk avtomobiliga qaysi yo‘nalishlar bo‘yicha harakatlanishga ruxsat etiladi?",
+        "description": "YHQ: 4.1.3 «Chapga harakatlanish» belgisi chapga burilish va orqaga qayrilib olishga ruxsat beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1279.jpg",
+        "answers": [
+            {
+                "content": "To‘g‘riga va chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat chapga",
+                "is_correct": 0
+            },
+            {
+                "content": "Chapga va qayrilib olishga",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3380,
+        "content": "Qaysi transport vositasi o‘ngga to‘g‘ri burilmoqda?",
+        "description": "YHQ 11.2-band: O'ngga burilishni imkon qadar qatnov qismining chetki o'ng bo'lagiga (oq avtomobil kabi) tushib amalga oshirish kerak. Agar bir necha bo'lakdan ruxsat beruvchi belgilar bo'lsa, boshqacha bo'lishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1280.jpg",
+        "answers": [
+            {
+                "content": "Sariq va yashil avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq avtomobil",
+                "is_correct": 1
+            },
+            {
+                "content": "Qizil va oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq va sariq avtomobil",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3381,
+        "content": "Ushbu vaziyatda oxirgi bo‘lib kim o‘tadi?",
+        "description": "YHQ: Tartibga solinmagan teng ahamiyatli yo'llar chorrahasida haydovchilar o'ng qo'l qoidasiga amal qiladilar. Chapga burilayotgan avtomobil qarama-qarshidan kelayotganlarga yo'l beradi. Tahlilga ko'ra, qizil avtomobil oxirgi o'tishi mumkin.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1281.jpg",
+        "answers": [
+            {
+                "content": "Ko‘k avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "O‘zaro kelishib o‘tadilar",
+                "is_correct": 0
+            },
+            {
+                "content": "Oq avtomobil",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil avtomobil",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3382,
+        "content": "Qaysi javobda yo‘l belgilari guruhlarining ketma-ketligi to‘g‘ri ko‘rsatilgan?",
+        "description": "YHQ: Yo'l belgilari quyidagi tartibda guruhlanadi: 1. Ogohlantiruvchi, 2. Imtiyoz, 3. Taqiqlovchi, 4. Buyuruvchi, 5. Axborot-ko‘rsatkich, 6. Servis, 7. Qo‘shimcha axborot belgilari.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Ogohlantiruvchi, Imtiyoz, Taqiqlovchi, Buyuruvchi, Axborot-ko‘rsatkich, Servis, Qo‘shimcha axborot",
+                "is_correct": 1
+            },
+            {
+                "content": "Ogohlantiruvchi, Imtiyoz, Buyuruvchi, Taqiqlovchi, Axborot-ko‘rsatkich, Servis, Qo‘shimcha axborot",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlovchi, Imtiyoz, Buyuruvchi, Axborot-ko‘rsatkich, Ogohlantiruvchi, Servis, Qo‘shimcha axborot",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha javoblar to‘g‘ri",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3383,
+        "content": "Ko‘k avtomobil haydovchisiga avtoturargohga kirishga ruxsat etiladimi?",
+        "description": "YHQ: 3.1 «Kirish taqiqlangan» (g'isht) belgisi barcha transport vositalarining kirishini taqiqlaydi. Agar belgi bevosita kirish joyida bo'lsa, kirish taqiqlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1283.jpg",
+        "answers": [
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3384,
+        "content": "Yo‘l patrul xizmat xodimlariga yo‘l harakat qatnashchilari bilan o‘zaro munosabatlari va maxsus moslamalardan foydalanishda nizom to‘g‘risidagi qonunda qanday tartib qo‘yilgan?",
+        "description": "Nizomga ko'ra, YPX xodimlari xavfsizlikni ta'minlash maqsadida kuzatish, taqib qilish, maxsus tadbirlar o'tkazish va hodisalarning oldini olish huquqiga ega.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1284.jpg",
+        "answers": [
+            {
+                "content": "Ko'rsatilgan barcha javoblar",
+                "is_correct": 1
+            },
+            {
+                "content": "Yo‘l transport hodisasini oldini olish va harakat harfsizligini ta’minlash",
+                "is_correct": 0
+            },
+            {
+                "content": "Maxsus tadbirlar o‘tqazish",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqib qilish",
+                "is_correct": 0
+            },
+            {
+                "content": "Kuzatish",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3385,
+        "content": "Harakatlanish tartibini ko‘rsating:",
+        "description": "YHQ: Svetoforning bir xil ishorasida (yashil) tramvaylar relesiz transport vositalariga nisbatan imtiyozga ega. 1-tramvay sariq avtomobil bilan bir vaqtda (turli yo'nalishlar), so'ng qolganlar harakatlanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1285.jpg",
+        "answers": [
+            {
+                "content": "1-tramvay sariq avtomobil bilan bir vaqtda, qora avtomobil, 2-tramvay",
+                "is_correct": 1
+            },
+            {
+                "content": "1-tramvay sariq avtomobil bilan bir vaqtda, 2-tramvay qora avtomobil bilan bir vaqtda",
+                "is_correct": 0
+            },
+            {
+                "content": "1-tramvay, 2-tramvay, sariq avtomobil, qora avtomobil",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3386,
+        "content": "Qaysi rasmda to‘rt tasmali yo‘l ko‘rsatilgan?",
+        "description": "YHQ: Yo'lning umumiy kengligi va chiziqlar soniga qarab tasmalar aniqlanadi. 1.1 yoki 1.3 chiziqlari bilan ajratilgan, har bir yo'nalishda ikki tasmali yo'llar to'rt tasmali hisoblanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1286.jpg",
+        "answers": [
+            {
+                "content": "Barchasida",
+                "is_correct": 1
+            },
+            {
+                "content": "Birinchi",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkinchi va uchinchi",
+                "is_correct": 0
+            },
+            {
+                "content": "Birinchi va ikkinchi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3387,
+        "content": "Ko‘k avtomobil haydovchisi qaysi yo‘nalishlarda harakatlanishga ruxsat etilmaydi?",
+        "description": "YHQ: 4.1.1 «To'g'riga harakatlanish» belgisi chorrahadan oldin o'rnatilgan bo'lsa, u chorrahada o'ngga, chapga va qayrilib olishni taqiqlaydi. Faqat to'g'riga (2-yo'nalish) ruxsat beriladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1287.jpg",
+        "answers": [
+            {
+                "content": "Faqat 1, 3, 4 yo‘nalishlarda",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat 2",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha yo‘nalishlarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat 1",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3388,
+        "content": "Avtomobilda bolalarni himoya qilish tizimini joylashtirish uchun qaysi joy eng xavfsiz hisoblanadi?",
+        "description": "Xavfsizlik tadqiqotlariga ko'ra, avtomobilning orqa o'rta o'rindig'i yon zarbalardan eng uzoq masofada bo'lgani uchun eng xavfsiz joy hisoblanadi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1288.jpg",
+        "answers": [
+            {
+                "content": "Orqa o'rta o'rindiq",
+                "is_correct": 1
+            },
+            {
+                "content": "Oldi o'rindiq",
+                "is_correct": 0
+            },
+            {
+                "content": "Haydovchi orqasidagi o'rindiq",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3389,
+        "content": "Transport vositasi haydovchisi tomonidan chiqarilgan havodagi etanol bug‘lari konsentratsiyasi qancha miqdorni ko‘rsatgan hollarda DYHXX xodimi haydovchiga nisbatan alkogolli ichimlik iste’mol qilganligi fakti yuzasidan ma’muriy bayonnoma rasmiylashtiradi",
+        "description": "O'zbekiston Respublikasi qonunchiligiga ko'ra, alkogol mastligi chegarasi puflangan havoning bir litrida 0,135 milligramm va undan yuqori deb belgilangan.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1289.jpg",
+        "answers": [
+            {
+                "content": "Puflangan havoning bir litrida 0,135 milligramm va undan yuqori bo‘lgan hollarda",
+                "is_correct": 1
+            },
+            {
+                "content": "Puflangan havoning bir litrida 0,105 milligramm va undan yuqori bo‘lgan hollarda",
+                "is_correct": 0
+            },
+            {
+                "content": "Puflangan havoning bir litrida 0,255 milligramm va undan yuqori bo‘lgan hollarda",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3390,
+        "content": "Bunday holatda qaysi haydovchi yo‘l berishi kerak?",
+        "description": "YHQ: Tartibga solinmagan chorrahada tramvay liniyasi yo'lning qatnov qismini kesib o'tsa, tramvay (depodan chiqishdan tashqari) har doim imtiyozga ega. Avtomobil yo'l beradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1290.jpg",
+        "answers": [
+            {
+                "content": "Avtomobil haydovchisi",
+                "is_correct": 1
+            },
+            {
+                "content": "Tramvay haydovchisi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3391,
+        "content": "Aholi punktlarida quvib o‘tishda qanday ogohlantirish ishoralaridan foydalanish mumkin?",
+        "description": "YHQ 103-band: Aholi punktlarida tovushli ishora berish taqiqlangan (YTH oldini olishdan tashqari). Shuning uchun faqat chiroq (faralarni uzoq-yaqin qilish) orqali ogohlantirish mumkin.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Faralarning uzoqni yorituvchi chiroqlaridan",
+                "is_correct": 1
+            },
+            {
+                "content": "Tovushli ishoralardan",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkala javob ham to'g'ri",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3392,
+        "content": "Aholi punktlaridan tashqarida quvib o‘tishda qanday ogohlantirish ishoralaridan foydalanish mumkin?",
+        "description": "YHQ 103-band: Aholi punktlaridan tashqarida quvib o‘tish haqida ogohlantirish uchun tovushli ishoradan hamda faralarning yaqin yorituvchi chiroqlarini uzoq yorituvchisiga ko‘p marta qisqa vaqtli o‘tkazishdan (miltillatishdan) foydalanish mumkin.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Faralarning uzoqni yorituvchi chiroqlaridan",
+                "is_correct": 0
+            },
+            {
+                "content": "Ikkala javob ham to‘g‘ri",
+                "is_correct": 1
+            },
+            {
+                "content": "Tovushli ishoralardan",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3393,
+        "content": "Qaysi yo‘nalish bo‘yicha harakatlanishga ruxsat berilgan?",
+        "description": "YHQ: 3.18.2 «Chapga burilish taqiqlangan» belgisi faqat chapga burilishni taqiqlaydi, lekin qayrilib olishga (B yo'nalish) ruxsat beradi. 4.1.1 «To'g'riga harakatlanish» (A) esa har doim ruxsat etilgan bo'ladi, agar boshqa taqiq bo'lmasa.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1293.jpg",
+        "answers": [
+            {
+                "content": "Faqat \"A\"",
+                "is_correct": 0
+            },
+            {
+                "content": "Faqat \"B\"",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikki yo‘nalishda mumkin",
+                "is_correct": 1
+            },
+            {
+                "content": "Har ikki yo‘nalishda taqiqlanadi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3394,
+        "content": "Piyodalarga qatnov qismidan kesib o‘tishga ruxsat etiladimi?",
+        "description": "YHQ 19-band: Piyodalar o'tish joylari bo'lmaganda, yo'lning ko'rinadigan joyida ajratuvchi bo'lak va to'siqlar bo'lmasa, qatnov qismini uning chetiga nisbatan to'g'ri burchak ostida kesib o'tishga ruxsat etiladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1294.jpg",
+        "answers": [
+            {
+                "content": "Barcha holatda ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Taqiqlanadi",
+                "is_correct": 0
+            },
+            {
+                "content": "Ruxsat etiladi",
+                "is_correct": 1
+            }
+        ]
+    },
+    {
+        "id": 3395,
+        "content": "Ushbu qora transport vositasining haydovchisi yo‘nalishni o‘zgartirish qanday nomlanadi?",
+        "description": "YHQ: Haydovchining harakat yo'nalishini yoki bo'lagini o'zgartirishi (burilish, qayrilib olish, qayta tizilish) «Manyovr qilish» deb ataladi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1295.jpg",
+        "answers": [
+            {
+                "content": "Bo'laklar sonini o'zgartish",
+                "is_correct": 0
+            },
+            {
+                "content": "Manyovr qilish",
+                "is_correct": 1
+            },
+            {
+                "content": "Xavfli harakatlanish",
+                "is_correct": 0
+            },
+            {
+                "content": "Avariya holat keltirish",
+                "is_correct": 0
+            },
+            {
+                "content": "Barcha javoblar to'gri",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3396,
+        "content": "Ushbu belgi qaysi moddalarga kiradi?",
+        "description": "Xavfli yuklarni tashish qoidalariga ko'ra, 5.1-toifa (sariq fonli olov belgisi) «Oksidlovchi moddalar»ni bildiradi.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1296.jpg",
+        "answers": [
+            {
+                "content": "Toksik moddalar",
+                "is_correct": 0
+            },
+            {
+                "content": "Oksidlovchi moddalar",
+                "is_correct": 1
+            },
+            {
+                "content": "Organik peroksidlar",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3397,
+        "content": "Belgilangan yo‘nalishlarda harakatlanishga ruxsat etiladimi?",
+        "description": "YHQ: 4.1.5 «To'g'riga va chapga harakatlanish» belgisi o'rnatilgan bo'lsa, u ko'rsatilgan yo'nalishlarda harakatlanishga ruxsat beradi (o'ngga burilish taqiqlanadi).",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1297.jpg",
+        "answers": [
+            {
+                "content": "Faqat chapga ruxsat etiladi",
+                "is_correct": 1
+            },
+            {
+                "content": "Faqat o‘ngga ruxsat etiladi",
+                "is_correct": 0
+            },
+            {
+                "content": "Har ikkisiga ruxsat etiladi",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3398,
+        "content": "Ushbu holatda siz qanday yo‘l tutishingiz kerak?",
+        "description": "YHQ 14-band: Haydovchi harakatlanayotganda xavf tug'ilganda (masalan, yo'lga hayvon chiqib qolsa yoki to'siq bo'lsa) darhol tezlikni kamaytirishi, zarur bo'lsa to'xtashi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1298_1.jpg",
+        "answers": [
+            {
+                "content": "Chapga burilib, to‘siqni aylanib o‘teing",
+                "is_correct": 0
+            },
+            {
+                "content": "Zarur bo‘lganda darhol toʻxtash imkoniyatini beradigan darajada tezlikni kamaytiring",
+                "is_correct": 1
+            },
+            {
+                "content": "To‘xtovsiz harakatni davom ettiring",
+                "is_correct": 0
+            },
+            {
+                "content": "Ovozli ishora berib, tezlikni oshiring",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3399,
+        "content": "L-toifa bu?",
+        "description": "Texnik reglamentga muvofiq, L-toifasiga barcha mototransport vositalari (mototsikllar, mopedlar, kvadrosikllar) kiradi.",
+        "image_url": "",
+        "answers": [
+            {
+                "content": "Yo‘lovchi tashish transportlari",
+                "is_correct": 0
+            },
+            {
+                "content": "Mototransport vositalari",
+                "is_correct": 1
+            },
+            {
+                "content": "Yuk avtomobillari",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3400,
+        "content": "Bu holatda qaysi yorug‘lik ishorasini yoqishingiz shart?",
+        "description": "YHQ: Har qanday manyovr (quvib o'tish yoki to'siqni aylanib o'tish uchun chapga chiqish) oldidan tegishli burilish ko'rsatkichini yoqish majburiydir.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1297_1.jpg",
+        "answers": [
+            {
+                "content": "Uzoq\/yaqin yorug‘likka o‘tkazing",
+                "is_correct": 0
+            },
+            {
+                "content": "Chapga burilish ko‘rsatgichini yoqing",
+                "is_correct": 1
+            },
+            {
+                "content": "Ikkalasini bir vaqtda qo‘llang",
+                "is_correct": 0
+            }
+        ]
+    },
+    {
+        "id": 3401,
+        "content": "Qaysi avtomobil haydovchisi yo‘l berishi kerak?",
+        "description": "YHQ: To'siq mavjud bo'lgan bo'lakda harakatlanayotgan haydovchi (qizil avtomobil) qarama-qarshi yo'nalishda to'g'ri kelayotgan transportga yo'l berishi shart.",
+        "image_url": "https:\/\/e-avtomaktab.uz\/storage\/tests\/e-avtomaktab1298.jpg",
+        "answers": [
+            {
+                "content": "Ko‘k avtomobil haydovchisi",
+                "is_correct": 0
+            },
+            {
+                "content": "Qizil avtomobil haydovchisi",
+                "is_correct": 1
+            }
+        ]
+    }
+]
