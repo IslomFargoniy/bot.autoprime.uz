@@ -267,6 +267,27 @@ class DesktopAuthController extends Controller
     }
 
     /**
+     * Session heartbeat & single active device validation endpoint.
+     */
+    public function ping(Request $request): JsonResponse
+    {
+        [$student, $errType, $errMsg] = DesktopStudentResolver::resolve($request);
+
+        if (! $student) {
+            return response()->json([
+                'success' => false,
+                'code' => $errType ?? 'SESSION_SUPERSEDED',
+                'message' => $errMsg ?? 'Hisobingizga boshqa kompyuterdan kirilgani sababli ushbu desktop sessiyasi to\'xtatildi.',
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'session_id' => $student->current_desktop_session_id,
+        ]);
+    }
+
+    /**
      * Find a student by a normalized phone, also matching numbers stored
      * before phone normalization was introduced.
      */

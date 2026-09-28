@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../constants/api_constants.dart';
 import '../models/student.dart';
+import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 
@@ -7,6 +10,7 @@ enum AuthStatus { initial, unauthenticated, authenticated, loading }
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  Timer? _heartbeatTimer;
 
   AuthStatus _status = AuthStatus.initial;
   Student? _student;
@@ -32,6 +36,7 @@ class AuthProvider extends ChangeNotifier {
       if (res['success'] == true) {
         _student = res['student'];
         _status = AuthStatus.authenticated;
+        _startHeartbeat();
       } else {
         await StorageService.clearSession();
         _status = AuthStatus.unauthenticated;
@@ -40,6 +45,26 @@ class AuthProvider extends ChangeNotifier {
       _status = AuthStatus.unauthenticated;
     }
     notifyListeners();
+  }
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
+      if (_status != AuthStatus.authenticated) {
+        _heartbeatTimer?.cancel();
+        return;
+      }
+      try {
+        await ApiService.dio.get(ApiConstants.ping);
+      } catch (_) {
+        // Any 401 error is automatically intercepted by ApiService and triggers onSessionSuperseded
+      }
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
   }
 
   Future<bool> sendOtp(String phone) async {
@@ -62,11 +87,13 @@ class AuthProvider extends ChangeNotifier {
     if (res['success'] == true) {
       _student = res['student'];
       _status = AuthStatus.authenticated;
+      _startHeartbeat();
       notifyListeners();
       return true;
     } else {
       _errorMessage = res['message'];
       _status = AuthStatus.unauthenticated;
+      _stopHeartbeat();
       notifyListeners();
       return false;
     }
@@ -79,6 +106,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void onSessionTerminated(String reason) {
+    _stopHeartbeat();
     _student = null;
     _status = AuthStatus.unauthenticated;
     _errorMessage = reason;
@@ -86,9 +114,16 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _stopHeartbeat();
     await _authService.logout();
     _student = null;
     _status = AuthStatus.unauthenticated;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _stopHeartbeat();
+    super.dispose();
   }
 }

@@ -40,12 +40,16 @@ class DesktopStudentResolver
             return [null, 'EXPIRED_TOKEN', 'Kirish sessiyasi muddati tugagan. Iltimos, qayta kiring.'];
         }
 
-        if ($student->desktop_auth_token !== hash('sha256', $rawSecret)) {
-            return [null, 'INVALID_TOKEN', 'Kirish tokeni bekor qilingan yoki yaroqsiz.'];
-        }
-
         $sessionHeader = $request->header('X-Desktop-Session-Id');
         if ($sessionHeader && $student->current_desktop_session_id !== $sessionHeader) {
+            return [
+                null,
+                'SESSION_SUPERSEDED',
+                'Hisobingizga boshqa kompyuterdan kirilgani sababli ushbu desktop sessiyasi to\'xtatildi.',
+            ];
+        }
+
+        if ($student->desktop_auth_token !== hash('sha256', $rawSecret)) {
             return [
                 null,
                 'SESSION_SUPERSEDED',

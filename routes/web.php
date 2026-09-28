@@ -106,6 +106,7 @@ Route::get('/api/tests/stats', [StudentTestController::class, 'getStudentStats']
 Route::get('/api/desktop/version-check', [DesktopAuthController::class, 'versionCheck'])->name('desktop.version-check');
 Route::post('/api/desktop/auth/send-otp', [DesktopAuthController::class, 'sendOtp'])->middleware('throttle:10,1')->name('desktop.send-otp');
 Route::post('/api/desktop/auth/verify-otp', [DesktopAuthController::class, 'verifyOtp'])->middleware('throttle:20,1')->name('desktop.verify-otp');
+Route::get('/api/desktop/auth/ping', [DesktopAuthController::class, 'ping'])->name('desktop.ping');
 Route::get('/api/desktop/student/dashboard', [DesktopAuthController::class, 'dashboard'])->name('desktop.dashboard');
 
 Route::middleware(['auth.telegram', 'branch.access'])->group(function () {

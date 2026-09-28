@@ -34,12 +34,12 @@ class ApiService {
         onError: (DioException error, handler) async {
           if (error.response?.statusCode == 401) {
             final data = error.response?.data;
-            if (data is Map && data['code'] == 'SESSION_SUPERSEDED') {
-              await StorageService.clearSession();
-              final msg = data['message'] ??
-                  'Hisobingizga boshqa kompyuterdan kirildi. Ushbu sessiya to\'xtatildi.';
-              onSessionSuperseded?.call(msg);
+            String msg = 'Hisobingizga boshqa kompyuterdan kirilgani sababli ushbu desktop sessiyasi to\'xtatildi.';
+            if (data is Map && data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+              msg = data['message'].toString();
             }
+            await StorageService.clearSession();
+            onSessionSuperseded?.call(msg);
           }
           return handler.next(error);
         },

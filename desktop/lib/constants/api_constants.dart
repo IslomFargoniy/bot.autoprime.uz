@@ -5,6 +5,7 @@ class ApiConstants {
   static const String versionCheck = '$baseUrl/api/desktop/version-check';
   static const String sendOtp = '$baseUrl/api/desktop/auth/send-otp';
   static const String verifyOtp = '$baseUrl/api/desktop/auth/verify-otp';
+  static const String ping = '$baseUrl/api/desktop/auth/ping';
   static const String dashboard = '$baseUrl/api/desktop/student/dashboard';
 
   // Tests & Quizzes

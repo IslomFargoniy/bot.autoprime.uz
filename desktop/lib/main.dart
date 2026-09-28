@@ -47,9 +47,11 @@ class AutoPrimeDesktopApp extends StatelessWidget {
               showDialog(
                 context: ctx,
                 barrierDismissible: false,
-                builder: (_) => SessionTerminatedDialog(
+                builder: (dialogCtx) => SessionTerminatedDialog(
                   message: reason,
-                  onDismiss: () => Navigator.of(ctx).popUntil((route) => route.isFirst),
+                  onDismiss: () {
+                    Navigator.of(dialogCtx, rootNavigator: true).pop();
+                  },
                 ),
               );
             }
