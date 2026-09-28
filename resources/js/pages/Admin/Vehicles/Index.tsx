@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import {
     Dialog,
     DialogContent,
@@ -553,7 +554,7 @@ export default function VehiclesIndex({
                                     <MoneyInput
                                         id="m_odo"
                                         value={maintenanceForm.data.odometer}
-                                        onChange={(val) => maintenanceForm.setData('odometer', val ? Number(val) : '')}
+                                        onChange={(val) => maintenanceForm.setData('odometer', val)}
                                         suffix="km"
                                         placeholder="0"
                                         className="mt-1"

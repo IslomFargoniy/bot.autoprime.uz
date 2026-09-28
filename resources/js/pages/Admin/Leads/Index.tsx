@@ -929,6 +929,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                 <SearchableSelect
                                     id="lead_student"
                                     value={String(convertingLead.id)}
+                                    onChange={() => {}}
                                     disabled
                                     options={[
                                         {

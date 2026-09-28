@@ -20,6 +20,7 @@ import {
     Car,
 } from 'lucide-react';
 import { TestQuiz } from '@/components/test-quiz';
+import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 import { formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 
 
