@@ -15,7 +15,8 @@ class PublishDesktopReleaseCommand extends Command
     protected $signature = 'desktop:publish-release
                             {version : Yangi versiya raqami (masalan: 1.0.1)}
                             {--mandatory : Yangilanish majburiy ekanligini belgilash}
-                            {--changelog= : Yangilanish tavsifi (o\'zgarishlar ro\'yxati)}';
+                            {--changelog= : Yangilanish tavsifi (o\'zgarishlar ro\'yxati)}
+                            {--build= : Yangi build raqami}';
 
     /**
      * The console command description.
@@ -45,8 +46,18 @@ class PublishDesktopReleaseCommand extends Command
             $currentData = json_decode(File::get($versionFilePath), true) ?: [];
         }
 
-        $currentBuild = isset($currentData['build_number']) ? (int) $currentData['build_number'] : 0;
-        $newBuild = $currentBuild + 1;
+        $buildOption = $this->option('build');
+        if ($buildOption !== null && is_numeric($buildOption)) {
+            $newBuild = (int) $buildOption;
+        } else {
+            $pubspecPath = base_path('desktop/pubspec.yaml');
+            if (File::exists($pubspecPath) && preg_match('/version:\s*[0-9\.]+\+(\d+)/', (string) File::get($pubspecPath), $m)) {
+                $newBuild = (int) $m[1];
+            } else {
+                $currentBuild = isset($currentData['build_number']) ? (int) $currentData['build_number'] : 0;
+                $newBuild = $currentBuild + 1;
+            }
+        }
 
         $appUrl = config('app.url');
         if (! str_starts_with($appUrl, 'https://')) {

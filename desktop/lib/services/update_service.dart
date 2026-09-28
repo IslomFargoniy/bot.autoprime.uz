@@ -4,6 +4,7 @@ import 'package:open_file/open_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../constants/api_constants.dart';
+import '../constants/app_version.dart';
 import '../models/version_info.dart';
 
 class UpdateService {
@@ -15,14 +16,32 @@ class UpdateService {
       final response = await _dio.get(ApiConstants.versionCheck);
       if (response.statusCode == 200 && response.data['success'] == true) {
         final versionInfo = VersionInfo.fromJson(response.data['data']);
-        final packageInfo = await PackageInfo.fromPlatform();
 
-        final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 1;
-        final currentVersion = packageInfo.version;
+        String currentVersion = AppVersion.version;
+        int currentBuild = AppVersion.buildNumber;
 
-        // Compare build number or version string
-        if (versionInfo.buildNumber > currentBuild ||
-            _isVersionGreater(versionInfo.version, currentVersion)) {
+        try {
+          final packageInfo = await PackageInfo.fromPlatform();
+          if (packageInfo.version.isNotEmpty &&
+              packageInfo.version != '0.0.0' &&
+              packageInfo.version != '1.0.0') {
+            if (_isVersionGreater(packageInfo.version, currentVersion)) {
+              currentVersion = packageInfo.version;
+            }
+          }
+          final pkgBuild = int.tryParse(packageInfo.buildNumber);
+          if (pkgBuild != null && pkgBuild > currentBuild) {
+            currentBuild = pkgBuild;
+          }
+        } catch (_) {}
+
+        // Compare: only notify update if remote version is strictly greater,
+        // or build is greater on the exact same version
+        final isNewerVersion = _isVersionGreater(versionInfo.version, currentVersion);
+        final isNewerBuild =
+            versionInfo.version == currentVersion && versionInfo.buildNumber > currentBuild;
+
+        if (isNewerVersion || isNewerBuild) {
           return versionInfo;
         }
       }
