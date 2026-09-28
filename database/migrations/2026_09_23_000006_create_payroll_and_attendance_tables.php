@@ -14,13 +14,17 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('period', 20); // YYYY-MM
-            $table->enum('salary_type', ['base_salary', 'driving_hourly_rate', 'lesson_rate', 'bonus_kpi', 'penalty', 'advance'])->default('base_salary');
+            $table->string('salary_type', 40)->default('base_salary'); // base_salary, bonus, kpi, fine, advance
             $table->decimal('amount', 12, 2);
             $table->boolean('is_deduction')->default(false);
             $table->integer('lessons_or_hours_count')->default(0);
             $table->text('notes')->nullable();
             $table->timestamp('accrued_at');
             $table->timestamps();
+
+            $table->index(['user_id', 'period', 'salary_type'], 'idx_salaries_user_period_type');
+            $table->index(['user_id', 'is_deduction'], 'idx_salaries_user_deduction');
+            $table->index(['branch_id', 'period'], 'idx_salaries_branch_period');
         });
 
         Schema::create('salary_payments', function (Blueprint $table) {
@@ -34,6 +38,10 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->timestamp('paid_at');
             $table->timestamps();
+
+            $table->index(['salary_id', 'paid_at'], 'idx_salary_payments_salary_date');
+            $table->index(['user_id', 'paid_at'], 'idx_salary_payments_user_date');
+            $table->index(['cash_register_id', 'paid_at'], 'idx_salary_payments_register_date');
         });
 
         Schema::create('lesson_sessions', function (Blueprint $table) {
@@ -48,6 +56,10 @@ return new class extends Migration
             $table->enum('status', ['active', 'finished', 'cancelled'])->default('active');
             $table->string('qr_secret_salt', 255);
             $table->timestamps();
+
+            $table->index(['group_id', 'started_at'], 'idx_lesson_sessions_group_date');
+            $table->index(['teacher_id', 'status', 'started_at'], 'idx_lesson_sessions_teacher_date');
+            $table->index(['branch_id', 'status', 'started_at'], 'idx_lesson_sessions_branch_status');
         });
 
         Schema::create('attendances', function (Blueprint $table) {
@@ -63,6 +75,9 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['lesson_session_id', 'student_id']);
+            $table->index(['student_id', 'status'], 'idx_attendances_student_status');
+            $table->index(['lesson_session_id', 'status'], 'idx_attendances_session_status');
+            $table->index('scanned_at', 'idx_attendances_scanned_at');
         });
     }
 

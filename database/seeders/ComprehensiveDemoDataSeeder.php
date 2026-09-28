@@ -39,6 +39,8 @@ use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Models\Activity;
 
@@ -1581,5 +1583,135 @@ class ComprehensiveDemoDataSeeder extends Seeder
                 ],
             ]
         );
+
+        // ---------------------------------------------------------------------
+        // 19. CASH LEDGER (must match every register balance)
+        // ---------------------------------------------------------------------
+        $this->seedCashLedger();
+    }
+
+    /**
+     * Write the cash_transactions ledger for the seeded money movements so the
+     * "Kassa tarixi" chain is continuous and ends at each register's balance.
+     * The demo balances are fixed above, so every register gets an opening
+     * entry first that covers the difference, then its movements in date order.
+     */
+    private function seedCashLedger(): void
+    {
+        if (DB::table('cash_transactions')->exists()) {
+            return;
+        }
+
+        foreach (CashRegister::all() as $register) {
+            $events = $this->cashEventsFor($register)->sortBy('transacted_at')->values();
+
+            $movementsTotal = $events->sum(fn (array $event) => $event['type'] === 'in' ? $event['amount'] : -$event['amount']);
+            $openingAmount = round((float) $register->balance - $movementsTotal, 2);
+
+            if (abs($openingAmount) > 0.01) {
+                $openedAt = $events->isEmpty()
+                    ? ($register->created_at ?? now())
+                    : Carbon::parse($events->first()['transacted_at'])->subMinute();
+
+                $events->prepend([
+                    'type' => $openingAmount > 0 ? 'in' : 'out',
+                    'category' => 'initial',
+                    'amount' => abs($openingAmount),
+                    'description' => "Boshlang'ich qoldiq / Saldo",
+                    'reference' => null,
+                    'user_id' => null,
+                    'transacted_at' => $openedAt,
+                ]);
+            }
+
+            $running = 0.0;
+            foreach ($events as $event) {
+                $before = $running;
+                $running = round($running + ($event['type'] === 'in' ? 1 : -1) * $event['amount'], 2);
+
+                DB::table('cash_transactions')->insert([
+                    'cash_register_id' => $register->id,
+                    'type' => $event['type'],
+                    'category' => $event['category'],
+                    'amount' => $event['amount'],
+                    'balance_before' => $before,
+                    'balance_after' => $running,
+                    'description' => $event['description'],
+                    'reference_type' => $event['reference'] ? get_class($event['reference']) : null,
+                    'reference_id' => $event['reference']?->id,
+                    'user_id' => $event['user_id'],
+                    'transacted_at' => $event['transacted_at'],
+                    'created_at' => $event['transacted_at'],
+                    'updated_at' => $event['transacted_at'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @return Collection<int, array{type: string, category: string, amount: float, description: string, reference: mixed, user_id: int|null, transacted_at: mixed}>
+     */
+    private function cashEventsFor(CashRegister $register): Collection
+    {
+        $events = collect();
+
+        foreach (Payment::where('cash_register_id', $register->id)->get() as $payment) {
+            $isRefund = $payment->payment_type === 'refund';
+            $events->push([
+                'type' => $isRefund ? 'out' : 'in',
+                'category' => $isRefund ? 'refund' : 'payment',
+                'amount' => (float) $payment->amount,
+                'description' => ($isRefund ? "To'lov qaytarildi" : "To'lov qabul qilindi")." (#{$payment->receipt_number})",
+                'reference' => $payment,
+                'user_id' => $payment->received_by_user_id,
+                'transacted_at' => $payment->paid_at ?? $payment->created_at,
+            ]);
+        }
+
+        foreach (Expense::with('category')->where('cash_register_id', $register->id)->get() as $expense) {
+            $events->push([
+                'type' => 'out',
+                'category' => 'expense',
+                'amount' => (float) $expense->amount,
+                'description' => 'Xarajat: '.$expense->category->name,
+                'reference' => $expense,
+                'user_id' => $expense->user_id,
+                'transacted_at' => $expense->spent_at ?? $expense->created_at,
+            ]);
+        }
+
+        foreach (SalaryPayment::with('user')->where('cash_register_id', $register->id)->get() as $salaryPayment) {
+            $events->push([
+                'type' => 'out',
+                'category' => 'salary',
+                'amount' => (float) $salaryPayment->amount,
+                'description' => "Oylik to'lovi: ".$salaryPayment->user->name,
+                'reference' => $salaryPayment,
+                'user_id' => $salaryPayment->paid_by_user_id,
+                'transacted_at' => $salaryPayment->paid_at ?? $salaryPayment->created_at,
+            ]);
+        }
+
+        $approvedTransfers = CashTransfer::with(['fromCashRegister', 'toCashRegister'])
+            ->where('status', 'approved')
+            ->where(fn ($query) => $query->where('from_cash_register_id', $register->id)->orWhere('to_cash_register_id', $register->id))
+            ->get();
+
+        foreach ($approvedTransfers as $transfer) {
+            $isOutgoing = $transfer->from_cash_register_id === $register->id;
+            $events->push([
+                'type' => $isOutgoing ? 'out' : 'in',
+                'category' => $isOutgoing ? 'transfer_out' : 'transfer_in',
+                'amount' => (float) $transfer->amount,
+                'description' => $isOutgoing
+                    ? 'Transfer chiqim: '.$transfer->toCashRegister->name.' ga'
+                    : 'Transfer kirim: '.$transfer->fromCashRegister->name.' dan',
+                'reference' => $transfer,
+                'user_id' => $transfer->approved_by_user_id ?? $transfer->sent_by_user_id,
+                'transacted_at' => $transfer->updated_at ?? $transfer->created_at,
+            ]);
+        }
+
+        return $events;
     }
 }

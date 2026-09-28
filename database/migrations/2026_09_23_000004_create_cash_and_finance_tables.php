@@ -40,6 +40,12 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->timestamp('paid_at');
             $table->timestamps();
+
+            $table->index(['contract_id', 'payment_type'], 'idx_payments_contract_type');
+            $table->index(['student_id', 'payment_type'], 'idx_payments_student_type');
+            $table->index(['cash_register_id', 'paid_at'], 'idx_payments_register_date');
+            $table->index(['branch_id', 'paid_at'], 'idx_payments_branch_date');
+            $table->index('payment_method', 'idx_payments_method');
         });
 
         Schema::create('expense_categories', function (Blueprint $table) {
@@ -62,6 +68,10 @@ return new class extends Migration
             $table->string('receipt_photo_url', 500)->nullable();
             $table->timestamp('spent_at');
             $table->timestamps();
+
+            $table->index(['cash_register_id', 'spent_at'], 'idx_expenses_register_date');
+            $table->index(['branch_id', 'spent_at'], 'idx_expenses_branch_date');
+            $table->index('expense_category_id', 'idx_expenses_category');
         });
 
         Schema::create('cash_shifts', function (Blueprint $table) {
@@ -92,10 +102,53 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        // Immutable cash ledger: every balance change of a register, with the running balance.
+        Schema::create('cash_transactions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('cash_register_id')->constrained('cash_registers')->cascadeOnDelete();
+            $table->string('type', 10); // in | out
+            $table->string('category', 40); // payment, expense, transfer_in/out, sweep_in/out, refund, initial ...
+            $table->decimal('amount', 14, 2);
+            $table->decimal('balance_before', 14, 2)->default(0);
+            $table->decimal('balance_after', 14, 2)->default(0);
+            $table->string('description', 500)->nullable();
+            $table->nullableMorphs('reference');
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('transacted_at')->useCurrent();
+            $table->timestamps();
+
+            $table->index(['cash_register_id', 'transacted_at']);
+            $table->index(['category']);
+        });
+
+        // Per-student / per-employee money history (tuition, refunds, salary accruals and payouts).
+        Schema::create('financial_histories', function (Blueprint $table) {
+            $table->id();
+            $table->string('entity_type');
+            $table->unsignedBigInteger('entity_id');
+            $table->string('type', 10); // credit | debit
+            $table->string('category', 40);
+            $table->decimal('amount', 14, 2);
+            $table->decimal('balance_before', 14, 2)->default(0);
+            $table->decimal('balance_after', 14, 2)->default(0);
+            $table->string('payment_method', 30)->nullable();
+            $table->string('description', 500)->nullable();
+            $table->nullableMorphs('reference');
+            $table->foreignId('performed_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('transacted_at')->useCurrent();
+            $table->timestamps();
+
+            $table->index(['entity_type', 'entity_id', 'transacted_at']);
+            $table->index(['category']);
+            $table->index(['transacted_at']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('financial_histories');
+        Schema::dropIfExists('cash_transactions');
         Schema::dropIfExists('cash_transfers');
         Schema::dropIfExists('cash_shifts');
         Schema::dropIfExists('expenses');

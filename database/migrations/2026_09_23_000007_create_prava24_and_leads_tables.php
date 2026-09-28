@@ -111,6 +111,10 @@ return new class extends Migration
             $table->timestamp('finished_at')->nullable();
             $table->integer('duration_seconds')->default(0);
             $table->timestamps();
+
+            $table->index(['student_id', 'attempt_type', 'is_passed'], 'idx_attempts_student_exam_passed');
+            $table->index('ticket_id', 'idx_attempts_ticket_id');
+            $table->index(['attempt_type', 'is_passed'], 'idx_attempts_type_passed');
         });
 
         Schema::create('attempt_answers', function (Blueprint $table) {
@@ -119,7 +123,7 @@ return new class extends Migration
             $table->foreignId('question_id')->constrained('questions')->cascadeOnDelete();
             $table->foreignId('answer_id')->nullable()->constrained('answers')->nullOnDelete();
             $table->boolean('is_correct')->default(false);
-            $table->timestamp('answered_at');
+            $table->timestamp('answered_at')->nullable();
             $table->integer('duration_seconds')->default(0);
             $table->timestamps();
         });
@@ -137,8 +141,8 @@ return new class extends Migration
             $table->string('phone', 50);
             $table->string('category', 20)->default('B');
             $table->string('preferred_time', 50)->nullable();
-            $table->string('passport_series', 10)->nullable();
-            $table->string('passport_number', 20)->nullable();
+            $table->text('passport_series')->nullable();
+            $table->text('passport_number')->nullable();
             $table->text('pinfl')->nullable();
             $table->string('pinfl_hash', 64)->nullable();
             $table->date('birth_date')->nullable();
@@ -146,11 +150,16 @@ return new class extends Migration
             $table->string('photo_url', 500)->nullable();
             $table->string('passport_photo_url', 500)->nullable();
             $table->string('medical_certificate_photo_url', 500)->nullable();
-            $table->enum('source', ['telegram_bot', 'website', 'instagram', 'recommendation', 'walk_in'])->default('telegram_bot');
+            $table->string('source', 40)->default('telegram_bot'); // telegram_bot, website, instagram, recommendation, walk_in, reception_manual
             $table->enum('stage', ['new_lead', 'form_sent', 'form_completed', 'contract_signed', 'rejected'])->default('new_lead');
             $table->text('notes')->nullable();
             $table->text('lost_reason')->nullable();
             $table->timestamps();
+
+            $table->index(['telegram_id', 'stage'], 'idx_leads_telegram_stage');
+            $table->index(['branch_id', 'stage'], 'idx_leads_branch_stage');
+            $table->index(['stage', 'created_at'], 'idx_leads_stage_date');
+            $table->index('source', 'idx_leads_source');
         });
     }
 

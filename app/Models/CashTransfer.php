@@ -43,6 +43,9 @@ class CashTransfer extends Model
         return $this->belongsTo(CashRegister::class, 'from_cash_register_id');
     }
 
+    /**
+     * @return BelongsTo<CashRegister, $this>
+     */
     public function toCashRegister(): BelongsTo
     {
         return $this->belongsTo(CashRegister::class, 'to_cash_register_id');

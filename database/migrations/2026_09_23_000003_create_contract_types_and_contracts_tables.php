@@ -51,6 +51,11 @@ return new class extends Migration
             $table->text('terms')->nullable();
             $table->string('file_url', 500)->nullable();
             $table->timestamps();
+
+            $table->index(['student_id', 'status'], 'idx_contracts_student_status');
+            $table->index(['branch_id', 'status'], 'idx_contracts_branch_status');
+            $table->index(['status', 'debt_amount'], 'idx_contracts_status_debt');
+            $table->index('payment_status', 'idx_contracts_payment_status');
         });
 
         Schema::create('certificates', function (Blueprint $table) {
@@ -71,6 +76,9 @@ return new class extends Migration
             $table->enum('status', ['issued', 'revoked'])->default('issued');
             $table->string('file_url', 500)->nullable();
             $table->timestamps();
+
+            $table->index(['student_id', 'status'], 'idx_certificates_student_status');
+            $table->index(['branch_id', 'issued_date'], 'idx_certificates_branch_date');
         });
     }
 

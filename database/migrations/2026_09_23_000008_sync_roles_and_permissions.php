@@ -6,9 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration
 {
     /**
-     * Apply the reworked role defaults from config/roles.php: capability
-     * permissions (drivings.conduct, lessons.teach), unused permissions
-     * removed and per-role default changes.
+     * Create every role and permission defined in config/roles.php. Rerun
+     * RolesAndPermissionsSeeder (or this sync) whenever that config changes.
      */
     public function up(): void
     {
@@ -17,6 +16,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Role permissions always mirror config/roles.php; nothing to revert.
+        // Roles and permissions are dropped together with the permission tables.
     }
 };

@@ -49,6 +49,9 @@ class Expense extends Model
         return $this->belongsTo(CashRegister::class);
     }
 
+    /**
+     * @return BelongsTo<ExpenseCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
