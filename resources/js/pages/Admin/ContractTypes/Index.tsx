@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { formatNumber, formatMoney } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface ContractType {
     id: number;
@@ -169,7 +171,7 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
 
                                 <h3 className="font-bold text-base text-gray-900 dark:text-white">{ct.name}</h3>
                                 <p className="text-xl font-extrabold text-gray-900 dark:text-white mt-2">
-                                    {Number(ct.price).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500">UZS</span>
+                                    {formatNumber(ct.price)} <span className="text-xs font-normal text-gray-500">UZS</span>
                                 </p>
 
                                 {ct.description && (
@@ -264,12 +266,13 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="price" required>{t('contract_types.price', 'Narx (UZS)')}</Label>
-                                <Input
+                                <MoneyInput
                                     id="price"
-                                    type="number"
                                     value={form.data.price}
-                                    onChange={(e) => form.setData('price', e.target.value)}
+                                    onChange={(val) => form.setData('price', val)}
                                     required
+                                    suffix="UZS"
+                                    placeholder="0"
                                     className="mt-1"
                                 />
                             </div>

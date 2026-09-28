@@ -41,8 +41,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { formatDate, formatDateTime, parseDate } from '@/lib/utils';
+import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
 
 interface Student {
     id: number;
@@ -156,8 +155,7 @@ export default function StudentShow({
     const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const formatMoney = (val: number | string | undefined | null) => {
-        const num = Number(val || 0);
-        return new Intl.NumberFormat('uz-UZ').format(num) + ' ' + t('common.sum', "so'm");
+        return formatMoneyUtil(val, t('common.sum', "so'm"));
     };
 
     const totalContractAmount = contracts.reduce((acc, c) => acc + Number(c.total_amount || 0), 0);

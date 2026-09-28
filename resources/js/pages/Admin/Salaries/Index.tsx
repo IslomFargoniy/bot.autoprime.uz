@@ -35,6 +35,8 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { formatNumber, formatMoney } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface Salary {
     id: number;
@@ -275,10 +277,10 @@ export default function SalariesIndex({
                                         </span>
                                     </TableCell>
                                     <TableCell className={`font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                        {sal.is_deduction ? '-' : '+'}{Number(sal.amount).toLocaleString('uz-UZ')} UZS
+                                        {sal.is_deduction ? '-' : '+'}{formatMoney(sal.amount)}
                                     </TableCell>
                                     <TableCell className="font-semibold text-gray-800 dark:text-gray-200">
-                                        {Number(sal.user?.salary_balance || 0).toLocaleString('uz-UZ')} UZS
+                                        {formatMoney(sal.user?.salary_balance || 0)}
                                     </TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
@@ -356,13 +358,13 @@ export default function SalariesIndex({
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('salaries.amount', 'Summa')}</span>
                                     <span className={`font-bold ${sal.is_deduction ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                        {sal.is_deduction ? '-' : '+'}{Number(sal.amount).toLocaleString('uz-UZ')} UZS
+                                        {sal.is_deduction ? '-' : '+'}{formatMoney(sal.amount)}
                                     </span>
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('salaries.balance', 'Hozirgi Balans')}</span>
                                     <span className="font-semibold text-foreground">
-                                        {Number(sal.user?.salary_balance || 0).toLocaleString('uz-UZ')} UZS
+                                        {formatMoney(sal.user?.salary_balance || 0)}
                                     </span>
                                 </div>
                             </div>
@@ -437,12 +439,13 @@ export default function SalariesIndex({
                             </div>
                             <div>
                                 <Label required htmlFor="adj_amount">{t('salaries.amount', 'Summa (UZS)')}</Label>
-                                <Input
+                                <MoneyInput
                                     id="adj_amount"
-                                    type="number"
                                     value={adjustForm.data.amount}
-                                    onChange={(e) => adjustForm.setData('amount', e.target.value)}
+                                    onChange={(val) => adjustForm.setData('amount', val)}
                                     required
+                                    suffix="UZS"
+                                    placeholder="0"
                                     className="mt-1"
                                 />
                             </div>
@@ -505,7 +508,7 @@ export default function SalariesIndex({
                                     <div className="sm:text-right">
                                         <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('salaries.due_amount', 'To\'lanishi kerak')}</div>
                                         <div className="font-mono font-bold text-sm sm:text-base text-gray-900 dark:text-white">
-                                            {Number(payingSalary.amount).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-400">UZS</span>
+                                            {formatMoney(payingSalary.amount)}
                                         </div>
                                     </div>
                                 </div>
@@ -521,7 +524,7 @@ export default function SalariesIndex({
                                             options={cashRegisters.map((r) => ({
                                                 value: r.id,
                                                 label: r.name,
-                                                sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
+                                                sublabel: formatMoney(r.balance),
                                             }))}
                                             className="mt-1"
                                         />
@@ -573,17 +576,17 @@ export default function SalariesIndex({
                                                         ? 'text-rose-600 dark:text-rose-400'
                                                         : 'text-emerald-600 dark:text-emerald-400'
                                                 }`}>
-                                                    {Number(selectedRegister.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal">UZS</span>
+                                                    {formatMoney(selectedRegister.balance)}
                                                 </div>
                                                 <div className="text-[11px] mt-0.5">
                                                     {isInsufficient ? (
                                                         <span className="text-rose-600 dark:text-rose-400 font-medium inline-flex items-center gap-1">
                                                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                                            {t('finance.insufficient_funds', 'Mablag\' yetarli emas!')} (-{Number(payAmountNum - regBalanceNum).toLocaleString('uz-UZ')} UZS)
+                                                            {t('finance.insufficient_funds', 'Mablag\' yetarli emas!')} (-{formatMoney(payAmountNum - regBalanceNum)})
                                                         </span>
                                                     ) : (
                                                         <span className="text-emerald-700 dark:text-emerald-300 opacity-90 font-medium">
-                                                            {t('finance.remaining_after_pay', 'To\'lovdan keyin qoladi')}: {Number(remainingBalance).toLocaleString('uz-UZ')} UZS
+                                                            {t('finance.remaining_after_pay', 'To\'lovdan keyin qoladi')}: {formatMoney(remainingBalance)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -604,12 +607,12 @@ export default function SalariesIndex({
                                             {t('salaries.set_full_amount', 'To\'liq summani kiritish')}
                                         </button>
                                     </div>
-                                    <Input
+                                    <MoneyInput
                                         id="pay_amt"
-                                        type="number"
                                         value={payForm.data.amount}
-                                        onChange={(e) => payForm.setData('amount', e.target.value)}
+                                        onChange={(val) => payForm.setData('amount', val)}
                                         required
+                                        suffix="UZS"
                                         className="h-10 text-sm font-semibold font-mono"
                                     />
                                 </div>

@@ -27,8 +27,8 @@ import {
 } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface VehicleMaintenance {
     id: number;
@@ -300,7 +300,7 @@ export default function VehiclesIndex({
                                     </div>
                                     <div className="flex justify-between font-semibold">
                                         <span className="text-gray-900 dark:text-white truncate max-w-[150px]">{v.maintenances[0].maintenance_type}</span>
-                                        <span className="text-amber-600 dark:text-amber-400">{Number(v.maintenances[0].cost).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="text-amber-600 dark:text-amber-400">{formatMoney(v.maintenances[0].cost)}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-gray-400 dark:text-gray-500 text-[10px]">
                                         <span>{v.maintenances[0].performed_date}</span>
@@ -518,7 +518,7 @@ export default function VehiclesIndex({
                                         { value: '', label: t('vehicles.no_cash_register', 'Kassadan yechilmasin (Faqat garaj hisobi)') },
                                         ...(cashRegisters || []).map((c) => ({
                                             value: String(c.id),
-                                            label: `${c.name} (${Number(c.balance).toLocaleString('uz-UZ')} UZS)`,
+                                            label: `${c.name} (${formatMoney(c.balance)})`,
                                         })),
                                     ]}
                                     className="mt-1"
@@ -538,22 +538,24 @@ export default function VehiclesIndex({
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label required htmlFor="m_cost">{t('vehicles.cost', 'Xarajat (UZS)')}</Label>
-                                    <Input
+                                    <MoneyInput
                                         id="m_cost"
-                                        type="number"
                                         value={maintenanceForm.data.cost}
-                                        onChange={(e) => maintenanceForm.setData('cost', e.target.value)}
+                                        onChange={(val) => maintenanceForm.setData('cost', val)}
                                         required
+                                        suffix="UZS"
+                                        placeholder="0"
                                         className="mt-1"
                                     />
                                 </div>
                                 <div>
                                     <Label htmlFor="m_odo">{t('vehicles.odometer', 'Probeg (km)')}</Label>
-                                    <Input
+                                    <MoneyInput
                                         id="m_odo"
-                                        type="number"
                                         value={maintenanceForm.data.odometer}
-                                        onChange={(e) => maintenanceForm.setData('odometer', e.target.value)}
+                                        onChange={(val) => maintenanceForm.setData('odometer', val ? Number(val) : '')}
+                                        suffix="km"
+                                        placeholder="0"
                                         className="mt-1"
                                     />
                                 </div>
@@ -636,7 +638,7 @@ export default function VehiclesIndex({
                                         {t('vehicles.total_maintenance_cost', 'Jami xarajat')}
                                     </span>
                                     <span className="text-sm sm:text-base font-bold text-amber-800 dark:text-amber-200">
-                                        {((historyVehicle.maintenances || []).reduce((acc, m) => acc + Number(m.cost || 0), 0)).toLocaleString('uz-UZ')} UZS
+                                        {formatMoney((historyVehicle.maintenances || []).reduce((acc, m) => acc + Number(m.cost || 0), 0))}
                                     </span>
                                 </div>
                                 <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40 text-center">
@@ -644,7 +646,7 @@ export default function VehiclesIndex({
                                         {t('vehicles.current_mileage_label', 'Joriy probeg')}
                                     </span>
                                     <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-200">
-                                        {(historyVehicle.current_mileage || 0).toLocaleString('uz-UZ')} km
+                                        {formatNumber(historyVehicle.current_mileage || 0)} km
                                     </span>
                                 </div>
                             </div>
@@ -679,7 +681,7 @@ export default function VehiclesIndex({
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 dark:text-gray-400 text-[11px] font-mono">
                                                     <span>📅 {formatDate(m.performed_date)}</span>
-                                                    {m.odometer && <span>🛣️ {Number(m.odometer).toLocaleString('uz-UZ')} km</span>}
+                                                    {m.odometer && <span>🛣️ {formatNumber(m.odometer)} km</span>}
                                                     {m.next_due_date && <span>⏳ {t('vehicles.next_due_date', 'Keyingi muddat')}: {formatDate(m.next_due_date)}</span>}
                                                 </div>
                                                 {m.notes && (
@@ -691,7 +693,7 @@ export default function VehiclesIndex({
 
                                             <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-700/40">
                                                 <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-right whitespace-nowrap">
-                                                    {Number(m.cost).toLocaleString('uz-UZ')} UZS
+                                                    {formatMoney(m.cost)}
                                                 </span>
                                                 {can('fleet.manage') && (
                                                     <Button

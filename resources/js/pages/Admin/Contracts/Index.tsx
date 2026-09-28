@@ -48,7 +48,8 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, parseDate } from '@/lib/utils';
+import { formatDate, parseDate, formatNumber, formatMoney } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface CashRegister {
     id: number;
@@ -352,7 +353,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                             {c.group?.name || '-'}
                                         </TableCell>
                                         <TableCell className="font-medium text-xs">
-                                            {Number(c.final_amount).toLocaleString('uz-UZ')} UZS
+                                            {formatMoney(c.final_amount)}
                                         </TableCell>
                                         <TableCell className="font-medium text-xs text-emerald-600 dark:text-emerald-400">
                                             <button
@@ -362,11 +363,11 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                 title={t('contracts.payments_history', "To'lovlar tarixi")}
                                             >
                                                 <ReceiptText className="w-3.5 h-3.5 text-emerald-500" />
-                                                {Number(c.paid_amount).toLocaleString('uz-UZ')} UZS
+                                                {formatMoney(c.paid_amount)}
                                             </button>
                                         </TableCell>
                                         <TableCell className="font-medium text-xs text-red-500">
-                                            {Number(c.debt_amount).toLocaleString('uz-UZ')} UZS
+                                            {formatMoney(c.debt_amount)}
                                         </TableCell>
                                         <TableCell>
                                             <span className={`px-2.5 py-1 rounded-md border text-xs font-semibold ${getBadgeStyle(c.payment_badge_color)}`}>
@@ -479,7 +480,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                             <div className="grid grid-cols-3 gap-2 p-2.5 bg-muted/40 rounded-lg text-xs">
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('contracts.final_amount', 'Summa')}</span>
-                                    <span className="font-semibold">{Number(c.final_amount).toLocaleString('uz-UZ')}</span>
+                                    <span className="font-semibold">{formatNumber(c.final_amount)}</span>
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('contracts.paid_amount', "To'langan")}</span>
@@ -489,13 +490,13 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
                                     >
                                         <ReceiptText className="w-3 h-3" />
-                                        {Number(c.paid_amount).toLocaleString('uz-UZ')}
+                                        {formatNumber(c.paid_amount)}
                                     </button>
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('contracts.debt_amount', 'Qarz')}</span>
                                     <span className={`font-semibold ${Number(c.debt_amount) > 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                                        {Number(c.debt_amount).toLocaleString('uz-UZ')}
+                                        {formatNumber(c.debt_amount)}
                                     </span>
                                 </div>
                             </div>
@@ -627,7 +628,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         </span>
                                     </div>
                                     <span className="font-semibold font-mono text-primary">
-                                        {Number(viewingContract.total_amount).toLocaleString('uz-UZ')} UZS
+                                        {formatMoney(viewingContract.total_amount)}
                                     </span>
                                 </div>
 
@@ -671,27 +672,27 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     <div className="p-2 bg-background rounded-lg border">
                                         <span className="text-[10px] text-muted-foreground block">{t('contracts.total_amount', 'Tarif summasi')}</span>
-                                        <span className="font-semibold text-xs">{Number(viewingContract.total_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-semibold text-xs">{formatMoney(viewingContract.total_amount)}</span>
                                     </div>
                                     <div className="p-2 bg-background rounded-lg border">
                                         <span className="text-[10px] text-muted-foreground block">{t('contracts.discount', 'Chegirma')}</span>
-                                        <span className="font-semibold text-xs text-amber-600">-{Number(viewingContract.discount_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-semibold text-xs text-amber-600">-{formatMoney(viewingContract.discount_amount)}</span>
                                     </div>
                                     <div className="p-2 bg-background rounded-lg border">
                                         <span className="text-[10px] text-muted-foreground block">{t('contracts.final_amount', 'Yakuniy summa')}</span>
-                                        <span className="font-bold text-xs text-foreground">{Number(viewingContract.final_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-bold text-xs text-foreground">{formatMoney(viewingContract.final_amount)}</span>
                                     </div>
                                     <div className="p-2 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-lg border border-emerald-200">
                                         <span className="text-[10px] text-emerald-700 dark:text-emerald-300 block font-medium">{t('contracts.paid_amount', 'To\'langan')}</span>
-                                        <span className="font-bold text-xs text-emerald-700 dark:text-emerald-300">{Number(viewingContract.paid_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-bold text-xs text-emerald-700 dark:text-emerald-300">{formatMoney(viewingContract.paid_amount)}</span>
                                     </div>
                                     <div className="p-2 bg-rose-50/60 dark:bg-rose-950/30 rounded-lg border border-rose-200">
                                         <span className="text-[10px] text-rose-700 dark:text-rose-300 block font-medium">{t('contracts.debt_amount', 'Qoldiq qarz')}</span>
-                                        <span className="font-bold text-xs text-rose-700 dark:text-rose-300">{Number(viewingContract.debt_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-bold text-xs text-rose-700 dark:text-rose-300">{formatMoney(viewingContract.debt_amount)}</span>
                                     </div>
                                     <div className="p-2 bg-background rounded-lg border">
                                         <span className="text-[10px] text-muted-foreground block">{t('contracts.overpaid', 'Ortiqcha to\'lov')}</span>
-                                        <span className="font-semibold text-xs text-blue-600">{Number(viewingContract.overpaid_amount).toLocaleString('uz-UZ')} UZS</span>
+                                        <span className="font-semibold text-xs text-blue-600">{formatMoney(viewingContract.overpaid_amount)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -787,7 +788,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 options={contractTypes.map((ct) => ({
                                     value: ct.id,
                                     label: ct.name,
-                                    sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS (${ct.category})`,
+                                    sublabel: `${formatMoney(ct.price)} (${ct.category})`,
                                 }))}
                                 placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
                                 className="mt-1"
@@ -812,13 +813,13 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
                             <div>
                                 <Label htmlFor="discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
-                                <Input
+                                <MoneyInput
                                     id="discount_amount"
-                                    type="number"
                                     value={form.data.discount_amount}
-                                    onChange={(e) => form.setData('discount_amount', Number(e.target.value))}
+                                    onChange={(val) => form.setData('discount_amount', Number(val) || 0)}
                                     className="mt-1"
                                     placeholder="0"
+                                    suffix="UZS"
                                 />
                             </div>
                         </div>
@@ -887,7 +888,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     #{refundingContract.contract_number} • {refundingContract.contract_type?.name}
                                 </div>
                                 <div className="text-emerald-600 dark:text-emerald-400 font-bold pt-1">
-                                    {t('contracts.paid_amount', "To'langan summa")}: {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                    {t('contracts.paid_amount', "To'langan summa")}: {formatMoney(refundingContract.paid_amount)}
                                 </div>
                             </div>
 
@@ -895,18 +896,17 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 <Label required htmlFor="refund_amount">
                                     {t('contracts.refund_amount', 'Qaytariladigan summa (UZS)')}
                                 </Label>
-                                <Input
+                                <MoneyInput
                                     id="refund_amount"
-                                    type="number"
-                                    step="any"
-                                    max={Number(refundingContract.paid_amount)}
                                     value={refundForm.data.amount}
-                                    onChange={(e) => refundForm.setData('amount', e.target.value)}
+                                    onChange={(val) => refundForm.setData('amount', val)}
+                                    placeholder="0"
+                                    suffix="UZS"
                                     className="mt-1 font-semibold text-amber-600"
                                     required
                                 />
                                 <span className="text-[11px] text-muted-foreground mt-0.5 block">
-                                    {t('contracts.max_refund_notice', 'Maksimal qaytarish mumkin bo\'lgan summa')}: {Number(refundingContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                    {t('contracts.max_refund_notice', 'Maksimal qaytarish mumkin bo\'lgan summa')}: {formatMoney(refundingContract.paid_amount)}
                                 </span>
                             </div>
 
@@ -920,7 +920,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     onChange={(val) => refundForm.setData('cash_register_id', String(val))}
                                     options={cashRegisters.map((cr) => ({
                                         value: String(cr.id),
-                                        label: `${cr.name} (${Number(cr.balance).toLocaleString('uz-UZ')} UZS)`,
+                                        label: `${cr.name} (${formatMoney(cr.balance)})`,
                                     }))}
                                     className="mt-1"
                                 />
@@ -999,10 +999,10 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 </div>
                                 <div className="text-right">
                                     <div className="text-emerald-600 dark:text-emerald-400 font-bold">
-                                        {t('contracts.paid_amount', "To'langan")}: {Number(viewingPaymentsContract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                        {t('contracts.paid_amount', "To'langan")}: {formatMoney(viewingPaymentsContract.paid_amount)}
                                     </div>
                                     <div className="text-red-500 text-[11px]">
-                                        {t('contracts.debt_amount', 'Qarz')}: {Number(viewingPaymentsContract.debt_amount).toLocaleString('uz-UZ')} UZS
+                                        {t('contracts.debt_amount', 'Qarz')}: {formatMoney(viewingPaymentsContract.debt_amount)}
                                     </div>
                                 </div>
                             </div>
@@ -1032,7 +1032,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                         <TableCell className="text-muted-foreground">{p.paid_at}</TableCell>
                                                         <TableCell className="text-muted-foreground">{p.cash_register?.name || '-'}</TableCell>
                                                         <TableCell className={`font-semibold ${isRefund ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                                            {isRefund ? '-' : '+'}{Number(p.amount).toLocaleString('uz-UZ')} UZS
+                                                            {isRefund ? '-' : '+'}{formatMoney(p.amount)}
                                                         </TableCell>
                                                         <TableCell className="text-right">
                                                             {can('payments.edit') && (

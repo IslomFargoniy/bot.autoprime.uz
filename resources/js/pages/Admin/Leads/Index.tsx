@@ -44,8 +44,8 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
-import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, formatDateTime, parseDate } from '@/lib/utils';
+import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface Lead {
     id: number;
@@ -950,7 +950,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     options={contractTypes.map((ct) => ({
                                         value: String(ct.id),
                                         label: ct.name,
-                                        sublabel: `${Number(ct.price).toLocaleString('uz-UZ')} UZS (${ct.category})`,
+                                        sublabel: `${formatMoney(ct.price)} (${ct.category})`,
                                     }))}
                                     placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
                                     className="mt-1"
@@ -975,13 +975,13 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
                                 <div>
                                     <Label htmlFor="conv_discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
-                                    <Input
+                                    <MoneyInput
                                         id="conv_discount_amount"
-                                        type="number"
                                         value={convertForm.data.discount_amount}
-                                        onChange={(e) => convertForm.setData('discount_amount', Number(e.target.value))}
+                                        onChange={(val) => convertForm.setData('discount_amount', Number(val) || 0)}
                                         className="mt-1"
                                         placeholder="0"
+                                        suffix="UZS"
                                     />
                                 </div>
                             </div>

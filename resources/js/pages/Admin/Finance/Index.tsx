@@ -44,7 +44,8 @@ import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { useCan } from '@/hooks/use-can';
 import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, formatDateTime } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
+import { formatDate, formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 
 interface CashRegister {
     id: number;
@@ -544,7 +545,7 @@ export default function FinanceIndex({
                                 </div>
                                 <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">{reg.name}</h3>
                                 <p className="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
-                                    {Number(reg.balance).toLocaleString('uz-UZ')} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
+                                    {formatNumber(reg.balance)} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
                                 </p>
                             </div>
 
@@ -671,7 +672,7 @@ export default function FinanceIndex({
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
-                                                    {Number(reg.balance).toLocaleString('uz-UZ')} UZS
+                                                    {formatMoney(reg.balance)}
                                                 </TableCell>
                                                 <TableCell className="text-right space-x-2 whitespace-nowrap">
                                                     <Button
@@ -823,17 +824,17 @@ export default function FinanceIndex({
                                                 <TableCell className="whitespace-nowrap font-mono font-bold">
                                                     {tx.type === 'in' ? (
                                                         <span className="text-emerald-600 dark:text-emerald-400">
-                                                            +{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                            +{formatMoney(tx.amount)}
                                                         </span>
                                                     ) : (
                                                         <span className="text-rose-600 dark:text-rose-400">
-                                                            -{Number(tx.amount).toLocaleString('uz-UZ')} UZS
+                                                            -{formatMoney(tx.amount)}
                                                         </span>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="whitespace-nowrap">
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-bold bg-gray-100 dark:bg-gray-700/80 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600">
-                                                        {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
+                                                        {formatMoney(tx.balance_after)}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="text-gray-700 dark:text-gray-300 text-xs max-w-xs truncate">
@@ -874,11 +875,11 @@ export default function FinanceIndex({
                                         <div className="text-right shrink-0">
                                             {tx.type === 'in' ? (
                                                 <span className="font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
-                                                    +{Number(tx.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                    +{formatNumber(tx.amount)} <span className="text-[10px] font-normal">UZS</span>
                                                 </span>
                                             ) : (
                                                 <span className="font-mono font-bold text-sm sm:text-base text-rose-600 dark:text-rose-400">
-                                                    -{Number(tx.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                    -{formatNumber(tx.amount)} <span className="text-[10px] font-normal">UZS</span>
                                                 </span>
                                             )}
                                         </div>
@@ -895,7 +896,7 @@ export default function FinanceIndex({
                                         <div className="text-[11px] shrink-0 text-gray-500 dark:text-gray-400">
                                             <span>{t('finance.balance_after', 'Balans')}: </span>
                                             <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
-                                                {Number(tx.balance_after).toLocaleString('uz-UZ')} UZS
+                                                {formatMoney(tx.balance_after)}
                                             </span>
                                         </div>
                                     </div>
@@ -953,7 +954,7 @@ export default function FinanceIndex({
                                                     {p.contract?.contract_number ? `#${p.contract.contract_number}` : '-'}
                                                 </TableCell>
                                                 <TableCell className="font-bold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
-                                                    +{Number(p.amount).toLocaleString('uz-UZ')} UZS
+                                                    +{formatMoney(p.amount)}
                                                 </TableCell>
                                                 <TableCell className="whitespace-nowrap">
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
@@ -1012,7 +1013,7 @@ export default function FinanceIndex({
                                         </div>
                                         <div className="text-right shrink-0">
                                             <div className="font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
-                                                +{Number(p.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                +{formatNumber(p.amount)} <span className="text-[10px] font-normal">UZS</span>
                                             </div>
                                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
                                                 {getMethodLabel(p.payment_method)}
@@ -1080,7 +1081,7 @@ export default function FinanceIndex({
                                                 <TableCell className="font-medium whitespace-nowrap">{e.category?.name || '-'}</TableCell>
                                                 <TableCell className="text-gray-700 dark:text-gray-300">{e.description}</TableCell>
                                                 <TableCell className="font-bold text-red-500 dark:text-red-400 font-mono whitespace-nowrap">
-                                                    -{Number(e.amount).toLocaleString('uz-UZ')} UZS
+                                                    -{formatMoney(e.amount)}
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.cash_register?.name}</TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.user?.name || '-'}</TableCell>
@@ -1128,7 +1129,7 @@ export default function FinanceIndex({
                                         </div>
                                         <div className="text-right shrink-0">
                                             <div className="font-mono font-bold text-sm sm:text-base text-rose-600 dark:text-rose-400">
-                                                -{Number(e.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                                -{formatNumber(e.amount)} <span className="text-[10px] font-normal">UZS</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1196,7 +1197,7 @@ export default function FinanceIndex({
                                                     {tr.to_cash_register?.name}
                                                 </TableCell>
                                                 <TableCell className="font-bold text-gray-900 dark:text-white font-mono whitespace-nowrap">
-                                                    {Number(tr.amount).toLocaleString('uz-UZ')} UZS
+                                                    {formatMoney(tr.amount)}
                                                 </TableCell>
                                                 <TableCell className="whitespace-nowrap">
                                                     <span
@@ -1275,7 +1276,7 @@ export default function FinanceIndex({
                                             <span className="text-[11px] text-gray-400 font-mono">{formatDateTime(tr.created_at)}</span>
                                         </div>
                                         <div className="font-mono font-bold text-sm sm:text-base text-gray-900 dark:text-white shrink-0">
-                                            {Number(tr.amount).toLocaleString('uz-UZ')} <span className="text-[10px] font-normal">UZS</span>
+                                            {formatNumber(tr.amount)} <span className="text-[10px] font-normal">UZS</span>
                                         </div>
                                     </div>
 
@@ -1374,20 +1375,16 @@ export default function FinanceIndex({
                                         <div className="flex items-center justify-between sm:justify-end gap-3 pl-6 sm:pl-0">
                                             <div className="text-[11px] text-gray-500 dark:text-gray-400 sm:text-right">
                                                 <span className="sm:hidden">{t('finance.balance', 'Balans')}: </span>
-                                                <span className="font-bold text-gray-900 dark:text-white font-mono">{Number(item.balance).toLocaleString('uz-UZ')} UZS</span>
+                                                <span className="font-bold text-gray-900 dark:text-white font-mono">{formatMoney(item.balance)}</span>
                                             </div>
                                             {item.selected && (
-                                                <Input
-                                                    type="number"
+                                                <MoneyInput
                                                     value={item.amount}
-                                                    onChange={(e) => {
+                                                    onChange={(val) => {
                                                         const updated = [...sweepItems];
-                                                        updated[idx].amount = Number(e.target.value);
+                                                        updated[idx].amount = Number(val);
                                                         setSweepItems(updated);
                                                     }}
-                                                    max={item.balance}
-                                                    min={0}
-                                                    step="any"
                                                     className="w-32 sm:w-36 h-8 text-xs font-mono font-bold text-right"
                                                 />
                                             )}
@@ -1412,7 +1409,7 @@ export default function FinanceIndex({
                             <div>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">{t('finance.sweep_total', 'Jami o\'tkazilayotgan mablag\'')}:</span>
                                 <div className="text-base sm:text-lg font-extrabold text-amber-600 dark:text-amber-400 font-mono">
-                                    {totalSweepAmount.toLocaleString('uz-UZ')} UZS
+                                    {formatMoney(totalSweepAmount)}
                                 </div>
                             </div>
 
@@ -1451,7 +1448,7 @@ export default function FinanceIndex({
                                     return {
                                         value: c.id,
                                         label: `#${c.contract_number}${st ? ` - ${st.full_name}` : ''}`,
-                                        sublabel: `Qarz: ${Number(c.debt_amount).toLocaleString('uz-UZ')} UZS`,
+                                        sublabel: `Qarz: ${formatMoney(c.debt_amount)}`,
                                     };
                                 })}
                                 placeholder={t('finance.select_contract', 'Shartnoma')}
@@ -1500,12 +1497,12 @@ export default function FinanceIndex({
 
                         <div>
                             <Label required htmlFor="pay_amount">{t('finance.amount', 'To\'lov Summasi (UZS)')}</Label>
-                            <Input
+                            <MoneyInput
                                 id="pay_amount"
-                                type="number"
                                 value={paymentForm.data.amount}
-                                onChange={(e) => paymentForm.setData('amount', e.target.value)}
-                                placeholder="1000000"
+                                onChange={(val) => paymentForm.setData('amount', val)}
+                                placeholder="1 000 000"
+                                suffix="UZS"
                                 required
                                 className="mt-1"
                             />
@@ -1553,7 +1550,7 @@ export default function FinanceIndex({
                                     options={cashRegisters.map((r) => ({
                                         value: r.id,
                                         label: r.name,
-                                        sublabel: `${Number(r.balance).toLocaleString('uz-UZ')} UZS`,
+                                        sublabel: formatMoney(r.balance),
                                     }))}
                                     className="mt-1"
                                 />
@@ -1573,11 +1570,12 @@ export default function FinanceIndex({
 
                         <div>
                             <Label required htmlFor="exp_amount">{t('finance.amount', 'Summa (UZS)')}</Label>
-                            <Input
+                            <MoneyInput
                                 id="exp_amount"
-                                type="number"
                                 value={expenseForm.data.amount}
-                                onChange={(e) => expenseForm.setData('amount', e.target.value)}
+                                onChange={(val) => expenseForm.setData('amount', val)}
+                                placeholder="500 000"
+                                suffix="UZS"
                                 required
                                 className="mt-1"
                             />
@@ -1641,11 +1639,12 @@ export default function FinanceIndex({
 
                         <div>
                             <Label required htmlFor="tr_amount">{t('finance.amount', 'O\'tkaziladigan Summa (UZS)')}</Label>
-                            <Input
+                            <MoneyInput
                                 id="tr_amount"
-                                type="number"
                                 value={transferForm.data.amount}
-                                onChange={(e) => transferForm.setData('amount', e.target.value)}
+                                onChange={(val) => transferForm.setData('amount', val)}
+                                placeholder="500 000"
+                                suffix="UZS"
                                 required
                                 className="mt-1"
                             />

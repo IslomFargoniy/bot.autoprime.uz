@@ -47,7 +47,8 @@ import {
 import { StaffPermissionsDialog } from '@/components/staff-permissions-dialog';
 import type { PermissionCatalog, PermissionMember } from '@/components/staff-permissions-dialog';
 import { useCan } from '@/hooks/use-can';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
+import { MoneyInput } from '@/components/ui/money-input';
 import {
     Table,
     TableBody,
@@ -175,8 +176,7 @@ export default function StaffIndex({
     });
 
     const formatMoney = (val: number | string | undefined | null) => {
-        const num = Number(val || 0);
-        return new Intl.NumberFormat('uz-UZ').format(num) + " " + t('common.sum', "so'm");
+        return formatMoneyUtil(val, t('common.sum', "so'm"));
     };
 
     const applyFilters = useCallback(
@@ -1086,13 +1086,12 @@ export default function StaffIndex({
                                         <Label htmlFor="staff_driving_rate">
                                             {t('staff.driving_hourly_rate', 'Soatbay stavka (soat/so\'m)')}
                                         </Label>
-                                        <Input
+                                        <MoneyInput
                                             id="staff_driving_rate"
-                                            type="number"
-                                            min="0"
                                             value={data.driving_hourly_rate}
-                                            onChange={(e) => setData('driving_hourly_rate', e.target.value)}
+                                            onChange={(val) => setData('driving_hourly_rate', val)}
                                             placeholder="50 000"
+                                            suffix={t('common.sum', "so'm")}
                                         />
                                         {errors.driving_hourly_rate && (
                                             <p className="text-xs text-rose-500">{errors.driving_hourly_rate}</p>
@@ -1112,13 +1111,12 @@ export default function StaffIndex({
                                     <Label htmlFor="staff_lesson_rate">
                                         {t('staff.lesson_rate', 'Har bir nazariy dars stavkasi (so\'m)')}
                                     </Label>
-                                    <Input
+                                    <MoneyInput
                                         id="staff_lesson_rate"
-                                        type="number"
-                                        min="0"
                                         value={data.lesson_rate}
-                                        onChange={(e) => setData('lesson_rate', e.target.value)}
+                                        onChange={(val) => setData('lesson_rate', val)}
                                         placeholder="75 000"
+                                        suffix={t('common.sum', "so'm")}
                                     />
                                     {errors.lesson_rate && <p className="text-xs text-rose-500">{errors.lesson_rate}</p>}
                                 </div>
@@ -1131,13 +1129,12 @@ export default function StaffIndex({
                                 <Label htmlFor="staff_base_salary">
                                     {t('staff.base_salary', 'Asosiy oylik maosh (Fiksa, so\'m)')}
                                 </Label>
-                                <Input
+                                <MoneyInput
                                     id="staff_base_salary"
-                                    type="number"
-                                    min="0"
                                     value={data.base_salary}
-                                    onChange={(e) => setData('base_salary', e.target.value)}
+                                    onChange={(val) => setData('base_salary', val)}
                                     placeholder="4 000 000"
+                                    suffix={t('common.sum', "so'm")}
                                 />
                                 {errors.base_salary && <p className="text-xs text-rose-500">{errors.base_salary}</p>}
                             </div>

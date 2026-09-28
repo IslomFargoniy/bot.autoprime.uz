@@ -20,8 +20,7 @@ import {
     Car,
 } from 'lucide-react';
 import { TestQuiz } from '@/components/test-quiz';
-import { telegramInitDataHeaders } from '@/hooks/use-telegram';
-import { formatDateTime, parseDate } from '@/lib/utils';
+import { formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 
 
 interface StudentProps {
@@ -253,13 +252,13 @@ export default function MiniApp({
                         <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
                             <span className="text-gray-500 dark:text-gray-400 block">{t('contracts.paid_amount', 'To\'langan')}</span>
                             <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5 block">
-                                {Number(contract.paid_amount).toLocaleString('uz-UZ')} UZS
+                                {formatMoney(contract.paid_amount)}
                             </span>
                         </div>
                         <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
                             <span className="text-gray-500 dark:text-gray-400 block">{t('contracts.debt_amount', 'Qoldiq qarz')}</span>
                             <span className="font-bold text-red-500 text-sm mt-0.5 block">
-                                {Number(contract.debt_amount).toLocaleString('uz-UZ')} UZS
+                                {formatMoney(contract.debt_amount)}
                             </span>
                         </div>
                     </div>
@@ -379,7 +378,7 @@ export default function MiniApp({
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-500">{t('contracts.total_amount', 'Jami to\'lov')}:</span>
-                                <span className="font-semibold">{Number(contract.total_amount).toLocaleString('uz-UZ')} UZS</span>
+                                <span className="font-semibold">{formatMoney(contract.total_amount)}</span>
                             </div>
                         </div>
                     )}

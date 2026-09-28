@@ -33,6 +33,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import { formatMoney } from '@/lib/utils';
 
 interface Certificate {
     id: number;
@@ -301,7 +302,7 @@ export default function CertificatesIndex({
                                                     cand.debt_ok ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
                                                 }`}>
                                                     {cand.debt_ok ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                                    {cand.debt_ok ? 'Qarz yo\'q (0 UZS)' : `Qarz: ${Number(cand.debt_amount).toLocaleString('uz-UZ')}`}
+                                                    {cand.debt_ok ? 'Qarz yo\'q (0 UZS)' : `Qarz: ${formatMoney(cand.debt_amount)}`}
                                                 </span>
 
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${

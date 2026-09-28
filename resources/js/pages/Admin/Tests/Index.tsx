@@ -31,7 +31,7 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import { cn, formatDateTime } from '@/lib/utils';
+import { cn, formatDateTime, formatNumber } from '@/lib/utils';
 import Pagination from '@/components/pagination';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
@@ -771,7 +771,7 @@ export default function TestsIndex({
                         {t('tests.stats_questions', 'Jami Savollar')}
                     </p>
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                        {stats.total_questions.toLocaleString()}
+                        {formatNumber(stats.total_questions)}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">4 tilda to'liq baza</p>
                 </div>
@@ -793,7 +793,7 @@ export default function TestsIndex({
                         {t('tests.stats_attempts', 'Topshirilgan Testlar')}
                     </p>
                     <p className="text-xl font-bold text-foreground mt-1">
-                        {stats.total_attempts.toLocaleString()}
+                        {formatNumber(stats.total_attempts)}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                         {t('tests.stats_passed_count', 'O\'tganlar')}: {stats.passed_attempts}

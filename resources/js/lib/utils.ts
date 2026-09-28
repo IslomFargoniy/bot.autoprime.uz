@@ -62,3 +62,38 @@ export function formatDate(dateStr?: string | Date | null): string {
 
     return `${year}-${month}-${day}`;
 }
+
+/**
+ * Format number with space as thousands separator: "1 380 000"
+ */
+export function formatNumber(val?: number | string | null): string {
+    if (val === undefined || val === null || val === '') return '0';
+    const numStr = String(val).trim();
+    if (numStr === '' || numStr === 'NaN') return '0';
+
+    const isNegative = numStr.startsWith('-');
+    const cleanNum = numStr.replace(/[^\d.]/g, '');
+    if (!cleanNum) return '0';
+
+    const parts = cleanNum.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const formatted = parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0];
+    return isNegative ? `-${formatted}` : formatted;
+}
+
+/**
+ * Format money with space as thousands separator: "1 380 000 UZS"
+ */
+export function formatMoney(val?: number | string | null, currency = 'UZS'): string {
+    const formatted = formatNumber(val);
+    return currency ? `${formatted} ${currency}` : formatted;
+}
+
+/**
+ * Clean input string to raw digits/number string for state/backend
+ */
+export function unformatNumber(val?: string | number | null): string {
+    if (val === undefined || val === null) return '';
+    return String(val).replace(/[^\d.]/g, '');
+}
+
