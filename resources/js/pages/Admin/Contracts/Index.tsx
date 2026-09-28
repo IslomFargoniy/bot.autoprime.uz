@@ -48,7 +48,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, parseDate, formatNumber, formatMoney } from '@/lib/utils';
+import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
 interface CashRegister {
@@ -608,7 +608,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         <span className="text-[11px] text-muted-foreground block">{t('contracts.dates', 'O\'qish muddatlari')}</span>
                                         <span className="font-medium text-foreground mt-0.5 inline-flex items-center gap-1">
                                             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                            {viewingContract.start_date || '-'} — {viewingContract.end_date || '-'}
+                                            {viewingContract.start_date ? formatDate(viewingContract.start_date) : '-'} — {viewingContract.end_date ? formatDate(viewingContract.end_date) : '-'}
                                         </span>
                                     </div>
                                 </div>
@@ -1029,7 +1029,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                                 return (
                                                     <TableRow key={p.id}>
                                                         <TableCell className="font-medium font-mono">#{p.receipt_number}</TableCell>
-                                                        <TableCell className="text-muted-foreground">{p.paid_at}</TableCell>
+                                                        <TableCell className="text-muted-foreground font-mono text-xs">{formatDateTime(p.paid_at)}</TableCell>
                                                         <TableCell className="text-muted-foreground">{p.cash_register?.name || '-'}</TableCell>
                                                         <TableCell className={`font-semibold ${isRefund ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                                             {isRefund ? '-' : '+'}{formatMoney(p.amount)}

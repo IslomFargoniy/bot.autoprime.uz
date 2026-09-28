@@ -303,8 +303,8 @@ export default function VehiclesIndex({
                                         <span className="text-gray-900 dark:text-white truncate max-w-[150px]">{v.maintenances[0].maintenance_type}</span>
                                         <span className="text-amber-600 dark:text-amber-400">{formatMoney(v.maintenances[0].cost)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-gray-400 dark:text-gray-500 text-[10px]">
-                                        <span>{v.maintenances[0].performed_date}</span>
+                                    <div className="flex justify-between items-center text-gray-400 dark:text-gray-500 text-[10px] font-mono">
+                                        <span>{formatDate(v.maintenances[0].performed_date)}</span>
                                         {v.maintenances[0].cash_register && (
                                             <span className="text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[110px]">
                                                 {v.maintenances[0].cash_register.name}

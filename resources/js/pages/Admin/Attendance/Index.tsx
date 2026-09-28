@@ -429,7 +429,7 @@ export default function AttendanceIndex({
                         ) : (
                             attendances.data.map((att) => (
                                 <TableRow key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                                    <TableCell className="font-medium text-gray-900 dark:text-white">{att.date}</TableCell>
+                                    <TableCell className="font-medium text-gray-900 dark:text-white font-mono text-xs">{formatDate(att.date)}</TableCell>
                                     <TableCell className="font-medium">{att.student?.full_name}</TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">{att.student?.group?.name || '-'}</TableCell>
                                     <TableCell>
@@ -498,7 +498,7 @@ export default function AttendanceIndex({
                             <div className="grid grid-cols-2 gap-2 p-2 bg-muted/40 rounded-lg text-xs">
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('attendance.date', 'Sana')}:</span>
-                                    <span className="font-medium">{att.date}</span>
+                                    <span className="font-medium font-mono">{formatDate(att.date)}</span>
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-muted-foreground block">{t('attendance.time', 'Vaqt')}:</span>

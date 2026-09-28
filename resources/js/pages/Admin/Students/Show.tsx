@@ -42,7 +42,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
+import { formatDate, formatDateTime, formatTime, parseDate, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
 
 interface Student {
     id: number;
@@ -430,13 +430,11 @@ export default function StudentShow({
                                     <TableRow key={driving.id} className="hover:bg-muted/30">
                                         <TableCell>{(drivings.from || 1) + index}</TableCell>
                                         <TableCell className="whitespace-nowrap">
-                                            <div className="font-medium">
+                                            <div className="font-medium font-mono text-xs">
                                                 {formatDate(driving.start_time)}
                                             </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-                                                {' - '}
-                                                {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            <div className="text-xs text-muted-foreground font-mono">
+                                                {formatTime(driving.start_time)} - {formatTime(driving.end_time)}
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">{driving.instructor?.name || '-'}</TableCell>
@@ -505,13 +503,11 @@ export default function StudentShow({
                             <div key={driving.id} className="p-4 space-y-3 bg-card border rounded-xl shadow-sm">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <div className="font-semibold text-sm">
+                                        <div className="font-semibold text-sm font-mono">
                                             {formatDate(driving.start_time)}
                                         </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-                                            {' - '}
-                                            {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                        <div className="text-xs text-muted-foreground font-mono">
+                                            {formatTime(driving.start_time)} - {formatTime(driving.end_time)}
                                         </div>
                                     </div>
                                     <div>

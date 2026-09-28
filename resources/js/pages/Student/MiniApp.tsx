@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { TestQuiz } from '@/components/test-quiz';
 import { telegramInitDataHeaders } from '@/hooks/use-telegram';
-import { formatDateTime, parseDate, formatMoney } from '@/lib/utils';
+import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 
 
 interface StudentProps {
@@ -398,7 +398,7 @@ export default function MiniApp({
                                     <div key={att.id} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
                                         <div className="flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                            <span className="text-gray-700 dark:text-gray-300 font-medium">{att.date}</span>
+                                            <span className="text-gray-700 dark:text-gray-300 font-medium font-mono">{formatDate(att.date)}</span>
                                         </div>
                                         <span className="text-xs text-gray-400">
                                             {att.is_manual ? t('attendance.manual', 'Qo\'lda belgilangan') : t('attendance.qr_scanned', 'QR skanerlangan')}

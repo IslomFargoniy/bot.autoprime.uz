@@ -33,7 +33,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
-import { formatMoney } from '@/lib/utils';
+import { formatDate, formatMoney } from '@/lib/utils';
 
 interface Certificate {
     id: number;
@@ -162,7 +162,7 @@ export default function CertificatesIndex({
                                     </TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">#{cert.contract?.contract_number}</TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">{cert.branch?.name || '-'}</TableCell>
-                                    <TableCell className="text-gray-600 dark:text-gray-300">{cert.issued_date}</TableCell>
+                                    <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-xs">{formatDate(cert.issued_date)}</TableCell>
                                     <TableCell className="text-gray-500 dark:text-gray-400">{cert.issued_by?.name || '-'}</TableCell>
                                     <TableCell className="text-right space-x-1">
                                         {can('certificates.print') && (
@@ -230,7 +230,7 @@ export default function CertificatesIndex({
 
                             {/* Footer: Date & Download Actions */}
                             <div className="flex items-center justify-between pt-2 border-t text-xs">
-                                <span className="text-muted-foreground text-[11px]">{cert.issued_date}</span>
+                                <span className="text-muted-foreground text-[11px] font-mono">{formatDate(cert.issued_date)}</span>
                                 <div className="flex items-center gap-2">
                                     {can('certificates.print') && (
                                         <a

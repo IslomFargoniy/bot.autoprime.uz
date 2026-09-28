@@ -34,7 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
-import { formatDate, parseDate } from '@/lib/utils';
+import { formatDate, formatTime, parseDate } from '@/lib/utils';
 
 interface Instructor {
     id: number;
@@ -214,11 +214,6 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
             return;
         }
         setEditing(driving);
-
-        const formatTime = (dateString: string) => {
-            const date = parseDate(dateString);
-            return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(11, 16);
-        };
 
         setData({
             instructor_id: String(driving.instructor_id || ''),
@@ -1025,8 +1020,8 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <div className="font-medium text-xs font-mono">
                                                 {formatDate(driving.start_time)}
                                             </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                            <div className="text-xs text-muted-foreground font-mono">
+                                                {formatTime(driving.start_time)} - {formatTime(driving.end_time)}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -1162,8 +1157,8 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                         <div className="font-medium font-mono text-xs">
                                             {formatDate(driving.start_time)}
                                         </div>
-                                        <div className="text-muted-foreground text-xs">
-                                            {parseDate(driving.start_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} - {parseDate(driving.end_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                        <div className="text-muted-foreground text-xs font-mono">
+                                            {formatTime(driving.start_time)} - {formatTime(driving.end_time)}
                                         </div>
                                     </div>
                                     <div>

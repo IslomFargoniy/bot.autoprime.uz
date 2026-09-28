@@ -64,6 +64,23 @@ export function formatDate(dateStr?: string | Date | null): string {
 }
 
 /**
+ * Format time to standard format: HH:mm (e.g. 09:00)
+ */
+export function formatTime(dateStr?: string | Date | null): string {
+    if (!dateStr) return '-';
+    if (typeof dateStr === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
+        return dateStr.slice(0, 5);
+    }
+    const d = parseDate(dateStr);
+    if (isNaN(d.getTime())) return typeof dateStr === 'string' ? dateStr : '-';
+
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+}
+
+/**
  * Format number with space as thousands separator: "1 380 000"
  */
 export function formatNumber(val?: number | string | null): string {

@@ -1054,7 +1054,7 @@ export default function FinanceIndex({
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.cash_register?.name}</TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.received_by?.name || '-'}</TableCell>
-                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{p.paid_at}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap font-mono text-xs">{formatDateTime(p.paid_at)}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
                                                     {can('payments.edit') && (
                                                         <Button
@@ -1118,7 +1118,7 @@ export default function FinanceIndex({
                                             {p.received_by?.name && <span className="text-[11px] text-gray-400"> ({p.received_by.name})</span>}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <span className="text-[11px] font-mono">{p.paid_at}</span>
+                                            <span className="text-[11px] font-mono">{formatDateTime(p.paid_at)}</span>
                                             {can('payments.edit') && (
                                                 <Button
                                                     size="sm"
@@ -1176,7 +1176,7 @@ export default function FinanceIndex({
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.cash_register?.name}</TableCell>
                                                 <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{e.user?.name || '-'}</TableCell>
-                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap">{e.spent_at || e.expense_date || '-'}</TableCell>
+                                                <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap font-mono text-xs">{formatDateTime(e.spent_at || e.expense_date)}</TableCell>
                                                 <TableCell className="text-right whitespace-nowrap">
                                                     {can('expenses.delete') && (
                                                         <Button
@@ -1231,7 +1231,7 @@ export default function FinanceIndex({
                                             {e.user?.name && <span className="text-[11px] text-gray-400"> ({e.user.name})</span>}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <span className="text-[11px] font-mono">{e.spent_at || e.expense_date || '-'}</span>
+                                            <span className="text-[11px] font-mono">{formatDateTime(e.spent_at || e.expense_date)}</span>
                                             {can('expenses.delete') && (
                                                 <Button
                                                     size="sm"
