@@ -1396,7 +1396,8 @@ export default function FinanceIndex({
                                                         setSweepItems(updated);
                                                     }}
                                                     max={item.balance}
-                                                    min={0.01}
+                                                    min={0}
+                                                    step="any"
                                                     className="w-32 sm:w-36 h-8 text-xs font-mono font-bold text-right"
                                                 />
                                             )}
