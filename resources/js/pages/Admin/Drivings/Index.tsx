@@ -127,11 +127,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
     const [isSearchingStudents, setIsSearchingStudents] = useState(false);
     const [selectedStudentsBasket, setSelectedStudentsBasket] = useState<Student[]>([]);
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const yyyy = today.getFullYear();
-    const todayString = `${dd}-${mm}-${yyyy}`;
+    const todayString = formatDate(new Date());
 
     const { data, setData, post, put, delete: destroy, reset, errors, processing, transform } = useForm({
         instructor_id: isInstructor ? String(auth.user.id) : '',
@@ -222,13 +218,6 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
         const formatTime = (dateString: string) => {
             const date = parseDate(dateString);
             return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(11, 16);
-        };
-        const formatDate = (dateString: string) => {
-            const date = parseDate(dateString);
-            const d = String(date.getDate()).padStart(2, '0');
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const y = date.getFullYear();
-            return `${y}-${m}-${d}`;
         };
 
         setData({

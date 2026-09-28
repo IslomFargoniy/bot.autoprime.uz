@@ -52,7 +52,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -130,7 +130,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -228,7 +228,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -277,7 +277,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -318,7 +318,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -369,7 +369,7 @@ class TelegramService
             return;
         }
 
-        $dateFormatted = Carbon::parse($driving->start_time)->format('d.m.Y');
+        $dateFormatted = Carbon::parse($driving->start_time)->format('Y-m-d');
         $startTime = Carbon::parse($driving->start_time)->format('H:i');
         $endTime = Carbon::parse($driving->end_time)->format('H:i');
 
@@ -420,7 +420,7 @@ class TelegramService
         }
 
         $amountFormatted = number_format((float) $payment->amount, 0, '.', ' ');
-        $paidAt = $payment->paid_at ? Carbon::parse($payment->paid_at)->format('d.m.Y H:i') : now()->format('d.m.Y H:i');
+        $paidAt = $payment->paid_at ? Carbon::parse($payment->paid_at)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s');
         $methodLabel = match ($payment->payment_method) {
             'cash' => '💵 Naqd pul',
             'card_click' => '💳 Karta / Click / Payme',

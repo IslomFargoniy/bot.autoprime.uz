@@ -72,7 +72,7 @@ class DrivingScheduler
         }
 
         if (! $activeContract->canScheduleDrivingAt(Carbon::parse($startTime))) {
-            $formattedDate = $activeContract->end_date ? $activeContract->end_date->format('d.m.Y') : '';
+            $formattedDate = $activeContract->end_date ? $activeContract->end_date->format('Y-m-d') : '';
 
             return "{$student->full_name} talabasining shartnoma muddati tugagan ({$formattedDate}). Mashg'ulot qo'shish uchun shartnoma muddatini uzaytirish kerak.";
         }

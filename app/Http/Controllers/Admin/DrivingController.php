@@ -82,8 +82,8 @@ class DrivingController extends Controller
             $query->where('status', $request->status);
         }
 
-        $from = $request->input('from', Carbon::now()->startOfMonth()->format('d-m-Y'));
-        $to = $request->input('to', Carbon::now()->format('d-m-Y'));
+        $from = $request->input('from', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $to = $request->input('to', Carbon::now()->format('Y-m-d'));
 
         if ($request->filled('instructor_id') && ! $isInstructor) {
             $query->where('instructor_id', $request->instructor_id);

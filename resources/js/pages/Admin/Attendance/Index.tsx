@@ -38,7 +38,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { formatDateTime } from '@/lib/utils';
+import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface Attendance {
     id: number;
@@ -129,7 +129,7 @@ export default function AttendanceIndex({
         }
     }, [filters.action, filters.group_id]);
     const [rosterDate, setRosterDate] = useState<string>(
-        new Date().toISOString().split('T')[0]
+        formatDate(new Date())
     );
     const [rosterTopic, setRosterTopic] = useState<string>('Nazariy dars');
     const [rosterList, setRosterList] = useState<GroupRosterStudent[]>([]);
@@ -143,7 +143,7 @@ export default function AttendanceIndex({
 
     const manualForm = useForm({
         student_id: students[0]?.id || '',
-        date: new Date().toISOString().split('T')[0],
+        date: formatDate(new Date()),
         status: 'present',
         manual_reason: 'Telefoni yo\'q',
     });

@@ -43,7 +43,8 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { useCan } from '@/hooks/use-can';
-import { formatDateTime } from '@/lib/utils';
+import { DatePicker } from '@/components/ui/date-picker';
+import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface CashRegister {
     id: number;
@@ -756,22 +757,22 @@ export default function FinanceIndex({
 
                             <div>
                                 <Label htmlFor="hist_from" className="text-xs mb-1 block">{t('common.from', 'Dan')}</Label>
-                                <Input
+                                <DatePicker
                                     id="hist_from"
-                                    type="date"
                                     value={historyFrom}
-                                    onChange={(e) => setHistoryFrom(e.target.value)}
+                                    onChange={(val) => setHistoryFrom(val)}
+                                    placeholder="YYYY-MM-DD"
                                     className="h-9 text-xs"
                                 />
                             </div>
 
                             <div>
                                 <Label htmlFor="hist_to" className="text-xs mb-1 block">{t('common.to', 'Gacha')}</Label>
-                                <Input
+                                <DatePicker
                                     id="hist_to"
-                                    type="date"
                                     value={historyTo}
-                                    onChange={(e) => setHistoryTo(e.target.value)}
+                                    onChange={(val) => setHistoryTo(val)}
+                                    placeholder="YYYY-MM-DD"
                                     className="h-9 text-xs"
                                 />
                             </div>

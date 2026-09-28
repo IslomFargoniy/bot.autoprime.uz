@@ -28,6 +28,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { formatDate } from '@/lib/utils';
 
 interface VehicleMaintenance {
     id: number;
@@ -107,7 +108,7 @@ export default function VehiclesIndex({
     const maintenanceForm = useForm({
         maintenance_type: 'Moy almashtirish (Oil change)',
         cost: '',
-        performed_date: new Date().toISOString().split('T')[0],
+        performed_date: formatDate(new Date()),
         next_due_date: '',
         odometer: '',
         cash_register_id: '',
@@ -125,7 +126,7 @@ export default function VehiclesIndex({
         maintenanceForm.setData({
             maintenance_type: 'Moy almashtirish (Oil change)',
             cost: '',
-            performed_date: new Date().toISOString().split('T')[0],
+            performed_date: formatDate(new Date()),
             next_due_date: '',
             odometer: v.current_mileage ? String(v.current_mileage) : '',
             cash_register_id: '',
@@ -676,10 +677,10 @@ export default function VehiclesIndex({
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 dark:text-gray-400 text-[11px]">
-                                                    <span>📅 {m.performed_date}</span>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 dark:text-gray-400 text-[11px] font-mono">
+                                                    <span>📅 {formatDate(m.performed_date)}</span>
                                                     {m.odometer && <span>🛣️ {Number(m.odometer).toLocaleString('uz-UZ')} km</span>}
-                                                    {m.next_due_date && <span>⏳ {t('vehicles.next_due_date', 'Keyingi muddat')}: {m.next_due_date}</span>}
+                                                    {m.next_due_date && <span>⏳ {t('vehicles.next_due_date', 'Keyingi muddat')}: {formatDate(m.next_due_date)}</span>}
                                                 </div>
                                                 {m.notes && (
                                                     <p className="text-gray-600 dark:text-gray-300 text-[11px] italic">

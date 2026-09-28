@@ -48,7 +48,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { DatePicker } from '@/components/ui/date-picker';
-import { parseDate } from '@/lib/utils';
+import { formatDate, parseDate } from '@/lib/utils';
 
 interface CashRegister {
     id: number;
@@ -552,7 +552,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 <div>
                                     <span className="text-base font-bold font-mono block">#{viewingContract?.contract_number}</span>
                                     <span className="text-xs text-muted-foreground font-normal">
-                                        {viewingContract?.contract_date ? parseDate(viewingContract.contract_date).toLocaleDateString('uz-UZ') : ''}
+                                        {viewingContract?.contract_date ? formatDate(viewingContract.contract_date) : ''}
                                     </span>
                                 </div>
                             </div>

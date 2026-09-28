@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { formatDate } from '@/lib/utils';
 import {
     Table,
     TableBody,
@@ -72,7 +73,7 @@ export default function GroupAttendanceModal({
         groupId || (groups && groups[0] ? groups[0].id : '')
     );
     const [selectedDate, setSelectedDate] = useState<string>(
-        new Date().toISOString().split('T')[0]
+        formatDate(new Date())
     );
     const [topic, setTopic] = useState<string>('Nazariy dars');
     const [rosterList, setRosterList] = useState<GroupRosterStudent[]>([]);

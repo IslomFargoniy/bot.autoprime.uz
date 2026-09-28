@@ -45,7 +45,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import { DatePicker } from '@/components/ui/date-picker';
-import { parseDate } from '@/lib/utils';
+import { formatDate, formatDateTime, parseDate } from '@/lib/utils';
 
 interface Lead {
     id: number;
@@ -489,7 +489,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                 <div>
                                     <span className="text-base font-bold block">{viewingLead?.full_name}</span>
                                     <span className="text-xs text-muted-foreground font-normal">
-                                        ID: #{viewingLead?.id} • {viewingLead?.created_at ? parseDate(viewingLead.created_at).toLocaleDateString('uz-UZ') : ''}
+                                        ID: #{viewingLead?.id} • {viewingLead?.created_at ? formatDateTime(viewingLead.created_at) : ''}
                                     </span>
                                 </div>
                             </div>
@@ -534,7 +534,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                         <span className="text-[11px] text-muted-foreground block">{t('leads.birth_date', 'Tug\'ilgan sana')}</span>
                                         <span className="font-medium flex items-center gap-1 mt-0.5">
                                             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                            {viewingLead.birth_date ? parseDate(viewingLead.birth_date).toLocaleDateString('uz-UZ') : '-'}
+                                            {viewingLead.birth_date ? formatDate(viewingLead.birth_date) : '-'}
                                         </span>
                                     </div>
                                     <div className="sm:col-span-2">
@@ -838,11 +838,11 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             </div>
                             <div>
                                 <Label htmlFor="birth_date">{t('leads.birth_date', 'Tug\'ilgan sana')}</Label>
-                                <Input
+                                <DatePicker
                                     id="birth_date"
-                                    type="date"
                                     value={createForm.data.birth_date}
-                                    onChange={(e) => createForm.setData('birth_date', e.target.value)}
+                                    onChange={(val) => createForm.setData('birth_date', val)}
+                                    placeholder="YYYY-MM-DD"
                                     className="mt-1"
                                 />
                             </div>

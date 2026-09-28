@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { QrCode, Users, CheckCircle2, StopCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatDate } from '@/lib/utils';
 
 interface StudentAttendance {
     id: number;
@@ -167,7 +168,7 @@ export default function AttendanceScreen({
 
             {/* Bottom Bar Info */}
             <div className="text-center text-xs text-slate-500 border-t border-slate-800/80 pt-4">
-                AutoPrime LMS &bull; Dinamik HMAC QR Texnologiyasi &bull; {new Date().toLocaleDateString('uz-UZ')}
+                AutoPrime LMS &bull; Dinamik HMAC QR Texnologiyasi &bull; {formatDate(new Date())}
             </div>
         </div>
     );
