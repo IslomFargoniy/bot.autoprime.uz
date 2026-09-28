@@ -52,7 +52,21 @@ export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, 
                             ) : (
                                 transfers.data.map((tr) => (
                                     <TableRow key={tr.id}>
-                                        <TableCell className="font-medium whitespace-nowrap">{tr.from_cash_register?.name}</TableCell>
+                                        <TableCell className="font-medium whitespace-nowrap">
+                                            <div>{tr.from_cash_register?.name}</div>
+                                            {tr.notes && (
+                                                <div
+                                                    className={`text-[11px] font-normal truncate max-w-[260px] mt-0.5 ${
+                                                        tr.status === 'rejected'
+                                                            ? 'text-red-600 dark:text-red-400 font-medium'
+                                                            : 'text-gray-500 dark:text-gray-400'
+                                                    }`}
+                                                    title={tr.notes}
+                                                >
+                                                    {tr.notes}
+                                                </div>
+                                            )}
+                                        </TableCell>
                                         <TableCell className="font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                             {tr.to_cash_register?.name}
                                         </TableCell>
@@ -153,6 +167,19 @@ export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, 
                                 <ArrowRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                                 <span className="text-blue-600 dark:text-blue-400 truncate min-w-0 flex-1">{tr.to_cash_register?.name}</span>
                             </div>
+
+                            {tr.notes && (
+                                <div
+                                    className={`text-xs p-2 rounded-lg leading-relaxed ${
+                                        tr.status === 'rejected'
+                                            ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-100 dark:border-red-900/40'
+                                            : 'bg-gray-50 dark:bg-gray-700/30 text-gray-600 dark:text-gray-300'
+                                    }`}
+                                >
+                                    <span className="font-medium">{t('finance.notes', 'Izoh')}: </span>
+                                    {tr.notes}
+                                </div>
+                            )}
 
                             <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 gap-2 min-w-0">
                                 <div className="text-[11px] truncate min-w-0 flex-1">

@@ -406,10 +406,12 @@ class FinanceController extends Controller
                     'approved_by_user_id' => $request->user()->id,
                 ]);
 
+                $isSweep = $toReg->branch_id === null || str_contains(mb_strtolower($lockedTransfer->notes ?? ''), "bo'shatish");
+
                 $fromReg->transferTo(
                     targetRegister: $toReg,
                     amount: (float) $lockedTransfer->amount,
-                    category: 'transfer',
+                    category: $isSweep ? 'sweep' : 'transfer',
                     reference: $lockedTransfer,
                     userId: $request->user()->id
                 );
@@ -436,15 +438,26 @@ class FinanceController extends Controller
             return redirect()->back()->withErrors(['transfer' => 'O\'zingiz yuborgan o\'tkazmani boshqa xodim ko\'rib chiqishi kerak.']);
         }
 
-        $rejected = DB::transaction(function () use ($transfer, $request) {
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $rejected = DB::transaction(function () use ($transfer, $request, $validated) {
             $lockedTransfer = CashTransfer::whereKey($transfer->id)->lockForUpdate()->first();
             if (! $lockedTransfer || $lockedTransfer->status !== 'pending') {
                 return false;
             }
 
+            $reason = trim($validated['reason'] ?? '');
+            $notes = $lockedTransfer->notes;
+            if ($reason !== '') {
+                $notes = $notes ? "{$notes} | Rad etish sababi: {$reason}" : "Rad etish sababi: {$reason}";
+            }
+
             $lockedTransfer->update([
                 'status' => 'rejected',
                 'approved_by_user_id' => $request->user()->id,
+                'notes' => $notes,
             ]);
 
             return true;
@@ -520,30 +533,30 @@ class FinanceController extends Controller
                     continue;
                 }
 
-                $amountToTransfer = min((float) $branchRegister->balance, $amount);
+                $pendingSum = (float) CashTransfer::where('from_cash_register_id', $branchRegister->id)
+                    ->where('status', 'pending')
+                    ->sum('amount');
+                $availableBalance = (float) $branchRegister->balance - $pendingSum;
+                if ($availableBalance <= 0) {
+                    continue;
+                }
+
+                $amountToTransfer = min($availableBalance, $amount);
                 if ($amountToTransfer <= 0) {
                     continue;
                 }
 
                 $superadminRegister = CashRegister::getSuperadminRegisterForType($branchRegister->cash_register_type_id);
 
-                $transfer = CashTransfer::create([
+                CashTransfer::create([
                     'from_cash_register_id' => $branchRegister->id,
                     'to_cash_register_id' => $superadminRegister->id,
                     'amount' => $amountToTransfer,
                     'sent_by_user_id' => $request->user()->id,
-                    'approved_by_user_id' => $request->user()->id,
-                    'status' => 'approved',
-                    'notes' => $request->input('notes') ?: "Kassani bo'shatish (Superadmin transferi)",
+                    'approved_by_user_id' => null,
+                    'status' => 'pending',
+                    'notes' => $request->input('notes') ?: "Kassani bo'shatish (Superadmin tasdig'i kutilmoqda)",
                 ]);
-
-                $branchRegister->transferTo(
-                    targetRegister: $superadminRegister,
-                    amount: $amountToTransfer,
-                    category: 'sweep',
-                    reference: $transfer,
-                    userId: $request->user()->id
-                );
 
                 $transferredCount++;
                 $totalSweptAmount += $amountToTransfer;
@@ -552,13 +565,13 @@ class FinanceController extends Controller
 
         if ($transferredCount === 0) {
             return redirect()->back()->withErrors([
-                'sweep' => "Mablag' o'tkazilmadi. Kassalarda yetarli balans mavjud emas.",
+                'sweep' => "Mablag' o'tkazilmadi. Kassalarda yetarli balans mavjud emas yoki avvalgi so'rov hali tasdiqlanmagan.",
             ]);
         }
 
         $formattedSum = number_format($totalSweptAmount, 0, '', ' ');
 
-        return redirect()->back()->with('success', "Kassalar muvaffaqiyatli bo'shatildi! Jami {$formattedSum} UZS Superadmin kassalariga o'tkazildi.");
+        return redirect()->back()->with('success', "Kassa bo'shatish so'rovi yuborildi! Jami {$formattedSum} UZS Superadmin tasdiqlashi uchun kutish holatiga o'tkazildi.");
     }
 
     /**

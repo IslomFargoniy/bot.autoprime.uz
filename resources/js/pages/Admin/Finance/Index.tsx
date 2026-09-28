@@ -145,7 +145,7 @@ export default function FinanceIndex({
             onSuccess: () => {
                 setShowSweepModal(false);
                 setIsSweeping(false);
-                toast.success(t('finance.sweep_success', 'Kassalar muvaffaqiyatli bo\'shatildi!'));
+                toast.success(t('finance.sweep_request_sent', 'Kassa bo\'shatish so\'rovi yuborildi! Admin tasdiqlashi kutilmoqda.'));
             },
             onError: (err) => {
                 setIsSweeping(false);
@@ -200,12 +200,14 @@ export default function FinanceIndex({
     };
 
     const handleRejectTransfer = (transfer: CashTransfer) => {
-        if (confirm(t('finance.confirm_reject_transfer', 'Ushbu transferni rad etmoqchimisiz? Mablag\' o\'tkazilmaydi.'))) {
-            router.post(`/admin/finance/transfer/${transfer.id}/reject`, {}, {
-                onSuccess: () => toast.success(t('finance.transfer_rejected', 'Transfer rad etildi')),
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
-            });
+        const reason = prompt(t('finance.prompt_reject_reason', 'Transferni rad etish sababini kiriting (masalan: pul kam chiqdi, xatolik va h.k.):'));
+        if (reason === null) {
+            return;
         }
+        router.post(`/admin/finance/transfer/${transfer.id}/reject`, { reason }, {
+            onSuccess: () => toast.success(t('finance.transfer_rejected', 'Transfer rad etildi')),
+            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+        });
     };
 
     const handleDeletePayment = (payment: Payment) => {

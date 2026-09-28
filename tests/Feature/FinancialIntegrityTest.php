@@ -4,6 +4,7 @@ use App\Jobs\ReconcileFinancialBalancesJob;
 use App\Models\Branch;
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
+use App\Models\CashTransaction;
 use App\Models\CashTransfer;
 use App\Models\Contract;
 use App\Models\ContractType;
@@ -354,4 +355,86 @@ test('transfers between different branches remain pending until approved', funct
         ->and($transfer->approved_by_user_id)->toBeNull()
         ->and((float) $from->fresh()->balance)->toEqual(1000000.0)
         ->and((float) $to->fresh()->balance)->toEqual(0.0);
+});
+
+test('sweeping cash registers creates pending transfers without moving money immediately', function () {
+    $branchReg = fundedRegister($this->branch, 1500000, 'Filial Kassasi');
+    $superadminReg = CashRegister::getSuperadminRegisterForType($this->cashType->id);
+    $superadminReg->update(['balance' => 0]);
+
+    $this->actingAs($this->admin)->post('/admin/finance/sweep', [
+        'registers' => [
+            ['cash_register_id' => $branchReg->id, 'amount' => 1500000],
+        ],
+        'notes' => 'Filialdan kunlik tushumni topshirish',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $transfer = CashTransfer::where('from_cash_register_id', $branchReg->id)
+        ->where('to_cash_register_id', $superadminReg->id)
+        ->latest('id')
+        ->first();
+
+    expect($transfer)->not->toBeNull()
+        ->and($transfer->status)->toBe('pending')
+        ->and($transfer->approved_by_user_id)->toBeNull()
+        ->and((float) $transfer->amount)->toEqual(1500000.0)
+        ->and((float) $branchReg->fresh()->balance)->toEqual(1500000.0)
+        ->and((float) $superadminReg->fresh()->balance)->toEqual(0.0);
+});
+
+test('superadmin can approve a swept register transfer which moves money and records sweep category', function () {
+    $branchReg = fundedRegister($this->branch, 1500000, 'Filial Kassasi');
+    $superadminReg = CashRegister::getSuperadminRegisterForType($this->cashType->id);
+    $superadminReg->update(['balance' => 0]);
+
+    $transfer = CashTransfer::create([
+        'from_cash_register_id' => $branchReg->id,
+        'to_cash_register_id' => $superadminReg->id,
+        'amount' => 1500000,
+        'sent_by_user_id' => $this->admin->id,
+        'status' => 'pending',
+        'notes' => "Kassani bo'shatish (Superadmin tasdig'i kutilmoqda)",
+    ]);
+
+    $this->actingAs($this->superAdmin)->post("/admin/finance/transfer/{$transfer->id}/approve")
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($transfer->fresh()->status)->toBe('approved')
+        ->and($transfer->fresh()->approved_by_user_id)->toBe($this->superAdmin->id)
+        ->and((float) $branchReg->fresh()->balance)->toEqual(0.0)
+        ->and((float) $superadminReg->fresh()->balance)->toEqual(1500000.0);
+
+    // Verify transaction category is sweep
+    $outTx = CashTransaction::where('cash_register_id', $branchReg->id)
+        ->where('type', 'out')
+        ->latest('id')
+        ->first();
+    expect($outTx->category)->toBe('sweep_out');
+});
+
+test('superadmin can reject a swept register transfer with reason and money does not move', function () {
+    $branchReg = fundedRegister($this->branch, 1500000, 'Filial Kassasi');
+    $superadminReg = CashRegister::getSuperadminRegisterForType($this->cashType->id);
+    $superadminReg->update(['balance' => 0]);
+
+    $transfer = CashTransfer::create([
+        'from_cash_register_id' => $branchReg->id,
+        'to_cash_register_id' => $superadminReg->id,
+        'amount' => 1500000,
+        'sent_by_user_id' => $this->admin->id,
+        'status' => 'pending',
+        'notes' => "Kassani bo'shatish",
+    ]);
+
+    $this->actingAs($this->superAdmin)->post("/admin/finance/transfer/{$transfer->id}/reject", [
+        'reason' => 'Pul sanalganda 200 000 kam chiqdi',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $refreshed = $transfer->fresh();
+    expect($refreshed->status)->toBe('rejected')
+        ->and($refreshed->approved_by_user_id)->toBe($this->superAdmin->id)
+        ->and($refreshed->notes)->toContain('200 000 kam chiqdi')
+        ->and((float) $branchReg->fresh()->balance)->toEqual(1500000.0)
+        ->and((float) $superadminReg->fresh()->balance)->toEqual(0.0);
 });

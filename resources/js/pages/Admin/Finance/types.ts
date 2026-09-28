@@ -60,6 +60,7 @@ export interface CashTransfer {
     sent_by_user_id?: number | null;
     transferred_by?: { name: string };
     approved_by?: { name: string };
+    notes?: string | null;
     created_at: string;
 }
 

@@ -51,7 +51,7 @@ export function SweepModal({
                 </DialogHeader>
 
                 <div className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-lg p-3 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                    {t('finance.sweep_desc', 'Filiallardagi kassalarning mablag\'lari o\'z turiga mos Superadmin kassasiga to\'liq yoki qisman transfer qilinadi.')}
+                    {t('finance.sweep_desc', 'Filiallardagi kassalarning mablag\'lari o\'z turiga mos Superadmin kassasiga to\'liq yoki qisman transfer qilinadi. Transfer yuborilgach, Superadmin tomonidan tasdiqlanishi yoki rad etilishi mumkin.')}
                 </div>
 
                 <form onSubmit={onSubmit} className="space-y-4 text-xs">
