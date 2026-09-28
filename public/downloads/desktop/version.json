@@ -1,11 +1,11 @@
 {
-    "version": "1.0.2",
-    "build_number": 3,
+    "version": "1.0.3",
+    "build_number": 4,
     "release_date": "2026-09-28",
     "is_mandatory": false,
-    "download_url_windows": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.2.exe",
-    "download_url_macos": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.2.dmg",
+    "download_url_windows": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.3.exe",
+    "download_url_macos": "https://localhost/downloads/desktop/AutoPrime-Setup-1.0.3.dmg",
     "file_size_mb": 25,
-    "changelog_uz": "AutoPrime LMS Desktop v1.0.2\n• Yuklab olish xatoliklarini ko'rsatish va macOS/Windows yangilash mexanizmi takomillashtirildi",
-    "changelog_ru": "AutoPrime LMS Desktop v1.0.2\n• Yuklab olish xatoliklarini ko'rsatish va macOS/Windows yangilash mexanizmi takomillashtirildi"
+    "changelog_uz": "AutoPrime LMS Desktop v1.0.3\n• v1.0.3 yangilanish testi: interfeys barqarorligi va tezkor yuklanish",
+    "changelog_ru": "AutoPrime LMS Desktop v1.0.3\n• v1.0.3 yangilanish testi: interfeys barqarorligi va tezkor yuklanish"
 }
