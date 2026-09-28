@@ -484,30 +484,30 @@ export default function FinanceIndex({
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
 
             {/* Page Title & Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-bold truncate">{t('finance.title', 'Moliya va Kassalar')}</h1>
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto">
                     {can('cash_transfers.create') && (
-                        <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
-                            <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
+                        <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs">
+                            <ArrowDownToLine className="w-3.5 h-3.5 mr-1.5 shrink-0" />
                             <span className="truncate">{t('finance.empty_registers', 'Kassalarni bo\'shatish')}</span>
                         </Button>
                     )}
                     {can('payments.create') && (
-                        <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-9 justify-center">
-                            <ArrowDownRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <Button onClick={() => setShowPaymentModal(true)} className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs">
+                            <ArrowDownRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
                             <span className="truncate">{t('finance.accept_payment', 'To\'lov Qabul Qilish')}</span>
                         </Button>
                     )}
                     {can('expenses.create') && (
-                        <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-9 justify-center">
-                            <ArrowUpRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <Button onClick={() => setShowExpenseModal(true)} variant="outline" className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs">
+                            <ArrowUpRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
                             <span className="truncate">{t('finance.add_expense', 'Chiqim Qilish')}</span>
                         </Button>
                     )}
                     {can('cash_transfers.create') && (
-                        <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs h-9 justify-center">
-                            <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
+                        <Button onClick={() => setShowTransferModal(true)} variant="outline" className="text-xs h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs">
+                            <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
                             <span className="truncate">{t('finance.transfer', 'Transfer')}</span>
                         </Button>
                     )}
