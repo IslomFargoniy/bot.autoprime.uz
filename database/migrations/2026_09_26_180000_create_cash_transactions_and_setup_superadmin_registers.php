@@ -2,9 +2,9 @@
 
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
+use App\Models\CashTransfer;
 use App\Models\Expense;
 use App\Models\Payment;
-use App\Models\CashTransfer;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +46,7 @@ return new class extends Migration
                 CashRegister::create([
                     'branch_id' => null,
                     'cash_register_type_id' => $type->id,
-                    'name' => 'Bosh ' . $type->name . ' (Superadmin)',
+                    'name' => 'Bosh '.$type->name.' (Superadmin)',
                     'balance' => 0,
                     'is_active' => true,
                 ]);
@@ -87,7 +87,7 @@ return new class extends Migration
                     'type' => 'out',
                     'category' => 'expense',
                     'amount' => (float) $expense->amount,
-                    'description' => "Xarajat: " . ($expense->category?->name ?? 'Umumiy') . ($expense->description ? " - {$expense->description}" : ''),
+                    'description' => 'Xarajat: '.($expense->category?->name ?? 'Umumiy').($expense->description ? " - {$expense->description}" : ''),
                     'reference_type' => Expense::class,
                     'reference_id' => $expense->id,
                     'user_id' => $expense->user_id,
@@ -105,7 +105,7 @@ return new class extends Migration
                     'type' => 'out',
                     'category' => 'transfer_out',
                     'amount' => (float) $tr->amount,
-                    'description' => "Transfer chiqim: " . ($tr->toCashRegister?->name ?? 'Boshqa kassa') . " ga",
+                    'description' => 'Transfer chiqim: '.($tr->toCashRegister?->name ?? 'Boshqa kassa').' ga',
                     'reference_type' => CashTransfer::class,
                     'reference_id' => $tr->id,
                     'user_id' => $tr->approved_by_user_id ?? $tr->sent_by_user_id,
@@ -123,7 +123,7 @@ return new class extends Migration
                     'type' => 'in',
                     'category' => 'transfer_in',
                     'amount' => (float) $tr->amount,
-                    'description' => "Transfer kirim: " . ($tr->fromCashRegister?->name ?? 'Boshqa kassa') . " dan",
+                    'description' => 'Transfer kirim: '.($tr->fromCashRegister?->name ?? 'Boshqa kassa').' dan',
                     'reference_type' => CashTransfer::class,
                     'reference_id' => $tr->id,
                     'user_id' => $tr->approved_by_user_id ?? $tr->sent_by_user_id,
@@ -140,7 +140,9 @@ return new class extends Migration
                 if ($item['type'] === 'in') {
                     $runningBalance += $item['amount'];
                 } else {
-                    $runningBalance = max(0, $runningBalance - $item['amount']);
+                    // No clamping: a clamp silently drops money and the ledger stops
+                    // summing to the real balance (see repair_clamped_cash_ledger_backfill).
+                    $runningBalance -= $item['amount'];
                 }
 
                 DB::table('cash_transactions')->insert([
@@ -161,12 +163,13 @@ return new class extends Migration
             }
 
             // If register balance differs from runningBalance, insert an opening/reconciliation record if needed
-            if ($runningBalance != (float) $register->balance && (float) $register->balance > 0) {
+            $openingAmount = (float) $register->balance - $runningBalance;
+            if (abs($openingAmount) > 0.01) {
                 DB::table('cash_transactions')->insert([
                     'cash_register_id' => $register->id,
-                    'type' => 'in',
+                    'type' => $openingAmount > 0 ? 'in' : 'out',
                     'category' => 'initial',
-                    'amount' => (float) $register->balance - $runningBalance,
+                    'amount' => abs($openingAmount),
                     'balance_before' => $runningBalance,
                     'balance_after' => (float) $register->balance,
                     'description' => "Boshlang'ich qoldiq / Saldo",

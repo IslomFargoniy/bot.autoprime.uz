@@ -18,11 +18,11 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Rebuild every cached balance from its source records, using exactly the
+     * Check every cached balance from its source records, using exactly the
      * same rules as the live code:
      *  - contract paid/debt: tuition payments minus refunds
-     *  - cash register balance: the cash_transactions ledger (in - out), which
-     *    also contains opening balances ("initial" entries)
+     *  - cash register balance: compared with the cash_transactions ledger
+     *    (in - out) and only reported, never overwritten
      *  - salary balance: accruals - deductions - payouts (no clamping)
      * Each correction runs under a row lock and is logged as drift.
      */
@@ -88,43 +88,16 @@ class ReconcileFinancialBalancesJob implements ShouldQueue
                     continue;
                 }
 
-                $driftCount += (int) DB::transaction(function () use ($register) {
-                    $locked = CashRegister::whereKey($register->id)->lockForUpdate()->first();
-                    if (! $locked) {
-                        return false;
-                    }
-
-                    $ledgerBalance = $this->ledgerBalance($locked);
-                    if ($ledgerBalance === null || abs((float) $locked->balance - $ledgerBalance) <= 0.01) {
-                        return false;
-                    }
-
-                    Log::warning("[Reconciliation Drift] Register {$locked->name} (ID: {$locked->id}) cached: {$locked->balance}, ledger: {$ledgerBalance}. Updating from ledger.");
-                    $locked->update(['balance' => $ledgerBalance]);
-
-                    return true;
-                });
+                // Cash balances are only reported, never overwritten: every live
+                // operation updates the balance and the ledger atomically, so a
+                // mismatch means the ledger itself is incomplete or wrong (e.g. a
+                // bad backfill) and blindly copying it would corrupt real money.
+                Log::warning("[Reconciliation Drift] Register {$register->name} (ID: {$register->id}) cached: {$register->balance}, ledger: {$expectedBalance}. Needs manual review; balance left unchanged.");
+                $driftCount++;
             }
         });
 
         return $driftCount;
-    }
-
-    /**
-     * Balance implied by the register's ledger, or null when it has no entries yet.
-     */
-    private function ledgerBalance(CashRegister $register): ?float
-    {
-        $totals = DB::table('cash_transactions')
-            ->where('cash_register_id', $register->id)
-            ->selectRaw("COUNT(*) as entries, COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in, COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out")
-            ->first();
-
-        if (! $totals || (int) $totals->entries === 0) {
-            return null;
-        }
-
-        return round((float) $totals->total_in - (float) $totals->total_out, 2);
     }
 
     private function reconcileSalaryBalances(): int

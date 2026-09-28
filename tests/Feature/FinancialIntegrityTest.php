@@ -18,6 +18,8 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
 use App\Services\TelegramService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 beforeEach(function () {
     $this->mock(TelegramService::class)->shouldIgnoreMissing();
@@ -153,15 +155,62 @@ test('a fine is deducted in full and the nightly reconciliation agrees with the 
     expect((float) $employee->fresh()->salary_balance)->toEqual(900000.0);
 });
 
-test('reconciliation keeps opening balances and repairs drift from the ledger', function () {
+test('reconciliation keeps opening balances and only reports register drift', function () {
     $register = fundedRegister($this->branch, 45000000);
 
     (new ReconcileFinancialBalancesJob)->handle();
     expect((float) $register->fresh()->balance)->toEqual(45000000.0);
 
+    // A mismatch means the ledger may be wrong: it is logged, never copied over real money.
+    Log::spy();
     $register->update(['balance' => 1]);
     (new ReconcileFinancialBalancesJob)->handle();
-    expect((float) $register->fresh()->balance)->toEqual(45000000.0);
+
+    expect((float) $register->fresh()->balance)->toEqual(1.0);
+    Log::shouldHaveReceived('warning')->withArgs(fn (string $message) => str_contains($message, "(ID: {$register->id})"));
+});
+
+test('the ledger repair restores money lost by the clamped backfill', function () {
+    $register = fundedRegister($this->branch, 0);
+    $rows = [
+        // Production ledger of "Chilonzor Naqd pul kassasi" as written by the clamped backfill.
+        ['in', 'payment', 3500000, 0, 3500000, '2026-08-24 06:15:52'],
+        ['in', 'payment', 2100000, 3500000, 5600000, '2026-08-29 06:15:52'],
+        ['in', 'payment', 700000, 5600000, 6300000, '2026-09-09 06:15:52'],
+        ['out', 'expense', 250000, 6300000, 6050000, '2026-09-20 06:12:44'],
+        ['out', 'expense', 380000, 6050000, 5670000, '2026-09-21 06:12:44'],
+        ['out', 'expense', 120000, 5670000, 5550000, '2026-09-23 04:12:44'],
+        ['out', 'transfer_out', 5000000, 5550000, 550000, '2026-09-23 06:12:45'],
+        ['out', 'transfer_out', 1500000, 550000, 0, '2026-09-26 15:35:58'],
+        ['in', 'transfer_in', 1000, 0, 1000, '2026-09-26 15:39:06'],
+        ['in', 'initial', 13000000, 1000, 13001000, '2026-09-23 06:12:45'],
+        ['out', 'sweep_out', 13001000, 13001000, 0, '2026-09-26 17:41:24'],
+    ];
+    foreach ($rows as [$type, $category, $amount, $before, $after, $at]) {
+        DB::table('cash_transactions')->insert([
+            'cash_register_id' => $register->id, 'type' => $type, 'category' => $category, 'amount' => $amount,
+            'balance_before' => $before, 'balance_after' => $after, 'transacted_at' => $at, 'created_at' => $at, 'updated_at' => $at,
+        ]);
+    }
+    // The old nightly job had copied the wrong ledger total into the register.
+    $register->update(['balance' => -950000]);
+
+    (require database_path('migrations/2026_09_28_073203_repair_clamped_cash_ledger_backfill.php'))->up();
+
+    $ledger = DB::table('cash_transactions')->where('cash_register_id', $register->id)->orderBy('transacted_at')->orderBy('id')->get();
+    $sum = $ledger->sum(fn ($row) => ($row->type === 'in' ? 1 : -1) * (float) $row->amount);
+
+    expect((float) $register->fresh()->balance)->toEqual(0.0)
+        ->and(round($sum, 2))->toEqual(0.0)
+        ->and((float) $ledger->firstWhere('category', 'initial')->amount)->toEqual(13950000.0)
+        ->and((float) $ledger->last()->balance_after)->toEqual(0.0);
+
+    // Every row now continues from the previous one.
+    $previousAfter = 0.0;
+    foreach ($ledger as $row) {
+        expect((float) $row->balance_before)->toEqual($previousAfter);
+        $previousAfter = (float) $row->balance_after;
+    }
 });
 
 test('a refund larger than what was paid returns a validation error', function () {
