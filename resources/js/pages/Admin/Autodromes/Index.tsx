@@ -40,8 +40,8 @@ L.Icon.Default.mergeOptions({
 interface Autodrome {
     id: number;
     name: string;
-    latitude: number;
-    longitude: number;
+    latitude: number | string;
+    longitude: number | string;
     radius_meters: number;
     branch_id?: number | null;
     branch?: Branch | null;
@@ -223,7 +223,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
             radius_meters: String(autodrome.radius_meters),
             branch_id: autodrome.branch_id ? String(autodrome.branch_id) : '',
         });
-        setPosition(new L.LatLng(autodrome.latitude, autodrome.longitude));
+        setPosition(new L.LatLng(Number(autodrome.latitude), Number(autodrome.longitude)));
         setShowForm(true);
     };
 
@@ -441,7 +441,7 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                             <div className="flex items-center justify-between text-xs pt-1.5 border-t text-muted-foreground">
                                 <div className="flex items-center gap-1 font-mono text-[11px] truncate">
                                     <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-                                    <span className="truncate">{item.latitude?.toFixed(4)}, {item.longitude?.toFixed(4)}</span>
+                                    <span className="truncate">{Number(item.latitude || 0).toFixed(4)}, {Number(item.longitude || 0).toFixed(4)}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
                                     <span>{t('autodromes.completed_drivings', 'Darslar')}:</span>
