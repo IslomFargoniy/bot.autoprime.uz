@@ -310,3 +310,48 @@ test('amounts above the column capacity are rejected by validation', function ()
         'description' => 'Katta',
     ])->assertSessionHasErrors('amount');
 });
+
+test('transfers between own branch registers are automatically approved and funds move immediately', function () {
+    $from = fundedRegister($this->branch, 1000000, 'Asosiy kassa');
+    $to = fundedRegister($this->branch, 200000, 'Bank hisobi');
+
+    $this->actingAs($this->admin)->post('/admin/finance/transfer', [
+        'from_cash_register_id' => $from->id,
+        'to_cash_register_id' => $to->id,
+        'amount' => 300000,
+        'notes' => 'Inkassatsiya',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $transfer = CashTransfer::where('from_cash_register_id', $from->id)
+        ->where('to_cash_register_id', $to->id)
+        ->first();
+
+    expect($transfer)->not->toBeNull()
+        ->and($transfer->status)->toBe('approved')
+        ->and($transfer->approved_by_user_id)->toBe($this->admin->id)
+        ->and((float) $from->fresh()->balance)->toEqual(700000.0)
+        ->and((float) $to->fresh()->balance)->toEqual(500000.0);
+});
+
+test('transfers between different branches remain pending until approved', function () {
+    $secondBranch = Branch::firstOrCreate(['code' => 'branch-target'], ['name' => 'Ikkinchi Filial', 'status' => 'active']);
+    $from = fundedRegister($this->branch, 1000000, 'Birinchi Filial Kassasi');
+    $to = fundedRegister($secondBranch, 0, 'Ikkinchi Filial Kassasi');
+
+    $this->actingAs($this->admin)->post('/admin/finance/transfer', [
+        'from_cash_register_id' => $from->id,
+        'to_cash_register_id' => $to->id,
+        'amount' => 400000,
+        'notes' => 'Filiallararo yordam',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $transfer = CashTransfer::where('from_cash_register_id', $from->id)
+        ->where('to_cash_register_id', $to->id)
+        ->first();
+
+    expect($transfer)->not->toBeNull()
+        ->and($transfer->status)->toBe('pending')
+        ->and($transfer->approved_by_user_id)->toBeNull()
+        ->and((float) $from->fresh()->balance)->toEqual(1000000.0)
+        ->and((float) $to->fresh()->balance)->toEqual(0.0);
+});

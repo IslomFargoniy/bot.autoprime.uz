@@ -53,9 +53,15 @@ class EnsureBranchAccess
     private function branchIdOf(Model $record): ?int
     {
         if ($record instanceof CashTransfer) {
-            $branchId = $record->fromCashRegister?->branch_id;
+            $fromBranchId = $record->fromCashRegister?->branch_id;
+            $toBranchId = $record->toCashRegister?->branch_id;
 
-            return $branchId !== null ? (int) $branchId : null;
+            $userBranchId = auth()->user()?->branch_id;
+            if ($userBranchId !== null && ((int) $fromBranchId === (int) $userBranchId || (int) $toBranchId === (int) $userBranchId)) {
+                return (int) $userBranchId;
+            }
+
+            return $fromBranchId !== null ? (int) $fromBranchId : null;
         }
 
         $branchId = $record->getAttribute('branch_id');

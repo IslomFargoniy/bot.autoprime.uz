@@ -318,12 +318,46 @@ class FinanceController extends Controller
         ]);
 
         $fromRegister = CashRegister::findOrFail($validated['from_cash_register_id']);
+        $toRegister = CashRegister::findOrFail($validated['to_cash_register_id']);
+
         if ((float) $fromRegister->balance < (float) $validated['amount']) {
             return redirect()->back()->withErrors([
-                'amount' => "Chiqim kassasida mablag' yetarli emas (Mavjud: {$fromRegister->balance} UZS).",
+                'amount' => "Chiqim kassasida mablag' yetarli emas (Mavjud: ".number_format((float) $fromRegister->balance, 0, '', ' ').' UZS).',
             ]);
         }
 
+        // O'z kassalari o'rtasida (bir xil filial yoki ikkalasi ham umumiy kassa) bo'lsa, avtomatik tasdiqlanadi
+        $isOwnRegisters = ($fromRegister->branch_id === $toRegister->branch_id);
+
+        if ($isOwnRegisters) {
+            try {
+                DB::transaction(function () use ($validated, $fromRegister, $toRegister, $request) {
+                    $transfer = CashTransfer::create([
+                        'from_cash_register_id' => $fromRegister->id,
+                        'to_cash_register_id' => $toRegister->id,
+                        'sent_by_user_id' => $request->user()->id,
+                        'approved_by_user_id' => $request->user()->id,
+                        'amount' => $validated['amount'],
+                        'status' => 'approved',
+                        'notes' => $validated['notes'] ?? null,
+                    ]);
+
+                    $fromRegister->transferTo(
+                        targetRegister: $toRegister,
+                        amount: (float) $validated['amount'],
+                        category: 'transfer',
+                        reference: $transfer,
+                        userId: $request->user()->id
+                    );
+                });
+            } catch (InvalidArgumentException $e) {
+                return redirect()->back()->withErrors(['amount' => $e->getMessage()]);
+            }
+
+            return redirect()->back()->with('success', 'Kassalararo transfer muvaffaqiyatli amalga oshirildi va avtomatik tasdiqlandi.');
+        }
+
+        // Filiallararo (boshqa filial kassasiga) o'tkazma bo'lsa, tasdiqlash uchun kutish holatida yuboriladi
         CashTransfer::create([
             'from_cash_register_id' => $validated['from_cash_register_id'],
             'to_cash_register_id' => $validated['to_cash_register_id'],
@@ -333,7 +367,7 @@ class FinanceController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->back()->with('success', 'Transfer so\'rovi yuborildi. Tasdiqlanishi kutilmoqda.');
+        return redirect()->back()->with('success', 'Filiallararo transfer so\'rovi yuborildi. Qabul qiluvchi filial tasdiqlashi kutilmoqda.');
     }
 
     /**
