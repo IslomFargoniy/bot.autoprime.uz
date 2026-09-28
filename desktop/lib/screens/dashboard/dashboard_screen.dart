@@ -94,16 +94,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           // App Brand Logo
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 38,
+                    height: 38,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.drive_eta_rounded, color: Colors.white, size: 22),
+                    ),
                   ),
-                  child: const Icon(Icons.drive_eta_rounded, color: Colors.white, size: 22),
                 ),
                 const SizedBox(width: 12),
                 const Column(

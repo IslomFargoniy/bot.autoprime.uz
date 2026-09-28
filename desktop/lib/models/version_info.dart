@@ -29,7 +29,9 @@ class VersionInfo {
       isMandatory: json['is_mandatory'] ?? false,
       downloadUrlWindows: json['download_url_windows'] ?? '',
       downloadUrlMacos: json['download_url_macos'] ?? '',
-      fileSizeMb: (json['file_size_mb'] ?? 25.0).toDouble(),
+      fileSizeMb: json['file_size_mb'] is num
+          ? (json['file_size_mb'] as num).toDouble()
+          : (double.tryParse(json['file_size_mb']?.toString() ?? '') ?? 25.0),
       changelogUz: json['changelog_uz'] ?? '',
       changelogRu: json['changelog_ru'] ?? '',
     );

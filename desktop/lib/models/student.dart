@@ -90,6 +90,15 @@ class TeacherInfo {
   }
 }
 
+double _parseDouble(dynamic val) {
+  if (val == null) return 0.0;
+  if (val is num) return val.toDouble();
+  if (val is String) {
+    return double.tryParse(val) ?? 0.0;
+  }
+  return 0.0;
+}
+
 class ContractInfo {
   final int id;
   final String contractNumber;
@@ -119,10 +128,10 @@ class ContractInfo {
     return ContractInfo(
       id: json['id'] ?? 0,
       contractNumber: json['contract_number'] ?? '',
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
-      paidAmount: (json['paid_amount'] ?? 0).toDouble(),
-      debtAmount: (json['debt_amount'] ?? 0).toDouble(),
-      paymentPercentage: (json['payment_percentage'] ?? 0).toDouble(),
+      totalAmount: _parseDouble(json['total_amount']),
+      paidAmount: _parseDouble(json['paid_amount']),
+      debtAmount: _parseDouble(json['debt_amount']),
+      paymentPercentage: _parseDouble(json['payment_percentage']),
       paymentBadgeColor: json['payment_badge_color'] ?? 'white',
       hasTheory: json['has_theory'] ?? true,
       hasDriving: json['has_driving'] ?? true,

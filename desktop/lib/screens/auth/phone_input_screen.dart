@@ -75,18 +75,27 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
             children: [
               // Logo
               Center(
-                child: Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                  ),
-                  child: const Icon(
-                    Icons.directions_car_filled_rounded,
-                    size: 34,
-                    color: AppColors.primary,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      ),
+                      child: const Icon(
+                        Icons.directions_car_filled_rounded,
+                        size: 34,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -46,25 +46,36 @@ class DashboardProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final dashRes = await _authService.fetchDashboard();
-    if (dashRes['success'] == true) {
-      _student = dashRes['student'];
-      _contract = dashRes['contract'];
-      _group = dashRes['group'];
-      _topics = dashRes['topics'] ?? [];
-      _drivings = dashRes['drivings'] ?? [];
-      _attendances = dashRes['attendances'] ?? [];
+    try {
+      final results = await Future.wait([
+        _authService.fetchDashboard(),
+        _quizService.fetchTickets(),
+        _quizService.fetchSigns(),
+        _quizService.fetchStats(),
+      ]);
+
+      final dashRes = results[0] as Map<String, dynamic>;
+      if (dashRes['success'] == true) {
+        _student = dashRes['student'];
+        _contract = dashRes['contract'];
+        _group = dashRes['group'];
+        _topics = dashRes['topics'] ?? [];
+        _drivings = dashRes['drivings'] ?? [];
+        _attendances = dashRes['attendances'] ?? [];
+      }
+
+      _tickets = results[1] as List<Ticket>;
+
+      final signsRes = results[2] as Map<String, dynamic>;
+      _signCategories = signsRes['categories'] ?? [];
+      _roadLines = signsRes['road_lines'] ?? [];
+
+      _stats = results[3] as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('DashboardProvider loadAllData error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _tickets = await _quizService.fetchTickets();
-
-    final signsRes = await _quizService.fetchSigns();
-    _signCategories = signsRes['categories'] ?? [];
-    _roadLines = signsRes['road_lines'] ?? [];
-
-    _stats = await _quizService.fetchStats();
-
-    _isLoading = false;
-    notifyListeners();
   }
 }
