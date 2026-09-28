@@ -484,9 +484,9 @@ export default function FinanceIndex({
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
 
             {/* Page Title & Action Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('finance.title', 'Moliya va Kassalar')}</h1>
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
                     {can('cash_transfers.create') && (
                         <Button onClick={() => openSweepModal()} variant="brand" className="text-xs h-9 justify-center">
                             <ArrowDownToLine className="w-4 h-4 mr-1.5 shrink-0" />
@@ -544,7 +544,7 @@ export default function FinanceIndex({
                                     )}
                                 </div>
                                 <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">{reg.name}</h3>
-                                <p className="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+                                <p className="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono break-all">
                                     {formatNumber(reg.balance)} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">UZS</span>
                                 </p>
                             </div>
@@ -626,82 +626,161 @@ export default function FinanceIndex({
 
             {/* Tab: Registers Overview */}
             {activeTab === 'registers' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>{t('finance.register_name', 'Kassa Nomi')}</TableHead>
-                                    <TableHead>{t('finance.type', 'Turi')}</TableHead>
-                                    <TableHead>{t('finance.branch', 'Filial')}</TableHead>
-                                    <TableHead>{t('finance.balance', 'Balans')}</TableHead>
-                                    <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {cashRegisters.length === 0 ? (
-                                    <TableEmpty
-                                        colSpan={5}
-                                        icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                        title={t('finance.no_registers', 'Kassalar topilmadi')}
-                                    />
-                                ) : (
-                                    cashRegisters.map((reg) => {
-                                        const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
-                                        const canSweep = !isSuperadmin && Number(reg.balance) > 0;
+                <div className="space-y-4">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t('finance.register_name', 'Kassa Nomi')}</TableHead>
+                                        <TableHead>{t('finance.type', 'Turi')}</TableHead>
+                                        <TableHead>{t('finance.branch', 'Filial')}</TableHead>
+                                        <TableHead>{t('finance.balance', 'Balans')}</TableHead>
+                                        <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {cashRegisters.length === 0 ? (
+                                        <TableEmpty
+                                            colSpan={5}
+                                            icon={<Wallet className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
+                                            title={t('finance.no_registers', 'Kassalar topilmadi')}
+                                        />
+                                    ) : (
+                                        cashRegisters.map((reg) => {
+                                            const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
+                                            const canSweep = !isSuperadmin && Number(reg.balance) > 0;
 
-                                        return (
-                                            <TableRow key={reg.id}>
-                                                <TableCell className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
-                                                    <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
-                                                    <span>{reg.name}</span>
-                                                </TableCell>
-                                                <TableCell className="whitespace-nowrap">
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                                        {reg.type?.name || '-'}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="whitespace-nowrap">
-                                                    {isSuperadmin ? (
-                                                        <span className="inline-flex items-center gap-1 font-semibold text-xs text-indigo-600 dark:text-indigo-400">
-                                                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                                                            {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                            return (
+                                                <TableRow key={reg.id}>
+                                                    <TableCell className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
+                                                        <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                                                        <span>{reg.name}</span>
+                                                    </TableCell>
+                                                    <TableCell className="whitespace-nowrap">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                                            {reg.type?.name || '-'}
                                                         </span>
-                                                    ) : (
-                                                        reg.branch?.name || '-'
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
-                                                    {formatMoney(reg.balance)}
-                                                </TableCell>
-                                                <TableCell className="text-right space-x-2 whitespace-nowrap">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleSelectRegisterHistory(reg.id)}
-                                                        className="h-8 gap-1 text-xs"
-                                                    >
-                                                        <History className="w-3.5 h-3.5" />
-                                                        {t('finance.view_history', 'Tarix')}
-                                                    </Button>
-                                                    {canSweep && (
-                                                        (can('cash_transfers.create') ? <Button
+                                                    </TableCell>
+                                                    <TableCell className="whitespace-nowrap">
+                                                        {isSuperadmin ? (
+                                                            <span className="inline-flex items-center gap-1 font-semibold text-xs text-indigo-600 dark:text-indigo-400">
+                                                                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                                                {t('finance.superadmin_cash_register', 'Superadmin Bosh kassa')}
+                                                            </span>
+                                                        ) : (
+                                                            reg.branch?.name || '-'
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
+                                                        {formatMoney(reg.balance)}
+                                                    </TableCell>
+                                                    <TableCell className="text-right space-x-2 whitespace-nowrap">
+                                                        <Button
                                                             size="sm"
-                                                            variant="brand"
-                                                            onClick={() => openSweepModal(reg.id)}
+                                                            variant="outline"
+                                                            onClick={() => handleSelectRegisterHistory(reg.id)}
                                                             className="h-8 gap-1 text-xs"
                                                         >
-                                                            <ArrowDownToLine className="w-3.5 h-3.5" />
-                                                            {t('finance.empty_this_register', 'Bo\'shatish')}
-                                                        </Button> : null)
+                                                            <History className="w-3.5 h-3.5" />
+                                                            {t('finance.view_history', 'Tarix')}
+                                                        </Button>
+                                                        {canSweep && (
+                                                            (can('cash_transfers.create') ? <Button
+                                                                size="sm"
+                                                                variant="brand"
+                                                                onClick={() => openSweepModal(reg.id)}
+                                                                className="h-8 gap-1 text-xs"
+                                                            >
+                                                                <ArrowDownToLine className="w-3.5 h-3.5" />
+                                                                {t('finance.empty_this_register', 'Bo\'shatish')}
+                                                            </Button> : null)
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Mobile Registers Card Feed */}
+                    <div className="md:hidden space-y-3">
+                        {cashRegisters.length === 0 ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                                <Wallet className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_registers', 'Kassalar topilmadi')}</p>
+                            </div>
+                        ) : (
+                            cashRegisters.map((reg) => {
+                                const isSuperadmin = reg.branch_id === null || reg.branch_id === undefined;
+                                const canSweep = !isSuperadmin && Number(reg.balance) > 0;
+
+                                return (
+                                    <div
+                                        key={reg.id}
+                                        className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs space-y-3"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="space-y-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                                        {reg.type?.name || '-'}
+                                                    </span>
+                                                    {isSuperadmin ? (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
+                                                            <ShieldCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                                                            {t('finance.superadmin_cash_register', 'Superadmin')}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40">
+                                                            <Building2 className="w-3 h-3 text-gray-400" />
+                                                            {reg.branch?.name || t('branches.unknown', 'Filial')}
+                                                        </span>
                                                     )}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
-                                )}
-                            </TableBody>
-                        </Table>
+                                                </div>
+                                                <h4 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                                                    <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                                                    <span className="truncate">{reg.name}</span>
+                                                </h4>
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <span className="text-[10px] text-gray-400 block">{t('finance.balance', 'Balans')}</span>
+                                                <span className="font-extrabold text-sm sm:text-base text-emerald-600 dark:text-emerald-400 font-mono">
+                                                    {formatMoney(reg.balance)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className={`pt-2.5 border-t border-gray-100 dark:border-gray-700/50 ${canSweep && can('cash_transfers.create') ? 'grid grid-cols-2 gap-2' : 'flex justify-end'}`}>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleSelectRegisterHistory(reg.id)}
+                                                className="h-8 gap-1 text-xs justify-center"
+                                            >
+                                                <History className="w-3.5 h-3.5" />
+                                                <span>{t('finance.view_history', 'Tarix')}</span>
+                                            </Button>
+                                            {canSweep && can('cash_transfers.create') && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="brand"
+                                                    onClick={() => openSweepModal(reg.id)}
+                                                    className="h-8 gap-1 text-xs justify-center"
+                                                >
+                                                    <ArrowDownToLine className="w-3.5 h-3.5" />
+                                                    <span>{t('finance.empty_this_register', 'Bo\'shatish')}</span>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             )}
@@ -710,8 +789,8 @@ export default function FinanceIndex({
             {activeTab === 'history' && (
                 <div className="space-y-4">
                     {/* Filters Bar */}
-                    <div className="bg-card border rounded-xl p-4 shadow-xs">
-                        <form onSubmit={handleFilterHistory} className="flex flex-wrap items-center gap-2">
+                    <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs">
+                        <form onSubmit={handleFilterHistory} className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center gap-2.5">
                             <SearchableSelect
                                 id="hist_reg"
                                 value={historyRegId}
@@ -725,8 +804,8 @@ export default function FinanceIndex({
                                     })),
                                 ]}
                                 placeholder={t('finance.all_registers', 'Barcha kassalar')}
-                                className="w-full sm:w-52"
-                                triggerClassName="h-10 text-sm"
+                                className="w-full lg:w-52"
+                                triggerClassName="h-9 sm:h-10 text-xs sm:text-sm"
                             />
 
                             <SearchableSelect
@@ -746,36 +825,41 @@ export default function FinanceIndex({
                                     { value: 'refund', label: t('finance.op_refund', 'Bekor qilish / Qaytarish') },
                                 ]}
                                 placeholder={t('finance.all_categories', 'Barcha amallar')}
-                                className="w-full sm:w-48"
-                                triggerClassName="h-10 text-sm"
+                                className="w-full lg:w-48"
+                                triggerClassName="h-9 sm:h-10 text-xs sm:text-sm"
                             />
 
-                            <DatePicker
-                                id="hist_from"
-                                value={historyFrom}
-                                onChange={(val) => setHistoryFrom(val)}
-                                placeholder="YYYY-MM-DD"
-                                className="w-full sm:w-36"
-                            />
+                            <div className="grid grid-cols-2 gap-2 w-full lg:w-auto">
+                                <DatePicker
+                                    id="hist_from"
+                                    value={historyFrom}
+                                    onChange={(val) => setHistoryFrom(val)}
+                                    placeholder={t('common.date_from', 'Dan')}
+                                    className="w-full lg:w-36"
+                                />
 
-                            <DatePicker
-                                id="hist_to"
-                                value={historyTo}
-                                onChange={(val) => setHistoryTo(val)}
-                                placeholder="YYYY-MM-DD"
-                                className="w-full sm:w-36"
-                            />
+                                <DatePicker
+                                    id="hist_to"
+                                    value={historyTo}
+                                    onChange={(val) => setHistoryTo(val)}
+                                    placeholder={t('common.date_to', 'Gacha')}
+                                    className="w-full lg:w-36"
+                                />
+                            </div>
 
-                            <Button type="submit" variant="secondary" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2 h-10" title={t('common.filter', 'Filtrlash')}>
-                                <Search className="w-4 h-4 sm:mr-2" />
-                                <span className="hidden sm:inline">{t('common.filter', 'Filtrlash')}</span>
-                            </Button>
-
-                            {(historyRegId || historyCat || historyFrom || historyTo) && (
-                                <Button type="button" variant="outline" size="icon" onClick={handleResetHistory} className="h-10 w-10 shrink-0" title={t('common.reset', 'Tozalash')}>
-                                    <RotateCcw className="w-4 h-4" />
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
+                                <Button type="submit" variant="secondary" className="flex-1 sm:flex-initial h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm" title={t('common.filter', 'Filtrlash')}>
+                                    <Search className="w-4 h-4 mr-1.5" />
+                                    <span>{t('common.filter', 'Filtrlash')}</span>
                                 </Button>
-                            )}
+
+                                {(historyRegId || historyCat || historyFrom || historyTo) && (
+                                    <Button type="button" variant="outline" onClick={handleResetHistory} className="h-9 sm:h-10 px-3 text-xs sm:text-sm" title={t('common.reset', 'Tozalash')}>
+                                        <RotateCcw className="w-4 h-4 mr-1.5 sm:mr-0" />
+                                        <span className="sm:hidden">{t('common.reset', 'Tozalash')}</span>
+                                    </Button>
+                                )}
+                            </div>
                         </form>
                     </div>
 
