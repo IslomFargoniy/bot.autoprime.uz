@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import { DatePicker } from '@/components/ui/date-picker';
 import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
