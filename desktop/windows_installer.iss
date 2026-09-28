@@ -2,7 +2,7 @@
 ; Used to compile a single-file AutoPrime-Setup.exe installer
 
 #define MyAppName "AutoPrime LMS"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "AutoPrime"
 #define MyAppURL "https://lms.autoprime.uz"
 #define MyAppExeName "autoprime_desktop.exe"

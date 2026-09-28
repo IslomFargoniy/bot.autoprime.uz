@@ -59,6 +59,7 @@ class PublishDesktopReleaseCommand extends Command
             'release_date' => date('Y-m-d'),
             'is_mandatory' => $isMandatory,
             'download_url_windows' => "{$appUrl}/downloads/desktop/AutoPrime-Setup-{$version}.exe",
+            'download_url_macos' => "{$appUrl}/downloads/desktop/AutoPrime-Setup-{$version}.dmg",
             'file_size_mb' => 25.0,
             'changelog_uz' => "AutoPrime LMS Desktop v{$version}\n• {$changelog}",
             'changelog_ru' => "AutoPrime LMS Desktop v{$version}\n• {$changelog}",

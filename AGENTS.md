@@ -249,6 +249,8 @@ ssh -o StrictHostKeyChecking=no root@193.181.213.60 "cd /var/www/lms_autoprim_us
   ```
   *(Add `--mandatory` flag if update is required to proceed)*.
 - **Single Active Session Rule**: Each student can only be logged in on ONE desktop device at a time. Authenticating on a new device immediately invalidates all previous sessions via `current_desktop_session_id` and returns `SESSION_SUPERSEDED` (HTTP 401).
+- **Desktop Version Increment Rule (MANDATORY)**: Whenever ANY change, fix, UI adjustment, or feature is made in the Flutter Desktop application (`/desktop`), ALWAYS increment the desktop application version in `desktop/pubspec.yaml` (e.g. 1.0.0 -> 1.0.1, build +1) and publish the new release on the server using `/opt/php83/bin/php artisan desktop:publish-release <version> --changelog="<description>"`.
+
 
 ---
 
