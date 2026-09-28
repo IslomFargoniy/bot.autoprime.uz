@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,10 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            // Staff always belong to a branch; only superadmins work unassigned.
+            'branch_id' => fn (array $attributes) => ($attributes['role'] ?? 'instructor') === 'superadmin'
+                ? null
+                : Branch::firstOrCreate(['code' => 'factory-default'], ['name' => 'Asosiy filial', 'status' => 'active'])->id,
         ];
     }
 

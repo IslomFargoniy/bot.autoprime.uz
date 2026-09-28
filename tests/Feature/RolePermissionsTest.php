@@ -275,3 +275,26 @@ test('a teacher with contract permissions only sees contracts of own students', 
         ->assertInertia(fn ($page) => $page->where('contracts.data', fn ($rows) => collect($rows)->pluck('id')->all() === [$own->id]));
     $this->actingAs($teacher)->get("/admin/contracts/{$other->id}/download-pdf")->assertForbidden();
 });
+
+test('staff without a branch cannot sign in, a branchless superadmin can', function () {
+    $branchless = User::factory()->create(['role' => 'reception', 'branch_id' => null, 'telegram_id' => '880001']);
+    $superAdmin = User::factory()->create(['role' => 'superadmin', 'branch_id' => null, 'telegram_id' => '880002']);
+
+    expect($branchless->canSignIn())->toBeFalse()
+        ->and($superAdmin->canSignIn())->toBeTrue()
+        ->and($branchless->isBranchRestricted())->toBeTrue();
+
+    $this->postJson('/api/telegram-auth', ['initData' => signedTelegramInitData(880001)])->assertForbidden();
+    $this->actingAs($branchless)->get(route('students.index'))->assertRedirect(route('login'));
+});
+
+test('a superadmin must pick a branch when creating staff', function () {
+    $superAdmin = User::factory()->create(['role' => 'superadmin']);
+
+    $this->actingAs($superAdmin)->post('/admin/staff', [
+        'name' => 'Filialsiz',
+        'phone' => '+998900000077',
+        'role' => 'kassir',
+        'password' => 'secret123',
+    ])->assertSessionHasErrors('branch_id');
+});

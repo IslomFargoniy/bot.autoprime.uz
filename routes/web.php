@@ -53,8 +53,8 @@ Route::post('/api/telegram-auth', function (Request $request) {
         return response()->json(['success' => false, 'message' => 'Tizimda ushbu Telegram hisobiga biriktirilgan foydalanuvchi topilmadi.'], 404);
     }
 
-    if (! $user->isActive()) {
-        return response()->json(['success' => false, 'message' => 'Hisobingiz faolsizlantirilgan.'], 403);
+    if (! $user->canSignIn()) {
+        return response()->json(['success' => false, 'message' => 'Hisobingiz faolsizlantirilgan yoki filialga biriktirilmagan. Administratorga murojaat qiling.'], 403);
     }
 
     Auth::login($user, true);
