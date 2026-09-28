@@ -12,9 +12,11 @@ export default function AppSidebarLayout({
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="pb-24 md:pb-0">
+            <AppContent variant="sidebar" className="pb-24 md:pb-0 min-w-0 max-w-full overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                {children}
+                <div className="w-full max-w-full min-w-0 overflow-x-hidden flex-1">
+                    {children}
+                </div>
             </AppContent>
             <MobileBottomNav />
         </AppShell>
