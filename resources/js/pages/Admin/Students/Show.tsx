@@ -41,6 +41,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
 
 interface Student {
