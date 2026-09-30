@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
@@ -490,18 +491,18 @@ export default function StaffIndex({
                             key={tab.key}
                             type="button"
                             onClick={() => handleRoleTabChange(tab.key)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border transition-all flex items-center gap-1.5 ${
                                 isActive
-                                    ? 'bg-primary text-primary-foreground shadow-xs'
-                                    : 'bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground'
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                                    : 'bg-muted/50 text-foreground border-input hover:bg-muted'
                             }`}
                         >
                             <span>{tab.label}</span>
                             <span
                                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                                     isActive
-                                        ? 'bg-primary-foreground/20 text-primary-foreground'
-                                        : 'bg-background/80 text-muted-foreground'
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-background/80 text-foreground/80'
                                 }`}
                             >
                                 {tab.count}
@@ -512,53 +513,44 @@ export default function StaffIndex({
             </div>
 
             {/* Filter & Search Bar Card */}
-            <div className="bg-card border rounded-xl p-4 shadow-xs">
-                <div className="flex flex-col md:flex-row justify-between gap-4">
-                    {/* Search */}
-                    <div className="flex items-center gap-2 flex-1 w-full md:max-w-md">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                value={search}
-                                onChange={handleSearchChange}
-                                placeholder={t('staff.search_placeholder', "Ism, telefon, mashina yoki Telegram ID bo'yicha...")}
-                                className="pl-8 h-10 text-sm"
-                            />
-                        </div>
-                    </div>
+            <PageFilterBar>
+                <div className="flex flex-wrap items-center gap-2">
+                    {isSuperAdmin && branches.length > 0 && (
+                        <SearchableSelect
+                            id="branch_filter"
+                            value={selectedBranch}
+                            onChange={(val) => handleBranchChange(val ? String(val) : '')}
+                            options={[
+                                { value: '', label: t('staff.all_branches', 'Barcha filiallar') },
+                                ...branches.map((b) => ({ value: b.id, label: b.name })),
+                            ]}
+                            placeholder={t('staff.filter_branch', 'Barcha filiallar')}
+                            className="w-48"
+                            triggerClassName="h-10 text-sm"
+                            allowClear
+                        />
+                    )}
 
-                    {/* Desktop Filters */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        {isSuperAdmin && branches.length > 0 && (
-                            <SearchableSelect
-                                id="branch_filter"
-                                value={selectedBranch}
-                                onChange={(val) => handleBranchChange(val ? String(val) : '')}
-                                options={[
-                                    { value: '', label: t('staff.all_branches', 'Barcha filiallar') },
-                                    ...branches.map((b) => ({ value: b.id, label: b.name })),
-                                ]}
-                                placeholder={t('staff.filter_branch', 'Barcha filiallar')}
-                                className="w-48"
-                                triggerClassName="h-10 text-sm"
-                                allowClear
-                            />
-                        )}
-
-                        <select
-                            value={selectedStatus}
-                            onChange={(e) => handleStatusChange(e.target.value)}
-                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        >
-                            <option value="all">{t('staff.all_statuses', 'Barcha holat')}</option>
-                            <option value="active">{t('staff.active', 'Faol')}</option>
-                            <option value="inactive">{t('staff.inactive', 'Nofaol')}</option>
-                        </select>
-
-                        <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-                    </div>
+                    <select
+                        value={selectedStatus}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        className="flex h-10 items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
+                    >
+                        <option value="all">{t('staff.all_statuses', 'Barcha holat')}</option>
+                        <option value="active">{t('staff.active', 'Faol')}</option>
+                        <option value="inactive">{t('staff.inactive', 'Nofaol')}</option>
+                    </select>
                 </div>
-            </div>
+
+                <PageFilterSearch
+                    value={search}
+                    onChange={handleSearchChange}
+                    placeholder={t('staff.search_placeholder', "Ism, telefon, mashina yoki Telegram ID bo'yicha...")}
+                    perPage={perPage}
+                    onPerPageChange={handlePerPageChange}
+                    showSubmitButton={false}
+                />
+            </PageFilterBar>
 
             {/* Staff Table / List */}
             <div className="bg-card border rounded-xl shadow-2xs overflow-hidden">

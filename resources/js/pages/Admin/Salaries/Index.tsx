@@ -36,6 +36,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar } from '@/components/page-filter-bar';
 import { formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -244,18 +245,18 @@ export default function SalariesIndex({
             </div>
 
             {/* Filter Toolbar */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
+            <PageFilterBar className="mb-6">
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-500">{t('salaries.period', 'Davr')}:</span>
+                    <span className="text-xs font-medium text-muted-foreground">{t('salaries.period', 'Davr')}:</span>
                     <Input
                         type="month"
                         value={period}
                         onChange={(e) => handlePeriodChange(e.target.value)}
-                        className="w-40 h-9 text-xs"
+                        className="w-44 h-10 text-sm bg-background text-foreground"
                     />
                 </div>
                 <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-            </div>
+            </PageFilterBar>
 
             {/* Table / Desktop View */}
             <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">

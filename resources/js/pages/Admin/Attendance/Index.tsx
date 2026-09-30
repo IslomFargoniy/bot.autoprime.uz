@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar } from '@/components/page-filter-bar';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
@@ -387,7 +388,7 @@ export default function AttendanceIndex({
             )}
 
             {/* Filters Bar */}
-            <div className="bg-card border rounded-xl p-4 shadow-xs mb-4">
+            <PageFilterBar className="mb-4">
                 <div className="flex flex-wrap items-center gap-2">
                     <SearchableSelect
                         value={filterGroupId}
@@ -421,7 +422,7 @@ export default function AttendanceIndex({
                         </Button>
                     )}
                 </div>
-            </div>
+            </PageFilterBar>
 
             {/* Attendance Records Table / Desktop & Tablet */}
             <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">

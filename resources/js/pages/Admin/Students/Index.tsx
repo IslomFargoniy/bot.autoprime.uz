@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
 import { Branch, SharedData } from '@/types/auth';
 import {
     Dialog,
@@ -190,30 +191,41 @@ export default function StudentsIndex({ students, groups, branches = [], filters
             </div>
             
             {/* Filters Bar */}
-            <div className="bg-card border rounded-xl p-4 shadow-xs space-y-4 mb-6">
-                <div className="flex flex-col md:flex-row justify-between gap-4">
-                    {/* Search & Mobile Filter Trigger inline */}
-                    <div className="flex items-center gap-2 flex-1 w-full md:max-w-md">
-                        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder={t('students.search_placeholder', 'Ism, telefon yoki pasport...')}
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-8"
-                                />
-                            </div>
-                            <Button type="submit" variant="secondary" size="icon" className="shrink-0 sm:w-auto sm:px-4 sm:py-2">
-                                <Search className="w-4 h-4 sm:mr-2" />
-                                <span className="hidden sm:inline">{t('common.search', 'Qidirish')}</span>
-                            </Button>
-                        </form>
+            <PageFilterBar className="mb-6">
+                <div className="hidden md:flex gap-2 items-center flex-1">
+                    <SearchableSelect
+                        value={groupId}
+                        onChange={(val) => {
+                            setGroupId(val);
+                            applyFilters(search, val, perPage);
+                        }}
+                        options={[
+                            { value: '', label: t('students.all_groups', 'Barcha guruhlar') },
+                            ...groups.map(grp => ({ value: grp.id, label: grp.name }))
+                        ]}
+                        placeholder={t('students.all_groups', 'Barcha guruhlar')}
+                        className="w-56"
+                        triggerClassName="h-10 text-sm"
+                        allowClear
+                    />
+                </div>
 
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <PageFilterSearch
+                        value={search}
+                        onChange={setSearch}
+                        onSubmit={handleSearch}
+                        placeholder={t('students.search_placeholder', 'Ism, telefon yoki pasport...')}
+                        perPage={perPage}
+                        onPerPageChange={(val) => {
+                            setPerPage(val);
+                            applyFilters(search, groupId, val);
+                        }}
+                    >
                         {/* Mobile Filters Trigger */}
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="outline" size="icon" className="md:hidden shrink-0">
+                                <Button variant="outline" size="icon" className="md:hidden shrink-0 h-10 w-10">
                                     <Filter className="w-4 h-4" />
                                 </Button>
                             </SheetTrigger>
@@ -239,49 +251,12 @@ export default function StudentsIndex({ students, groups, branches = [], filters
                                             triggerClassName="h-10 text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                        <PerPageSelect
-                                            value={perPage}
-                                            onChange={(val) => {
-                                                setPerPage(val);
-                                                applyFilters(search, groupId, val);
-                                            }}
-                                            className="w-full"
-                                        />
-                                    </div>
                                 </div>
                             </SheetContent>
                         </Sheet>
-                    </div>
-
-                    {/* Desktop Filters */}
-                    <div className="hidden md:flex gap-2 items-center">
-                        <SearchableSelect
-                            value={groupId}
-                            onChange={(val) => {
-                                setGroupId(val);
-                                applyFilters(search, val, perPage);
-                            }}
-                            options={[
-                                { value: '', label: t('students.all_groups', 'Barcha guruhlar') },
-                                ...groups.map(grp => ({ value: grp.id, label: grp.name }))
-                            ]}
-                            placeholder={t('students.all_groups', 'Barcha guruhlar')}
-                            className="w-52"
-                            triggerClassName="h-10 text-sm"
-                            allowClear
-                        />
-                        <PerPageSelect
-                            value={perPage}
-                            onChange={(val) => {
-                                setPerPage(val);
-                                applyFilters(search, groupId, val);
-                            }}
-                        />
-                    </div>
+                    </PageFilterSearch>
                 </div>
-            </div>
+            </PageFilterBar>
 
             <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
                 <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">

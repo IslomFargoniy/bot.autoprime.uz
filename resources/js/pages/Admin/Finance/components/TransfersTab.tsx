@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar } from '@/components/page-filter-bar';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { CashTransfer } from '../types';
 
@@ -44,9 +45,10 @@ export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, 
     return (
         <div className="space-y-4 w-full max-w-full min-w-0">
             {/* Top Toolbar */}
-            <div className="flex justify-end">
+            <PageFilterBar>
+                <div className="flex-1" />
                 <PerPageSelect value={filters?.per_page || '15'} onChange={handlePerPageChange} />
-            </div>
+            </PageFilterBar>
 
             {/* Desktop & Tablet Table with dedicated Horizontal Scrollbar */}
             <div className="hidden md:block w-full max-w-full overflow-hidden">

@@ -29,6 +29,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
 import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -264,23 +265,17 @@ export default function VehiclesIndex({
             </div>
 
             {/* Filter Toolbar */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
-                <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 max-w-sm">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input
-                            placeholder={t('common.search', 'Qidirish...')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9 h-9 text-xs"
-                        />
-                    </div>
-                    <Button type="submit" variant="secondary" size="sm" className="h-9 text-xs">
-                        {t('common.search', 'Qidirish')}
-                    </Button>
-                </form>
-                <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-            </div>
+            <PageFilterBar className="mb-6">
+                <div className="flex-1" />
+                <PageFilterSearch
+                    value={search}
+                    onChange={setSearch}
+                    onSubmit={handleSearch}
+                    placeholder={t('common.search', 'Qidirish...')}
+                    perPage={perPage}
+                    onPerPageChange={handlePerPageChange}
+                />
+            </PageFilterBar>
 
             {/* Vehicles Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

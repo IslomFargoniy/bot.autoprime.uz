@@ -25,6 +25,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
 import type { Branch } from '@/types/auth';
 
 interface Props {
@@ -134,25 +135,20 @@ export default function Index({ branches, filters }: Props) {
                 </div>
 
                 {/* Search & Filter Bar */}
-                <div className="flex items-center gap-3">
-                    <PerPageSelect
-                        value={perPage}
-                        onChange={(val) => {
+                <PageFilterBar>
+                    <div className="flex-1" />
+                    <PageFilterSearch
+                        value={search}
+                        onChange={setSearch}
+                        onSubmit={handleSearch}
+                        placeholder={t('common.search_placeholder', 'Qidirish...')}
+                        perPage={perPage}
+                        onPerPageChange={(val) => {
                             setPerPage(val);
                             applyFilters(search, val);
                         }}
                     />
-                    <form onSubmit={handleSearch} className="flex-1 max-w-md relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            type="text"
-                            placeholder={t('common.search_placeholder', 'Qidirish...')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9 bg-card"
-                        />
-                    </form>
-                </div>
+                </PageFilterBar>
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block">

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
@@ -183,48 +184,18 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                 </Button>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                {/* Desktop Filters */}
-                <div className="hidden md:flex gap-2 items-center">
-                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-                </div>
-
-                <div className="flex gap-2 w-full md:w-auto">
-                    {/* Search Form */}
-                    <form onSubmit={(e) => { e.preventDefault(); applyFilters(search, perPage); }} className="flex relative flex-1 md:w-64">
-                        <Input
-                            placeholder={t('admins.search_placeholder', 'Ism, email yoki telefon bo\'yicha qidiruv...')}
-                            value={search}
-                            onChange={handleSearchChange}
-                            className="pr-8"
-                        />
-                        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
-                            <Search className="w-4 h-4" />
-                        </button>
-                    </form>
-
-                    {/* Mobile Filters Trigger */}
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" size="icon" className="md:hidden shrink-0">
-                                <Filter className="w-4 h-4" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto rounded-t-xl">
-                            <SheetHeader>
-                                <SheetTitle>{t('common.filters', 'Filtrlar')}</SheetTitle>
-                                <SheetDescription>{t('common.filter', 'Filtrlash')}</SheetDescription>
-                            </SheetHeader>
-                            <div className="grid gap-4 py-4 mt-2">
-                                <div className="space-y-2">
-                                    <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                    <PerPageSelect value={perPage} onChange={handlePerPageChange} className="w-full" />
-                                </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
-            </div>
+            {/* Filters Bar */}
+            <PageFilterBar className="mb-6">
+                <div className="flex-1" />
+                <PageFilterSearch
+                    value={search}
+                    onChange={handleSearchChange}
+                    onSubmit={(e) => { e.preventDefault(); applyFilters(search, perPage); }}
+                    placeholder={t('admins.search_placeholder', 'Ism, email yoki telefon bo\'yicha qidiruv...')}
+                    perPage={perPage}
+                    onPerPageChange={handlePerPageChange}
+                />
+            </PageFilterBar>
 
             {/* Dialog Form */}
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

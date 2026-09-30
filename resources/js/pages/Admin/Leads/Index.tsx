@@ -47,6 +47,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
 import { DatePicker } from '@/components/ui/date-picker';
 import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -294,40 +295,29 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-2xs">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full md:w-auto">
-                    {['all', 'new_lead', 'form_sent', 'form_completed', 'contract_signed', 'rejected'].map((st) => (
-                        <button
-                            key={st}
-                            onClick={() => handleStageChange(st)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border shrink-0 transition-colors ${
-                                (filters.stage || 'all') === st
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                                    : 'bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-border'
-                            }`}
-                        >
-                            {t(`leads.stage_${st}`, st)}
-                        </button>
-                    ))}
-                </div>
+            <PageFilterBar>
+                <PageFilterPills
+                    activeValue={filters.stage || 'all'}
+                    onChange={handleStageChange}
+                    items={[
+                        { value: 'all', label: t('leads.stage_all', 'Barchasi') },
+                        { value: 'new_lead', label: t('leads.stage_new_lead', 'Yangi lid') },
+                        { value: 'form_sent', label: t('leads.stage_form_sent', 'Anketa yuborildi') },
+                        { value: 'form_completed', label: t('leads.stage_form_completed', "To'ldirildi") },
+                        { value: 'contract_signed', label: t('leads.stage_contract_signed', 'Shartnoma tuzildi') },
+                        { value: 'rejected', label: t('leads.stage_rejected', 'Rad etildi') },
+                    ]}
+                />
 
-                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto items-center">
-                    <div className="relative flex-1 md:w-64">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={t('common.search', 'Qidirish...')}
-                            className="pl-9 h-10 text-sm"
-                        />
-                    </div>
-                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-                    <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
-                        <Search className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('common.find', 'Qidiruv')}</span>
-                    </Button>
-                </form>
-            </div>
+                <PageFilterSearch
+                    value={search}
+                    onChange={setSearch}
+                    onSubmit={handleSearch}
+                    placeholder={t('common.search', 'Qidirish...')}
+                    perPage={perPage}
+                    onPerPageChange={handlePerPageChange}
+                />
+            </PageFilterBar>
 
             {/* Desktop/Tablet Table */}
             <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">

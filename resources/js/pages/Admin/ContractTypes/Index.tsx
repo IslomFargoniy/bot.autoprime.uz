@@ -17,6 +17,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar } from '@/components/page-filter-bar';
 import { formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -153,9 +154,10 @@ export default function ContractTypesIndex({ contractTypes, branches, filters = 
             </div>
 
             {/* Filter Toolbar */}
-            <div className="flex justify-end">
+            <PageFilterBar>
+                <div className="flex-1" />
                 <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-            </div>
+            </PageFilterBar>
 
             {/* Contract Types Grid / Table */}
             {contractTypes.data.length === 0 ? (

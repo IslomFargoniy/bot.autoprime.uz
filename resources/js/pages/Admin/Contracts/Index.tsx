@@ -48,6 +48,7 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
 import { DatePicker } from '@/components/ui/date-picker';
 import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -289,21 +290,18 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0 flex-nowrap md:flex-wrap">
-                    {['all', 'unpaid', 'partial', 'paid'].map((st) => (
-                        <button
-                            key={st}
-                            onClick={() => handleFilterStatus(st)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors shrink-0 ${
-                                (filters.payment_status || 'all') === st
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-muted/50 text-foreground border-input hover:bg-muted'
-                            }`}
-                        >
-                            {t(`contracts.status_${st}`, st)}
-                        </button>
-                    ))}
+            <PageFilterBar>
+                <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0 flex-nowrap md:flex-wrap items-center">
+                    <PageFilterPills
+                        activeValue={filters.payment_status || 'all'}
+                        onChange={handleFilterStatus}
+                        items={[
+                            { value: 'all', label: t('contracts.status_all', 'Barchasi') },
+                            { value: 'unpaid', label: t('contracts.status_unpaid', "To'lanmagan") },
+                            { value: 'partial', label: t('contracts.status_partial', "Qisman to'langan") },
+                            { value: 'paid', label: t('contracts.status_paid', "To'liq to'langan") },
+                        ]}
+                    />
                     <button
                         onClick={() => router.get('/admin/contracts', { ...filters, has_debt: !filters.has_debt }, { preserveState: true })}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors shrink-0 ${
@@ -316,23 +314,15 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                     </button>
                 </div>
 
-                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto items-center">
-                    <div className="relative flex-1 md:w-64">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={t('common.search', 'Shartnoma yoki talaba...')}
-                            className="pl-9 h-10 text-sm"
-                        />
-                    </div>
-                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-                    <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
-                        <Search className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('common.find', 'Qidiruv')}</span>
-                    </Button>
-                </form>
-            </div>
+                <PageFilterSearch
+                    value={search}
+                    onChange={setSearch}
+                    onSubmit={handleSearch}
+                    placeholder={t('common.search', 'Shartnoma yoki talaba...')}
+                    perPage={perPage}
+                    onPerPageChange={handlePerPageChange}
+                />
+            </PageFilterBar>
 
             {/* Desktop & Tablet Table */}
             <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-hidden">

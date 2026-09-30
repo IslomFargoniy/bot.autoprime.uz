@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
+import { PageFilterBar } from '@/components/page-filter-bar';
 import { router } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -375,9 +376,10 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
             </Dialog>
 
             {/* Filter Toolbar */}
-            <div className="flex justify-end">
+            <PageFilterBar>
+                <div className="flex-1" />
                 <PerPageSelect value={perPage} onChange={handlePerPageChange} />
-            </div>
+            </PageFilterBar>
 
             {/* Desktop/Tablet Table */}
             <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-x-auto">
