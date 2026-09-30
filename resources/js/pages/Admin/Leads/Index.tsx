@@ -19,9 +19,11 @@ import {
     ImageIcon,
     Copy,
     Check,
+    CheckCircle,
     X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCan } from '@/hooks/use-can';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,6 +46,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -52,7 +55,7 @@ interface Lead {
     id: number;
     full_name: string;
     phone: string;
-    category?: string;
+    category: string;
     preferred_time?: string;
     passport_series?: string;
     passport_number?: string;
@@ -85,6 +88,9 @@ interface PageProps {
         data: Lead[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
+        per_page?: number;
     };
     contractTypes: Array<{
         id: number;
@@ -103,6 +109,7 @@ interface PageProps {
         stage?: string;
         source?: string;
         branch_id?: string | number;
+        per_page?: string;
     };
 }
 
@@ -141,7 +148,24 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
         terms: '',
     });
 
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
+
+    const isLeadConverted = (lead?: Lead | null) => {
+        if (!lead) return false;
+        return Boolean(
+            lead.contract_id ||
+            lead.student_id ||
+            lead.stage === 'contract_signed' ||
+            lead.convertedStudent ||
+            lead.contract
+        );
+    };
+
     const openConvertModal = (lead: Lead) => {
+        if (isLeadConverted(lead)) {
+            toast.error(t('leads.already_converted', 'Ushbu lid bilan allaqachon shartnoma tuzilgan.'));
+            return;
+        }
         setConvertingLead(lead);
         convertForm.setData({
             contract_type_id: String(contractTypes[0]?.id || ''),
@@ -156,11 +180,16 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/admin/leads', { ...filters, search }, { preserveState: true });
+        router.get('/admin/leads', { ...filters, search, per_page: perPage }, { preserveState: true });
     };
 
     const handleStageChange = (stage: string) => {
-        router.get('/admin/leads', { ...filters, stage: stage === 'all' ? '' : stage }, { preserveState: true });
+        router.get('/admin/leads', { ...filters, stage: stage === 'all' ? '' : stage, per_page: perPage }, { preserveState: true });
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get('/admin/leads', { ...filters, search, per_page: newPerPage }, { preserveState: true, replace: true });
     };
 
     const handleCreateSubmit = (e: React.FormEvent) => {
@@ -282,7 +311,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                     ))}
                 </div>
 
-                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto items-center">
                     <div className="relative flex-1 md:w-64">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <Input
@@ -292,6 +321,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                             className="pl-9 h-10 text-sm"
                         />
                     </div>
+                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
                     <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
                         <Search className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">{t('common.find', 'Qidiruv')}</span>
@@ -366,16 +396,23 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                         >
                                             <Eye className="w-3.5 h-3.5" />
                                         </Button>
-                                        {lead.stage !== 'contract_signed' && (
-                                            (can('contracts.create') ? <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => openConvertModal(lead)}
-                                                className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
-                                            >
-                                                <UserCheck className="w-3.5 h-3.5 mr-1" />
-                                                {t('leads.convert_button', 'Shartnoma tuzish')}
-                                            </Button> : null)
+                                        {isLeadConverted(lead) ? (
+                                            <Badge variant="outline" className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium shrink-0 inline-flex items-center">
+                                                <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                                {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
+                                            </Badge>
+                                        ) : (
+                                            can('contracts.create') ? (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => openConvertModal(lead)}
+                                                    className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+                                                >
+                                                    <UserCheck className="w-3.5 h-3.5 mr-1" />
+                                                    {t('leads.convert_button', 'Shartnoma tuzish')}
+                                                </Button>
+                                            ) : null
                                         )}
                                         {can('leads.manage') && (
                                             <Button
@@ -452,16 +489,23 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     <Eye className="w-3.5 h-3.5 mr-1" />
                                     {t('common.details', 'Batafsil')}
                                 </Button>
-                                {lead.stage !== 'contract_signed' && (
-                                    (can('contracts.create') ? <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => openConvertModal(lead)}
-                                        className="h-8 flex-1 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                    >
-                                        <UserCheck className="w-3.5 h-3.5 mr-1" />
-                                        {t('leads.convert_button', 'Shartnoma tuzish')}
-                                    </Button> : null)
+                                {isLeadConverted(lead) ? (
+                                    <Badge variant="outline" className="h-8 flex-1 justify-center text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium">
+                                        <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                        {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
+                                    </Badge>
+                                ) : (
+                                    can('contracts.create') ? (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => openConvertModal(lead)}
+                                            className="h-8 flex-1 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                        >
+                                            <UserCheck className="w-3.5 h-3.5 mr-1" />
+                                            {t('leads.convert_button', 'Shartnoma tuzish')}
+                                        </Button>
+                                    ) : null
                                 )}
                                 {can('leads.manage') && (
                                     <Button
@@ -480,7 +524,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
             </div>
 
             {/* Pagination */}
-            <Pagination links={leads.links} />
+            <Pagination links={leads.links} total={leads.total} from={leads.from} to={leads.to} />
 
             {/* View Lead Details Modal */}
             <Dialog open={!!viewingLead} onOpenChange={(open) => !open && setViewingLead(null)}>
@@ -718,15 +762,34 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                     {t('common.close', 'Yopish')}
                                 </Button>
                                 <div className="flex items-center gap-2">
-                                    {viewingLead.stage !== 'contract_signed' && (
-                                        (can('contracts.create') ? <Button
-                                            type="button"
-                                            onClick={() => openConvertModal(viewingLead)}
-                                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                                        >
-                                            <UserCheck className="w-4 h-4 mr-1.5" />
-                                            {t('leads.convert_button', 'Shartnoma tuzish')}
-                                        </Button> : null)
+                                    {isLeadConverted(viewingLead) ? (
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <Badge variant="outline" className="h-9 px-3 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium">
+                                                <CheckCircle className="w-4 h-4 mr-1.5 text-emerald-600 dark:text-emerald-400" />
+                                                {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
+                                                {viewingLead.contract?.contract_number ? ` (#${viewingLead.contract.contract_number})` : ''}
+                                            </Badge>
+                                            {viewingLead.contract?.id && (
+                                                <a
+                                                    href={`/admin/contracts?search=${encodeURIComponent(viewingLead.contract.contract_number || '')}`}
+                                                    className="inline-flex items-center h-9 px-3 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800"
+                                                >
+                                                    <FileText className="w-3.5 h-3.5 mr-1.5" />
+                                                    {t('leads.view_contract', 'Shartnomani ko\'rish')}
+                                                </a>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        can('contracts.create') ? (
+                                            <Button
+                                                type="button"
+                                                onClick={() => openConvertModal(viewingLead)}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            >
+                                                <UserCheck className="w-4 h-4 mr-1.5" />
+                                                {t('leads.convert_button', 'Shartnoma tuzish')}
+                                            </Button>
+                                        ) : null
                                     )}
                                 </div>
                             </div>

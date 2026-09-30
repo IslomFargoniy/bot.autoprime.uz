@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { router } from '@inertiajs/react';
 import { ArrowUpRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,21 +12,42 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { useCan } from '@/hooks/use-can';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { Expense } from '../types';
 
 interface Props {
-    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number };
+    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
     onDeleteExpense: (expense: Expense) => void;
+    filters?: {
+        branch_id?: string | number;
+        per_page?: string;
+        [key: string]: any;
+    };
 }
 
-export function ExpensesTab({ expenses, onDeleteExpense }: Props) {
+export function ExpensesTab({ expenses, onDeleteExpense, filters = {} }: Props) {
     const { t } = useTranslation();
     const can = useCan();
 
+    const handlePerPageChange = (newPerPage: string) => {
+        router.get('/admin/finance', {
+            ...filters,
+            per_page: newPerPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <div className="space-y-4 w-full max-w-full min-w-0">
+            {/* Top Toolbar */}
+            <div className="flex justify-end">
+                <PerPageSelect value={filters?.per_page || '15'} onChange={handlePerPageChange} />
+            </div>
+
             {/* Desktop & Tablet Table with dedicated Horizontal Scrollbar */}
             <div className="hidden md:block w-full max-w-full overflow-hidden">
                 <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs">
@@ -132,7 +154,12 @@ export function ExpensesTab({ expenses, onDeleteExpense }: Props) {
                 )}
             </div>
 
-            <Pagination links={expenses.links} />
+            <Pagination
+                links={expenses.links}
+                total={expenses.total}
+                from={expenses.from}
+                to={expenses.to}
+            />
         </div>
     );
 }

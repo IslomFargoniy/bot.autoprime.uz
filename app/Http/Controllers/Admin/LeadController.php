@@ -136,6 +136,12 @@ class LeadController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
+        if (($lead->contract_id || $lead->student_id || $lead->stage === 'contract_signed') && isset($validated['stage']) && $validated['stage'] !== 'contract_signed') {
+            return redirect()->back()->withErrors([
+                'stage' => "Shartnoma tuzilgan lid holatini o'zgartirib bo'lmaydi.",
+            ]);
+        }
+
         $lead->update($validated);
 
         return redirect()->back()->with('success', 'Lid yangilandi.');
@@ -156,9 +162,9 @@ class LeadController extends Controller
             'terms' => 'nullable|string',
         ]);
 
-        if ($lead->stage === 'contract_signed' || $lead->student_id) {
+        if ($lead->stage === 'contract_signed' || $lead->student_id || $lead->contract_id) {
             return redirect()->back()->withErrors([
-                'lead' => "Bu lid allaqachon o'quvchiga aylantirilgan.",
+                'lead' => 'Ushbu lid bilan allaqachon shartnoma tuzilgan.',
             ]);
         }
 
@@ -177,65 +183,76 @@ class LeadController extends Controller
         $student = null;
         $contract = null;
 
-        DB::transaction(function () use ($lead, $contractType, $branchId, $validated, $totalAmount, $discount, $finalAmount, $request, &$student, &$contract) {
-            // Create Student
-            $student = Student::create([
-                'branch_id' => $branchId,
-                'group_id' => $validated['group_id'] ?? null,
-                'registered_by_user_id' => $request->user()->id,
-                'full_name' => $lead->full_name,
-                'phone' => $lead->phone,
-                'passport_series' => $lead->passport_series,
-                'passport_number' => $lead->passport_number,
-                'pinfl' => $lead->pinfl,
-                'birth_date' => $lead->birth_date,
-                'address' => $lead->address,
-                'photo_url' => $lead->photo_url,
-                'passport_photo_url' => $lead->passport_photo_url,
-                'medical_certificate_photo_url' => $lead->medical_certificate_photo_url,
-                'telegram_id' => $lead->telegram_id,
-                'telegram_chat_id' => $lead->telegram_id ? (int) $lead->telegram_id : null,
-                'status' => 'active',
-                'is_active' => true,
-            ]);
+        try {
+            DB::transaction(function () use ($lead, $contractType, $branchId, $validated, $totalAmount, $discount, $finalAmount, $request, &$student, &$contract) {
+                $lockedLead = Lead::where('id', $lead->id)->lockForUpdate()->firstOrFail();
+                if ($lockedLead->stage === 'contract_signed' || $lockedLead->student_id || $lockedLead->contract_id) {
+                    throw new \DomainException('Ushbu lid bilan allaqachon shartnoma tuzilgan.');
+                }
 
-            // Generate Contract number
-            $contractNumber = DocumentNumberService::nextContractNumber();
+                // Create Student
+                $student = Student::create([
+                    'branch_id' => $branchId,
+                    'group_id' => $validated['group_id'] ?? null,
+                    'registered_by_user_id' => $request->user()->id,
+                    'full_name' => $lead->full_name,
+                    'phone' => $lead->phone,
+                    'passport_series' => $lead->passport_series,
+                    'passport_number' => $lead->passport_number,
+                    'pinfl' => $lead->pinfl,
+                    'birth_date' => $lead->birth_date,
+                    'address' => $lead->address,
+                    'photo_url' => $lead->photo_url,
+                    'passport_photo_url' => $lead->passport_photo_url,
+                    'medical_certificate_photo_url' => $lead->medical_certificate_photo_url,
+                    'telegram_id' => $lead->telegram_id,
+                    'telegram_chat_id' => $lead->telegram_id ? (int) $lead->telegram_id : null,
+                    'status' => 'active',
+                    'is_active' => true,
+                ]);
 
-            // Create Contract
-            $contract = Contract::create([
-                'branch_id' => $branchId,
-                'student_id' => $student->id,
-                'contract_type_id' => $contractType->id,
-                'group_id' => $validated['group_id'] ?? null,
-                'created_by_user_id' => $request->user()->id,
-                'contract_number' => $contractNumber,
-                'contract_date' => now()->toDateString(),
-                'start_date' => $validated['start_date'] ?? null,
-                'end_date' => $validated['end_date'] ?? null,
-                'has_theory' => $contractType->has_theory,
-                'has_driving' => $contractType->has_driving,
-                'has_lms' => $contractType->has_lms,
-                'required_driving_lessons' => $contractType->required_driving_lessons,
-                'required_theory_lessons' => $contractType->required_theory_lessons,
-                'total_amount' => $totalAmount,
-                'discount_amount' => $discount,
-                'final_amount' => $finalAmount,
-                'paid_amount' => 0,
-                'debt_amount' => $finalAmount,
-                'overpaid_amount' => 0,
-                'status' => 'active',
-                'payment_status' => 'unpaid',
-                'terms' => $validated['terms'] ?? null,
-            ]);
+                // Generate Contract number
+                $contractNumber = DocumentNumberService::nextContractNumber();
 
-            // Update Lead
-            $lead->update([
-                'stage' => 'contract_signed',
-                'student_id' => $student->id,
-                'contract_id' => $contract->id,
+                // Create Contract
+                $contract = Contract::create([
+                    'branch_id' => $branchId,
+                    'student_id' => $student->id,
+                    'contract_type_id' => $contractType->id,
+                    'group_id' => $validated['group_id'] ?? null,
+                    'created_by_user_id' => $request->user()->id,
+                    'contract_number' => $contractNumber,
+                    'contract_date' => now()->toDateString(),
+                    'start_date' => $validated['start_date'] ?? null,
+                    'end_date' => $validated['end_date'] ?? null,
+                    'has_theory' => $contractType->has_theory,
+                    'has_driving' => $contractType->has_driving,
+                    'has_lms' => $contractType->has_lms,
+                    'required_driving_lessons' => $contractType->required_driving_lessons,
+                    'required_theory_lessons' => $contractType->required_theory_lessons,
+                    'total_amount' => $totalAmount,
+                    'discount_amount' => $discount,
+                    'final_amount' => $finalAmount,
+                    'paid_amount' => 0,
+                    'debt_amount' => $finalAmount,
+                    'overpaid_amount' => 0,
+                    'status' => 'active',
+                    'payment_status' => 'unpaid',
+                    'terms' => $validated['terms'] ?? null,
+                ]);
+
+                // Update Lead
+                $lead->update([
+                    'stage' => 'contract_signed',
+                    'student_id' => $student->id,
+                    'contract_id' => $contract->id,
+                ]);
+            });
+        } catch (\DomainException $e) {
+            return redirect()->back()->withErrors([
+                'lead' => $e->getMessage(),
             ]);
-        });
+        }
 
         if ($contract) {
             $telegramService->sendContractSignedNotification($contract);

@@ -10,6 +10,7 @@ import PasswordInput from '@/components/password-input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { SharedData, Branch } from '@/types/auth';
 import {
@@ -64,7 +65,9 @@ interface PageProps {
     instructors: {
         data: Instructor[];
         links: any[];
+        total?: number;
         from?: number;
+        to?: number;
     };
     branches?: Branch[];
     filters?: {
@@ -248,17 +251,13 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                                 <div className="space-y-4 py-4">
                                     <div>
                                         <Label>{t('common.per_page', 'Ko\'rsatish soni')}</Label>
-                                        <select
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
-                                            value={perPage}
-                                            onChange={(e) => setPerPage(e.target.value)}
-                                        >
-                                            <option value="15">15</option>
-                                            <option value="25">25</option>
-                                            <option value="50">50</option>
-                                            <option value="75">75</option>
-                                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                                        </select>
+                                        <div className="mt-1">
+                                            <PerPageSelect
+                                                value={perPage}
+                                                onChange={(val) => setPerPage(val)}
+                                                className="w-full"
+                                            />
+                                        </div>
                                     </div>
                                     <div>
                                         <Label>{t('common.from', 'Dan')}</Label>
@@ -306,21 +305,13 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                             }}
                             className="w-36"
                         />
-                        <select
-                            className="flex h-10 w-full md:w-auto items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <PerPageSelect
                             value={perPage}
-                            onChange={(e) => {
-                                setPerPage(e.target.value);
-                                router.get('/admin/instructors', { search, from, to, per_page: e.target.value }, { preserveState: true, replace: true });
+                            onChange={(val) => {
+                                setPerPage(val);
+                                router.get('/admin/instructors', { search, from, to, per_page: val }, { preserveState: true, replace: true });
                             }}
-                            title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                        >
-                            <option value="15">15</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="75">75</option>
-                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                        </select>
+                        />
                     </div>
                 </div>
             </div>
@@ -618,7 +609,12 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
                     ))}
                 </div>
 
-            <Pagination links={instructors.links} />
+            <Pagination
+                links={instructors.links}
+                total={instructors.total}
+                from={instructors.from}
+                to={instructors.to}
+            />
         </div>
     );
 }

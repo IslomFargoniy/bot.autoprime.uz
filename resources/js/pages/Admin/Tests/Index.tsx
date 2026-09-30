@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/table';
 import { cn, formatDateTime, formatNumber } from '@/lib/utils';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
@@ -107,6 +108,8 @@ interface PageProps {
         data: Attempt[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
     };
     stats: {
         total_tickets: number;
@@ -122,6 +125,7 @@ interface PageProps {
         search?: string;
         status?: string;
         type?: string;
+        per_page?: string;
     };
 }
 
@@ -141,6 +145,7 @@ export default function TestsIndex({
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
     const [typeFilter, setTypeFilter] = useState(filters.type || '');
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     // Ticket inspection modal state
     const [inspectingTicket, setInspectingTicket] = useState<Ticket | null>(null);
@@ -211,6 +216,21 @@ export default function TestsIndex({
                 search: search || undefined,
                 status: statusFilter || undefined,
                 type: typeFilter || undefined,
+                per_page: perPage,
+            },
+            { preserveState: true }
+        );
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get(
+            '/admin/tests',
+            {
+                search: search || undefined,
+                status: statusFilter || undefined,
+                type: typeFilter || undefined,
+                per_page: newPerPage,
             },
             { preserveState: true }
         );
@@ -220,7 +240,7 @@ export default function TestsIndex({
         setSearch('');
         setStatusFilter('');
         setTypeFilter('');
-        router.get('/admin/tests', {}, { preserveState: true });
+        router.get('/admin/tests', { per_page: perPage }, { preserveState: true });
     };
 
     const openTicketDetails = async (ticket: Ticket) => {
@@ -886,6 +906,8 @@ export default function TestsIndex({
                             triggerClassName="h-10 text-sm"
                         />
 
+                        <PerPageSelect value={perPage} onChange={handlePerPageChange} />
+
                         <Button type="submit" variant="secondary" className="h-10 px-4">
                             <Search className="w-4 h-4 mr-1.5" />
                             {t('common.filter', 'Filtrlash')}
@@ -1047,7 +1069,12 @@ export default function TestsIndex({
                         )}
                     </div>
 
-                    <Pagination links={attempts.links} />
+                    <Pagination
+                        links={attempts.links}
+                        total={attempts.total}
+                        from={attempts.from}
+                        to={attempts.to}
+                    />
                 </div>
             )}
 

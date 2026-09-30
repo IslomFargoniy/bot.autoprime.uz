@@ -373,6 +373,7 @@ export default function FinanceIndex({
                 <PaymentsTab
                     payments={payments}
                     onDeletePayment={handleDeletePayment}
+                    filters={filters}
                 />
             )}
 
@@ -380,6 +381,7 @@ export default function FinanceIndex({
                 <ExpensesTab
                     expenses={expenses}
                     onDeleteExpense={handleDeleteExpense}
+                    filters={filters}
                 />
             )}
 
@@ -389,6 +391,7 @@ export default function FinanceIndex({
                     canReviewTransfer={canReviewTransfer}
                     onApproveTransfer={handleApproveTransfer}
                     onRejectTransfer={handleRejectTransfer}
+                    filters={filters}
                 />
             )}
 

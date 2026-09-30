@@ -78,10 +78,10 @@ export interface SweepItem {
 export interface PageProps {
     cashRegisters: CashRegister[];
     superadminRegisters: CashRegister[];
-    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number };
-    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number };
-    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number };
-    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number };
+    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
+    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
+    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
+    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
     branches: Array<{ id: number; name: string }>;
     expenseCategories: Array<{ id: number; name: string }>;
     registerTypes: Array<{ id: number; code: string; name: string }>;
@@ -96,6 +96,7 @@ export interface PageProps {
     }>;
     filters?: {
         branch_id?: string | number;
+        per_page?: string;
         history_register_id?: string | number;
         history_category?: string;
         history_from?: string;

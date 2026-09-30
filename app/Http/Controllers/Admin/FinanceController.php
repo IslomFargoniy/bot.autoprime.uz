@@ -70,7 +70,6 @@ class FinanceController extends Controller
         if ($targetBranchId) {
             $paymentsQuery->where('branch_id', $targetBranchId);
         }
-        $payments = $paymentsQuery->paginate(15, ['*'], 'payments_page')->withQueryString();
 
         // 4. Recent Expenses
         $expensesQuery = Expense::with(['cashRegister', 'category', 'user'])
@@ -78,7 +77,6 @@ class FinanceController extends Controller
         if ($targetBranchId) {
             $expensesQuery->where('branch_id', $targetBranchId);
         }
-        $expenses = $expensesQuery->paginate(15, ['*'], 'expenses_page')->withQueryString();
 
         // 5. Cash Transactions (Kassa tarixi / Ledger with Running Balance)
         $transactionsQuery = CashTransaction::with(['cashRegister.branch', 'cashRegister.type', 'user'])
@@ -111,8 +109,6 @@ class FinanceController extends Controller
             $transactionsQuery->whereDate('transacted_at', '<=', $request->input('history_to'));
         }
 
-        $transactions = $transactionsQuery->paginate(15, ['*'], 'transactions_page')->withQueryString();
-
         // 6. Cash Transfers
         $transfersQuery = CashTransfer::with(['fromCashRegister', 'toCashRegister', 'transferredBy', 'approvedBy'])
             ->orderBy('created_at', 'desc');
@@ -125,7 +121,19 @@ class FinanceController extends Controller
                 });
             });
         }
-        $transfers = $transfersQuery->paginate(15, ['*'], 'transfers_page')->withQueryString();
+
+        $perPage = $this->perPage($request, fn () => max(
+            $paymentsQuery->count(),
+            $expensesQuery->count(),
+            $transactionsQuery->count(),
+            $transfersQuery->count(),
+            1
+        ));
+
+        $payments = $paymentsQuery->paginate($perPage, ['*'], 'payments_page')->withQueryString();
+        $expenses = $expensesQuery->paginate($perPage, ['*'], 'expenses_page')->withQueryString();
+        $transactions = $transactionsQuery->paginate($perPage, ['*'], 'transactions_page')->withQueryString();
+        $transfers = $transfersQuery->paginate($perPage, ['*'], 'transfers_page')->withQueryString();
 
         // Select lists
         $branches = Branch::where('status', 'active')->get();
@@ -159,6 +167,7 @@ class FinanceController extends Controller
             'contracts' => $activeContracts,
             'filters' => [
                 'branch_id' => $targetBranchId,
+                'per_page' => $request->query('per_page'),
                 'history_register_id' => $request->input('history_register_id'),
                 'history_category' => $request->input('history_category'),
                 'history_from' => $request->input('history_from'),

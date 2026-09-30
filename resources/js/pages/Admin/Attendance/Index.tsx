@@ -29,6 +29,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
@@ -84,6 +85,8 @@ interface PageProps {
         data: Attendance[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
     };
     activeSessions: LessonSession[];
     groups: Array<{ id: number; name: string }>;
@@ -94,6 +97,7 @@ interface PageProps {
         date?: string;
         branch_id?: string | number;
         action?: string;
+        per_page?: string;
     };
 }
 
@@ -113,6 +117,7 @@ export default function AttendanceIndex({
     // Page filter states
     const [filterGroupId, setFilterGroupId] = useState(filters.group_id?.toString() || '');
     const [filterDate, setFilterDate] = useState(filters.date || '');
+    const [perPage, setPerPage] = useState(filters?.per_page || '15');
 
     // Group journal state inside modal
     const [rosterGroupId, setRosterGroupId] = useState<number | string>(
@@ -302,6 +307,20 @@ export default function AttendanceIndex({
             {
                 group_id: nextGroupId || undefined,
                 date: nextDate || undefined,
+                per_page: perPage,
+            },
+            { preserveState: true, replace: true }
+        );
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get(
+            '/admin/attendance',
+            {
+                group_id: filterGroupId || undefined,
+                date: filterDate || undefined,
+                per_page: newPerPage,
             },
             { preserveState: true, replace: true }
         );
@@ -310,7 +329,7 @@ export default function AttendanceIndex({
     const handleClearFilters = () => {
         setFilterGroupId('');
         setFilterDate('');
-        router.get('/admin/attendance', {}, { preserveState: true, replace: true });
+        router.get('/admin/attendance', { per_page: perPage }, { preserveState: true, replace: true });
     };
 
     const presentCount = rosterList.filter((s) => s.is_attended).length;
@@ -388,6 +407,7 @@ export default function AttendanceIndex({
                         onChange={(val) => handleFilterChange('date', val)}
                         className="w-full sm:w-44"
                     />
+                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
                     {(filterGroupId || filterDate) && (
                         <Button
                             type="button"
@@ -527,7 +547,12 @@ export default function AttendanceIndex({
             </div>
 
             {/* Pagination */}
-            <Pagination links={attendances.links} />
+            <Pagination
+                links={attendances.links}
+                total={attendances.total}
+                from={attendances.from}
+                to={attendances.to}
+            />
 
             {/* Start Session Modal */}
             <Dialog open={showSessionModal} onOpenChange={setShowSessionModal}>

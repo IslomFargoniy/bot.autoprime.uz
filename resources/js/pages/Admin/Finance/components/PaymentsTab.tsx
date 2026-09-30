@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { router } from '@inertiajs/react';
 import { ArrowDownRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,18 +12,34 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { useCan } from '@/hooks/use-can';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { Payment } from '../types';
 
 interface Props {
-    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number };
+    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
     onDeletePayment: (payment: Payment) => void;
+    filters?: {
+        branch_id?: string | number;
+        per_page?: string;
+        [key: string]: any;
+    };
 }
 
-export function PaymentsTab({ payments, onDeletePayment }: Props) {
+export function PaymentsTab({ payments, onDeletePayment, filters = {} }: Props) {
     const { t } = useTranslation();
     const can = useCan();
+
+    const handlePerPageChange = (newPerPage: string) => {
+        router.get('/admin/finance', {
+            ...filters,
+            per_page: newPerPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     const getMethodLabel = (method: string) => {
         switch (method) {
@@ -47,6 +64,11 @@ export function PaymentsTab({ payments, onDeletePayment }: Props) {
 
     return (
         <div className="space-y-4 w-full max-w-full min-w-0">
+            {/* Top Toolbar */}
+            <div className="flex justify-end">
+                <PerPageSelect value={filters?.per_page || '15'} onChange={handlePerPageChange} />
+            </div>
+
             {/* Desktop & Tablet Table with dedicated Horizontal Scrollbar */}
             <div className="hidden md:block w-full max-w-full overflow-hidden">
                 <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs">
@@ -174,7 +196,12 @@ export function PaymentsTab({ payments, onDeletePayment }: Props) {
                 )}
             </div>
 
-            <Pagination links={payments.links} />
+            <Pagination
+                links={payments.links}
+                total={payments.total}
+                from={payments.from}
+                to={payments.to}
+            />
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { router } from '@inertiajs/react';
 import { ArrowLeftRight, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,21 +12,42 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { CashTransfer } from '../types';
 
 interface Props {
-    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number };
+    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
     canReviewTransfer: (transfer: CashTransfer) => boolean;
     onApproveTransfer: (transfer: CashTransfer) => void;
     onRejectTransfer: (transfer: CashTransfer) => void;
+    filters?: {
+        branch_id?: string | number;
+        per_page?: string;
+        [key: string]: any;
+    };
 }
 
-export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, onRejectTransfer }: Props) {
+export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, onRejectTransfer, filters = {} }: Props) {
     const { t } = useTranslation();
+
+    const handlePerPageChange = (newPerPage: string) => {
+        router.get('/admin/finance', {
+            ...filters,
+            per_page: newPerPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     return (
         <div className="space-y-4 w-full max-w-full min-w-0">
+            {/* Top Toolbar */}
+            <div className="flex justify-end">
+                <PerPageSelect value={filters?.per_page || '15'} onChange={handlePerPageChange} />
+            </div>
+
             {/* Desktop & Tablet Table with dedicated Horizontal Scrollbar */}
             <div className="hidden md:block w-full max-w-full overflow-hidden">
                 <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs">
@@ -214,7 +236,12 @@ export function TransfersTab({ transfers, canReviewTransfer, onApproveTransfer, 
                 )}
             </div>
 
-            <Pagination links={transfers.links} />
+            <Pagination
+                links={transfers.links}
+                total={transfers.total}
+                from={transfers.from}
+                to={transfers.to}
+            />
         </div>
     );
 }

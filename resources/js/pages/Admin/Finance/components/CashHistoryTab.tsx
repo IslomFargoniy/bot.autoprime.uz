@@ -15,14 +15,16 @@ import {
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { CashRegister, CashTransaction } from '../types';
 
 interface Props {
     cashRegisters: CashRegister[];
-    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number };
+    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
     filters?: {
         branch_id?: string | number;
+        per_page?: string;
         history_register_id?: string | number;
         history_category?: string;
         history_from?: string;
@@ -37,6 +39,7 @@ export function CashHistoryTab({ cashRegisters, transactions, filters = {} }: Pr
     const [historyCat, setHistoryCat] = useState<string>(filters.history_category || '');
     const [historyFrom, setHistoryFrom] = useState<string>(filters.history_from || '');
     const [historyTo, setHistoryTo] = useState<string>(filters.history_to || '');
+    const [perPage, setPerPage] = useState<string>(filters.per_page || '15');
 
     const handleFilterHistory = (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,6 +49,22 @@ export function CashHistoryTab({ cashRegisters, transactions, filters = {} }: Pr
             history_category: historyCat || undefined,
             history_from: historyFrom || undefined,
             history_to: historyTo || undefined,
+            per_page: perPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get('/admin/finance', {
+            ...filters,
+            history_register_id: historyRegId || undefined,
+            history_category: historyCat || undefined,
+            history_from: historyFrom || undefined,
+            history_to: historyTo || undefined,
+            per_page: newPerPage,
         }, {
             preserveState: true,
             preserveScroll: true,
@@ -198,6 +217,8 @@ export function CashHistoryTab({ cashRegisters, transactions, filters = {} }: Pr
                     </div>
 
                     <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
+                        <PerPageSelect value={perPage} onChange={handlePerPageChange} />
+
                         <Button type="submit" variant="secondary" className="flex-1 sm:flex-initial h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm" title={t('common.filter', 'Filtrlash')}>
                             <Search className="w-4 h-4 mr-1.5" />
                             <span>{t('common.filter', 'Filtrlash')}</span>
@@ -346,7 +367,12 @@ export function CashHistoryTab({ cashRegisters, transactions, filters = {} }: Pr
                 )}
             </div>
 
-            <Pagination links={transactions.links} />
+            <Pagination
+                links={transactions.links}
+                total={transactions.total}
+                from={transactions.from}
+                to={transactions.to}
+            />
         </div>
     );
 }

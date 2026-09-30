@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -121,6 +122,9 @@ interface PageProps {
         data: Contract[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
+        per_page?: number;
     };
     students: Array<{ id: number; full_name: string; phone: string; group_id?: number }>;
     contractTypes: Array<{ id: number; name: string; price: number | string; category: string }>;
@@ -133,6 +137,7 @@ interface PageProps {
         payment_status?: string;
         has_debt?: boolean;
         branch_id?: string | number;
+        per_page?: string;
     };
 }
 
@@ -144,6 +149,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const [refundingContract, setRefundingContract] = useState<Contract | null>(null);
     const [viewingPaymentsContract, setViewingPaymentsContract] = useState<Contract | null>(null);
     const [search, setSearch] = useState(filters.search || '');
+    const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const refundForm = useForm({
         cash_register_id: cashRegisters[0]?.id ? String(cashRegisters[0].id) : '',
@@ -165,11 +171,16 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/admin/contracts', { ...filters, search }, { preserveState: true });
+        router.get('/admin/contracts', { ...filters, search, per_page: perPage }, { preserveState: true });
     };
 
     const handleFilterStatus = (status: string) => {
-        router.get('/admin/contracts', { ...filters, payment_status: status === 'all' ? '' : status }, { preserveState: true });
+        router.get('/admin/contracts', { ...filters, payment_status: status === 'all' ? '' : status, per_page: perPage }, { preserveState: true });
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get('/admin/contracts', { ...filters, search, per_page: newPerPage }, { preserveState: true, replace: true });
     };
 
     const handleCreateSubmit = (e: React.FormEvent) => {
@@ -296,7 +307,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                     </button>
                 </div>
 
-                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto items-center">
                     <div className="relative flex-1 md:w-64">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -306,6 +317,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                             className="pl-9 h-10 text-sm"
                         />
                     </div>
+                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
                     <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
                         <Search className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">{t('common.find', 'Qidiruv')}</span>
@@ -543,7 +555,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             </div>
 
             {/* Pagination */}
-            <Pagination links={contracts.links} />
+            <Pagination links={contracts.links} total={contracts.total} from={contracts.from} to={contracts.to} />
 
             {/* View Full Contract Details Modal */}
             <Dialog open={!!viewingContract} onOpenChange={(open) => !open && setViewingContract(null)}>

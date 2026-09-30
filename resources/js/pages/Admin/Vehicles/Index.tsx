@@ -28,6 +28,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -71,6 +72,8 @@ interface PageProps {
         data: Vehicle[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
     };
     instructors: Array<{ id: number; name: string }>;
     branches: Array<{ id: number; name: string }>;
@@ -78,6 +81,7 @@ interface PageProps {
     filters: {
         search?: string;
         branch_id?: string | number;
+        per_page?: string;
     };
 }
 
@@ -94,6 +98,32 @@ export default function VehiclesIndex({
     const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
     const [maintainingVehicle, setMaintainingVehicle] = useState<Vehicle | null>(null);
     const [historyVehicle, setHistoryVehicle] = useState<Vehicle | null>(null);
+    const [search, setSearch] = useState(filters.search || '');
+    const [perPage, setPerPage] = useState<string>(filters.per_page || '15');
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get('/admin/vehicles', {
+            ...filters,
+            search: search || undefined,
+            per_page: perPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get('/admin/vehicles', {
+            ...filters,
+            search: search || undefined,
+            per_page: newPerPage,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     const vehicleForm = useForm({
         branch_id: branches[0]?.id || '',
@@ -233,6 +263,25 @@ export default function VehiclesIndex({
                 )}
             </div>
 
+            {/* Filter Toolbar */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
+                <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 max-w-sm">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input
+                            placeholder={t('common.search', 'Qidirish...')}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-9 h-9 text-xs"
+                        />
+                    </div>
+                    <Button type="submit" variant="secondary" size="sm" className="h-9 text-xs">
+                        {t('common.search', 'Qidirish')}
+                    </Button>
+                </form>
+                <PerPageSelect value={perPage} onChange={handlePerPageChange} />
+            </div>
+
             {/* Vehicles Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {vehicles.data.map((v) => (
@@ -362,7 +411,12 @@ export default function VehiclesIndex({
             </div>
 
             {/* Pagination */}
-            <Pagination links={vehicles.links} />
+            <Pagination
+                links={vehicles.links}
+                total={vehicles.total}
+                from={vehicles.from}
+                to={vehicles.to}
+            />
 
             {/* Vehicle Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

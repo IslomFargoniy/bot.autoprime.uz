@@ -25,6 +25,8 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
+import { router } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -53,8 +55,14 @@ interface PageProps {
         data: Autodrome[];
         links: any[];
         total?: number;
+        from?: number;
+        to?: number;
     } | Autodrome[];
     branches?: Branch[];
+    filters?: {
+        branch_id?: string | number;
+        per_page?: string;
+    };
 }
 
 function LocationMarker({ position, setPosition, radius }: { position: L.LatLng | null; setPosition: (pos: L.LatLng) => void; radius: number }) {
@@ -88,17 +96,29 @@ function MapController({ center }: { center: L.LatLng | null }) {
     return null;
 }
 
-export default function AutodromesIndex({ autodromes, branches = [] }: PageProps) {
+export default function AutodromesIndex({ autodromes, branches = [], filters = {} }: PageProps) {
     const autodromesList: Autodrome[] = Array.isArray(autodromes) ? autodromes : (autodromes?.data || []);
     const autodromesLinks = !Array.isArray(autodromes) ? autodromes?.links : undefined;
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
     const isInstructor = auth?.user?.role === 'instructor';
 
+    const [perPage, setPerPage] = useState(filters?.per_page || '15');
     const [editing, setEditing] = useState<Autodrome | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [locating, setLocating] = useState(false);
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
+
+    const handlePerPageChange = (val: string) => {
+        setPerPage(val);
+        router.get('/admin/autodromes', {
+            ...filters,
+            per_page: val,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
     
     // Default to Tashkent coordinates if no position is selected
     const defaultCenter = useMemo(() => new L.LatLng(41.2995, 69.2401), []);
@@ -354,6 +374,11 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
                 </DialogContent>
             </Dialog>
 
+            {/* Filter Toolbar */}
+            <div className="flex justify-end">
+                <PerPageSelect value={perPage} onChange={handlePerPageChange} />
+            </div>
+
             {/* Desktop/Tablet Table */}
             <div className="hidden md:block bg-card border rounded-xl shadow-xs overflow-x-auto">
                 <Table>
@@ -467,7 +492,14 @@ export default function AutodromesIndex({ autodromes, branches = [] }: PageProps
             </div>
 
             {/* Pagination */}
-            {autodromesLinks && <Pagination links={autodromesLinks} />}
+            {autodromesLinks && (
+                <Pagination
+                    links={autodromesLinks}
+                    total={!Array.isArray(autodromes) ? autodromes.total : undefined}
+                    from={!Array.isArray(autodromes) ? autodromes.from : undefined}
+                    to={!Array.isArray(autodromes) ? autodromes.to : undefined}
+                />
+            )}
         </div>
     );
 }

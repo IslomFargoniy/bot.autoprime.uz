@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -39,15 +40,33 @@ interface PageProps {
         data: ContractType[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
     };
     branches: Array<{ id: number; name: string }>;
+    filters?: {
+        branch_id?: string | number;
+        per_page?: string;
+    };
 }
 
-export default function ContractTypesIndex({ contractTypes, branches }: PageProps) {
+export default function ContractTypesIndex({ contractTypes, branches, filters = {} }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
+    const [perPage, setPerPage] = useState(filters?.per_page || '15');
     const [showModal, setShowModal] = useState(false);
     const [editingType, setEditingType] = useState<ContractType | null>(null);
+
+    const handlePerPageChange = (val: string) => {
+        setPerPage(val);
+        router.get('/admin/contract-types', {
+            ...filters,
+            per_page: val,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     const form = useForm({
         name: '',
@@ -131,6 +150,11 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
                         <span>{t('common.add', 'Qo\'shish')}</span>
                     </Button>
                 )}
+            </div>
+
+            {/* Filter Toolbar */}
+            <div className="flex justify-end">
+                <PerPageSelect value={perPage} onChange={handlePerPageChange} />
             </div>
 
             {/* Contract Types Grid / Table */}
@@ -218,7 +242,12 @@ export default function ContractTypesIndex({ contractTypes, branches }: PageProp
             )}
 
             {/* Pagination */}
-            <Pagination links={contractTypes.links} />
+            <Pagination
+                links={contractTypes.links}
+                total={contractTypes.total}
+                from={contractTypes.from}
+                to={contractTypes.to}
+            />
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

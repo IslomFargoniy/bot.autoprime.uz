@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/table';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatNumber, formatMoney } from '@/lib/utils';
 import { MoneyInput } from '@/components/ui/money-input';
 
@@ -74,6 +75,8 @@ interface PageProps {
         data: Salary[];
         links: any[];
         total: number;
+        from?: number;
+        to?: number;
     };
     employees: Employee[];
     cashRegisters: CashRegister[];
@@ -81,6 +84,7 @@ interface PageProps {
     filters: {
         period: string;
         branch_id?: string | number;
+        per_page?: string;
     };
 }
 
@@ -93,6 +97,7 @@ export default function SalariesIndex({
     const { t } = useTranslation();
     const can = useCan();
     const [period, setPeriod] = useState(filters.period);
+    const [perPage, setPerPage] = useState<string>(filters.per_page || '15');
 
     // Modals
     const [showAdjustModal, setShowAdjustModal] = useState(false);
@@ -116,7 +121,12 @@ export default function SalariesIndex({
 
     const handlePeriodChange = (newPeriod: string) => {
         setPeriod(newPeriod);
-        router.get('/admin/salaries', { ...filters, period: newPeriod }, { preserveState: true });
+        router.get('/admin/salaries', { ...filters, period: newPeriod, per_page: perPage }, { preserveState: true });
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setPerPage(newPerPage);
+        router.get('/admin/salaries', { ...filters, period, per_page: newPerPage }, { preserveState: true });
     };
 
     const handleGeneratePayroll = () => {
@@ -218,12 +228,6 @@ export default function SalariesIndex({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">{t('salaries.title', 'Xodimlar Oylik Hisob-kitobi')}</h1>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Input
-                        type="month"
-                        value={period}
-                        onChange={(e) => handlePeriodChange(e.target.value)}
-                        className="w-36 h-9 text-xs"
-                    />
                     {can('salaries.accrue') && (
                         <Button onClick={handleGeneratePayroll} variant="brand" className="text-xs">
                             <Calculator className="w-4 h-4 mr-1.5" />
@@ -237,6 +241,20 @@ export default function SalariesIndex({
                         </Button>
                     )}
                 </div>
+            </div>
+
+            {/* Filter Toolbar */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-gray-500">{t('salaries.period', 'Davr')}:</span>
+                    <Input
+                        type="month"
+                        value={period}
+                        onChange={(e) => handlePeriodChange(e.target.value)}
+                        className="w-40 h-9 text-xs"
+                    />
+                </div>
+                <PerPageSelect value={perPage} onChange={handlePerPageChange} />
             </div>
 
             {/* Table / Desktop View */}
@@ -393,7 +411,12 @@ export default function SalariesIndex({
             </div>
 
             {/* Pagination */}
-            <Pagination links={salaries.links} />
+            <Pagination
+                links={salaries.links}
+                total={salaries.total}
+                from={salaries.from}
+                to={salaries.to}
+            />
 
             {/* Custom Adjustment Modal (Bonus, Fine, Advance) */}
             <Dialog open={showAdjustModal} onOpenChange={setShowAdjustModal}>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Branch, SharedData } from '@/types/auth';
 import {
@@ -66,7 +67,10 @@ interface PageProps {
     groups: {
         data: Group[];
         links?: any[];
+        total?: number;
         from?: number;
+        to?: number;
+        per_page?: number;
     };
     instructors: Instructor[];
     teachers?: Instructor[];
@@ -238,19 +242,14 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
                                     </div>
                                     <div className="space-y-2">
                                         <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                        <select
-                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                        <PerPageSelect
                                             value={perPage}
-                                            onChange={(e) => {
-                                                setPerPage(e.target.value);
-                                                applyFilters(search, instructorId, e.target.value);
+                                            onChange={(val) => {
+                                                setPerPage(val);
+                                                applyFilters(search, instructorId, val);
                                             }}
-                                        >
-                                            <option value="10">10</option>
-                                            <option value="30">30</option>
-                                            <option value="50">50</option>
-                                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                                        </select>
+                                            className="w-full"
+                                        />
                                     </div>
                                 </div>
                             </SheetContent>
@@ -275,21 +274,13 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
                             triggerClassName="h-10 text-sm"
                             allowClear
                         />
-                        <select
-                            className="flex h-10 w-full md:w-auto items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <PerPageSelect
                             value={perPage}
-                            onChange={(e) => {
-                                setPerPage(e.target.value);
-                                applyFilters(search, instructorId, e.target.value);
+                            onChange={(val) => {
+                                setPerPage(val);
+                                applyFilters(search, instructorId, val);
                             }}
-                            title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                        >
-                            <option value="15">15</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="75">75</option>
-                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                        </select>
+                        />
                     </div>
                 </div>
             </div>
@@ -514,7 +505,7 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
                 </div>
             </div>
 
-            <Pagination links={groups.links} />
+            <Pagination links={groups.links} total={groups.total} from={groups.from} to={groups.to} />
 
             <GroupAttendanceModal
                 isOpen={!!attendanceGroup}

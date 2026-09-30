@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import type { Branch } from '@/types/auth';
 
 interface Props {
@@ -134,21 +135,13 @@ export default function Index({ branches, filters }: Props) {
 
                 {/* Search & Filter Bar */}
                 <div className="flex items-center gap-3">
-                    <select
-                        className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <PerPageSelect
                         value={perPage}
-                        onChange={(e) => {
-                            setPerPage(e.target.value);
-                            applyFilters(search, e.target.value);
+                        onChange={(val) => {
+                            setPerPage(val);
+                            applyFilters(search, val);
                         }}
-                        title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                    >
-                        <option value="15">15</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="75">75</option>
-                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                    </select>
+                    />
                     <form onSubmit={handleSearch} className="flex-1 max-w-md relative">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -277,7 +270,12 @@ export default function Index({ branches, filters }: Props) {
                 </div>
 
                 {/* Pagination */}
-                <Pagination links={branches.links} />
+                <Pagination
+                    links={branches.links}
+                    total={branches.total}
+                    from={branches.from}
+                    to={branches.to}
+                />
 
                 {/* Create / Edit Dialog */}
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>

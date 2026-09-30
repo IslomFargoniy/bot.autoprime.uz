@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
@@ -49,7 +50,9 @@ interface PageProps {
     admins: {
         data: AdminUser[];
         links?: any[];
+        total?: number;
         from?: number;
+        to?: number;
     };
     branches?: Branch[];
     filters?: {
@@ -86,8 +89,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
         applyFilters(value, perPage);
     };
 
-    const handlePerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
+    const handlePerPageChange = (value: string) => {
         setPerPage(value);
         applyFilters(search, value);
     };
@@ -184,18 +186,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 {/* Desktop Filters */}
                 <div className="hidden md:flex gap-2 items-center">
-                    <select
-                        className="flex h-10 w-full md:w-auto items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={perPage}
-                        onChange={handlePerPageChange}
-                        title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                    >
-                        <option value="15">15</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="75">75</option>
-                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                    </select>
+                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
@@ -227,16 +218,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                             <div className="grid gap-4 py-4 mt-2">
                                 <div className="space-y-2">
                                     <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                    <select
-                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                        value={perPage}
-                                        onChange={handlePerPageChange}
-                                    >
-                                        <option value="10">10</option>
-                                        <option value="30">30</option>
-                                        <option value="50">50</option>
-                                        <option value="all">{t('common.all', 'Barchasi')}</option>
-                                    </select>
+                                    <PerPageSelect value={perPage} onChange={handlePerPageChange} className="w-full" />
                                 </div>
                             </div>
                         </SheetContent>
@@ -445,7 +427,12 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                 </div>
             </div>
 
-            <Pagination links={admins.links} />
+            <Pagination
+                links={admins.links}
+                total={admins.total}
+                from={admins.from}
+                to={admins.to}
+            />
         </div>
     );
 }

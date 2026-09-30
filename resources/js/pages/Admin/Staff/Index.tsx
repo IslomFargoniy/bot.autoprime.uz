@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
 import {
@@ -101,6 +102,7 @@ interface PageProps {
         data: StaffUser[];
         links?: any[];
         from?: number;
+        to?: number;
         total?: number;
     };
     branches?: Branch[];
@@ -217,8 +219,7 @@ export default function StaffIndex({
         applyFilters(selectedRole, status, selectedBranch, search, perPage);
     };
 
-    const handlePerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
+    const handlePerPageChange = (val: string) => {
         setPerPage(val);
         applyFilters(selectedRole, selectedStatus, selectedBranch, search, val);
     };
@@ -554,16 +555,7 @@ export default function StaffIndex({
                             <option value="inactive">{t('staff.inactive', 'Nofaol')}</option>
                         </select>
 
-                        <select
-                            value={perPage}
-                            onChange={handlePerPageChange}
-                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        >
-                            <option value="15">15</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                        </select>
+                        <PerPageSelect value={perPage} onChange={handlePerPageChange} />
                     </div>
                 </div>
             </div>
@@ -917,7 +909,12 @@ export default function StaffIndex({
             </div>
 
             {/* Pagination */}
-            <Pagination links={staff.links} />
+            <Pagination
+                links={staff.links}
+                total={staff.total}
+                from={staff.from}
+                to={staff.to}
+            />
 
             {/* Add / Edit Staff Modal */}
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

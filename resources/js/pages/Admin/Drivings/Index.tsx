@@ -34,6 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { formatDate, formatTime, parseDate } from '@/lib/utils';
 
 interface Instructor {
@@ -86,7 +87,10 @@ interface PageProps {
     drivings: {
         data: Driving[];
         links?: { url: string | null; label: string; active: boolean }[];
+        total?: number;
         from?: number;
+        to?: number;
+        per_page?: number;
     };
     instructors: Instructor[];
     students: Student[];
@@ -527,19 +531,14 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
                                     <div className="space-y-2">
                                         <Label>{t('common.pagination', 'Sahifalash')}</Label>
-                                        <select
-                                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                        <PerPageSelect
                                             value={perPage}
-                                            onChange={(e) => {
-                                                setPerPage(e.target.value);
-                                                applyFilters(search, status, instructorId, fromDate, toDate, e.target.value);
+                                            onChange={(val) => {
+                                                setPerPage(val);
+                                                applyFilters(search, status, instructorId, fromDate, toDate, val);
                                             }}
-                                        >
-                                            <option value="10">10</option>
-                                            <option value="30">30</option>
-                                            <option value="50">50</option>
-                                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                                        </select>
+                                            className="w-full"
+                                        />
                                     </div>
                                 </div>
                             </SheetContent>
@@ -598,21 +597,13 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                             className="w-36"
                         />
 
-                        <select
-                            className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <PerPageSelect
                             value={perPage}
-                            onChange={(e) => {
-                                setPerPage(e.target.value);
-                                applyFilters(search, status, instructorId, fromDate, toDate, e.target.value);
+                            onChange={(val) => {
+                                setPerPage(val);
+                                applyFilters(search, status, instructorId, fromDate, toDate, val);
                             }}
-                            title={t('common.per_page', 'Sahifada ko\'rsatish')}
-                        >
-                            <option value="15">15</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="75">75</option>
-                            <option value="all">{t('common.all', 'Barchasi')}</option>
-                        </select>
+                        />
                     </div>
                 </div>
             </div>
@@ -1255,7 +1246,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                 </div>
             </div>
 
-            <Pagination links={drivings.links} />
+            <Pagination links={drivings.links} total={drivings.total} from={drivings.from} to={drivings.to} />
         </div>
     );
 }
