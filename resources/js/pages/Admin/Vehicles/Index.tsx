@@ -126,7 +126,7 @@ export default function VehiclesIndex({
     };
 
     const vehicleForm = useForm({
-        branch_id: branches[0]?.id || '',
+        branch_id: '' as string | number,
         default_instructor_id: '',
         plate_number: '',
         model: '',
@@ -192,7 +192,7 @@ export default function VehiclesIndex({
         if (status === 'retired') status = 'out_of_service';
 
         vehicleForm.setData({
-            branch_id: v.branch?.id || branches[0]?.id || '',
+            branch_id: v.branch?.id ? String(v.branch.id) : '',
             default_instructor_id: v.default_instructor_id ? String(v.default_instructor_id) : '',
             plate_number: v.plate_number,
             model: v.model,
@@ -494,7 +494,8 @@ export default function VehiclesIndex({
                                     value={vehicleForm.data.branch_id}
                                     onChange={(val) => vehicleForm.setData('branch_id', val ? String(val) : '')}
                                     options={branches.map((b) => ({ value: String(b.id), label: b.name }))}
-                                    placeholder={t('branches.branch', 'Filial')}
+                                    placeholder={t('branches.select_branch', 'Filialni tanlang')}
+                                    allowClear
                                     className="mt-1"
                                 />
                             </div>

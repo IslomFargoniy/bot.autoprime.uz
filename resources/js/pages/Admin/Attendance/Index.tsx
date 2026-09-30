@@ -121,7 +121,7 @@ export default function AttendanceIndex({
 
     // Group journal state inside modal
     const [rosterGroupId, setRosterGroupId] = useState<number | string>(
-        filters.group_id || groups[0]?.id || ''
+        filters.group_id || ''
     );
 
     useEffect(() => {
@@ -143,11 +143,11 @@ export default function AttendanceIndex({
 
     // Single student manual form
     const sessionForm = useForm({
-        group_id: groups[0]?.id || '',
+        group_id: '' as string | number,
     });
 
     const manualForm = useForm({
-        student_id: students[0]?.id || '',
+        student_id: '' as string | number,
         date: formatDate(new Date()),
         status: 'present',
         manual_reason: 'Telefoni yo\'q',
@@ -832,8 +832,9 @@ export default function AttendanceIndex({
                                         label: st.full_name,
                                         sublabel: st.phone,
                                     }))}
-                                    placeholder={t('attendance.student', 'Talaba')}
+                                    placeholder={t('attendance.select_student', 'Talabani tanlang')}
                                     searchPlaceholder={t('common.search_student', 'Talaba ismi yoki telefon...')}
+                                    allowClear
                                     className="mt-1"
                                     required
                                 />

@@ -152,7 +152,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const refundForm = useForm({
-        cash_register_id: cashRegisters[0]?.id ? String(cashRegisters[0].id) : '',
+        cash_register_id: '',
         amount: '',
         payment_method: 'cash',
         cancel_contract: true,
@@ -160,8 +160,8 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     });
 
     const form = useForm({
-        student_id: students[0]?.id || '',
-        contract_type_id: contractTypes[0]?.id || '',
+        student_id: '' as string | number,
+        contract_type_id: '' as string | number,
         group_id: '',
         discount_amount: 0,
         start_date: '',
@@ -213,7 +213,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
     const openRefund = (contract: Contract) => {
         setRefundingContract(contract);
         refundForm.setData({
-            cash_register_id: cashRegisters[0]?.id ? String(cashRegisters[0].id) : '',
+            cash_register_id: '',
             amount: String(contract.paid_amount),
             payment_method: 'cash',
             cancel_contract: true,
@@ -272,7 +272,16 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
             <div className="flex items-center justify-between gap-4">
                 <h1 className="text-xl sm:text-2xl font-bold">{t('contracts.title', 'Shartnomalar')}</h1>
                 {can('contracts.create') && (
-                    <Button onClick={() => setShowModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
+                    <Button
+                        onClick={() => {
+                            form.reset();
+                            form.clearErrors();
+                            setShowModal(true);
+                        }}
+                        variant="brand"
+                        size="sm"
+                        className="text-xs shrink-0"
+                    >
                         <Plus className="w-4 h-4 mr-1.5" />
                         <span>{t('common.add', 'Qo\'shish')}</span>
                     </Button>
@@ -790,6 +799,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     sublabel: s.phone,
                                 }))}
                                 placeholder={t('contracts.select_student', 'Talabani tanlang')}
+                                allowClear
                                 className="mt-1"
                             />
                         </div>
@@ -806,6 +816,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     sublabel: `${formatMoney(ct.price)} (${ct.category})`,
                                 }))}
                                 placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
+                                allowClear
                                 className="mt-1"
                             />
                         </div>
@@ -817,11 +828,9 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     id="group_id"
                                     value={form.data.group_id}
                                     onChange={(val) => form.setData('group_id', val)}
-                                    options={[
-                                        { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
-                                        ...groups.map((g) => ({ value: g.id, label: g.name })),
-                                    ]}
-                                    placeholder={t('common.not_assigned', 'Biriktirilmagan')}
+                                    options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                                    placeholder={t('contracts.select_group', 'Guruhni tanlang')}
+                                    allowClear
                                     className="mt-1"
                                 />
                             </div>

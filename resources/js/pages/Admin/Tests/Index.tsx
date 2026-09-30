@@ -177,7 +177,7 @@ export default function TestsIndex({
     // Management Modals: Sign
     const [showSignModal, setShowSignModal] = useState(false);
     const [editingSign, setEditingSign] = useState<any | null>(null);
-    const [signCategoryId, setSignCategoryId] = useState<number>(signCategories[0]?.id || 1);
+    const [signCategoryId, setSignCategoryId] = useState<number | ''>('');
     const [signNumber, setSignNumber] = useState('');
     const [signName, setSignName] = useState('');
     const [signDesc, setSignDesc] = useState('');
@@ -489,7 +489,7 @@ export default function TestsIndex({
     // ==========================================
     const openCreateSignModal = () => {
         setEditingSign(null);
-        setSignCategoryId(signCategories[0]?.id || 1);
+        setSignCategoryId('');
         setSignNumber('');
         setSignName('');
         setSignDesc('');
@@ -1748,13 +1748,14 @@ export default function TestsIndex({
                             <Label required className="text-xs mb-1.5 block">{t('tests.sign_category', 'Toifa')}</Label>
                             <SearchableSelect
                                 value={signCategoryId}
-                                onChange={(val) => setSignCategoryId(Number(val))}
+                                onChange={(val) => setSignCategoryId(val ? Number(val) : '')}
                                 options={signCategories.map((c) => ({
                                     value: c.id,
                                     label: c.name_uz,
                                     sublabel: `${c.signs?.length || 0} ta belgi`,
                                 }))}
                                 placeholder={t('tests.select_category', '-- Toifani tanlang --')}
+                                allowClear
                                 triggerClassName="text-xs rounded-xl"
                             />
                         </div>

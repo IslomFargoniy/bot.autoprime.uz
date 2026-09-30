@@ -105,7 +105,7 @@ export default function SalariesIndex({
 
     // Forms
     const adjustForm = useForm({
-        user_id: employees[0]?.id || '',
+        user_id: '',
         period: period,
         type: 'bonus',
         amount: '',
@@ -113,7 +113,7 @@ export default function SalariesIndex({
     });
 
     const payForm = useForm({
-        cash_register_id: cashRegisters[0]?.id || '',
+        cash_register_id: '',
         amount: '',
         payment_method: 'cash',
         notes: '',
@@ -549,6 +549,8 @@ export default function SalariesIndex({
                                                 label: r.name,
                                                 sublabel: formatMoney(r.balance),
                                             }))}
+                                            placeholder={t('finance.select_register', '-- Kassani tanlang --')}
+                                            allowClear
                                             className="mt-1"
                                         />
                                     </div>

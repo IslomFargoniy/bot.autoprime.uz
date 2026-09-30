@@ -127,7 +127,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
         full_name: '',
         phone: '',
         category: 'B',
-        branch_id: branches[0]?.id ? String(branches[0].id) : '',
+        branch_id: '',
         source: 'reception_manual',
         preferred_time: '',
         birth_date: '',
@@ -139,7 +139,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
     });
 
     const convertForm = useForm({
-        contract_type_id: String(contractTypes[0]?.id || ''),
+        contract_type_id: '',
         group_id: '',
         branch_id: '',
         discount_amount: 0,
@@ -168,9 +168,9 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
         }
         setConvertingLead(lead);
         convertForm.setData({
-            contract_type_id: String(contractTypes[0]?.id || ''),
+            contract_type_id: '',
             group_id: '',
-            branch_id: String(lead.branch_id || branches[0]?.id || ''),
+            branch_id: String(lead.branch_id || ''),
             discount_amount: 0,
             start_date: '',
             end_date: '',
@@ -1021,6 +1021,7 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                         sublabel: `${formatMoney(ct.price)} (${ct.category})`,
                                     }))}
                                     placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
+                                    allowClear
                                     className="mt-1"
                                 />
                             </div>
@@ -1032,11 +1033,9 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
                                         id="conv_group_id"
                                         value={convertForm.data.group_id}
                                         onChange={(val) => convertForm.setData('group_id', val)}
-                                        options={[
-                                            { value: '', label: t('common.not_assigned', 'Biriktirilmagan') },
-                                            ...groups.map((g) => ({ value: String(g.id), label: g.name })),
-                                        ]}
-                                        placeholder={t('common.not_assigned', 'Biriktirilmagan')}
+                                        options={groups.map((g) => ({ value: String(g.id), label: g.name }))}
+                                        placeholder={t('contracts.select_group', 'Guruhni tanlang')}
+                                        allowClear
                                         className="mt-1"
                                     />
                                 </div>

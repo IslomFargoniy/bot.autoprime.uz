@@ -61,8 +61,8 @@ export default function FinanceIndex({
 
     // Payment Form
     const paymentForm = useForm({
-        contract_id: contracts[0]?.id || '',
-        cash_register_id: cashRegisters[0]?.id || '',
+        contract_id: '',
+        cash_register_id: '',
         amount: '',
         payment_method: 'cash',
         notes: '',
@@ -70,16 +70,16 @@ export default function FinanceIndex({
 
     // Expense Form
     const expenseForm = useForm({
-        cash_register_id: cashRegisters[0]?.id || '',
-        expense_category_id: expenseCategories[0]?.id || '',
+        cash_register_id: '',
+        expense_category_id: '',
         amount: '',
         description: '',
     });
 
     // Transfer Form
     const transferForm = useForm({
-        from_cash_register_id: cashRegisters[0]?.id || '',
-        to_cash_register_id: cashRegisters[1]?.id || '',
+        from_cash_register_id: '',
+        to_cash_register_id: '',
         amount: '',
         notes: '',
     });
