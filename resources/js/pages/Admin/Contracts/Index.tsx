@@ -180,7 +180,10 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                 form.reset();
                 toast.success(t('contracts.created_success', 'Shartnoma muvaffaqiyatli tuzildi'));
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) => {
+                const first = Object.values(err)[0] as string;
+                toast.error(t(first, first) || t('common.error', 'Xatolik yuz berdi'));
+            },
         });
     };
 
@@ -833,6 +836,9 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     onChange={(val) => form.setData('start_date', val)}
                                     className="mt-1"
                                 />
+                                {form.errors.start_date && (
+                                    <p className="text-red-500 text-xs mt-1">{t(form.errors.start_date, form.errors.start_date)}</p>
+                                )}
                             </div>
                             <div>
                                 <Label htmlFor="end_date">{t('contracts.end_date', 'Tugash Sanasi')}</Label>
@@ -842,6 +848,9 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                     onChange={(val) => form.setData('end_date', val)}
                                     className="mt-1"
                                 />
+                                {form.errors.end_date && (
+                                    <p className="text-red-500 text-xs mt-1">{t(form.errors.end_date, form.errors.end_date)}</p>
+                                )}
                             </div>
                         </div>
 

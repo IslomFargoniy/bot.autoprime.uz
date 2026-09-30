@@ -205,7 +205,7 @@
         "excel_columns_hint": "Ustunlar: full_name, phone bo'lishi kerak.",
         "download_template": "Shablonni yuklab olish",
         "students_title": "Guruh Talabalari",
-        "no_students_in_group": "Guruhda hozircha talabalar yo'q. Excel orqali yuklang.",
+        "no_students_in_group": "Guruhda hozircha talabalar yo'q",
         "take_attendance": "Davomat",
         "course": "LMS Kurs",
         "course_optional": "LMS Kurs (Ixtiyoriy)",
@@ -213,7 +213,7 @@
         "deleted_success": "Guruh o'chirildi",
         "error": "Xatolik yuz berdi",
         "main_room": "Asosiy o'quv zali",
-        "no_students_in_group_desc": "Excel orqali talabalarni yuklang",
+        "no_students_in_group_desc": "Talabalar shartnoma tuzish orqali guruhga biriktiriladi",
         "not_assigned": "Siz hali guruhga biriktirilmagansiz.",
         "room": "Auditoriya / Xona",
         "select_file": "Faylni tanlang",
@@ -1139,5 +1139,18 @@
         "light": "Yorug'",
         "dark": "Qorong'u",
         "system": "Tizim"
-    }
+    },
+    "validation": {
+        "after_or_equal": "Tugash sanasi boshlanish sanasidan keyingi yoki unga teng sana bo'lishi kerak.",
+        "after": "Tugash sanasi boshlanish sanasidan keyingi sana bo'lishi kerak.",
+        "before": "Boshlanish sanasi tugash sanasidan oldingi sana bo'lishi kerak.",
+        "before_or_equal": "Boshlanish sanasi tugash sanasidan oldingi yoki unga teng sana bo'lishi kerak.",
+        "required": "Ushbu maydon to'ldirilishi shart.",
+        "numeric": "Raqam kiritilishi kerak.",
+        "date": "Haqiqiy sana kiritilishi kerak."
+    },
+    "validation.after_or_equal": "Tugash sanasi boshlanish sanasidan keyingi yoki unga teng sana bo'lishi kerak.",
+    "validation.after": "Tugash sanasi boshlanish sanasidan keyingi sana bo'lishi kerak.",
+    "validation.before": "Boshlanish sanasi tugash sanasidan oldingi sana bo'lishi kerak.",
+    "validation.before_or_equal": "Boshlanish sanasi tugash sanasidan oldingi yoki unga teng sana bo'lishi kerak."
 }

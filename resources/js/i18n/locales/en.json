@@ -205,7 +205,7 @@
         "excel_columns_hint": "Columns must be: full_name, phone.",
         "download_template": "Download template",
         "students_title": "Group Students",
-        "no_students_in_group": "No students in this group yet. Upload via Excel.",
+        "no_students_in_group": "No students in this group yet",
         "take_attendance": "Attendance",
         "course": "LMS Course",
         "course_optional": "LMS Course (Optional)",
@@ -213,7 +213,7 @@
         "deleted_success": "Group deleted",
         "error": "An error occurred",
         "main_room": "Main lecture hall",
-        "no_students_in_group_desc": "Import students via Excel",
+        "no_students_in_group_desc": "Students are assigned to groups when creating contracts",
         "not_assigned": "You are not assigned to a group yet.",
         "room": "Classroom / Room",
         "select_file": "Select file",
@@ -1139,5 +1139,18 @@
         "light": "Light",
         "dark": "Dark",
         "system": "System"
-    }
+    },
+    "validation": {
+        "after_or_equal": "The end date must be a date after or equal to the start date.",
+        "after": "The end date must be a date after the start date.",
+        "before": "The start date must be a date before the end date.",
+        "before_or_equal": "The start date must be a date before or equal to the end date.",
+        "required": "This field is required.",
+        "numeric": "This field must be a number.",
+        "date": "This field must be a valid date."
+    },
+    "validation.after_or_equal": "The end date must be a date after or equal to the start date.",
+    "validation.after": "The end date must be a date after the start date.",
+    "validation.before": "The start date must be a date before the end date.",
+    "validation.before_or_equal": "The start date must be a date before or equal to the end date."
 }
