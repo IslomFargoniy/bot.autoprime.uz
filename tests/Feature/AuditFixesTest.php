@@ -316,3 +316,27 @@ test('deleting a refund payment removes only its own expense', function () {
     expect(Expense::whereKey($unrelated->id)->exists())->toBeTrue()
         ->and(Expense::where('description', 'like', "To'lovni qaytarish%")->exists())->toBeFalse();
 });
+
+test('the finance page tells which pending transfers the user may review', function () {
+    $from = auditRegister($this->branch->id, 1000000);
+    $to = auditRegister($this->otherBranch->id);
+    $sender = auditStaff('kassir');
+    $transfer = CashTransfer::create([
+        'from_cash_register_id' => $from->id, 'to_cash_register_id' => $to->id,
+        'sent_by_user_id' => $sender->id, 'amount' => 100000, 'status' => 'pending',
+    ]);
+
+    $canReview = fn (User $user): bool => (bool) collect($this->actingAs($user)->get('/admin/finance')->inertiaProps('transfers.data'))
+        ->firstWhere('id', $transfer->id)['can_review'];
+
+    expect($canReview($this->admin))->toBeFalse()
+        ->and($canReview(auditStaff('accountant', $this->otherBranch->id)))->toBeTrue();
+});
+
+test('the shared auth props tell whether the user is limited to own records', function () {
+    $props = fn (User $user) => $this->actingAs($user)->get('/profile')->inertiaProps('auth.works_on_own_records_only');
+
+    expect($props(auditStaff('teacher')))->toBeTrue()
+        ->and($props(auditStaff('instructor')))->toBeTrue()
+        ->and($props($this->admin))->toBeFalse();
+});

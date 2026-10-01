@@ -134,6 +134,12 @@ class FinanceController extends Controller
         $expenses = $expensesQuery->paginate($perPage, ['*'], 'expenses_page')->withQueryString();
         $transactions = $transactionsQuery->paginate($perPage, ['*'], 'transactions_page')->withQueryString();
         $transfers = $transfersQuery->paginate($perPage, ['*'], 'transfers_page')->withQueryString();
+        $transfers->getCollection()->each(function (CashTransfer $transfer) use ($request): void {
+            $transfer->setAttribute('can_review', $transfer->status === 'pending'
+                && $request->user()->can('cash_transfers.approve')
+                && $this->isReviewableBy($request, $transfer)
+                && ! $this->isOwnTransfer($request, $transfer));
+        });
 
         // Select lists
         $branches = Branch::where('status', 'active')->get();

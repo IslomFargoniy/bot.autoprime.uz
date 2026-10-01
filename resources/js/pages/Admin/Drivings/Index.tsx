@@ -109,7 +109,7 @@ interface PageProps {
 export default function DrivingsIndex({ drivings, instructors, students, groups, autodromes = [], filters = {} }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
-    const { auth } = usePage().props as unknown as { auth: { user: { id: number; role: string } } };
+    const { auth } = usePage().props as unknown as { auth: { user: { id: number; role: string }; works_on_own_records_only: boolean } };
     const isInstructor = auth.user.role === 'instructor';
 
     const [editing, setEditing] = useState<Driving | null>(null);
@@ -309,7 +309,7 @@ return;
         };
 
         // Admin uchun locatsiya so'ralmaydi; instruktor avtodrom hududida ekanini GPS bilan tasdiqlaydi
-        if (isInstructor && targetStatus === 'completed' && (statusModalDriving.autodrome || statusModalDriving.autodrome_id)) {
+        if (auth.works_on_own_records_only && targetStatus === 'completed' && (statusModalDriving.autodrome || statusModalDriving.autodrome_id)) {
             if (!navigator.geolocation) {
                 toast.error(t('instructor_panel.geolocation_not_supported', "Qurilmangizda geolokatsiya qo'llab-quvvatlanmaydi."));
 

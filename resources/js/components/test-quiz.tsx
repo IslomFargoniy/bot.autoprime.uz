@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -86,6 +87,10 @@ export function TestQuiz() {
     const { t, i18n } = useTranslation();
     const currentLang = i18n.language || 'uz';
     const haptic = useTelegramHaptic();
+
+    const showRequestError = (data: { message?: string } | null, fallback: string) => {
+        toast.error(data?.message || fallback);
+    };
 
     // Top view modes
     const [subTab, setSubTab] = useState<'tickets' | 'signs' | 'history'>('tickets');
@@ -187,6 +192,8 @@ return url;
 
             if (data.success && data.tickets) {
                 setTickets(data.tickets);
+            } else if (res.status === 401) {
+                showRequestError(data, t('tests.login_required', 'Testlarni ko\'rish uchun tizimga kiring.'));
             }
         } catch (e) {
             console.error('Error loading tickets:', e);
@@ -269,9 +276,12 @@ return;
                 setResult(null);
                 setTimeLeft(25 * 60);
                 setIsTimerRunning(true);
+            } else {
+                showRequestError(data, t('tests.ticket_start_failed', 'Biletni ochib bo\'lmadi. Qayta urinib ko\'ring.'));
             }
         } catch (e) {
             console.error('Error starting ticket exam:', e);
+            showRequestError(null, t('tests.network_error', 'Tarmoq xatosi. Qayta urinib ko\'ring.'));
         }
     };
 
@@ -292,9 +302,12 @@ return;
                 setResult(null);
                 setTimeLeft(25 * 60);
                 setIsTimerRunning(true);
+            } else {
+                showRequestError(data, t('tests.exam_start_failed', 'Imtihonni boshlab bo\'lmadi. Qayta urinib ko\'ring.'));
             }
         } catch (e) {
             console.error('Error starting mock exam:', e);
+            showRequestError(null, t('tests.network_error', 'Tarmoq xatosi. Qayta urinib ko\'ring.'));
         }
     };
 
@@ -469,9 +482,12 @@ clearInterval(timerRef.current);
             if (data.success) {
                 setResult(data);
                 fetchStats();
+            } else {
+                showRequestError(data, t('tests.submit_failed', 'Natijani yuborib bo\'lmadi. Qayta urinib ko\'ring.'));
             }
         } catch (e) {
             console.error('Error submitting exam:', e);
+            showRequestError(null, t('tests.network_error', 'Tarmoq xatosi. Qayta urinib ko\'ring.'));
         }
     };
 

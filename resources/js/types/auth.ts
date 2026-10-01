@@ -32,6 +32,7 @@ export type Auth = {
     user: User;
     permissions: string[];
     is_super_admin: boolean;
+    works_on_own_records_only: boolean;
     home_url: string;
 };
 

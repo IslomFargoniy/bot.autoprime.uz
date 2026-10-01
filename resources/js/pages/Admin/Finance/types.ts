@@ -58,6 +58,7 @@ export interface CashTransfer {
     amount: number | string;
     status: 'pending' | 'approved' | 'rejected';
     sent_by_user_id?: number | null;
+    can_review?: boolean;
     transferred_by?: { name: string };
     approved_by?: { name: string };
     notes?: string | null;

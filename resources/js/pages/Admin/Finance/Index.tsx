@@ -1,4 +1,4 @@
-import { Head, useForm, router, usePage } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useCan } from '@/hooks/use-can';
-import type { SharedData } from '@/types/auth';
 
 import { CashHistoryTab } from './components/CashHistoryTab';
 import { CashRegistersTab } from './components/CashRegistersTab';
@@ -38,11 +37,9 @@ export default function FinanceIndex({
 }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
-    const { auth } = usePage<SharedData>().props;
 
-    // The sender may not review their own transfer (superadmins excepted), mirroring the backend.
-    const canReviewTransfer = (transfer: CashTransfer) =>
-        can('cash_transfers.approve') && (auth.is_super_admin || transfer.sent_by_user_id !== auth.user.id);
+    // The backend decides who may review a transfer (receiving branch, superadmin, never the sender).
+    const canReviewTransfer = (transfer: CashTransfer) => !!transfer.can_review;
 
     const [activeTab, setActiveTab] = useState<'registers' | 'history' | 'payments' | 'expenses' | 'transfers'>('registers');
 
