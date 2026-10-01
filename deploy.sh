@@ -38,10 +38,12 @@ fi
 echo "▶ Frontend build (lokal)"
 npm run build
 
+BUNDLE_PATH="/tmp/autoprime-deploy.bundle"
+
 remote() {
     ssh -o BatchMode=yes "${SSH_HOST}" \
         BRANCH="${BRANCH}" APP_DIR="${APP_DIR}" APP_USER="${APP_USER}" PHP="${PHP}" \
-        COMPOSER="${COMPOSER}" SUPERVISOR_GROUP="${SUPERVISOR_GROUP}" STEP="$1" \
+        COMPOSER="${COMPOSER}" SUPERVISOR_GROUP="${SUPERVISOR_GROUP}" STEP="$1" BUNDLE_PATH="${BUNDLE_PATH}" \
         'bash -s' <<'REMOTE'
 set -euo pipefail
 
@@ -52,6 +54,9 @@ env_value() { grep -E "^$1=" "${APP_DIR}/.env" | tail -1 | cut -d= -f2- | tr -d 
 cd "${APP_DIR}"
 
 case "${STEP}" in
+head)
+    git_app rev-parse HEAD
+    ;;
 prepare)
     if [ "$(env_value APP_ENV)" != "production" ] || [ "$(env_value APP_DEBUG)" != "false" ]; then
         echo "✖ .env da APP_ENV=production va APP_DEBUG=false bo'lishi shart." >&2
@@ -72,11 +77,17 @@ prepare)
     as_app "${PHP} artisan down --retry=30"
 
     echo "▶ Kodni yangilash (${BRANCH})"
+    # Kod lokal'dan git bundle orqali keladi (serverga GitHub kaliti kerak emas).
     # Serverda yaratiladigan fayllar (masalan desktop version.json) saqlanadi;
     # agar yangi commit ham ularni o'zgartirsa, --ff-only to'xtatadi.
-    git_app fetch origin "${BRANCH}"
-    git_app checkout "${BRANCH}"
-    git_app pull --ff-only origin "${BRANCH}"
+    if [ -f "${BUNDLE_PATH}" ]; then
+        git_app checkout "${BRANCH}"
+        git_app fetch "${BUNDLE_PATH}" "${BRANCH}"
+        git_app merge --ff-only FETCH_HEAD
+        rm -f "${BUNDLE_PATH}"
+    else
+        echo "  Kod allaqachon yangi."
+    fi
 
     echo "▶ Composer"
     as_app "${PHP} ${COMPOSER} install --no-dev --optimize-autoloader --no-interaction"
@@ -102,6 +113,21 @@ finish)
 esac
 REMOTE
 }
+
+echo "▶ Kod bundle'ini tayyorlash"
+SERVER_HEAD="$(remote head)"
+if ! git merge-base --is-ancestor "${SERVER_HEAD}" HEAD; then
+    echo "✖ Serverdagi commit (${SERVER_HEAD}) lokal ${BRANCH} tarixida yo'q, fast-forward mumkin emas." >&2
+    exit 1
+fi
+ssh -o BatchMode=yes "${SSH_HOST}" "rm -f '${BUNDLE_PATH}'"
+if [ "${SERVER_HEAD}" != "$(git rev-parse HEAD)" ]; then
+    LOCAL_BUNDLE="$(mktemp -t autoprime-deploy).bundle"
+    git bundle create -q "${LOCAL_BUNDLE}" "${SERVER_HEAD}..${BRANCH}"
+    scp -q "${LOCAL_BUNDLE}" "${SSH_HOST}:${BUNDLE_PATH}"
+    ssh -o BatchMode=yes "${SSH_HOST}" "chmod a+r '${BUNDLE_PATH}'"
+    rm -f "${LOCAL_BUNDLE}"
+fi
 
 remote prepare
 
