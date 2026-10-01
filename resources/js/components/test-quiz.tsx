@@ -134,7 +134,7 @@ export function TestQuiz() {
         wrong_answers: number;
         total_questions: number;
         duration_seconds: number;
-        details?: any[];
+        details?: Array<{ question_id: number; selected_answer_id: number | null; correct_answer_id: number | null; is_correct: boolean }>;
     } | null>(null);
 
     // Signs & Road Lines
@@ -314,15 +314,18 @@ export function TestQuiz() {
 
         const currentQ = questions[currentIndex];
         const selectedAns = currentQ?.answers?.find((a) => a.id === answerId);
+        const isExamMode = activeQuizMode === 'exam';
 
-        // Haptic feedback if available in Telegram WebApp
-        if (selectedAns?.is_correct) {
+        // The exam never reveals correctness before submit, so only a neutral tap is given.
+        if (isExamMode) {
+            haptic.light();
+        } else if (selectedAns?.is_correct) {
             haptic.success();
         } else {
             haptic.error();
         }
 
-        if (isExplanationEnabled) {
+        if (isExplanationEnabled && !isExamMode) {
             setShowExplanationModal(true);
         } else {
             const scheduledFromIndex = currentIndex;
@@ -330,7 +333,7 @@ export function TestQuiz() {
                 handleNextQuestion(scheduledFromIndex);
             }, 400);
         }
-    }, [result, questions, currentIndex, isExplanationEnabled, handleNextQuestion]);
+    }, [result, questions, currentIndex, isExplanationEnabled, activeQuizMode, handleNextQuestion]);
 
     // Touch Swipe Handlers for smooth mobile UX
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -460,8 +463,15 @@ export function TestQuiz() {
         const currentSelectedId = optimisticAnswerId !== null && optimisticAnswerId !== undefined
             ? optimisticAnswerId
             : selectedAnswers[currentQ?.id];
-        const currentSelectedObject = currentQ?.answers?.find((a) => a.id === currentSelectedId);
-        const isCorrectValue = !!currentSelectedObject?.is_correct;
+        const isExamMode = activeQuizMode === 'exam';
+        // Exam answers carry no is_correct flag: correctness is only known from the submit result.
+        const feedbackVisible = !isExamMode || !!result;
+        const correctAnswerIdOf = (question?: Question): number | null => {
+            const detail = result?.details?.find((d) => d.question_id === question?.id);
+
+            return detail?.correct_answer_id ?? question?.answers?.find((a) => a.is_correct)?.id ?? null;
+        };
+        const isCorrectValue = currentSelectedId != null && currentSelectedId === correctAnswerIdOf(currentQ);
         const isCurrentAnswered = currentSelectedId !== undefined && currentSelectedId !== null;
 
         return (
@@ -504,7 +514,8 @@ export function TestQuiz() {
 
                         {/* O'ng tomon: Tavsif toggle + Font size + Language */}
                         <div className="flex items-center gap-2 ml-auto">
-                            {/* Tavsif toggle switch */}
+                            {/* Tavsif toggle switch (hidden in the exam: explanations would reveal answers) */}
+                            {!isExamMode && (
                             <div className="flex flex-col items-center justify-center gap-0.5 group">
                                 <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground">
                                     {t('tests.explanation_mode', 'Tavsif')}
@@ -525,8 +536,9 @@ export function TestQuiz() {
                                     />
                                 </button>
                             </div>
+                            )}
 
-                            <div className="w-px h-5 bg-border/60" />
+                            {!isExamMode && <div className="w-px h-5 bg-border/60" />}
 
                             {/* Font size controls */}
                             <div className="flex items-center gap-1">
@@ -590,6 +602,7 @@ export function TestQuiz() {
                             </div>
 
                             {/* Circular Tavsif (Info) button */}
+                            {!isExamMode && (
                             <button
                                 onClick={() => setShowExplanationModal(true)}
                                 className="flex items-center justify-center bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 size-9 rounded-full shrink-0 transition-all active:scale-90"
@@ -597,6 +610,7 @@ export function TestQuiz() {
                             >
                                 <Info className="h-5 w-5" />
                             </button>
+                            )}
                         </div>
                     </div>
 
@@ -624,8 +638,8 @@ export function TestQuiz() {
                         <div className="flex flex-col gap-2.5 flex-1">
                             {currentQ?.answers?.map((ans, idx) => {
                                 const isSelected = selectedAnswers[currentQ.id] === ans.id || optimisticAnswerId === ans.id;
-                                const isAnswered = isCurrentAnswered || !!result;
-                                const isCorrect = ans.is_correct;
+                                const isAnswered = feedbackVisible && (isCurrentAnswered || !!result);
+                                const isCorrect = ans.id === correctAnswerIdOf(currentQ);
 
                                 let btnStyle = 'border-border bg-card hover:border-primary hover:bg-muted/50';
 
@@ -676,8 +690,7 @@ export function TestQuiz() {
                                     const selectedAnsId = selectedAnswers[q.id];
                                     const isActive = currentIndex === idx;
                                     const isAnswered = selectedAnsId !== undefined && selectedAnsId !== null;
-                                    const selectedAnsObj = q.answers?.find((a) => a.id === selectedAnsId);
-                                    const isCorrect = selectedAnsObj?.is_correct;
+                                    const isCorrect = selectedAnsId === correctAnswerIdOf(q);
 
                                     return (
                                         <button
@@ -692,7 +705,9 @@ export function TestQuiz() {
                                                 isActive && 'ring-2 ring-blue-400 z-10',
                                                 !isAnswered
                                                     ? (isActive ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80')
-                                                    : (isCorrect ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-rose-600 text-white hover:bg-rose-700')
+                                                    : !feedbackVisible
+                                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                                        : (isCorrect ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-rose-600 text-white hover:bg-rose-700')
                                             )}
                                         >
                                             {idx + 1}

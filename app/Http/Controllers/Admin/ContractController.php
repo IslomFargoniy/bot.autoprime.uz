@@ -231,7 +231,7 @@ class ContractController extends Controller
         $this->ensureCanSeeStudent($request, $contract->student);
 
         $validated = $request->validate([
-            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
+            'cash_register_id' => ['required', $this->cashRegisterInUserBranch($request)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'cancel_contract' => 'nullable|boolean',
@@ -245,7 +245,11 @@ class ContractController extends Controller
             ]);
         }
 
-        $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
+        $cashRegister = CashRegister::with('type')->findOrFail($validated['cash_register_id']);
+        if ($mismatch = $cashRegister->paymentMethodMismatchMessage($validated['payment_method'])) {
+            return redirect()->back()->withErrors(['cash_register_id' => $mismatch]);
+        }
+
         if ((float) $cashRegister->balance < (float) $validated['amount']) {
             return redirect()->back()->withErrors([
                 'cash_register_id' => "Tanlangan kassada yetarli mablag' mavjud emas (Mavjud: ".number_format((float) $cashRegister->balance, 0, '', ' ').' UZS).',

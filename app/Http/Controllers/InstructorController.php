@@ -119,59 +119,28 @@ class InstructorController extends Controller
             throw ValidationException::withMessages(['general' => 'Faqat rejalashtirilgan darsni yakunlash mumkin.']);
         }
 
-        $autodrome = $driving->autodrome;
-
-        if (! $autodrome) {
-            // If no autodrome is assigned, just finish it without requiring location
-            $driving->update(['status' => 'completed']);
-            app(TelegramService::class)->sendLessonRatingPrompt($driving);
-
-            return redirect()->back();
+        $requiresLocation = (bool) $driving->autodrome;
+        if ($requiresLocation) {
+            $request->validate([
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+            ]);
         }
 
-        $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
-
-        $distance = $this->haversineGreatCircleDistance(
-            $request->latitude,
-            $request->longitude,
-            $autodrome->latitude,
-            $autodrome->longitude
+        $problem = app(DrivingScheduler::class)->completionRestriction(
+            $driving,
+            $driving->start_time,
+            $requiresLocation,
+            $request->input('latitude'),
+            $request->input('longitude'),
         );
-
-        if ($distance > $autodrome->radius_meters) {
-            throw ValidationException::withMessages([
-                'location' => 'Siz avtodrom hududida emassiz. Masofangiz: '.round($distance)." metr (Ruxsat etilgan: {$autodrome->radius_meters} metr).",
-            ]);
+        if ($problem) {
+            throw ValidationException::withMessages([$requiresLocation ? 'location' : 'general' => $problem]);
         }
 
         $driving->update(['status' => 'completed']);
         app(TelegramService::class)->sendLessonRatingPrompt($driving);
 
         return redirect()->back()->with('success', 'Dars muvaffaqiyatli yakunlandi');
-    }
-
-    /**
-     * Calculates the great-circle distance between two points, with
-     * the Haversine formula. Returns distance in meters.
-     */
-    private function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo)
-    {
-        $earthRadius = 6371000; // Earth radius in meters
-
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-
-        return $angle * $earthRadius;
     }
 }

@@ -67,6 +67,8 @@ class StudentTestController extends Controller
      */
     public function getTicketQuestions(Ticket $ticket): JsonResponse
     {
+        abort_unless($ticket->is_active, 404);
+
         $ticket->load([
             'questions' => function ($q) {
                 $q->where('is_active', true)
@@ -91,6 +93,10 @@ class StudentTestController extends Controller
     {
         $student = $this->resolveStudent($request);
 
+        if (! $student) {
+            return $this->unauthenticatedExamResponse();
+        }
+
         $questions = Question::where('is_active', true)
             ->with(['answers' => function ($ans) {
                 $ans->orderBy('order');
@@ -101,7 +107,7 @@ class StudentTestController extends Controller
 
         $attempt = DB::transaction(function () use ($student, $request, $questions) {
             $attempt = Attempt::create([
-                'student_id' => $student?->id,
+                'student_id' => $student->id,
                 'user_id' => $request->user()?->id,
                 'attempt_type' => 'random_mock',
                 'total_questions' => $questions->count(),
@@ -119,6 +125,13 @@ class StudentTestController extends Controller
             AttemptAnswer::insert($attemptAnswers);
 
             return $attempt;
+        });
+
+        // The exam is graded server-side on submit; neither the correct flag nor the
+        // explanation (which spells out the answer) may reach the client beforehand.
+        $questions->each(function (Question $question): void {
+            $question->makeHidden(['description_uz', 'description_ru', 'description_krill', 'description_en']);
+            $question->answers->each->makeHidden('is_correct');
         });
 
         return response()->json([
@@ -162,7 +175,11 @@ class StudentTestController extends Controller
             ->all();
 
         if ($attemptType === 'random_mock') {
-            return $this->submitMockExam($request, (int) $validated['attempt_id'], $student?->id, $submittedAnswers);
+            if (! $student) {
+                return $this->unauthenticatedExamResponse();
+            }
+
+            return $this->submitMockExam($request, (int) $validated['attempt_id'], $student->id, $submittedAnswers);
         }
 
         $questionIds = $attemptType === 'ticket_exam'
@@ -208,12 +225,20 @@ class StudentTestController extends Controller
         return $this->attemptResponse($attempt, $graded['details']);
     }
 
+    private function unauthenticatedExamResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Imtihon topshirish uchun tizimga kiring (Telegram yoki desktop orqali).',
+        ], 401);
+    }
+
     /**
      * Grade a served mock exam exactly once, against the questions stored on it.
      *
      * @param  array<int, int|null>  $submittedAnswers  selected answer id per question id
      */
-    private function submitMockExam(Request $request, int $attemptId, ?int $studentId, array $submittedAnswers): JsonResponse
+    private function submitMockExam(Request $request, int $attemptId, int $studentId, array $submittedAnswers): JsonResponse
     {
         $result = DB::transaction(function () use ($attemptId, $studentId, $submittedAnswers) {
             $attempt = Attempt::where('id', $attemptId)
@@ -222,7 +247,7 @@ class StudentTestController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $attempt || (int) $attempt->student_id !== (int) $studentId) {
+            if (! $attempt || (int) $attempt->student_id !== $studentId) {
                 return null;
             }
 

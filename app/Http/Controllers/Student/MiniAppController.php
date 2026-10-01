@@ -140,22 +140,27 @@ class MiniAppController extends Controller
 
         // Verify 30% theory payment rule
         $contract = $student->activeContract;
-        if ($contract) {
-            if (! $contract->has_theory) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Shartnomangizda nazariy ta\'lim moduli mavjud emas.',
-                ], 403);
-            }
+        if (! $contract) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Faol shartnomangiz topilmadi. Iltimos, administratorga murojaat qiling.',
+            ], 403);
+        }
 
-            if (! $contract->canAccessTheory()) {
-                $minPercent = (float) ($contract->contractType ? $contract->contractType->min_theory_payment_percent : 30.0);
+        if (! $contract->has_theory) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Shartnomangizda nazariy ta\'lim moduli mavjud emas.',
+            ], 403);
+        }
 
-                return response()->json([
-                    'success' => false,
-                    'message' => "Darsga kirish uchun to'lov foizi kamida {$minPercent}% bo'lishi shart. Sizning hozirgi to'lovingiz: {$contract->payment_percentage}%.",
-                ], 403);
-            }
+        if (! $contract->canAccessTheory()) {
+            $minPercent = (float) ($contract->contractType ? $contract->contractType->min_theory_payment_percent : 30.0);
+
+            return response()->json([
+                'success' => false,
+                'message' => "Darsga kirish uchun to'lov foizi kamida {$minPercent}% bo'lishi shart. Sizning hozirgi to'lovingiz: {$contract->payment_percentage}%.",
+            ], 403);
         }
 
         // Check if attendance already recorded today for this session

@@ -208,7 +208,7 @@ class CertificateController extends Controller
             ->firstOrFail();
 
         return response()->json([
-            'valid' => true,
+            'valid' => $certificate->status === 'issued',
             'certificate_number' => $certificate->certificate_number,
             'student_name' => $certificate->student?->full_name,
             'category' => $certificate->category,

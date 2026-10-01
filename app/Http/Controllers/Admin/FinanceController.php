@@ -183,7 +183,7 @@ class FinanceController extends Controller
     {
         $validated = $request->validate([
             'contract_id' => ['required', $this->existsInUserBranch($request, 'contracts')],
-            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
+            'cash_register_id' => ['required', $this->cashRegisterInUserBranch($request)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',
@@ -191,12 +191,8 @@ class FinanceController extends Controller
 
         $cashRegister = CashRegister::with('type')->findOrFail($validated['cash_register_id']);
 
-        // Strict register-type matching
-        $registerTypeCode = $cashRegister->type?->code;
-        if ($registerTypeCode && $registerTypeCode !== $validated['payment_method']) {
-            return redirect()->back()->withErrors([
-                'cash_register_id' => "Tanlangan kassa turi ({$registerTypeCode}) to'lov usuliga ({$validated['payment_method']}) mos emas.",
-            ]);
+        if ($mismatch = $cashRegister->paymentMethodMismatchMessage($validated['payment_method'])) {
+            return redirect()->back()->withErrors(['cash_register_id' => $mismatch]);
         }
 
         $contract = Contract::with('student')->findOrFail($validated['contract_id']);
@@ -272,7 +268,7 @@ class FinanceController extends Controller
     public function storeExpense(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
+            'cash_register_id' => ['required', $this->cashRegisterInUserBranch($request)],
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:1|max:9999999999',
             'description' => 'required|string|max:500',
@@ -320,7 +316,7 @@ class FinanceController extends Controller
     public function createTransfer(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'from_cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers'), 'different:to_cash_register_id'],
+            'from_cash_register_id' => ['required', $this->cashRegisterInUserBranch($request), 'different:to_cash_register_id'],
             'to_cash_register_id' => 'required|exists:cash_registers,id',
             'amount' => 'required|numeric|min:1|max:9999999999',
             'notes' => 'nullable|string',
@@ -391,10 +387,31 @@ class FinanceController extends Controller
     }
 
     /**
+     * Who may review a pending transfer: a transfer into a central register
+     * (e.g. a register sweep) is settled by a superadmin, a transfer between
+     * branches by the receiving branch (or a superadmin).
+     */
+    private function isReviewableBy(Request $request, CashTransfer $transfer): bool
+    {
+        $user = $request->user();
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $receivingBranchId = $transfer->toCashRegister?->branch_id;
+
+        return $receivingBranchId !== null && (int) $receivingBranchId === (int) $user->branch_id;
+    }
+
+    /**
      * Approve cash transfer.
      */
     public function approveTransfer(Request $request, CashTransfer $transfer): RedirectResponse
     {
+        if (! $this->isReviewableBy($request, $transfer)) {
+            return redirect()->back()->withErrors(['transfer' => 'Bu o\'tkazmani faqat qabul qiluvchi filial yoki Superadmin tasdiqlashi mumkin.']);
+        }
+
         if ($this->isOwnTransfer($request, $transfer)) {
             return redirect()->back()->withErrors(['transfer' => 'O\'zingiz yuborgan o\'tkazmani boshqa xodim tasdiqlashi kerak.']);
         }
@@ -443,6 +460,10 @@ class FinanceController extends Controller
      */
     public function rejectTransfer(Request $request, CashTransfer $transfer): RedirectResponse
     {
+        if (! $this->isReviewableBy($request, $transfer)) {
+            return redirect()->back()->withErrors(['transfer' => 'Bu o\'tkazmani faqat qabul qiluvchi filial yoki Superadmin ko\'rib chiqishi mumkin.']);
+        }
+
         if ($this->isOwnTransfer($request, $transfer)) {
             return redirect()->back()->withErrors(['transfer' => 'O\'zingiz yuborgan o\'tkazmani boshqa xodim ko\'rib chiqishi kerak.']);
         }
@@ -682,7 +703,11 @@ class FinanceController extends Controller
                             userId: auth()->id()
                         );
                     }
-                    Expense::where('description', 'like', "%{$payment->receipt_number}%")->delete();
+                    Expense::where('cash_register_id', $payment->cash_register_id)
+                        ->where('amount', $payment->amount)
+                        ->where('description', 'like', "To'lovni qaytarish (Chek: #{$payment->receipt_number})%")
+                        ->first()
+                        ?->delete();
                 } else {
                     // Deleting an income payment deducts the money from the register
                     if ($lockedRegister) {

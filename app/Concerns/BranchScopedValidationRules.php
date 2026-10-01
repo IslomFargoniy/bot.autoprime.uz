@@ -30,6 +30,23 @@ trait BranchScopedValidationRules
     }
 
     /**
+     * An `exists` rule for a cash register that money is moved out of or paid
+     * into by the actor. Unlike other records, the central (branch-less) registers
+     * belong to the superadmin, so branch-restricted users get their own branch only.
+     */
+    protected function cashRegisterInUserBranch(Request $request): Exists
+    {
+        $rule = Rule::exists('cash_registers', 'id');
+        $user = $request->user();
+
+        if ($user?->isBranchRestricted()) {
+            $rule->where('branch_id', $user->branch_id);
+        }
+
+        return $rule;
+    }
+
+    /**
      * A rule accepting only a user that holds the given capability permission
      * (drivings.conduct / lessons.teach), whether through the role or granted.
      *

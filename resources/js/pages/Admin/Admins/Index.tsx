@@ -84,8 +84,7 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
         router.get('/admin/admins', { search: newSearch, per_page: newPerPage }, { preserveState: true, replace: true });
     }, []);
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+    const handleSearchChange = (value: string) => {
         setSearch(value);
         applyFilters(value, perPage);
     };

@@ -37,7 +37,7 @@ function correctAnswersFor(array $questions): array
 {
     return collect($questions)->map(fn (array $question) => [
         'question_id' => $question['id'],
-        'answer_id' => collect($question['answers'])->firstWhere('is_correct', true)['id'],
+        'answer_id' => Answer::where('question_id', $question['id'])->where('is_correct', true)->value('id'),
     ])->all();
 }
 
@@ -203,4 +203,38 @@ test('stats cannot be read for another student via student_id', function () {
 
     $this->getJson("/api/tests/stats?student_id={$other->id}")
         ->assertJson(['has_student' => true, 'total_attempts' => 0]);
+});
+
+test('mock exam response never exposes correct answers or explanations', function () {
+    seedTicketWithQuestions(25);
+    Question::query()->update(['description_uz' => 'Sababi: birinchi javob']);
+
+    $response = $this->getJson('/api/tests/exam')->assertSuccessful();
+
+    foreach ($response->json('questions') as $question) {
+        expect($question)->not->toHaveKey('description_uz');
+        foreach ($question['answers'] as $answer) {
+            expect($answer)->not->toHaveKey('is_correct');
+        }
+    }
+});
+
+test('mock exam requires an identified student', function () {
+    seedTicketWithQuestions(25);
+
+    $this->withoutHeader('X-Telegram-Init-Data')->getJson('/api/tests/exam')->assertUnauthorized();
+    $this->withoutHeader('X-Telegram-Init-Data')->postJson('/api/tests/submit', [
+        'attempt_id' => 1,
+        'attempt_type' => 'random_mock',
+        'answers' => [['question_id' => 1, 'answer_id' => 1]],
+    ])->assertUnauthorized();
+
+    expect(Attempt::count())->toBe(0);
+});
+
+test('an inactive ticket cannot be opened', function () {
+    $ticket = seedTicketWithQuestions(3, 7);
+    $ticket->update(['is_active' => false]);
+
+    $this->getJson("/api/tests/ticket/{$ticket->id}")->assertNotFound();
 });

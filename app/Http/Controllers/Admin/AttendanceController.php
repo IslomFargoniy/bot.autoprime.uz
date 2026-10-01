@@ -134,7 +134,7 @@ class AttendanceController extends Controller
             'status' => 'active',
         ]);
 
-        return redirect()->route('admin.attendance.screen', $session->id);
+        return redirect()->route('attendance.screen', $session->id);
     }
 
     /**
@@ -155,7 +155,7 @@ class AttendanceController extends Controller
         return Inertia::render('Admin/Attendance/Screen', [
             'session' => $session,
             'qrToken' => $qrToken,
-            'studentsCount' => $session->group?->students_count ?? 0,
+            'studentsCount' => $session->group->students_count ?? 0,
             'attendances' => $session->attendances,
         ]);
     }
@@ -407,6 +407,6 @@ class AttendanceController extends Controller
             'ended_at' => now(),
         ]);
 
-        return redirect()->route('admin.attendance.index')->with('success', 'Dars sessiyasi yakunlandi.');
+        return redirect()->route('attendance.index')->with('success', 'Dars sessiyasi yakunlandi.');
     }
 }

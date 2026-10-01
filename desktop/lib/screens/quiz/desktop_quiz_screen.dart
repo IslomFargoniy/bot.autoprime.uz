@@ -381,7 +381,8 @@ class _DesktopQuizScreenState extends State<DesktopQuizScreen> {
 
   Widget _buildAnswersList(Question currentQ, QuizProvider quiz, String lang) {
     final selectedAnsId = quiz.selectedAnswers[currentQ.id];
-    final isAnswered = selectedAnsId != null;
+    // The exam never reveals correctness before submit (the server omits is_correct).
+    final isAnswered = selectedAnsId != null && quiz.mode != QuizMode.exam;
 
     return ListView.separated(
       itemCount: currentQ.answers.length,
@@ -485,8 +486,12 @@ class _DesktopQuizScreenState extends State<DesktopQuizScreen> {
                   Color textColor = Colors.white70;
 
                   if (isAnswered) {
-                    final correctAns = q.answers.firstWhere((a) => a.id == selectedId, orElse: () => q.answers.first);
-                    btnColor = correctAns.isCorrect ? AppColors.success : AppColors.error;
+                    if (quiz.mode == QuizMode.exam) {
+                      btnColor = AppColors.primary;
+                    } else {
+                      final correctAns = q.answers.firstWhere((a) => a.id == selectedId, orElse: () => q.answers.first);
+                      btnColor = correctAns.isCorrect ? AppColors.success : AppColors.error;
+                    }
                     textColor = Colors.white;
                   } else if (isCurrent) {
                     btnColor = AppColors.primary;

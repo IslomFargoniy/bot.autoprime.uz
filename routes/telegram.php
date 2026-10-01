@@ -180,6 +180,7 @@ if (! function_exists('buildDrivingsMessage')) {
                 if ($status === 'scheduled') {
                     $scheduled = Driving::with(['instructor', 'student', 'autodrome'])
                         ->where('status', 'scheduled')
+                        ->when($user->isBranchRestricted(), fn ($query) => $query->where('branch_id', $user->branch_id))
                         ->orderBy('start_time', 'asc')
                         ->take(15)
                         ->get();
@@ -199,6 +200,7 @@ if (! function_exists('buildDrivingsMessage')) {
                 } else {
                     $completed = Driving::with(['instructor', 'student', 'review'])
                         ->where('status', 'completed')
+                        ->when($user->isBranchRestricted(), fn ($query) => $query->where('branch_id', $user->branch_id))
                         ->orderBy('start_time', 'desc')
                         ->take(15)
                         ->get();

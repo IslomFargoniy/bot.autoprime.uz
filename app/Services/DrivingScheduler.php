@@ -79,4 +79,50 @@ class DrivingScheduler
 
         return null;
     }
+
+    /**
+     * Why the lesson may not be marked completed now, or null when it may:
+     * it must have started and, when the actor is held to the autodrome
+     * geofence, they must report a position inside the autodrome radius.
+     */
+    public function completionRestriction(Driving $driving, CarbonInterface $startTime, bool $requireLocation, mixed $latitude, mixed $longitude): ?string
+    {
+        if ($startTime->isFuture()) {
+            return 'Hali boshlanmagan mashg\'ulotni yakunlab bo\'lmaydi.';
+        }
+
+        $autodrome = $driving->autodrome;
+        if (! $requireLocation || ! $autodrome) {
+            return null;
+        }
+
+        if (! is_numeric($latitude) || ! is_numeric($longitude)) {
+            return 'Mashg\'ulotni yakunlash uchun joylashuvingizni aniqlash shart.';
+        }
+
+        $distance = $this->distanceInMeters((float) $latitude, (float) $longitude, (float) $autodrome->latitude, (float) $autodrome->longitude);
+
+        if ($distance > $autodrome->radius_meters) {
+            return 'Siz avtodrom hududida emassiz. Masofangiz: '.round($distance)." metr (Ruxsat etilgan: {$autodrome->radius_meters} metr).";
+        }
+
+        return null;
+    }
+
+    /**
+     * Great-circle distance between two points (Haversine formula) in meters.
+     */
+    private function distanceInMeters(float $latitudeFrom, float $longitudeFrom, float $latitudeTo, float $longitudeTo): float
+    {
+        $earthRadius = 6371000;
+
+        $latFrom = deg2rad($latitudeFrom);
+        $latTo = deg2rad($latitudeTo);
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = deg2rad($longitudeTo) - deg2rad($longitudeFrom);
+
+        $angle = 2 * asin(sqrt(sin($latDelta / 2) ** 2 + cos($latFrom) * cos($latTo) * sin($lonDelta / 2) ** 2));
+
+        return $angle * $earthRadius;
+    }
 }

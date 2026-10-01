@@ -182,6 +182,11 @@ class DrivingController extends Controller
             abort(403, 'Siz faqat o\'zingiz uchun mashg\'ulot rejalashtira olasiz.');
         }
 
+        $students = Student::with('activeContract.contractType')->whereIn('id', $validated['student_ids'])->get();
+        foreach ($students as $student) {
+            $this->ensureCanSeeStudent($request, $student);
+        }
+
         $scheduler = app(DrivingScheduler::class);
 
         // Auto-detect or validate vehicle
@@ -202,7 +207,6 @@ class DrivingController extends Controller
 
         // Validate every student before creating anything so a later failure
         // cannot leave the earlier students booked and notified.
-        $students = Student::with('activeContract.contractType')->whereIn('id', $validated['student_ids'])->get();
         foreach ($students as $student) {
             $restriction = $scheduler->studentRestrictionMessage($student, $validated['start_time']);
             if ($restriction) {
@@ -249,11 +253,26 @@ class DrivingController extends Controller
             'longitude' => 'nullable|numeric',
         ]);
 
+        $isBeingCompleted = ($validated['status'] ?? null) === 'completed';
+
         // Compare against the stored value when only one end of the slot changes.
         $newStart = Carbon::parse($validated['start_time'] ?? $driving->start_time);
         $newEnd = Carbon::parse($validated['end_time'] ?? $driving->end_time);
         if ($newEnd->lte($newStart)) {
             return redirect()->back()->withErrors(['end_time' => 'Tugash vaqti boshlanish vaqtidan keyin bo\'lishi kerak.']);
+        }
+
+        if ($isBeingCompleted) {
+            $problem = app(DrivingScheduler::class)->completionRestriction(
+                $driving,
+                $driving->start_time,
+                $request->user()->worksOnOwnRecordsOnly(),
+                $request->input('latitude'),
+                $request->input('longitude'),
+            );
+            if ($problem) {
+                return redirect()->back()->withErrors(['status' => $problem]);
+            }
         }
 
         $isRescheduled = ! $newStart->equalTo($driving->start_time) || ! $newEnd->equalTo($driving->end_time);
@@ -276,7 +295,7 @@ class DrivingController extends Controller
         $oldEndTime = $driving->end_time;
         $oldAutodromeId = $driving->autodrome_id;
 
-        $driving->update($validated);
+        $driving->update(collect($validated)->except(['latitude', 'longitude'])->all());
 
         if (! $driving->start_time->equalTo($oldStartTime)) {
             $driving->update([

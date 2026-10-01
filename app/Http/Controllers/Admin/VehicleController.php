@@ -159,7 +159,7 @@ class VehicleController extends Controller
             'performed_date' => 'required|date',
             'next_due_date' => 'nullable|date',
             'odometer' => 'nullable|numeric|min:0',
-            'cash_register_id' => ['nullable', $this->existsInUserBranch($request, 'cash_registers')],
+            'cash_register_id' => ['nullable', $this->cashRegisterInUserBranch($request)],
             'notes' => 'nullable|string',
         ]);
 

@@ -78,7 +78,9 @@ class SalaryController extends Controller
     public function generateMonthlyPayroll(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'period' => 'required|date_format:Y-m',
+            'period' => ['required', 'date_format:Y-m', 'before:'.now()->format('Y-m')],
+        ], [
+            'period.before' => 'Oylik faqat tugagan oylar uchun hisoblanadi (joriy yoki kelgusi oy uchun emas).',
         ]);
 
         $period = $validated['period'];
@@ -89,6 +91,7 @@ class SalaryController extends Controller
         $employees = User::with('roles')
             ->where('status', 'active')
             ->whereNotIn('role', config('roles.unsalaried_roles'))
+            ->whereKeyNot($request->user()->id)
             ->when($targetBranchId, fn ($q) => $q->where('branch_id', $targetBranchId))
             ->get();
         $createdCount = 0;
@@ -111,7 +114,7 @@ class SalaryController extends Controller
 
         // Batch pre-fetch theory lesson counts grouped by teacher
         $theoryLessonCounts = LessonSession::whereIn('teacher_id', $employeeIds)
-            ->whereIn('status', ['finished', 'completed'])
+            ->where('status', 'finished')
             ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
             ->selectRaw('teacher_id, COUNT(*) as cnt')
             ->groupBy('teacher_id')
@@ -297,7 +300,7 @@ class SalaryController extends Controller
     public function pay(Request $request, Salary $salary): RedirectResponse
     {
         $validated = $request->validate([
-            'cash_register_id' => ['required', $this->existsInUserBranch($request, 'cash_registers')],
+            'cash_register_id' => ['required', $this->cashRegisterInUserBranch($request)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'payment_method' => 'required|in:cash,card_click,bank_transfer',
             'notes' => 'nullable|string',
@@ -311,7 +314,10 @@ class SalaryController extends Controller
             return redirect()->back()->withErrors(['amount' => $error]);
         }
 
-        $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
+        $cashRegister = CashRegister::with('type')->findOrFail($validated['cash_register_id']);
+        if ($mismatch = $cashRegister->paymentMethodMismatchMessage($validated['payment_method'])) {
+            return redirect()->back()->withErrors(['cash_register_id' => $mismatch]);
+        }
 
         try {
             DB::transaction(function () use ($salary, $cashRegister, $validated, $request) {

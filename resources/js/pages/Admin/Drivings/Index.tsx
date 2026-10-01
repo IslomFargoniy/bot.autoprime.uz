@@ -282,7 +282,27 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
             });
         };
 
-        // Admin uchun locatsiya so'ralmaydi — to'g'ridan-to'g'ri yakunlash
+        // Admin uchun locatsiya so'ralmaydi; instruktor avtodrom hududida ekanini GPS bilan tasdiqlaydi
+        if (isInstructor && targetStatus === 'completed' && (statusModalDriving.autodrome || statusModalDriving.autodrome_id)) {
+            if (!navigator.geolocation) {
+                toast.error(t('instructor_panel.geolocation_not_supported', "Qurilmangizda geolokatsiya qo'llab-quvvatlanmaydi."));
+
+                return;
+            }
+
+            setIsStatusUpdating(true);
+            navigator.geolocation.getCurrentPosition(
+                (position) => performUpdate(position.coords.latitude, position.coords.longitude),
+                (error) => {
+                    setIsStatusUpdating(false);
+                    toast.error(t('instructor_panel.location_error', 'Joylashuvni aniqlash imkonsiz: ') + error.message);
+                },
+                { enableHighAccuracy: true },
+            );
+
+            return;
+        }
+
         performUpdate();
     };
 

@@ -204,8 +204,7 @@ export default function StaffIndex({
         applyFilters(role, selectedStatus, selectedBranch, search, perPage);
     };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
+    const handleSearchChange = (val: string) => {
         setSearch(val);
         applyFilters(selectedRole, selectedStatus, selectedBranch, val, perPage);
     };

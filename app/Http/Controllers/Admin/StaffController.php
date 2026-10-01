@@ -30,6 +30,28 @@ class StaffController extends Controller
         }
     }
 
+    /**
+     * The actor may only hand out a role whose permissions they could grant one
+     * by one, otherwise assigning a role would bypass the permission grant rules
+     * (e.g. giving the accountant role to obtain transfer approval).
+     *
+     * @return array<string, string>|null validation errors, or null when allowed
+     */
+    private function roleAssignmentError(User $actor, string $role, ?string $currentRole = null): ?array
+    {
+        if ($role === $currentRole) {
+            return null;
+        }
+
+        $missing = array_diff(config("roles.roles.{$role}", []), $this->permissionsGrantableBy($actor));
+
+        if ($missing === []) {
+            return null;
+        }
+
+        return ['role' => 'Bu rolni berish uchun sizda quyidagi ruxsatlar yetishmaydi: '.implode(', ', $missing)];
+    }
+
     public function index(Request $request): Response
     {
         $currentUser = $request->user();
@@ -149,6 +171,10 @@ class StaffController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
+        if ($error = $this->roleAssignmentError($currentUser, $validated['role'])) {
+            return redirect()->back()->withErrors($error);
+        }
+
         $branchId = $currentUser->isBranchRestricted()
             ? $currentUser->branch_id
             : ($validated['branch_id'] ?? null);
@@ -197,6 +223,10 @@ class StaffController extends Controller
             'photo' => 'nullable|image|max:5120',
             'password' => 'nullable|string|min:6',
         ]);
+
+        if ($error = $this->roleAssignmentError($currentUser, $validated['role'], $staff->role)) {
+            return redirect()->back()->withErrors($error);
+        }
 
         if ($currentUser->isBranchRestricted()) {
             $validated['branch_id'] = $currentUser->branch_id;

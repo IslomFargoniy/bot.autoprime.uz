@@ -110,6 +110,21 @@ class CashRegister extends Model
     }
 
     /**
+     * Why money paid by the given method cannot go through this register (its
+     * type is bound to one payment method), or null when it can.
+     */
+    public function paymentMethodMismatchMessage(string $paymentMethod): ?string
+    {
+        $registerTypeCode = $this->type?->code;
+
+        if ($registerTypeCode && $registerTypeCode !== $paymentMethod) {
+            return "Tanlangan kassa turi ({$registerTypeCode}) to'lov usuliga ({$paymentMethod}) mos emas.";
+        }
+
+        return null;
+    }
+
+    /**
      * Atomically deposit funds into this cash register and record ledger transaction.
      */
     public function deposit(
