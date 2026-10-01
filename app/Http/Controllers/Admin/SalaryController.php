@@ -78,9 +78,9 @@ class SalaryController extends Controller
     public function generateMonthlyPayroll(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'period' => ['required', 'date_format:Y-m', 'before:'.now()->format('Y-m')],
+            'period' => ['required', 'date_format:Y-m', 'before_or_equal:'.now()->format('Y-m')],
         ], [
-            'period.before' => 'Oylik faqat tugagan oylar uchun hisoblanadi (joriy yoki kelgusi oy uchun emas).',
+            'period.before_or_equal' => 'Oylik kelgusi oylar uchun hisoblanmaydi.',
         ]);
 
         $period = $validated['period'];

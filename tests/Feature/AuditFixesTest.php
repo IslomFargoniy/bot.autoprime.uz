@@ -171,33 +171,57 @@ test('only the receiving branch approves an inter-branch transfer', function () 
     expect($transfer->fresh()->status)->toBe('approved');
 });
 
-test('an admin cannot hand out a role carrying permissions they lack', function () {
+test('staff can only hand out roles whose permissions they hold', function () {
     $payload = fn (string $role) => [
         'name' => 'Yangi xodim', 'phone' => '+99890'.fake()->unique()->numerify('#######'), 'role' => $role, 'password' => 'secret123',
     ];
 
-    $this->actingAs($this->admin)->post('/admin/staff', $payload('accountant'))->assertSessionHasErrors('role');
-    expect(User::where('role', 'accountant')->exists())->toBeFalse();
+    $this->actingAs($this->admin)->post('/admin/staff', $payload('accountant'))->assertSessionHasNoErrors();
+    expect(User::where('role', 'accountant')->exists())->toBeTrue();
 
-    $this->actingAs($this->admin)->post('/admin/staff', $payload('reception'))->assertSessionHasNoErrors();
-    expect(User::where('role', 'reception')->exists())->toBeTrue();
+    $manager = auditStaff('kassir');
+    $manager->givePermissionTo(['users.view', 'users.manage']);
+
+    $this->actingAs($manager)->post('/admin/staff', $payload('accountant'))->assertSessionHasErrors('role');
+    expect(User::where('role', 'accountant')->count())->toBe(1);
 
     $kassir = auditStaff('kassir');
-    $this->actingAs($this->admin)->put("/admin/staff/{$kassir->id}", [
+    $this->actingAs($manager)->put("/admin/staff/{$kassir->id}", [
         'name' => $kassir->name, 'phone' => $kassir->phone, 'role' => 'accountant',
     ])->assertSessionHasErrors('role');
     expect($kassir->fresh()->role)->toBe('kassir');
 });
 
-test('payroll is only generated for finished months and never for the actor', function () {
+test('a branch admin approves transfers into their branch but not register sweeps', function () {
+    $from = auditRegister($this->otherBranch->id, 1000000);
+    $own = auditRegister($this->branch->id);
+    $central = auditRegister(null);
+    $sender = auditStaff('kassir', $this->otherBranch->id);
+
+    $interBranch = CashTransfer::create([
+        'from_cash_register_id' => $from->id, 'to_cash_register_id' => $own->id,
+        'sent_by_user_id' => $sender->id, 'amount' => 300000, 'status' => 'pending',
+    ]);
+    $sweep = CashTransfer::create([
+        'from_cash_register_id' => auditRegister($this->branch->id, 500000)->id, 'to_cash_register_id' => $central->id,
+        'sent_by_user_id' => $sender->id, 'amount' => 200000, 'status' => 'pending',
+    ]);
+
+    $this->actingAs($this->admin)->post(route('finance.approve-transfer', $sweep))->assertSessionHasErrors('transfer');
+    expect($sweep->fresh()->status)->toBe('pending');
+
+    $this->actingAs($this->admin)->post(route('finance.approve-transfer', $interBranch))->assertSessionHasNoErrors();
+    expect($interBranch->fresh()->status)->toBe('approved');
+});
+
+test('payroll covers the current month, never a future one, and never the actor', function () {
     $actor = auditStaff('accountant', null, ['base_salary' => 1000000]);
     $teacher = auditStaff('teacher', null, ['base_salary' => 2000000]);
 
-    $this->actingAs($actor)->post(route('salaries.generate'), ['period' => now()->format('Y-m')])->assertSessionHasErrors('period');
     $this->actingAs($actor)->post(route('salaries.generate'), ['period' => now()->addMonth()->format('Y-m')])->assertSessionHasErrors('period');
     expect(Salary::count())->toBe(0);
 
-    $this->actingAs($actor)->post(route('salaries.generate'), ['period' => now()->subMonth()->format('Y-m')])->assertSessionHasNoErrors();
+    $this->actingAs($actor)->post(route('salaries.generate'), ['period' => now()->format('Y-m')])->assertSessionHasNoErrors();
 
     expect(Salary::where('user_id', $teacher->id)->exists())->toBeTrue()
         ->and(Salary::where('user_id', $actor->id)->exists())->toBeFalse();

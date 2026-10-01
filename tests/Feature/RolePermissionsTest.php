@@ -162,10 +162,12 @@ test('a receptionist granted cashier permissions can open the finance page', fun
     expect($reception->fresh()->getDirectPermissions()->pluck('name')->all())->not->toContain('payments.create');
 });
 
-test('an admin cannot grant a permission they do not hold themselves', function () {
+test('staff cannot grant a permission they do not hold themselves', function () {
     $kassir = staffMember('kassir');
+    $manager = staffMember('reception');
+    $manager->givePermissionTo(['users.view', 'users.manage', 'roles.manage']);
 
-    $this->actingAs($this->admin)->put(route('staff.update-permissions', $kassir), [
+    $this->actingAs($manager)->put(route('staff.update-permissions', $kassir), [
         'permissions' => ['cash_transfers.approve'],
     ])->assertSessionHasErrors('permissions');
 

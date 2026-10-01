@@ -143,6 +143,7 @@ return [
             'expenses.create',
             'expenses.delete',
             'cash_transfers.create',
+            'cash_transfers.approve',
             'salaries.view',
             'salaries.accrue',
             'salaries.pay',
