@@ -65,8 +65,7 @@ prepare)
     MYSQL_PWD="$(env_value DB_PASSWORD)" mysqldump \
         --single-transaction --routines --no-tablespaces \
         -h "$(env_value DB_HOST)" -P "$(env_value DB_PORT)" -u "$(env_value DB_USERNAME)" \
-        "$(env_value DB_DATABASE)" | gzip > "${BACKUP_FILE}"
-    chown "${APP_USER}:${APP_USER}" "${BACKUP_FILE}"
+        "$(env_value DB_DATABASE)" | gzip | sudo -u "${APP_USER}" tee "${BACKUP_FILE}" > /dev/null
     echo "  ✓ ${BACKUP_FILE}"
 
     echo "▶ Maintenance mode"
@@ -83,7 +82,7 @@ prepare)
     as_app "${PHP} ${COMPOSER} install --no-dev --optimize-autoloader --no-interaction"
     ;;
 finish)
-    chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}/public/build"
+    sudo chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}/public/build"
 
     echo "▶ Migratsiyalar"
     as_app "${PHP} artisan migrate --force"
