@@ -1,8 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import { Users, ArrowLeft, Download, Trash2, CheckSquare } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
 import {
     Table,
     TableBody,
@@ -12,8 +13,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { useState } from 'react';
-import GroupAttendanceModal from '@/components/GroupAttendanceModal';
+import { useCan } from '@/hooks/use-can';
 
 interface Group {
     id: number;

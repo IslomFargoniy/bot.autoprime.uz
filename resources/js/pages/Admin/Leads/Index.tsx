@@ -1,14 +1,10 @@
-import { useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Plus,
     UserCheck,
     Trash2,
-    Search,
     Phone,
     Calendar,
-    ArrowRight,
     Eye,
     User,
     FileText,
@@ -20,14 +16,15 @@ import {
     Copy,
     Check,
     CheckCircle,
-    X,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
     Dialog,
     DialogContent,
@@ -35,6 +32,10 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -44,13 +45,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
-import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
-import { MoneyInput } from '@/components/ui/money-input';
+import { useCan } from '@/hooks/use-can';
+import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
 
 interface Lead {
     id: number;
@@ -152,7 +148,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
     const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const isLeadConverted = (lead?: Lead | null) => {
-        if (!lead) return false;
+        if (!lead) {
+return false;
+}
+
         return Boolean(
             lead.contract_id ||
             lead.student_id ||
@@ -165,8 +164,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
     const openConvertModal = (lead: Lead) => {
         if (isLeadConverted(lead)) {
             toast.error(t('leads.already_converted', 'Ushbu lid bilan allaqachon shartnoma tuzilgan.'));
+
             return;
         }
+
         setConvertingLead(lead);
         convertForm.setData({
             contract_type_id: '',
@@ -207,7 +208,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
     const handleConvertSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!convertingLead) return;
+
+        if (!convertingLead) {
+return;
+}
 
         convertForm.post(`/admin/leads/${convertingLead.id}/convert`, {
             onSuccess: () => {
@@ -226,7 +230,10 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
         if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/leads/${lead.id}`, {
                 onSuccess: () => {
-                    if (viewingLead?.id === lead.id) setViewingLead(null);
+                    if (viewingLead?.id === lead.id) {
+setViewingLead(null);
+}
+
                     toast.success(t('common.deleted', 'O\'chirildi'));
                 },
             });

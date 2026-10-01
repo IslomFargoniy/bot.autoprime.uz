@@ -1,15 +1,11 @@
-import { useState, useCallback } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
+import { Trash2, Edit2, Plus, ShieldCheck } from 'lucide-react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
-import { SearchableSelect } from '@/components/ui/searchable-select';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -17,14 +13,9 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -34,7 +25,6 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { Filter } from 'lucide-react';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface AdminUser {
@@ -123,7 +113,11 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         if (editingAdmin) {
             put(`/admin/admins/${editingAdmin.id}`, {
                 onSuccess: () => {
@@ -150,9 +144,13 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
     const handleDelete = (admin: AdminUser) => {
         if (auth.user.id === admin.id) {
             toast.error(t('admins.cannot_delete_self', 'O\'z hisobingizni o\'chira olmaysiz'));
+
             return;
         }
-        if (isDeleting === admin.id) return;
+
+        if (isDeleting === admin.id) {
+return;
+}
 
         if (confirm(t('common.confirm_delete', 'Rostdan ham ushbu adminni o\'chirmoqchimisiz?'))) {
             setIsDeleting(admin.id);
@@ -189,7 +187,9 @@ export default function AdminsIndex({ admins, branches = [], filters = {} }: Pag
                 <PageFilterSearch
                     value={search}
                     onChange={handleSearchChange}
-                    onSubmit={(e) => { e.preventDefault(); applyFilters(search, perPage); }}
+                    onSubmit={(e) => {
+ e.preventDefault(); applyFilters(search, perPage); 
+}}
                     placeholder={t('admins.search_placeholder', 'Ism, email yoki telefon bo\'yicha qidiruv...')}
                     perPage={perPage}
                     onPerPageChange={handlePerPageChange}

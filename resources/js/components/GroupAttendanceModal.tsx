@@ -1,28 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
 import { router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/date-picker';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { formatDate } from '@/lib/utils';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import {
     Users,
     CheckCircle2,
@@ -33,6 +9,30 @@ import {
     Calendar,
     BookOpen,
 } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { formatDate } from '@/lib/utils';
 
 export interface GroupRosterStudent {
     id: number;
@@ -92,28 +92,41 @@ export default function GroupAttendanceModal({
 
     // Fetch roster whenever modal opens or group/date changes
     useEffect(() => {
-        if (!isOpen || !selectedGroupId) return;
+        if (!isOpen || !selectedGroupId) {
+return;
+}
 
         let isMounted = true;
         setIsLoading(true);
 
         fetch(`/admin/attendance/group-attendances?group_id=${selectedGroupId}&date=${selectedDate}`)
             .then((res) => {
-                if (!res.ok) throw new Error('Failed to load roster');
+                if (!res.ok) {
+throw new Error('Failed to load roster');
+}
+
                 return res.json();
             })
             .then((data) => {
-                if (!isMounted) return;
+                if (!isMounted) {
+return;
+}
+
                 setIsLoading(false);
+
                 if (data.students) {
                     setRosterList(data.students);
                 }
+
                 if (data.session?.topic) {
                     setTopic(data.session.topic);
                 }
             })
             .catch(() => {
-                if (!isMounted) return;
+                if (!isMounted) {
+return;
+}
+
                 setIsLoading(false);
                 setRosterList([]);
             });
@@ -153,6 +166,7 @@ export default function GroupAttendanceModal({
                         is_attended: status === 'present' || status === 'late',
                     };
                 }
+
                 return s;
             })
         );
@@ -163,12 +177,14 @@ export default function GroupAttendanceModal({
             prev.map((s) => {
                 if (s.id === studentId) {
                     const nextAttended = !s.is_attended;
+
                     return {
                         ...s,
                         is_attended: nextAttended,
                         status: nextAttended ? 'present' : 'absent',
                     };
                 }
+
                 return s;
             })
         );
@@ -185,6 +201,7 @@ export default function GroupAttendanceModal({
 
         if (rosterList.length === 0) {
             toast.error(t('attendance.no_students_in_group', 'Ushbu guruhda faol talabalar topilmadi'));
+
             return;
         }
 
@@ -219,8 +236,12 @@ export default function GroupAttendanceModal({
     };
 
     const filteredRoster = useMemo(() => {
-        if (!searchQuery.trim()) return rosterList;
+        if (!searchQuery.trim()) {
+return rosterList;
+}
+
         const query = searchQuery.toLowerCase();
+
         return rosterList.filter(
             (s) =>
                 s.full_name.toLowerCase().includes(query) ||

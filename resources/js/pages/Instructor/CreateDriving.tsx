@@ -1,5 +1,6 @@
-import { useState, useMemo, FormEvent } from 'react';
 import { useForm, Link } from '@inertiajs/react';
+import type { FormEvent } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import TMALayout from '@/layouts/tma-layout';
 
@@ -29,13 +30,20 @@ export default function CreateDriving({ groups = [] }: PageProps) {
     });
 
     const selectedGroup = useMemo(() => {
-        if (!data.group_id) return null;
+        if (!data.group_id) {
+return null;
+}
+
         return groups.find(g => g.id.toString() === data.group_id.toString());
     }, [data.group_id, groups]);
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         post('/instructor/drivings');
     };
 

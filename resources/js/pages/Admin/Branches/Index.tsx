@@ -1,12 +1,20 @@
-import { useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Building2, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { Building2, Edit2, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableHeader,
@@ -16,16 +24,7 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import { useCan } from '@/hooks/use-can';
 import type { Branch } from '@/types/auth';
 
 interface Props {
@@ -89,6 +88,7 @@ export default function Index({ branches, filters }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingBranch) {
             put(`/admin/branches/${editingBranch.id}`, {
                 onSuccess: () => {
@@ -109,8 +109,10 @@ export default function Index({ branches, filters }: Props) {
     const handleDelete = (branch: Branch) => {
         if (branch.code === 'main') {
             alert(t('branches.cannot_delete_main', 'Asosiy filialni o\'chirib bo\'lmaydi.'));
+
             return;
         }
+
         if (confirm(t('common.confirm_delete', 'Haqiqatdan ham o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/branches/${branch.id}`);
         }

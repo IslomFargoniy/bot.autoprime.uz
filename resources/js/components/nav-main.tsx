@@ -30,7 +30,9 @@ export function NavMain({ items, groups }: NavMainProps) {
     return (
         <div className="space-y-1">
             {effectiveGroups.map((group, groupIdx) => {
-                if (!group.items || group.items.length === 0) return null;
+                if (!group.items || group.items.length === 0) {
+return null;
+}
 
                 return (
                     <SidebarGroup key={group.title || groupIdx} className="px-2 py-1">

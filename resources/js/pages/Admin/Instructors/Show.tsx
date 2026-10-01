@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Car,
@@ -11,12 +9,13 @@ import {
     XCircle,
     Calendar,
     User as UserIcon,
-    AlertTriangle,
     MessageSquare,
     TrendingUp,
     Search,
     MapPin,
 } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,8 +27,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { SharedData } from '@/types/auth';
 import { formatDateTime } from '@/lib/utils';
+import type { SharedData } from '@/types/auth';
 
 interface TagCount {
     tag: string;
@@ -101,12 +100,16 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
     const [search, setSearch] = useState('');
 
     const filteredDrivings = drivings.filter((d) => {
-        if (!search) return true;
+        if (!search) {
+return true;
+}
+
         const q = search.toLowerCase();
         const studentName = d.student?.full_name?.toLowerCase() || '';
         const groupName = d.student?.group?.name?.toLowerCase() || '';
         const autodromeName = d.autodrome?.name?.toLowerCase() || '';
         const comment = d.review?.comment?.toLowerCase() || '';
+
         return studentName.includes(q) || groupName.includes(q) || autodromeName.includes(q) || comment.includes(q);
     });
 
@@ -275,6 +278,7 @@ export default function InstructorShow({ instructor, stats, drivings }: PageProp
                             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                                 {stats.tag_counts.map((tc) => {
                                     const isNegative = ['Kechiqdi', 'Muomala yomon', 'Mashina nosoz', 'Vaqtidan kam o\'tildi', 'Nervniy'].some(k => tc.tag.includes(k));
+
                                     return (
                                         <div key={tc.tag} className="space-y-1">
                                             <div className="flex justify-between items-center text-xs font-medium">

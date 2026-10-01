@@ -76,6 +76,7 @@ class DashboardController extends Controller
         $drivingStats = (clone $drivingsQuery)
             ->selectRaw('DATE(start_time) as date_val, status, COUNT(*) as count')
             ->groupBy('date_val', 'status')
+            ->toBase()
             ->get();
 
         $periodDrivingsCount = (int) $drivingStats->sum('count');

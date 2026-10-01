@@ -3,9 +3,9 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
 import en from './locales/en.json';
+import krill from './locales/krill.json';
 import ru from './locales/ru.json';
 import uz from './locales/uz.json';
-import krill from './locales/krill.json';
 
 i18n
     .use(LanguageDetector)
@@ -33,6 +33,7 @@ i18n
 i18n.on('languageChanged', (lng) => {
     if (lng && typeof document !== 'undefined') {
         const langCode = lng.split('-')[0];
+
         if (['uz', 'krill', 'ru', 'en'].includes(langCode)) {
             document.cookie = `locale=${langCode}; path=/; max-age=31536000; SameSite=Lax`;
         }
@@ -41,6 +42,7 @@ i18n.on('languageChanged', (lng) => {
 
 if (typeof document !== 'undefined') {
     const initialLng = i18n.language?.split('-')[0];
+
     if (initialLng && ['uz', 'krill', 'ru', 'en'].includes(initialLng)) {
         document.cookie = `locale=${initialLng}; path=/; max-age=31536000; SameSite=Lax`;
     }

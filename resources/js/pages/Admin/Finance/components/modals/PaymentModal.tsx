@@ -1,16 +1,16 @@
-import { useTranslation } from 'react-i18next';
 import { ArrowDownRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { formatMoney } from '@/lib/utils';
 import type { CashRegister } from '../../types';
 
@@ -60,6 +60,7 @@ export function PaymentModal({
                             onChange={(val) => paymentForm.setData('contract_id', val)}
                             options={(contracts || []).map((c) => {
                                 const st = (students || []).find((s) => s.id === c.student_id);
+
                                 return {
                                     value: c.id,
                                     label: `#${c.contract_number}${st ? ` - ${st.full_name}` : ''}`,

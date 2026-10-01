@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import { User, Phone, Send, Lock, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { User, Phone, Send, Lock, Save, ShieldCheck } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
 import type { User as UserType } from '@/types';
 
 interface PageProps {
@@ -15,7 +14,7 @@ interface PageProps {
 export default function ProfileEdit({ user }: PageProps) {
     const { t } = useTranslation();
 
-    const { data, setData, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, put, processing, errors, clearErrors } = useForm({
         name: user.name || '',
         phone: user.phone || '',
         telegram_id: user.telegram_id || '',

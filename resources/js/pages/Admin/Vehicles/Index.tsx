@@ -1,37 +1,32 @@
-import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Car,
     Wrench,
-    Fuel,
-    Calendar,
-    Search,
     Trash2,
     Edit2,
-    AlertCircle,
     CheckCircle2,
     History,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { DatePicker } from '@/components/ui/date-picker';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
-import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useCan } from '@/hooks/use-can';
+import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
 
 interface VehicleMaintenance {
     id: number;
@@ -172,7 +167,10 @@ export default function VehiclesIndex({
                 onSuccess: () => {
                     toast.success(t('vehicles.maintenance_deleted', 'Texnik xizmat yozuvi o\'chirildi'));
                     setHistoryVehicle((prev) => {
-                        if (!prev) return null;
+                        if (!prev) {
+return null;
+}
+
                         return {
                             ...prev,
                             maintenances: (prev.maintenances || []).filter((item) => item.id !== m.id),
@@ -187,10 +185,20 @@ export default function VehiclesIndex({
     const openEdit = (v: Vehicle) => {
         setEditingVehicle(v);
         let fuel = v.fuel_type;
-        if (fuel === 'methane') fuel = 'gas_methane';
-        if (fuel === 'propane') fuel = 'gas_propane';
+
+        if (fuel === 'methane') {
+fuel = 'gas_methane';
+}
+
+        if (fuel === 'propane') {
+fuel = 'gas_propane';
+}
+
         let status = v.status;
-        if (status === 'retired') status = 'out_of_service';
+
+        if (status === 'retired') {
+status = 'out_of_service';
+}
 
         vehicleForm.setData({
             branch_id: v.branch?.id ? String(v.branch.id) : '',
@@ -207,6 +215,7 @@ export default function VehiclesIndex({
 
     const handleVehicleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingVehicle) {
             vehicleForm.put(`/admin/vehicles/${editingVehicle.id}`, {
                 onSuccess: () => {
@@ -229,7 +238,10 @@ export default function VehiclesIndex({
 
     const handleMaintenanceSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!maintainingVehicle) return;
+
+        if (!maintainingVehicle) {
+return;
+}
 
         maintenanceForm.post(`/admin/vehicles/${maintainingVehicle.id}/maintenances`, {
             onSuccess: () => {

@@ -105,7 +105,10 @@ class StaffController extends Controller
                 $countsQuery->where('branch_id', $currentUser->branch_id);
             }
         } elseif ($targetBranchId) {
-            $countsQuery->where('branch_id', $targetBranchId);
+            $countsQuery->where(function ($q) use ($targetBranchId) {
+                $q->where('branch_id', $targetBranchId)
+                    ->orWhereNull('branch_id');
+            });
         }
 
         $groupedCounts = (clone $countsQuery)

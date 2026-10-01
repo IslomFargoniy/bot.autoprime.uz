@@ -1,12 +1,30 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Search, Plus, Edit2, Trash2, CheckCircle2, XCircle, Filter, Download, Loader2, ShoppingCart, X, Car } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 import {
     Table,
     TableBody,
@@ -16,27 +34,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
-import { Input } from '@/components/ui/input';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
-import { formatDate, formatTime, parseDate } from '@/lib/utils';
+import { useCan } from '@/hooks/use-can';
+import { formatDate, formatTime } from '@/lib/utils';
 
 interface Instructor {
     id: number;
@@ -149,14 +148,25 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
     });
 
     useEffect(() => {
-        if (!showForm) return;
+        if (!showForm) {
+return;
+}
 
         const timer = setTimeout(() => {
             setIsSearchingStudents(true);
             const params = new URLSearchParams();
-            if (studentSearch) params.append('q', studentSearch);
-            if (data.group_id && !showOtherStudents) params.append('group_id', data.group_id);
-            if (showOtherStudents) params.append('other_students', 'true');
+
+            if (studentSearch) {
+params.append('q', studentSearch);
+}
+
+            if (data.group_id && !showOtherStudents) {
+params.append('group_id', data.group_id);
+}
+
+            if (showOtherStudents) {
+params.append('other_students', 'true');
+}
 
             fetch(`/admin/students/search-api?${params.toString()}`)
                 .then(res => res.json())
@@ -172,14 +182,17 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
     transform((formData) => {
         let dateForBackend = '';
+
         if (formData.date && formData.date.includes('-')) {
             const parts = formData.date.split('-');
+
             if (parts[0].length === 2 && parts[2]?.length === 4) {
                 dateForBackend = `${parts[2]}-${parts[1]}-${parts[0]}`;
             } else if (parts[0].length === 4) {
                 dateForBackend = formData.date;
             }
         }
+
         return {
             ...formData,
             start_time: dateForBackend && formData.time_from ? `${dateForBackend} ${formData.time_from}:00` : '',
@@ -189,7 +202,11 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         if (editing) {
             put('/admin/drivings/' + editing.id, {
                 onSuccess: () => {
@@ -216,8 +233,10 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
     const handleEdit = (driving: Driving) => {
         if (driving.status === 'completed' || driving.status === 'cancelled') {
             toast.error(t('drivings.edit_completed_error', 'Tugallangan yoki bekor qilingan mashg\'ulotni o\'zgartirish mumkin emas'));
+
             return;
         }
+
         setEditing(driving);
 
         setData({
@@ -233,14 +252,19 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
             end_time: '',
             status: driving.status,
         });
+
         if (driving.student) {
             setSelectedStudentsBasket([driving.student]);
         }
+
         setShowForm(true);
     };
 
     const handleDelete = (driving: Driving) => {
-        if (isDeleting === driving.id) return;
+        if (isDeleting === driving.id) {
+return;
+}
+
         if (confirm(t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"))) {
             setIsDeleting(driving.id);
             destroy('/admin/drivings/' + driving.id, {
@@ -258,7 +282,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
     };
 
     const handleStatusChangeConfirm = () => {
-        if (!statusModalDriving || !targetStatus || isStatusUpdating) return;
+        if (!statusModalDriving || !targetStatus || isStatusUpdating) {
+return;
+}
 
         const performUpdate = (latitude?: number, longitude?: number) => {
             setIsStatusUpdating(true);
@@ -320,6 +346,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
     const handleStudentSelect = (std: Student) => {
         const idStr = String(std.id);
+
         if (data.student_ids.includes(idStr)) {
             setData('student_ids', data.student_ids.filter(id => id !== idStr));
             setSelectedStudentsBasket(prev => prev.filter(s => s.id !== std.id));
@@ -351,24 +378,6 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
         applyFilters(search, status, instructorId, fromDate, toDate, perPage);
     };
 
-    const baseFilteredStudents = data.group_id ? students.filter(s => s.group_id === Number(data.group_id)) : students;
-    const filteredStudents = studentSearch
-        ? baseFilteredStudents.filter(s => 
-            s.full_name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-            (s.phone && s.phone.includes(studentSearch)) ||
-            (s.group && s.group.name.toLowerCase().includes(studentSearch.toLowerCase()))
-          )
-        : baseFilteredStudents;
-
-    const handleStudentToggle = (stdId: number) => {
-        const idStr = String(stdId);
-        if (data.student_ids.includes(idStr)) {
-            setData('student_ids', data.student_ids.filter(id => id !== idStr));
-        } else {
-            setData('student_ids', [...data.student_ids, idStr]);
-        }
-    };
-
     const handleFilterDateChange = (field: 'from' | 'to', dateStr: string) => {
         if (field === 'from') {
             setFromDate(dateStr);
@@ -381,7 +390,11 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
     const handleTimeChange = (field: 'time_from' | 'time_to', val: string) => {
         let clean = val.replace(/[^\d]/g, '');
-        if (clean.length > 4) clean = clean.substring(0, 4);
+
+        if (clean.length > 4) {
+clean = clean.substring(0, 4);
+}
+
         if (clean.length > 2) {
             if (parseInt(clean[2]) > 5) {
                 clean = clean.substring(0, 2) + '5' + clean.substring(3);
@@ -389,9 +402,11 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
         }
 
         let formatted = clean;
+
         if (clean.length > 2) {
             formatted = clean.substring(0, 2) + ':' + clean.substring(2);
         }
+
         setData(field, formatted);
     };
 
@@ -408,29 +423,84 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
 
     const translateTag = (tag: string) => {
         const clean = tag.replace(/^[^\w\u0400-\u04FF']+\s*/, '').trim();
-        if (tag.includes('Kechikdi') || clean === 'Kechikdi') return t('drivings.tag_late', 'Kechikdi');
-        if (tag.includes('Xushmuomala') || clean === 'Xushmuomala') return t('drivings.tag_polite', 'Xushmuomala');
-        if (tag.includes('Zargona tushuntirdi') || clean === 'Zargona tushuntirdi') return t('drivings.tag_slang', 'Zargona tushuntirdi');
-        if (tag.includes('Tushunarsiz') || clean === 'Tushunarsiz') return t('drivings.tag_unclear', 'Tushunarsiz');
-        if (tag.includes('Mashina nosoz') || clean === 'Mashina nosoz') return t('drivings.tag_car_issue', 'Mashina nosoz');
-        if (tag.includes('Yaxshi tushuntirdi') || clean === 'Yaxshi tushuntirdi') return t('drivings.tag_well_explained', 'Yaxshi tushuntirdi');
-        if (tag.includes('Sabrli') || clean === 'Sabrli') return t('drivings.tag_patient', 'Sabrli');
-        if (tag.includes('Asabiy') || clean === 'Asabiy') return t('drivings.tag_nervous', 'Asabiy');
-        if (tag.includes("Qo'pol") || clean === "Qo'pol" || tag.includes("Qo`pol") || clean === "Qopol") return t('drivings.tag_rude', "Qo'pol");
-        if (tag.includes('Mashina toza') || clean === 'Mashina toza') return t('drivings.tag_clean_car', 'Mashina toza');
-        if (tag.includes('Vaqtida boshladi') || clean === 'Vaqtida boshladi') return t('drivings.tag_on_time', 'Vaqtida boshladi');
-        if (tag.includes('Muomala yomon') || clean === 'Muomala yomon') return t('drivings.tag_bad_attitude', 'Muomala yomon');
-        if (tag.includes('Vaqtidan kam') || clean.includes('Vaqtidan kam')) return t('drivings.tag_short_lesson', "Vaqtidan kam o'tildi");
+
+        if (tag.includes('Kechikdi') || clean === 'Kechikdi') {
+return t('drivings.tag_late', 'Kechikdi');
+}
+
+        if (tag.includes('Xushmuomala') || clean === 'Xushmuomala') {
+return t('drivings.tag_polite', 'Xushmuomala');
+}
+
+        if (tag.includes('Zargona tushuntirdi') || clean === 'Zargona tushuntirdi') {
+return t('drivings.tag_slang', 'Zargona tushuntirdi');
+}
+
+        if (tag.includes('Tushunarsiz') || clean === 'Tushunarsiz') {
+return t('drivings.tag_unclear', 'Tushunarsiz');
+}
+
+        if (tag.includes('Mashina nosoz') || clean === 'Mashina nosoz') {
+return t('drivings.tag_car_issue', 'Mashina nosoz');
+}
+
+        if (tag.includes('Yaxshi tushuntirdi') || clean === 'Yaxshi tushuntirdi') {
+return t('drivings.tag_well_explained', 'Yaxshi tushuntirdi');
+}
+
+        if (tag.includes('Sabrli') || clean === 'Sabrli') {
+return t('drivings.tag_patient', 'Sabrli');
+}
+
+        if (tag.includes('Asabiy') || clean === 'Asabiy') {
+return t('drivings.tag_nervous', 'Asabiy');
+}
+
+        if (tag.includes("Qo'pol") || clean === "Qo'pol" || tag.includes("Qo`pol") || clean === "Qopol") {
+return t('drivings.tag_rude', "Qo'pol");
+}
+
+        if (tag.includes('Mashina toza') || clean === 'Mashina toza') {
+return t('drivings.tag_clean_car', 'Mashina toza');
+}
+
+        if (tag.includes('Vaqtida boshladi') || clean === 'Vaqtida boshladi') {
+return t('drivings.tag_on_time', 'Vaqtida boshladi');
+}
+
+        if (tag.includes('Muomala yomon') || clean === 'Muomala yomon') {
+return t('drivings.tag_bad_attitude', 'Muomala yomon');
+}
+
+        if (tag.includes('Vaqtidan kam') || clean.includes('Vaqtidan kam')) {
+return t('drivings.tag_short_lesson', "Vaqtidan kam o'tildi");
+}
+
         return tag;
     };
 
     const handleExport = () => {
         const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (instructorId) params.append('instructor_id', instructorId);
-        if (fromDate) params.append('from', fromDate);
-        if (toDate) params.append('to', toDate);
+
+        if (search) {
+params.append('search', search);
+}
+
+        if (status) {
+params.append('status', status);
+}
+
+        if (instructorId) {
+params.append('instructor_id', instructorId);
+}
+
+        if (fromDate) {
+params.append('from', fromDate);
+}
+
+        if (toDate) {
+params.append('to', toDate);
+}
 
         window.location.href = `/admin/drivings/export?${params.toString()}`;
     };
@@ -581,7 +651,11 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
             </PageFilterBar>
 
             {/* Status Change Confirmation Modal */}
-            <Dialog open={!!statusModalDriving} onOpenChange={(open) => { if (!open) { setStatusModalDriving(null); setTargetStatus(null); } }}>
+            <Dialog open={!!statusModalDriving} onOpenChange={(open) => {
+ if (!open) {
+ setStatusModalDriving(null); setTargetStatus(null); 
+} 
+}}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
@@ -614,7 +688,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                     </DialogHeader>
 
                     <div className="flex gap-2 pt-4 justify-end">
-                        <Button type="button" variant="outline" onClick={() => { setStatusModalDriving(null); setTargetStatus(null); }}>
+                        <Button type="button" variant="outline" onClick={() => {
+ setStatusModalDriving(null); setTargetStatus(null); 
+}}>
                             {t('common.cancel', 'Bekor qilish')}
                         </Button>
                         <Button
@@ -796,6 +872,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             ) : (
                                                 apiSearchResults.map(s => {
                                                     const isSelected = data.student_ids.includes(String(s.id));
+
                                                     return (
                                                         <div 
                                                             key={s.id} 
@@ -1003,6 +1080,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                             <div className="flex flex-wrap gap-1 mt-1">
                                                                 {driving.review.reason_tags.map((tag, i) => {
                                                                     const isNeg = isNegativeTag(tag);
+
                                                                     return (
                                                                         <span
                                                                             key={i}
@@ -1039,7 +1117,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                                 variant="outline"
                                                                 size="sm"
                                                                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
-                                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
+                                                                onClick={() => {
+ setStatusModalDriving(driving); setTargetStatus('completed'); 
+}}
                                                                 title={t('drivings.complete_action', 'Tugatish')}
                                                             >
                                                                 <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
@@ -1050,7 +1130,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                                 variant="outline"
                                                                 size="sm"
                                                                 className="text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
-                                                                onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
+                                                                onClick={() => {
+ setStatusModalDriving(driving); setTargetStatus('cancelled'); 
+}}
                                                                 title={t('drivings.cancel_action', 'Bekor qilish')}
                                                             >
                                                                 <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
@@ -1140,6 +1222,7 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                             <div className="flex flex-wrap gap-1 justify-end">
                                                 {driving.review.reason_tags.map((tag, i) => {
                                                     const isNeg = isNegativeTag(tag);
+
                                                     return (
                                                         <span
                                                             key={i}
@@ -1167,7 +1250,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                     variant="outline"
                                                     size="sm"
                                                     className="flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800/80 dark:hover:bg-emerald-950/40"
-                                                    onClick={() => { setStatusModalDriving(driving); setTargetStatus('completed'); }}
+                                                    onClick={() => {
+ setStatusModalDriving(driving); setTargetStatus('completed'); 
+}}
                                                 >
                                                     <CheckCircle2 className="w-4 h-4 mr-1" /> {t('drivings.complete_action', 'Tugatish')}
                                                 </Button>
@@ -1177,7 +1262,9 @@ export default function DrivingsIndex({ drivings, instructors, students, groups,
                                                     variant="outline"
                                                     size="sm"
                                                     className="flex-1 text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-700/60 dark:hover:bg-rose-950/40"
-                                                    onClick={() => { setStatusModalDriving(driving); setTargetStatus('cancelled'); }}
+                                                    onClick={() => {
+ setStatusModalDriving(driving); setTargetStatus('cancelled'); 
+}}
                                                 >
                                                     <XCircle className="w-4 h-4 mr-1" /> {t('drivings.cancel_action', 'Bekor qilish')}
                                                 </Button>

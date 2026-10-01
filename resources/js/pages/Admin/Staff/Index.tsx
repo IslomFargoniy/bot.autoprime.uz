@@ -1,11 +1,8 @@
-import { useState, useCallback } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Trash2,
     Edit2,
     Plus,
-    Search,
     UserCheck,
     Car,
     GraduationCap,
@@ -23,15 +20,15 @@ import {
     ArrowDownLeft,
     Clock,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { StaffPermissionsDialog } from '@/components/staff-permissions-dialog';
+import type { PermissionCatalog, PermissionMember } from '@/components/staff-permissions-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -39,6 +36,10 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Sheet,
     SheetContent,
@@ -46,11 +47,6 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import { StaffPermissionsDialog } from '@/components/staff-permissions-dialog';
-import type { PermissionCatalog, PermissionMember } from '@/components/staff-permissions-dialog';
-import { useCan } from '@/hooks/use-can';
-import { formatDateTime, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
-import { MoneyInput } from '@/components/ui/money-input';
 import {
     Table,
     TableBody,
@@ -60,6 +56,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import { useCan } from '@/hooks/use-can';
+import { formatDateTime, formatMoney as formatMoneyUtil } from '@/lib/utils';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface StaffUser {
@@ -270,6 +268,7 @@ export default function StaffIndex({
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setData('photo', file);
+
         if (file) {
             setPhotoPreview(URL.createObjectURL(file));
         }
@@ -324,15 +323,17 @@ export default function StaffIndex({
         setHistoryStaff(staffMember);
         setLoadingHistory(true);
         setIsHistoryOpen(true);
+
         try {
             const res = await fetch(`/admin/staff/${staffMember.id}`);
+
             if (res.ok) {
                 const json = await res.json();
                 setHistoryList(json.financialHistories || []);
             } else {
                 setHistoryList([]);
             }
-        } catch (error) {
+        } catch {
             setHistoryList([]);
         } finally {
             setLoadingHistory(false);
@@ -485,6 +486,7 @@ export default function StaffIndex({
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                 {roleTabs.map((tab) => {
                     const isActive = selectedRole === tab.key;
+
                     return (
                         <button
                             key={tab.key}
@@ -575,6 +577,7 @@ export default function StaffIndex({
                             ) : (
                                 staff.data.map((member, index) => {
                                     const balance = Number(member.salary_balance || 0);
+
                                     return (
                                         <TableRow key={member.id} className="hover:bg-muted/30">
                                             <TableCell className="text-center font-mono text-muted-foreground text-xs">
@@ -742,6 +745,7 @@ export default function StaffIndex({
                     {staff.data.length > 0 ? (
                         staff.data.map((member) => {
                             const balance = Number(member.salary_balance || 0);
+
                             return (
                                 <div
                                     key={member.id}
@@ -1219,6 +1223,7 @@ export default function StaffIndex({
                                 <div className="space-y-2">
                                     {historyList.map((item) => {
                                         const isDebit = item.type === 'debit';
+
                                         return (
                                             <div
                                                 key={item.id}

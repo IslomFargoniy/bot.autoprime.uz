@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
+import { usePage } from '@inertiajs/react';
 import { Users, Star, CalendarDays, CheckCircle2, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DatePicker } from '@/components/ui/date-picker';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     BarChart,
     Bar,
@@ -14,9 +13,10 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 
-import { Branch, SharedData } from '@/types/auth';
-import { usePage } from '@inertiajs/react';
+import type { Branch, SharedData } from '@/types/auth';
 
 interface PageProps {
     metrics: {
@@ -34,10 +34,8 @@ interface PageProps {
     };
 }
 
-export default function DashboardIndex({ metrics, chartData, branches = [], filters = {} }: PageProps) {
+export default function DashboardIndex({ metrics, chartData, filters = {} }: PageProps) {
     const { t } = useTranslation();
-    const { auth } = usePage<SharedData>().props;
-    const isSuperAdmin = !!auth?.is_super_admin;
 
     const [from, setFrom] = useState(filters.from || '');
     const [to, setTo] = useState(filters.to || '');
@@ -45,8 +43,14 @@ export default function DashboardIndex({ metrics, chartData, branches = [], filt
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const query: any = {};
-        if (from) query.from = from;
-        if (to) query.to = to;
+
+        if (from) {
+query.from = from;
+}
+
+        if (to) {
+query.to = to;
+}
 
         router.get('/admin/dashboard', query, { preserveState: true, replace: true });
     };

@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TMALayout from '@/layouts/tma-layout';
-import { formatDateTime, parseDate } from '@/lib/utils';
+import { formatDateTime } from '@/lib/utils';
 
 interface Group {
     id: number;
@@ -48,7 +48,9 @@ export default function InstructorDashboard({ groups = [], upcomingDrivings = []
     const [locationError, setLocationError] = useState('');
 
     const handleFinish = (driving: Driving) => {
-        if (!confirm(t('instructor_panel.confirm_finish', "Haqiqatdan ham bu mashg'ulotni yakunlamoqchimisiz?"))) return;
+        if (!confirm(t('instructor_panel.confirm_finish', "Haqiqatdan ham bu mashg'ulotni yakunlamoqchimisiz?"))) {
+return;
+}
         
         setFinishingId(driving.id);
         setLocationError('');
@@ -57,6 +59,7 @@ export default function InstructorDashboard({ groups = [], upcomingDrivings = []
             if (!navigator.geolocation) {
                 setLocationError(t('instructor_panel.geolocation_not_supported', "Qurilmangizda geolokatsiya qo'llab-quvvatlanmaydi."));
                 setFinishingId(null);
+
                 return;
             }
 

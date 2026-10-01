@@ -1,30 +1,24 @@
-import { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
+import { Head, useForm } from '@inertiajs/react';
 import {
     Plus,
     BookOpen,
-    Video,
     FileText,
     Play,
-    Download,
-    Trash2,
-    Clock,
-    ChevronDown,
-    ChevronRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useCan } from '@/hooks/use-can';
 
 interface Topic {
     id: number;
@@ -101,7 +95,10 @@ export default function CoursesIndex({ courses }: PageProps) {
 
     const handleCreateTopic = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedCourse) return;
+
+        if (!selectedCourse) {
+return;
+}
 
         topicForm.post(`/admin/courses/${selectedCourse.id}/topics`, {
             onSuccess: () => {
@@ -115,7 +112,10 @@ export default function CoursesIndex({ courses }: PageProps) {
 
     const handleCreateMaterial = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedTopicForMaterial) return;
+
+        if (!selectedTopicForMaterial) {
+return;
+}
 
         materialForm.post(`/admin/topics/${selectedTopicForMaterial.id}/materials`, {
             onSuccess: () => {

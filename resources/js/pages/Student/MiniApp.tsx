@@ -1,27 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
-import TMALayout from '@/layouts/tma-layout';
-import { useTranslation } from 'react-i18next';
 import {
     Calendar,
     CheckCircle2,
     Clock,
-    FileText,
     GraduationCap,
-    HelpCircle,
     MapPin,
     QrCode,
     User,
-    Video,
     XCircle,
     Play,
     Download,
     Phone,
     Car,
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TestQuiz } from '@/components/test-quiz';
 import { telegramInitDataHeaders } from '@/hooks/use-telegram';
-import { formatDate, formatDateTime, parseDate, formatMoney } from '@/lib/utils';
+import TMALayout from '@/layouts/tma-layout';
+import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
 
 
 interface StudentProps {
@@ -136,12 +133,16 @@ export default function MiniApp({
                             } catch {
                                 // ignore
                             }
+
                             sendScanToken(scannedText);
+
                             return true;
                         }
+
                         return false;
                     }
                 );
+
                 return;
             } catch {
                 setShowManualModal(true);
@@ -153,6 +154,7 @@ export default function MiniApp({
 
     const sendScanToken = async (token: string) => {
         setScanStatus({ loading: true });
+
         try {
             const tgInitData = (window as any).Telegram?.WebApp?.initData || '';
             const res = await fetch('/api/attendance/scan-qr', {
@@ -169,6 +171,7 @@ export default function MiniApp({
             });
 
             const data = await res.json();
+
             if (res.ok && data.success) {
                 setScanStatus({ loading: false, success: true, message: data.message });
             } else {

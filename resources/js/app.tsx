@@ -1,10 +1,10 @@
 import '@/i18n';
 import { createInertiaApp } from '@inertiajs/react';
+import { TelegramThemeProvider } from '@/components/telegram-theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { initTelegramWebApp } from '@/hooks/use-telegram';
-import { TelegramThemeProvider } from '@/components/telegram-theme-provider';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 

@@ -10,13 +10,16 @@ interface Props {
 
 export function BranchSelector({ branches }: Props) {
     const { t } = useTranslation();
-    const { auth, filters } = usePage<SharedData & { branches?: any; filters?: any }>().props;
+    const { auth, filters, branches: sharedBranches } = usePage<SharedData & { branches?: any; filters?: any }>().props;
     const user = auth?.user;
-    if (!user) return null;
+
+    if (!user) {
+return null;
+}
 
     const isSuperAdmin = !!auth?.is_super_admin;
 
-    const rawBranches = branches || (usePage().props.branches as any);
+    const rawBranches = branches || sharedBranches;
     const availableBranches: Branch[] = Array.isArray(rawBranches)
         ? rawBranches
         : (Array.isArray(rawBranches?.data) ? rawBranches.data : []);
@@ -32,12 +35,17 @@ export function BranchSelector({ branches }: Props) {
                 </Badge>
             );
         }
+
         return null;
     }
 
     if (!isSuperAdmin) {
         const userBranch = user.branch || availableBranches.find((b) => b.id === user.branch_id);
-        if (!userBranch) return null;
+
+        if (!userBranch) {
+return null;
+}
+
         return (
             <Badge variant="outline" className="gap-1.5 py-1 px-2.5 font-normal text-xs bg-muted/50 border-border">
                 <Building2 className="w-3.5 h-3.5 text-primary" />

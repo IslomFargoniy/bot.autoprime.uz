@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
 import { Form, Head } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -22,6 +22,7 @@ export default function Login({ status }: Props) {
 
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
+
         if (tg?.initData) {
             tg.ready();
             tg.expand();
@@ -41,6 +42,7 @@ export default function Login({ status }: Props) {
                         window.location.href = data.redirect;
                     } else {
                         setAuthenticating(false);
+
                         if (data.message) {
                             setAuthError(data.message);
                         }

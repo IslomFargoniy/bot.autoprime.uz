@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     Award,
@@ -19,13 +18,11 @@ import {
     Users,
     Wallet,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { useTranslation } from 'react-i18next';
-import { useCan } from '@/hooks/use-can';
-import { isTelegramWebApp } from '@/hooks/use-telegram';
-import { navPermissionsFor } from '@/lib/nav-permissions';
 import {
     Sidebar,
     SidebarContent,
@@ -36,6 +33,9 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
+import { useCan } from '@/hooks/use-can';
+import { isTelegramWebApp } from '@/hooks/use-telegram';
+import { navPermissionsFor } from '@/lib/nav-permissions';
 import type { NavGroup } from '@/types';
 import type { SharedData } from '@/types/auth';
 

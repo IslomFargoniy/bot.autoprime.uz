@@ -45,6 +45,7 @@ export function MobileBottomNav() {
                 {navItems.map((item) => {
                     const isActive = url.startsWith(item.href);
                     const Icon = item.icon;
+
                     return (
                         <Link
                             key={item.href}

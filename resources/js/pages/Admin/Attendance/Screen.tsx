@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
+import { Users, CheckCircle2, StopCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QrCode, Users, CheckCircle2, StopCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 
@@ -41,12 +41,15 @@ export default function AttendanceScreen({
         const interval = setInterval(async () => {
             try {
                 const res = await fetch(`/admin/attendance/session/${session.id}/qr`);
+
                 if (res.ok) {
                     const data = await res.json();
                     setQrToken(data.qrToken);
+
                     if (data.attendances) {
                         setAttendances(data.attendances);
                     }
+
                     setCountdown(15);
                 }
             } catch (err) {

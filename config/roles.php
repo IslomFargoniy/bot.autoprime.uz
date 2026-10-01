@@ -120,7 +120,6 @@ return [
 
         'admin' => [
             'dashboard.view',
-            'branches.view',
             'users.view',
             'users.manage',
             'roles.manage',

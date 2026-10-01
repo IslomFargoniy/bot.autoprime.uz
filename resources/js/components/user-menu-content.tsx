@@ -1,17 +1,17 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { useSidebar } from '@/components/ui/sidebar';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { useSidebar } from '@/components/ui/sidebar';
 import { logout } from '@/routes';
 import type { User } from '@/types';
-import { useTranslation } from 'react-i18next';
 
 type Props = {
     user: User;
@@ -24,14 +24,17 @@ export function UserMenuContent({ user }: Props) {
 
     const handleLogout = () => {
         cleanup();
+
         if (isMobile) {
             setOpenMobile(false);
         }
+
         router.flushAll();
     };
 
     const handleProfileClick = () => {
         cleanup();
+
         if (isMobile) {
             setOpenMobile(false);
         }

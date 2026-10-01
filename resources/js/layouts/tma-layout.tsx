@@ -1,7 +1,8 @@
-import { useEffect, useState, ReactNode } from 'react';
 import { Head } from '@inertiajs/react';
-import { initTelegramWebApp } from '@/hooks/use-telegram';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { initTelegramWebApp } from '@/hooks/use-telegram';
 
 interface TMALayoutProps {
     children: ReactNode;
@@ -13,13 +14,16 @@ export default function TMALayout({ children, title }: TMALayoutProps) {
 
     useEffect(() => {
         const tgWindow = window as any;
+
         if (typeof window !== 'undefined' && tgWindow.Telegram && tgWindow.Telegram.WebApp) {
             initTelegramWebApp();
 
             const webApp = tgWindow.Telegram.WebApp;
+
             if (webApp.backgroundColor) {
                 document.documentElement.style.setProperty('--tg-theme-bg-color', webApp.backgroundColor);
             }
+
             if (webApp.textColor) {
                 document.documentElement.style.setProperty('--tg-theme-text-color', webApp.textColor);
             }

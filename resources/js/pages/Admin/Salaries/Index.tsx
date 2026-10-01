@@ -1,29 +1,28 @@
-import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Calculator,
-    CreditCard,
-    DollarSign,
-    CheckCircle2,
-    Clock,
     AlertCircle,
-    UserCheck,
     Coins,
     Wallet,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -33,12 +32,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar } from '@/components/page-filter-bar';
-import { formatNumber, formatMoney } from '@/lib/utils';
-import { MoneyInput } from '@/components/ui/money-input';
+import { useCan } from '@/hooks/use-can';
+import { formatMoney } from '@/lib/utils';
 
 interface Salary {
     id: number;
@@ -153,7 +148,10 @@ export default function SalariesIndex({
 
     const handlePaySubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!payingSalary) return;
+
+        if (!payingSalary) {
+return;
+}
 
         payForm.post(`/admin/salaries/${payingSalary.id}/pay`, {
             onSuccess: () => {
@@ -190,7 +188,10 @@ export default function SalariesIndex({
     };
 
     const getRoleLabel = (role?: string) => {
-        if (!role) return '-';
+        if (!role) {
+return '-';
+}
+
         switch (role) {
             case 'instructor':
                 return t('salaries.role_instructor', 'Instruktor');

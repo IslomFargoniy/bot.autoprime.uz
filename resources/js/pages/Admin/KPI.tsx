@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import { Award } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -11,7 +12,6 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import { Award, Star } from 'lucide-react';
 
 interface Instructor {
     id: number;

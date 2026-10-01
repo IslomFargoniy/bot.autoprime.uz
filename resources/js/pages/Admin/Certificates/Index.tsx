@@ -1,28 +1,26 @@
-import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Award,
     Download,
     CheckCircle2,
     XCircle,
-    Search,
     QrCode,
-    GraduationCap,
-    ExternalLink,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -32,9 +30,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import { useCan } from '@/hooks/use-can';
 import { formatDate, formatMoney } from '@/lib/utils';
 
 interface Certificate {
@@ -128,7 +124,10 @@ export default function CertificatesIndex({
 
     const handleIssueSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedCandidate) return;
+
+        if (!selectedCandidate) {
+return;
+}
 
         form.post('/admin/certificates', {
             onSuccess: () => {

@@ -1,24 +1,32 @@
-import { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
-    Plus,
     Tv,
     QrCode,
     CheckCircle2,
     XCircle,
     UserCheck,
-    Search,
-    Calendar,
     Users,
     RotateCcw,
     Loader2,
     Check,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { PageFilterBar } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
+import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableHeader,
@@ -28,18 +36,7 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar } from '@/components/page-filter-bar';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { DatePicker } from '@/components/ui/date-picker';
-import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { useCan } from '@/hooks/use-can';
 import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface Attendance {
@@ -130,6 +127,7 @@ export default function AttendanceIndex({
             if (filters.group_id) {
                 setRosterGroupId(filters.group_id);
             }
+
             setAttendanceMode('group');
             setShowManualModal(true);
         }
@@ -156,7 +154,9 @@ export default function AttendanceIndex({
 
     // Fetch roster whenever modal opens or group/date changes
     useEffect(() => {
-        if (!showManualModal || !rosterGroupId) return;
+        if (!showManualModal || !rosterGroupId) {
+return;
+}
 
         let isMounted = true;
         setIsLoadingRoster(true);
@@ -164,17 +164,25 @@ export default function AttendanceIndex({
         fetch(`/admin/attendance/group-attendances?group_id=${rosterGroupId}&date=${rosterDate}`)
             .then((res) => res.json())
             .then((data) => {
-                if (!isMounted) return;
+                if (!isMounted) {
+return;
+}
+
                 setIsLoadingRoster(false);
+
                 if (data.students) {
                     setRosterList(data.students);
                 }
+
                 if (data.session?.topic) {
                     setRosterTopic(data.session.topic);
                 }
             })
             .catch(() => {
-                if (!isMounted) return;
+                if (!isMounted) {
+return;
+}
+
                 setIsLoadingRoster(false);
                 const filtered = students
                     .filter((s) => s.group_id === Number(rosterGroupId))
@@ -222,12 +230,14 @@ export default function AttendanceIndex({
             prev.map((s) => {
                 if (s.id === studentId) {
                     const nextAttended = !s.is_attended;
+
                     return {
                         ...s,
                         is_attended: nextAttended,
                         status: nextAttended ? 'present' : 'absent',
                     };
                 }
+
                 return s;
             })
         );
@@ -241,8 +251,10 @@ export default function AttendanceIndex({
 
     const handleSaveGroupAttendance = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (rosterList.length === 0) {
             toast.error(t('attendance.no_students_in_group', 'Ushbu guruhda faol talabalar topilmadi'));
+
             return;
         }
 
@@ -300,8 +312,13 @@ export default function AttendanceIndex({
         const nextGroupId = key === 'group_id' ? value : filterGroupId;
         const nextDate = key === 'date' ? value : filterDate;
 
-        if (key === 'group_id') setFilterGroupId(value);
-        if (key === 'date') setFilterDate(value);
+        if (key === 'group_id') {
+setFilterGroupId(value);
+}
+
+        if (key === 'date') {
+setFilterDate(value);
+}
 
         router.get(
             '/admin/attendance',

@@ -1,8 +1,12 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { router } from '@inertiajs/react';
 import { History, Search, RotateCcw, Wallet } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -12,10 +16,6 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { DatePicker } from '@/components/ui/date-picker';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { CashRegister, CashTransaction } from '../types';
 

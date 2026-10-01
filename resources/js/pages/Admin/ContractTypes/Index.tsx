@@ -1,25 +1,25 @@
-import { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
+import { Plus, Edit2, Trash2, FileText } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableEmpty } from '@/components/ui/table';
 import { toast } from 'sonner';
+import { PageFilterBar } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar } from '@/components/page-filter-bar';
-import { formatNumber, formatMoney } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import { Table, TableBody, TableEmpty } from '@/components/ui/table';
+import { useCan } from '@/hooks/use-can';
+import { formatNumber } from '@/lib/utils';
 
 interface ContractType {
     id: number;
@@ -51,7 +51,7 @@ interface PageProps {
     };
 }
 
-export default function ContractTypesIndex({ contractTypes, branches, filters = {} }: PageProps) {
+export default function ContractTypesIndex({ contractTypes, filters = {} }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
     const [perPage, setPerPage] = useState(filters?.per_page || '15');
@@ -109,6 +109,7 @@ export default function ContractTypesIndex({ contractTypes, branches, filters = 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingType) {
             form.put(`/admin/contract-types/${editingType.id}`, {
                 onSuccess: () => {

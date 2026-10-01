@@ -86,9 +86,6 @@ Route::get('/settings/security', function () {})->name('security.edit');
 Route::get('/settings/appearance', function () {})->name('appearance.edit');
 Route::get('/home', function () {})->name('home');
 
-// Public route for downloading Excel template (no auth required)
-Route::get('admin/groups/download-template', [GroupController::class, 'downloadTemplate'])->name('groups.download-template');
-
 // Student TMA & Dynamic QR Verification (Public / WebApp authenticated)
 Route::get('/mini-app', [MiniAppController::class, 'index'])->name('student.mini-app');
 Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->name('attendance.scan-qr');
@@ -147,6 +144,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
         ->middlewareFor('update', 'permission:students.edit')
         ->middlewareFor('destroy', 'permission:students.delete');
     Route::get('admin/groups/{group}/export-students', [GroupController::class, 'exportStudents'])->middleware('permission:groups.view')->name('groups.export-students');
+    Route::get('admin/groups/download-template', [GroupController::class, 'downloadTemplate'])->middleware('permission:groups.manage')->name('groups.download-template');
     Route::post('admin/groups/{group}/import-students', [GroupController::class, 'importStudents'])->middleware('permission:groups.manage')->name('groups.import-students');
     Route::resource('admin/groups', GroupController::class)->except(['create', 'edit'])
         ->middlewareFor(['index', 'show'], 'permission:groups.view')

@@ -1,19 +1,32 @@
-import { useState } from 'react';
 import { Head, useForm, router, usePage, Link } from '@inertiajs/react';
-import { toast } from 'sonner';
+import { Trash2, Edit2, Plus, AlertTriangle, Star, Filter, Download, Eye, User as UserIcon, Car } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, AlertTriangle, Star, Filter, Download, Eye, User as UserIcon, Car } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/password-input';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/date-picker';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
+import { toast } from 'sonner';
 import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import PasswordInput from '@/components/password-input';
+import PerPageSelect from '@/components/per-page-select';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { SharedData, Branch } from '@/types/auth';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 import {
     Table,
     TableHeader,
@@ -23,21 +36,8 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
+import { useCan } from '@/hooks/use-can';
+import type { SharedData, Branch } from '@/types/auth';
 
 interface Instructor {
     id: number;
@@ -111,9 +111,18 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
 
     const handleExport = () => {
         const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (from) params.append('from', from);
-        if (to) params.append('to', to);
+
+        if (search) {
+params.append('search', search);
+}
+
+        if (from) {
+params.append('from', from);
+}
+
+        if (to) {
+params.append('to', to);
+}
 
         window.location.href = `/admin/instructors/export?${params.toString()}`;
     };
@@ -150,6 +159,7 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setData('photo', file);
             setPhotoPreview(URL.createObjectURL(file));
@@ -158,7 +168,10 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
 
         if (editing) {
             router.post(`/admin/instructors/${editing.id}`, {

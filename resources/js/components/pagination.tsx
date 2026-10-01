@@ -26,12 +26,15 @@ export default function Pagination({ links, total, from, to, className }: Pagina
     }
 
     const renderLinks = () => {
-        if (!hasLinks) return null;
+        if (!hasLinks) {
+return null;
+}
 
         return (
             <div className="flex flex-wrap items-center justify-center gap-1">
                 {links.map((link, key) => {
                     let label = link.label;
+
                     if (label.includes('Previous') || label.includes('pagination.previous')) {
                         label = label.replace(/Previous|pagination\.previous/g, t('pagination.previous', 'Oldingisi'));
                     } else if (label.includes('Next') || label.includes('pagination.next')) {
@@ -47,6 +50,7 @@ export default function Pagination({ links, total, from, to, className }: Pagina
                             />
                         );
                     }
+
                     return (
                         <Link
                             key={key}

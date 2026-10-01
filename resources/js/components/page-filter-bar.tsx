@@ -1,9 +1,10 @@
-import React, { ReactNode } from 'react';
 import { Search } from 'lucide-react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import PerPageSelect from '@/components/per-page-select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 export interface PageFilterPillItem<T = string> {
@@ -30,6 +31,7 @@ export function PageFilterPills<T = string>({
         <div className={cn("flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full md:w-auto flex-nowrap md:flex-wrap", className)}>
             {items.map((item) => {
                 const isActive = item.value === activeValue;
+
                 return (
                     <button
                         key={String(item.value)}

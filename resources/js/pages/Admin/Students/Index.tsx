@@ -1,12 +1,30 @@
-import { useState, useCallback } from 'react';
 import { Head, useForm, router, Link, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
+import { Trash2, Edit2, Plus, Eye, Download, GraduationCap } from 'lucide-react';
+import { Filter } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, Eye, Download, GraduationCap } from 'lucide-react';
+import { toast } from 'sonner';
+import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 import {
     Table,
     TableHeader,
@@ -16,27 +34,8 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
-import { Branch, SharedData } from '@/types/auth';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
-import { Filter } from 'lucide-react';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useCan } from '@/hooks/use-can';
+import type { Branch, SharedData } from '@/types/auth';
 
 interface Group {
     id: number;
@@ -106,7 +105,11 @@ export default function StudentsIndex({ students, groups, branches = [], filters
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         if (editing) {
             put('/admin/students/' + editing.id, {
                 onSuccess: () => {
@@ -143,7 +146,10 @@ export default function StudentsIndex({ students, groups, branches = [], filters
     };
 
     const handleDelete = (id: number) => {
-        if (isDeleting === id) return;
+        if (isDeleting === id) {
+return;
+}
+
         if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
             setIsDeleting(id);
             destroy('/admin/students/' + id, {
@@ -164,8 +170,14 @@ export default function StudentsIndex({ students, groups, branches = [], filters
 
     const handleExport = () => {
         const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (groupId) params.append('group_id', groupId);
+
+        if (search) {
+params.append('search', search);
+}
+
+        if (groupId) {
+params.append('group_id', groupId);
+}
 
         window.location.href = `/admin/students/export?${params.toString()}`;
     };

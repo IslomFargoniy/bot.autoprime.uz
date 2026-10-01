@@ -28,10 +28,12 @@ export default function InputError({
     }
 
     let displayMessage = message;
+
     if (ERROR_KEY_MAP[message]) {
         displayMessage = t(ERROR_KEY_MAP[message]);
     } else {
         const translated = t(message);
+
         if (translated && translated !== message) {
             displayMessage = translated;
         }

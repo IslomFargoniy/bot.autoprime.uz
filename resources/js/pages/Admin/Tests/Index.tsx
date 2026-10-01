@@ -1,6 +1,4 @@
-import { useState, useRef, ChangeEvent } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     BookOpen,
     CheckCircle2,
@@ -18,10 +16,24 @@ import {
     FolderPlus,
     UploadCloud,
 } from 'lucide-react';
+import type { ChangeEvent } from 'react';
+import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
 import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableHeader,
@@ -31,19 +43,8 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
+import { useCan } from '@/hooks/use-can';
 import { cn, formatDateTime, formatNumber } from '@/lib/utils';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription,
-} from '@/components/ui/dialog';
 
 interface Attempt {
     id: number;
@@ -246,9 +247,11 @@ export default function TestsIndex({
     const openTicketDetails = async (ticket: Ticket) => {
         setInspectingTicket(ticket);
         setLoadingTicketQuestions(true);
+
         try {
             const res = await fetch(`/api/tests/ticket/${ticket.id}`);
             const data = await res.json();
+
             if (data.success && data.ticket?.questions) {
                 setTicketQuestions(data.ticket.questions);
             } else {
@@ -263,8 +266,14 @@ export default function TestsIndex({
 
     // Helper for image url
     const formatImageUrl = (url?: string) => {
-        if (!url) return null;
-        if (url.startsWith('http') || url.startsWith('/storage')) return url;
+        if (!url) {
+return null;
+}
+
+        if (url.startsWith('http') || url.startsWith('/storage')) {
+return url;
+}
+
         return `/storage/${url.replace(/^\/+/, '')}`;
     };
 
@@ -280,7 +289,10 @@ export default function TestsIndex({
     };
 
     const openEditTicketModal = (tkt: Ticket, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
+        if (e) {
+e.stopPropagation();
+}
+
         setEditingTicket(tkt);
         setTicketNumber(String(tkt.ticket_number));
         setTicketTitle(tkt.title_uz);
@@ -290,6 +302,7 @@ export default function TestsIndex({
 
     const handleTicketSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingTicket) {
             router.put(
                 `/admin/tests/tickets/${editingTicket.id}`,
@@ -301,6 +314,7 @@ export default function TestsIndex({
                 {
                     onSuccess: () => {
                         setShowTicketModal(false);
+
                         if (inspectingTicket && editingTicket && inspectingTicket.id === editingTicket.id) {
                             setInspectingTicket({
                                 ...inspectingTicket,
@@ -309,6 +323,7 @@ export default function TestsIndex({
                                 description: ticketDesc,
                             });
                         }
+
                         toast.success(t('tests.ticket_updated', 'Bilet yangilandi'));
                     },
                     onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
@@ -334,13 +349,17 @@ export default function TestsIndex({
     };
 
     const handleDeleteTicket = (tkt: Ticket, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
+        if (e) {
+e.stopPropagation();
+}
+
         if (window.confirm(t('tests.confirm_delete_ticket', 'Ushbu bilet va uning barcha savollari o\'chiriladi. Rozimisiz?'))) {
             router.delete(`/admin/tests/tickets/${tkt.id}`, {
                 onSuccess: () => {
                     if (inspectingTicket?.id === tkt.id) {
                         setInspectingTicket(null);
                     }
+
                     toast.success(t('tests.ticket_deleted', 'Bilet o\'chirildi'));
                 },
             });
@@ -357,7 +376,11 @@ export default function TestsIndex({
         setQuestionFile(null);
         setQuestionPreview(null);
         setRemoveQuestionImage(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
+
         setQuestionAnswers([
             { text: '', is_correct: true },
             { text: '', is_correct: false },
@@ -374,7 +397,11 @@ export default function TestsIndex({
         setQuestionFile(null);
         setQuestionPreview(formatImageUrl(q.image_url));
         setRemoveQuestionImage(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
+
         if (q.answers && q.answers.length > 0) {
             setQuestionAnswers(q.answers.map((a: any) => ({ text: a.answer_uz, is_correct: !!a.is_correct })));
         } else {
@@ -385,11 +412,13 @@ export default function TestsIndex({
                 { text: '', is_correct: false },
             ]);
         }
+
         setShowQuestionModal(true);
     };
 
     const handleQuestionImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setQuestionFile(file);
             setQuestionPreview(URL.createObjectURL(file));
@@ -401,7 +430,10 @@ export default function TestsIndex({
         setQuestionFile(null);
         setQuestionPreview(null);
         setRemoveQuestionImage(true);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
     };
 
     const addQuestionAnswerOption = () => {
@@ -409,29 +441,41 @@ export default function TestsIndex({
     };
 
     const removeQuestionAnswerOption = (index: number) => {
-        if (questionAnswers.length <= 2) return;
+        if (questionAnswers.length <= 2) {
+return;
+}
+
         const next = [...questionAnswers];
         const removedWasCorrect = next[index].is_correct;
         next.splice(index, 1);
+
         if (removedWasCorrect && next.length > 0) {
             next[0].is_correct = true;
         }
+
         setQuestionAnswers(next);
     };
 
     const handleQuestionSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inspectingTicket) return;
+
+        if (!inspectingTicket) {
+return;
+}
 
         const hasCorrect = questionAnswers.some((a) => a.is_correct && a.text.trim());
+
         if (!hasCorrect) {
             toast.error(t('tests.error_no_correct_answer', 'Kamida bitta to\'g\'ri javob belgilanishi shart'));
+
             return;
         }
 
         const validAnswers = questionAnswers.filter((a) => a.text.trim());
+
         if (validAnswers.length < 2) {
             toast.error(t('tests.error_min_answers', 'Kamida 2 ta javob varianti kiritilishi shart'));
+
             return;
         }
 
@@ -477,7 +521,10 @@ export default function TestsIndex({
         if (window.confirm(t('tests.confirm_delete_question', 'Ushbu savolni rostdan ham o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/tests/questions/${q.id}`, {
                 onSuccess: () => {
-                    if (inspectingTicket) openTicketDetails(inspectingTicket);
+                    if (inspectingTicket) {
+openTicketDetails(inspectingTicket);
+}
+
                     toast.success(t('tests.question_deleted', 'Savol o\'chirildi'));
                 },
             });
@@ -496,7 +543,11 @@ export default function TestsIndex({
         setSignFile(null);
         setSignPreview(null);
         setRemoveSignImage(false);
-        if (signFileInputRef.current) signFileInputRef.current.value = '';
+
+        if (signFileInputRef.current) {
+signFileInputRef.current.value = '';
+}
+
         setShowSignModal(true);
     };
 
@@ -509,12 +560,17 @@ export default function TestsIndex({
         setSignFile(null);
         setSignPreview(formatImageUrl(sign.image_url));
         setRemoveSignImage(false);
-        if (signFileInputRef.current) signFileInputRef.current.value = '';
+
+        if (signFileInputRef.current) {
+signFileInputRef.current.value = '';
+}
+
         setShowSignModal(true);
     };
 
     const handleSignImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setSignFile(file);
             setSignPreview(URL.createObjectURL(file));
@@ -526,7 +582,10 @@ export default function TestsIndex({
         setSignFile(null);
         setSignPreview(null);
         setRemoveSignImage(true);
-        if (signFileInputRef.current) signFileInputRef.current.value = '';
+
+        if (signFileInputRef.current) {
+signFileInputRef.current.value = '';
+}
     };
 
     const handleSignSubmit = (e: React.FormEvent) => {
@@ -582,7 +641,11 @@ export default function TestsIndex({
         setRoadLineFile(null);
         setRoadLinePreview(null);
         setRemoveRoadLineImage(false);
-        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
+
+        if (lineFileInputRef.current) {
+lineFileInputRef.current.value = '';
+}
+
         setShowRoadLineModal(true);
     };
 
@@ -594,12 +657,17 @@ export default function TestsIndex({
         setRoadLineFile(null);
         setRoadLinePreview(formatImageUrl(line.image_url));
         setRemoveRoadLineImage(false);
-        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
+
+        if (lineFileInputRef.current) {
+lineFileInputRef.current.value = '';
+}
+
         setShowRoadLineModal(true);
     };
 
     const handleRoadLineImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setRoadLineFile(file);
             setRoadLinePreview(URL.createObjectURL(file));
@@ -611,7 +679,10 @@ export default function TestsIndex({
         setRoadLineFile(null);
         setRoadLinePreview(null);
         setRemoveRoadLineImage(true);
-        if (lineFileInputRef.current) lineFileInputRef.current.value = '';
+
+        if (lineFileInputRef.current) {
+lineFileInputRef.current.value = '';
+}
     };
 
     const handleRoadLineSubmit = (e: React.FormEvent) => {
@@ -666,6 +737,7 @@ export default function TestsIndex({
 
     const handleCategorySubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingCategory) {
             router.put(`/admin/tests/sign-categories/${editingCategory.id}`, {
                 name_uz: categoryName,
@@ -703,6 +775,7 @@ export default function TestsIndex({
     const formatSeconds = (sec: number) => {
         const m = Math.floor(sec / 60);
         const s = sec % 60;
+
         return `${m} ${t('common.minutes', 'daq')} ${s} ${t('common.seconds', 'son')}`;
     };
 

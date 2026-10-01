@@ -1,10 +1,6 @@
-import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
-import { SharedData } from '@/types';
 import {
     ArrowLeft,
-    Calendar,
     Car,
     Star,
     User,
@@ -15,14 +11,24 @@ import {
     XCircle,
     Filter,
     Wallet,
-    Banknote,
     FileText,
     ArrowDownLeft,
     ArrowUpRight,
-    Receipt,
 } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import Pagination from '@/components/pagination';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 import {
     Table,
     TableHeader,
@@ -32,17 +38,8 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
-import Pagination from '@/components/pagination';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { formatDate, formatDateTime, formatTime, parseDate, formatNumber, formatMoney as formatMoneyUtil } from '@/lib/utils';
+import { formatDate, formatDateTime, formatTime, formatMoney as formatMoneyUtil } from '@/lib/utils';
+import type { SharedData } from '@/types';
 
 interface Student {
     id: number;
@@ -180,19 +177,59 @@ export default function StudentShow({
 
     const translateTag = (tag: string) => {
         const clean = tag.replace(/^[^\w\u0400-\u04FF']+\s*/, '').trim();
-        if (tag.includes('Kechikdi') || clean === 'Kechikdi') return t('drivings.tag_late', 'Kechikdi');
-        if (tag.includes('Xushmuomala') || clean === 'Xushmuomala') return t('drivings.tag_polite', 'Xushmuomala');
-        if (tag.includes('Zargona tushuntirdi') || clean === 'Zargona tushuntirdi') return t('drivings.tag_slang', 'Zargona tushuntirdi');
-        if (tag.includes('Tushunarsiz') || clean === 'Tushunarsiz') return t('drivings.tag_unclear', 'Tushunarsiz');
-        if (tag.includes('Mashina nosoz') || clean === 'Mashina nosoz') return t('drivings.tag_car_issue', 'Mashina nosoz');
-        if (tag.includes('Yaxshi tushuntirdi') || clean === 'Yaxshi tushuntirdi') return t('drivings.tag_well_explained', 'Yaxshi tushuntirdi');
-        if (tag.includes('Sabrli') || clean === 'Sabrli') return t('drivings.tag_patient', 'Sabrli');
-        if (tag.includes('Asabiy') || clean === 'Asabiy') return t('drivings.tag_nervous', 'Asabiy');
-        if (tag.includes("Qo'pol") || clean === "Qo'pol" || tag.includes("Qo`pol") || clean === "Qopol") return t('drivings.tag_rude', "Qo'pol");
-        if (tag.includes('Mashina toza') || clean === 'Mashina toza') return t('drivings.tag_clean_car', 'Mashina toza');
-        if (tag.includes('Vaqtida boshladi') || clean === 'Vaqtida boshladi') return t('drivings.tag_on_time', 'Vaqtida boshladi');
-        if (tag.includes('Muomala yomon') || clean === 'Muomala yomon') return t('drivings.tag_bad_attitude', 'Muomala yomon');
-        if (tag.includes('Vaqtidan kam') || clean.includes('Vaqtidan kam')) return t('drivings.tag_short_lesson', "Vaqtidan kam o'tildi");
+
+        if (tag.includes('Kechikdi') || clean === 'Kechikdi') {
+return t('drivings.tag_late', 'Kechikdi');
+}
+
+        if (tag.includes('Xushmuomala') || clean === 'Xushmuomala') {
+return t('drivings.tag_polite', 'Xushmuomala');
+}
+
+        if (tag.includes('Zargona tushuntirdi') || clean === 'Zargona tushuntirdi') {
+return t('drivings.tag_slang', 'Zargona tushuntirdi');
+}
+
+        if (tag.includes('Tushunarsiz') || clean === 'Tushunarsiz') {
+return t('drivings.tag_unclear', 'Tushunarsiz');
+}
+
+        if (tag.includes('Mashina nosoz') || clean === 'Mashina nosoz') {
+return t('drivings.tag_car_issue', 'Mashina nosoz');
+}
+
+        if (tag.includes('Yaxshi tushuntirdi') || clean === 'Yaxshi tushuntirdi') {
+return t('drivings.tag_well_explained', 'Yaxshi tushuntirdi');
+}
+
+        if (tag.includes('Sabrli') || clean === 'Sabrli') {
+return t('drivings.tag_patient', 'Sabrli');
+}
+
+        if (tag.includes('Asabiy') || clean === 'Asabiy') {
+return t('drivings.tag_nervous', 'Asabiy');
+}
+
+        if (tag.includes("Qo'pol") || clean === "Qo'pol" || tag.includes("Qo`pol") || clean === "Qopol") {
+return t('drivings.tag_rude', "Qo'pol");
+}
+
+        if (tag.includes('Mashina toza') || clean === 'Mashina toza') {
+return t('drivings.tag_clean_car', 'Mashina toza');
+}
+
+        if (tag.includes('Vaqtida boshladi') || clean === 'Vaqtida boshladi') {
+return t('drivings.tag_on_time', 'Vaqtida boshladi');
+}
+
+        if (tag.includes('Muomala yomon') || clean === 'Muomala yomon') {
+return t('drivings.tag_bad_attitude', 'Muomala yomon');
+}
+
+        if (tag.includes('Vaqtidan kam') || clean.includes('Vaqtidan kam')) {
+return t('drivings.tag_short_lesson', "Vaqtidan kam o'tildi");
+}
+
         return tag;
     };
 
@@ -455,6 +492,7 @@ export default function StudentShow({
                                                             <div className="flex flex-wrap gap-1 justify-center max-w-[200px]">
                                                                 {driving.review.reason_tags.map((tag, i) => {
                                                                     const isNeg = isNegativeTag(tag);
+
                                                                     return (
                                                                         <span
                                                                             key={i}
@@ -532,6 +570,7 @@ export default function StudentShow({
                                             <div className="flex flex-wrap gap-1">
                                                 {driving.review.reason_tags.map((tag, i) => {
                                                     const isNeg = isNegativeTag(tag);
+
                                                     return (
                                                         <span
                                                             key={i}
@@ -630,6 +669,7 @@ export default function StudentShow({
                                     ) : (
                                         financialHistories.map((fh, idx) => {
                                             const isDebit = fh.type === 'debit';
+
                                             return (
                                                 <TableRow key={fh.id}>
                                                     <TableCell className="text-muted-foreground font-mono text-xs">{idx + 1}</TableCell>
@@ -680,6 +720,7 @@ export default function StudentShow({
                             ) : (
                                 financialHistories.map((fh) => {
                                     const isDebit = fh.type === 'debit';
+
                                     return (
                                         <div key={fh.id} className="p-3 bg-muted/20 border rounded-xl space-y-1.5 text-xs">
                                             <div className="flex items-center justify-between">

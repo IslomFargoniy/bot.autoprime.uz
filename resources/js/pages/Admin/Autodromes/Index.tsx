@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
+import { router } from '@inertiajs/react';
+import L from 'leaflet';
 import { Trash2, Edit2, Plus, MapPin, Navigation, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import { toast } from 'sonner';
-import { Branch, SharedData } from '@/types/auth';
+import { PageFilterBar } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import PerPageSelect from '@/components/per-page-select';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -15,6 +17,9 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -24,12 +29,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar } from '@/components/page-filter-bar';
-import { router } from '@inertiajs/react';
-import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
+import type { Branch, SharedData } from '@/types/auth';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default Leaflet icon issues in React
@@ -73,7 +73,9 @@ function LocationMarker({ position, setPosition, radius }: { position: L.LatLng 
         },
     });
 
-    if (!position) return null;
+    if (!position) {
+return null;
+}
 
     return (
         <>
@@ -88,12 +90,15 @@ function MapController({ center }: { center: L.LatLng | null }) {
     useEffect(() => {
         const timer = setTimeout(() => {
             map.invalidateSize();
+
             if (center) {
                 map.setView(center, 15, { animate: true });
             }
         }, 200);
+
         return () => clearTimeout(timer);
     }, [center, map]);
+
     return null;
 }
 
@@ -137,7 +142,10 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
 
     const getPhoneLocation = (onSuccess: (lat: number, lng: number) => void, onError?: (err: any) => void) => {
         if (!navigator.geolocation) {
-            if (onError) onError(new Error('Geolocation not supported'));
+            if (onError) {
+onError(new Error('Geolocation not supported'));
+}
+
             return;
         }
 
@@ -155,7 +163,10 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
                     },
                     (finalErr) => {
                         console.error('All geolocation attempts failed:', finalErr);
-                        if (onError) onError(finalErr);
+
+                        if (onError) {
+onError(finalErr);
+}
                     },
                     { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 }
                 );
@@ -195,6 +206,7 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
     const handleLocateMe = () => {
         if (!navigator.geolocation) {
             toast.error(t('autodromes.geolocation_not_supported', 'Brauzeringiz geolokatsiyani qo\'llab-quvvatlamaydi'));
+
             return;
         }
 
@@ -206,7 +218,7 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
                 setLocating(false);
                 toast.success(t('autodromes.location_found', 'Hozirgi joylashuvingiz belgilandi'));
             },
-            (err) => {
+            () => {
                 setLocating(false);
                 toast.error(t('autodromes.geolocation_denied', 'Joylashuvni aniqlab bo\'lmadi. Qushimcha ruxsatni tekshiring.'));
             }
@@ -215,7 +227,11 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         if (editing) {
             put('/admin/autodromes/' + editing.id, {
                 onSuccess: () => {
@@ -249,7 +265,10 @@ export default function AutodromesIndex({ autodromes, branches = [], filters = {
     };
 
     const handleDelete = (id: number) => {
-        if (isDeleting === id) return;
+        if (isDeleting === id) {
+return;
+}
+
         if (confirm(t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"))) {
             setIsDeleting(id);
             destroy('/admin/autodromes/' + id, {

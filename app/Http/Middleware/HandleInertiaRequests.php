@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\Branch;
 use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -43,7 +42,8 @@ class HandleInertiaRequests extends Middleware
             if ($user->relationLoaded('branch') === false && $user->branch_id) {
                 $user->load('branch');
             }
-            if (Schema::hasTable('branches')) {
+            // Only superadmins switch between branches; everyone else is pinned to their own.
+            if ($user->isSuperAdmin()) {
                 $branches = Branch::where('status', 'active')
                     ->select(['id', 'name', 'code'])
                     ->orderBy('name')

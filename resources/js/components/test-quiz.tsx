@@ -1,17 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { telegramInitDataHeaders, useTelegramHaptic } from '@/hooks/use-telegram';
 import {
-    Award,
     CheckCircle2,
-    Clock,
     RotateCcw,
     Search,
     XCircle,
     Play,
-    AlertCircle,
     ArrowLeft,
-    Check,
     AArrowDown,
     AArrowUp,
     Info,
@@ -20,7 +13,9 @@ import {
     Zap,
     ClipboardList,
 } from 'lucide-react';
-import { cn, formatDateTime } from '@/lib/utils';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogClose,
@@ -30,7 +25,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { telegramInitDataHeaders, useTelegramHaptic } from '@/hooks/use-telegram';
+import { cn, formatDateTime } from '@/lib/utils';
 
 interface Question {
     id: number;
@@ -104,7 +100,7 @@ export function TestQuiz() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
-    const [revealedQuestions, setRevealedQuestions] = useState<Record<number, boolean>>({});
+    const [, setRevealedQuestions] = useState<Record<number, boolean>>({});
     const [optimisticAnswerId, setOptimisticAnswerId] = useState<number | null>(null);
     const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
     const [examAttemptId, setExamAttemptId] = useState<number | null>(null);
@@ -153,29 +149,42 @@ export function TestQuiz() {
 
     // Multilang helper
     const getLocalized = (item: any, field: string) => {
-        if (!item) return '';
-        if (currentLang === 'ru' && item[`${field}_ru`]) return item[`${field}_ru`];
-        if (currentLang === 'krill' && item[`${field}_krill`]) return item[`${field}_krill`];
-        if (currentLang === 'en' && item[`${field}_en`]) return item[`${field}_en`];
+        if (!item) {
+return '';
+}
+
+        if (currentLang === 'ru' && item[`${field}_ru`]) {
+return item[`${field}_ru`];
+}
+
+        if (currentLang === 'krill' && item[`${field}_krill`]) {
+return item[`${field}_krill`];
+}
+
+        if (currentLang === 'en' && item[`${field}_en`]) {
+return item[`${field}_en`];
+}
+
         return item[`${field}_uz`] || item[field] || '';
     };
 
     const formatImageUrl = (url?: string) => {
-        if (!url) return null;
-        if (url.startsWith('http') || url.startsWith('/storage')) return url;
+        if (!url) {
+return null;
+}
+
+        if (url.startsWith('http') || url.startsWith('/storage')) {
+return url;
+}
+
         return `/storage/${url.replace(/^\/+/, '')}`;
     };
-
-    // Load initial data
-    useEffect(() => {
-        fetchTickets();
-        fetchStats();
-    }, []);
 
     const fetchTickets = async () => {
         try {
             const res = await fetch('/api/tests/tickets', { headers: telegramInitDataHeaders() });
             const data = await res.json();
+
             if (data.success && data.tickets) {
                 setTickets(data.tickets);
             }
@@ -188,6 +197,7 @@ export function TestQuiz() {
         try {
             const res = await fetch('/api/tests/signs', { headers: telegramInitDataHeaders() });
             const data = await res.json();
+
             if (data.success) {
                 setSignCategories(data.categories || []);
                 setRoadLines(data.road_lines || []);
@@ -201,6 +211,7 @@ export function TestQuiz() {
         try {
             const res = await fetch('/api/tests/stats', { headers: telegramInitDataHeaders() });
             const data = await res.json();
+
             if (data.success) {
                 setStats({
                     has_passed_exam: !!data.passed_exam,
@@ -214,31 +225,25 @@ export function TestQuiz() {
         }
     };
 
-    // Timer effect
+    // Load initial data
     useEffect(() => {
-        if (isTimerRunning && timeLeft > 0) {
-            timerRef.current = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timerRef.current);
-                        submitQuiz(true);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, [isTimerRunning, timeLeft]);
+        fetchTickets();
+        fetchStats();
+    }, []);
 
     // Auto-scroll ribbon to active button
     useEffect(() => {
-        if (!mobileScrollRef.current) return;
+        if (!mobileScrollRef.current) {
+return;
+}
+
         const container = mobileScrollRef.current;
         const activeBtn = container.querySelector<HTMLElement>('[data-active="true"]');
-        if (!activeBtn) return;
+
+        if (!activeBtn) {
+return;
+}
+
         const containerWidth = container.clientWidth;
         const btnLeft = activeBtn.offsetLeft;
         const btnWidth = activeBtn.offsetWidth;
@@ -249,9 +254,11 @@ export function TestQuiz() {
     // Start Ticket Exam
     const startTicketExam = async (tkt: Ticket) => {
         setSelectedTicketForModal(null);
+
         try {
             const res = await fetch(`/api/tests/ticket/${tkt.id}`, { headers: telegramInitDataHeaders() });
             const data = await res.json();
+
             if (data.success && data.ticket?.questions?.length > 0) {
                 setQuestions(data.ticket.questions);
                 setActiveTicket(tkt);
@@ -273,6 +280,7 @@ export function TestQuiz() {
         try {
             const res = await fetch('/api/tests/exam', { headers: telegramInitDataHeaders() });
             const data = await res.json();
+
             if (data.success && data.questions?.length > 0) {
                 setExamAttemptId(data.attempt_id ?? null);
                 setQuestions(data.questions);
@@ -297,16 +305,20 @@ export function TestQuiz() {
             if (fromIndex !== undefined && prev !== fromIndex) {
                 return prev;
             }
+
             if (prev < questions.length - 1) {
                 return prev + 1;
             }
+
             return prev;
         });
     }, [questions.length]);
 
     // Handle Answer Selection
     const handleSelectAnswer = useCallback((questionId: number, answerId: number) => {
-        if (result) return; // quiz already finished
+        if (result) {
+return;
+} // quiz already finished
 
         setOptimisticAnswerId(answerId);
         setSelectedAnswers((prev) => ({ ...prev, [questionId]: answerId }));
@@ -342,8 +354,13 @@ export function TestQuiz() {
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-        if (showExplanationModal || showFinishConfirmModal) return;
-        if (touchStartX.current === null || touchStartY.current === null) return;
+        if (showExplanationModal || showFinishConfirmModal) {
+return;
+}
+
+        if (touchStartX.current === null || touchStartY.current === null) {
+return;
+}
 
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
@@ -374,18 +391,24 @@ export function TestQuiz() {
     // Keyboard Shortcuts (F1-F9, 1-9, Enter)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (!activeQuizMode || questions.length === 0) return;
+            if (!activeQuizMode || questions.length === 0) {
+return;
+}
 
             if (showExplanationModal) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     handleNextQuestion();
                 }
+
                 return;
             }
 
             const currentQ = questions[currentIndex];
-            if (!currentQ) return;
+
+            if (!currentQ) {
+return;
+}
 
             const keyMap: Record<string, number> = {
                 F1: 0, F2: 1, F3: 2, F4: 3,
@@ -396,6 +419,7 @@ export function TestQuiz() {
 
             if (e.key in keyMap) {
                 const idx = keyMap[e.key];
+
                 if (currentQ.answers && idx < currentQ.answers.length) {
                     e.preventDefault();
                     handleSelectAnswer(currentQ.id, currentQ.answers[idx].id);
@@ -404,14 +428,18 @@ export function TestQuiz() {
         };
 
         window.addEventListener('keydown', handleKeyDown);
+
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [activeQuizMode, questions, currentIndex, showExplanationModal, handleNextQuestion, handleSelectAnswer]);
 
     // Submit Attempt
-    const submitQuiz = async (autoTimeout = false) => {
+    const submitQuiz = async () => {
         setShowFinishConfirmModal(false);
         setIsTimerRunning(false);
-        if (timerRef.current) clearInterval(timerRef.current);
+
+        if (timerRef.current) {
+clearInterval(timerRef.current);
+}
 
         const durationSeconds = 25 * 60 - timeLeft;
 
@@ -437,6 +465,7 @@ export function TestQuiz() {
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
+
             if (data.success) {
                 setResult(data);
                 fetchStats();
@@ -446,10 +475,35 @@ export function TestQuiz() {
         }
     };
 
+    // Timer effect
+    useEffect(() => {
+        if (isTimerRunning && timeLeft > 0) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timerRef.current);
+                        submitQuiz();
+
+                        return 0;
+                    }
+
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timerRef.current) {
+clearInterval(timerRef.current);
+}
+        };
+    }, [isTimerRunning, timeLeft]);
+
     // Format mm:ss
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
+
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
@@ -805,7 +859,7 @@ export function TestQuiz() {
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
                             </DialogClose>
-                            <Button onClick={() => submitQuiz(false)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs px-6">
+                            <Button onClick={() => submitQuiz()} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs px-6">
                                 {t('tests.confirm_finish', 'Ha, yakunlash')}
                             </Button>
                         </DialogFooter>
@@ -861,8 +915,11 @@ export function TestQuiz() {
                                 </Button>
                                 <Button
                                     onClick={() => {
-                                        if (activeQuizMode === 'exam') startMockExam();
-                                        else if (activeTicket) startTicketExam(activeTicket);
+                                        if (activeQuizMode === 'exam') {
+startMockExam();
+} else if (activeTicket) {
+startTicketExam(activeTicket);
+}
                                     }}
                                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs"
                                 >
@@ -930,7 +987,10 @@ export function TestQuiz() {
                 <button
                     onClick={() => {
                         setSubTab('signs');
-                        if (signCategories.length === 0) fetchSigns();
+
+                        if (signCategories.length === 0) {
+fetchSigns();
+}
                     }}
                     className={cn(
                         'pb-2.5 px-3 border-b-2 transition-colors',

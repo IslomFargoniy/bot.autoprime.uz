@@ -1,28 +1,28 @@
-import { useState } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import type { SharedData } from '@/types/auth';
-import { useTranslation } from 'react-i18next';
 import {
     ArrowDownRight,
     ArrowUpRight,
     ArrowLeftRight,
     ArrowDownToLine,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { useCan } from '@/hooks/use-can';
+import type { SharedData } from '@/types/auth';
 
-import type { PageProps, Payment, Expense, CashTransfer, SweepItem } from './types';
-import { RegisterCardsGrid } from './components/RegisterCardsGrid';
-import { CashRegistersTab } from './components/CashRegistersTab';
 import { CashHistoryTab } from './components/CashHistoryTab';
-import { PaymentsTab } from './components/PaymentsTab';
+import { CashRegistersTab } from './components/CashRegistersTab';
 import { ExpensesTab } from './components/ExpensesTab';
-import { TransfersTab } from './components/TransfersTab';
-import { SweepModal } from './components/modals/SweepModal';
-import { PaymentModal } from './components/modals/PaymentModal';
 import { ExpenseModal } from './components/modals/ExpenseModal';
+import { PaymentModal } from './components/modals/PaymentModal';
+import { SweepModal } from './components/modals/SweepModal';
 import { TransferModal } from './components/modals/TransferModal';
+import { PaymentsTab } from './components/PaymentsTab';
+import { RegisterCardsGrid } from './components/RegisterCardsGrid';
+import { TransfersTab } from './components/TransfersTab';
+import type { PageProps, Payment, Expense, CashTransfer, SweepItem } from './types';
 
 export default function FinanceIndex({
     cashRegisters,
@@ -31,9 +31,7 @@ export default function FinanceIndex({
     expenses,
     transactions,
     transfers,
-    branches,
     expenseCategories,
-    registerTypes,
     contracts,
     students = [],
     filters = {},
@@ -133,6 +131,7 @@ export default function FinanceIndex({
 
         if (selected.length === 0) {
             toast.error(t('finance.no_registers_selected', 'Kamida bitta kassani tanlang'));
+
             return;
         }
 
@@ -201,9 +200,11 @@ export default function FinanceIndex({
 
     const handleRejectTransfer = (transfer: CashTransfer) => {
         const reason = prompt(t('finance.prompt_reject_reason', 'Transferni rad etish sababini kiriting (masalan: pul kam chiqdi, xatolik va h.k.):'));
+
         if (reason === null) {
             return;
         }
+
         router.post(`/admin/finance/transfer/${transfer.id}/reject`, { reason }, {
             onSuccess: () => toast.success(t('finance.transfer_rejected', 'Transfer rad etildi')),
             onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),

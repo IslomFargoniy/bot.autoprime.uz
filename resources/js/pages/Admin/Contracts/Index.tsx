@@ -1,34 +1,28 @@
-import { useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Download,
     FileText,
-    Search,
     Trash2,
-    CheckCircle2,
-    AlertCircle,
     RotateCcw,
     ReceiptText,
     Eye,
     User,
     Calendar,
-    Check,
-    X,
     ExternalLink,
-    Clock,
     DollarSign,
     Shield,
     BookOpen,
     Car,
     Laptop,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCan } from '@/hooks/use-can';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
+import Pagination from '@/components/pagination';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
     Dialog,
     DialogContent,
@@ -36,6 +30,10 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MoneyInput } from '@/components/ui/money-input';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
     TableBody,
@@ -45,13 +43,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
-import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
-import { DatePicker } from '@/components/ui/date-picker';
-import { formatDate, formatDateTime, parseDate, formatNumber, formatMoney } from '@/lib/utils';
-import { MoneyInput } from '@/components/ui/money-input';
+import { useCan } from '@/hooks/use-can';
+import { formatDate, formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 
 interface CashRegister {
     id: number;
@@ -142,7 +135,7 @@ interface PageProps {
     };
 }
 
-export default function ContractsIndex({ contracts, students, contractTypes, groups, branches, cashRegisters = [], filters }: PageProps) {
+export default function ContractsIndex({ contracts, students, contractTypes, groups, cashRegisters = [], filters }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
     const [showModal, setShowModal] = useState(false);
@@ -203,7 +196,10 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
         if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
             router.delete(`/admin/contracts/${contract.id}`, {
                 onSuccess: () => {
-                    if (viewingContract?.id === contract.id) setViewingContract(null);
+                    if (viewingContract?.id === contract.id) {
+setViewingContract(null);
+}
+
                     toast.success(t('common.deleted', 'O\'chirildi'));
                 },
                 onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
@@ -224,7 +220,10 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
 
     const handleRefundSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!refundingContract) return;
+
+        if (!refundingContract) {
+return;
+}
 
         refundForm.post(`/admin/contracts/${refundingContract.id}/refund`, {
             onSuccess: () => {
@@ -779,6 +778,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                 onChange={(val) => {
                                     form.setData('student_id', val);
                                     const std = students.find((s) => s.id === Number(val));
+
                                     if (std && std.group_id) {
                                         form.setData('group_id', String(std.group_id));
                                     }
@@ -1046,6 +1046,7 @@ export default function ContractsIndex({ contracts, students, contractTypes, gro
                                         <TableBody>
                                             {viewingPaymentsContract.payments.map((p) => {
                                                 const isRefund = p.payment_type === 'refund';
+
                                                 return (
                                                     <TableRow key={p.id}>
                                                         <TableCell className="font-medium font-mono">#{p.receipt_number}</TableCell>

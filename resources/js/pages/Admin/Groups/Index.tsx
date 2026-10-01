@@ -1,16 +1,14 @@
-import { useState, useCallback } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
+import { Link } from '@inertiajs/react';
+import { Trash2, Edit2, Plus, Eye, CheckSquare, GraduationCap } from 'lucide-react';
+import { Filter } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit2, Plus, Search, Eye, CheckSquare, GraduationCap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Pagination from '@/components/pagination';
-import PerPageSelect from '@/components/per-page-select';
+import { toast } from 'sonner';
+import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 import { PageFilterBar, PageFilterSearch } from '@/components/page-filter-bar';
-import { SearchableSelect } from '@/components/ui/searchable-select';
-import { Branch, SharedData } from '@/types/auth';
+import Pagination from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -18,6 +16,9 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Sheet,
     SheetContent,
@@ -35,10 +36,8 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
-import { Filter } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import GroupAttendanceModal from '@/components/GroupAttendanceModal';
 import { useCan } from '@/hooks/use-can';
+import type { Branch, SharedData } from '@/types/auth';
 
 interface Instructor {
     id: number;
@@ -120,7 +119,11 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (processing) return;
+
+        if (processing) {
+return;
+}
+
         if (editing) {
             put('/admin/groups/' + editing.id, {
                 onSuccess: () => {
@@ -157,7 +160,10 @@ export default function GroupsIndex({ groups, instructors, teachers = [], branch
     };
 
     const handleDelete = (id: number) => {
-        if (isDeleting === id) return;
+        if (isDeleting === id) {
+return;
+}
+
         if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
             setIsDeleting(id);
             destroy('/admin/groups/' + id, {
