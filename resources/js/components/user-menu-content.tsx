@@ -50,8 +50,12 @@ export function UserMenuContent({ user }: Props) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                    <Link className="block w-full cursor-pointer flex items-center" href="/profile" onClick={handleProfileClick}>
-                        <UserIcon className="mr-2 w-4 h-4" />
+                    <Link
+                        className="block flex w-full cursor-pointer items-center"
+                        href="/profile"
+                        onClick={handleProfileClick}
+                    >
+                        <UserIcon className="mr-2 h-4 w-4" />
                         {t('user_menu.profile', 'Profil')}
                     </Link>
                 </DropdownMenuItem>

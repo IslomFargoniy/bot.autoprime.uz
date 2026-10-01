@@ -53,7 +53,11 @@ export function AppSidebar() {
 
     useEffect(() => {
         if (typeof window !== 'undefined' && isMobile) {
-            setIsTg(isTelegramWebApp() || !!(window as any).Telegram?.WebApp?.initData || !!(window as any).Telegram?.WebApp?.platform);
+            setIsTg(
+                isTelegramWebApp() ||
+                    !!(window as any).Telegram?.WebApp?.initData ||
+                    !!(window as any).Telegram?.WebApp?.platform,
+            );
         }
     }, [isMobile]);
 
@@ -199,7 +203,9 @@ export function AppSidebar() {
     const filteredGroups = navGroups
         .map((group) => ({
             ...group,
-            items: group.items.filter((item) => can(...navPermissionsFor(item.href as string))),
+            items: group.items.filter((item) =>
+                can(...navPermissionsFor(item.href as string)),
+            ),
         }))
         .filter((group) => group.items.length > 0);
 
@@ -215,7 +221,10 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={auth.home_url ?? '/dashboard'} onClick={handleLogoClick}>
+                            <Link
+                                href={auth.home_url ?? '/dashboard'}
+                                onClick={handleLogoClick}
+                            >
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

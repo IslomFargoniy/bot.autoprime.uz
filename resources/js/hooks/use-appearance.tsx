@@ -14,16 +14,16 @@ let currentAppearance: Appearance = 'system';
 
 const prefersDark = (): boolean => {
     if (typeof window === 'undefined') {
-return false;
-}
+        return false;
+    }
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
 const setCookie = (name: string, value: string, days = 365): void => {
     if (typeof document === 'undefined') {
-return;
-}
+        return;
+    }
 
     const maxAge = days * 24 * 60 * 60;
     document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
@@ -31,8 +31,8 @@ return;
 
 const getStoredAppearance = (): Appearance => {
     if (typeof window === 'undefined') {
-return 'system';
-}
+        return 'system';
+    }
 
     return (localStorage.getItem('appearance') as Appearance) || 'system';
 };
@@ -43,8 +43,8 @@ const isDarkMode = (appearance: Appearance): boolean => {
 
 const applyTheme = (appearance: Appearance): void => {
     if (typeof document === 'undefined') {
-return;
-}
+        return;
+    }
 
     const isDark = isDarkMode(appearance);
 
@@ -62,8 +62,8 @@ const notify = (): void => listeners.forEach((listener) => listener());
 
 const mediaQuery = (): MediaQueryList | null => {
     if (typeof window === 'undefined') {
-return null;
-}
+        return null;
+    }
 
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
@@ -75,8 +75,8 @@ const handleSystemThemeChange = (): void => {
 
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
-return;
-}
+        return;
+    }
 
     if (!localStorage.getItem('appearance')) {
         localStorage.setItem('appearance', 'system');

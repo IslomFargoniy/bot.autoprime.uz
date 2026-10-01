@@ -32,7 +32,7 @@ export default function Login({ status }: Props) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                 },
                 body: JSON.stringify({ initData: tg.initData }),
             })
@@ -56,10 +56,13 @@ export default function Login({ status }: Props) {
 
     if (authenticating) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 space-y-4">
-                <Spinner className="w-8 h-8 text-primary" />
-                <p className="text-sm font-medium text-muted-foreground animate-pulse">
-                    {t('auth.auto_logging_in', 'Telegram orqali avtomatik kirilmoqda...')}
+            <div className="flex flex-col items-center justify-center space-y-4 p-8">
+                <Spinner className="h-8 w-8 text-primary" />
+                <p className="animate-pulse text-sm font-medium text-muted-foreground">
+                    {t(
+                        'auth.auto_logging_in',
+                        'Telegram orqali avtomatik kirilmoqda...',
+                    )}
                 </p>
             </div>
         );
@@ -70,13 +73,15 @@ export default function Login({ status }: Props) {
             <Head title={t('auth.login_title', 'Tizimga kirish')} />
 
             {authError && (
-                <div className="p-3 mb-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 text-center font-medium">
+                <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm font-medium text-destructive">
                     {t(authError, authError)}
                 </div>
             )}
 
             <Form
-                {...(store?.form ? store.form() : { action: '/login', method: 'post' })}
+                {...(store?.form
+                    ? store.form()
+                    : { action: '/login', method: 'post' })}
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >
@@ -84,7 +89,9 @@ export default function Login({ status }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="phone">{t('auth.phone', 'Telefon raqam')}</Label>
+                                <Label htmlFor="phone">
+                                    {t('auth.phone', 'Telefon raqam')}
+                                </Label>
                                 <Input
                                     id="phone"
                                     type="tel"
@@ -95,14 +102,20 @@ export default function Login({ status }: Props) {
                                     autoComplete="username"
                                     placeholder="+998911157709"
                                     onInput={(e) => {
-                                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+]/g, '');
+                                        e.currentTarget.value =
+                                            e.currentTarget.value.replace(
+                                                /[^0-9+]/g,
+                                                '',
+                                            );
                                     }}
                                 />
                                 <InputError message={errors.phone} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">{t('auth.password', 'Parol')}</Label>
+                                <Label htmlFor="password">
+                                    {t('auth.password', 'Parol')}
+                                </Label>
                                 <PasswordInput
                                     id="password"
                                     name="password"
@@ -120,7 +133,9 @@ export default function Login({ status }: Props) {
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">{t('auth.remember_me', 'Meni eslab qol')}</Label>
+                                <Label htmlFor="remember">
+                                    {t('auth.remember_me', 'Meni eslab qol')}
+                                </Label>
                             </div>
 
                             <Button
@@ -149,5 +164,6 @@ export default function Login({ status }: Props) {
 
 Login.layout = {
     title: 'Tizimga kirish',
-    description: 'Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting',
+    description:
+        'Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting',
 };

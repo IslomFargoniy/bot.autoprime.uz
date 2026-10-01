@@ -36,7 +36,17 @@ export interface CashTransaction {
     id: number;
     cash_register_id: number;
     type: 'in' | 'out';
-    category: 'payment' | 'expense' | 'transfer_in' | 'transfer_out' | 'sweep_in' | 'sweep_out' | 'refund' | 'initial' | 'salary' | 'maintenance';
+    category:
+        | 'payment'
+        | 'expense'
+        | 'transfer_in'
+        | 'transfer_out'
+        | 'sweep_in'
+        | 'sweep_out'
+        | 'refund'
+        | 'initial'
+        | 'salary'
+        | 'maintenance';
     amount: number | string;
     balance_before: number | string;
     balance_after: number | string;
@@ -79,10 +89,42 @@ export interface SweepItem {
 export interface PageProps {
     cashRegisters: CashRegister[];
     superadminRegisters: CashRegister[];
-    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
-    expenses: { data: Expense[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
-    transactions: { data: CashTransaction[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
-    transfers: { data: CashTransfer[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
+    payments: {
+        data: Payment[];
+        links: any[];
+        total: number;
+        current_page: number;
+        last_page: number;
+        from?: number;
+        to?: number;
+    };
+    expenses: {
+        data: Expense[];
+        links: any[];
+        total: number;
+        current_page: number;
+        last_page: number;
+        from?: number;
+        to?: number;
+    };
+    transactions: {
+        data: CashTransaction[];
+        links: any[];
+        total: number;
+        current_page: number;
+        last_page: number;
+        from?: number;
+        to?: number;
+    };
+    transfers: {
+        data: CashTransfer[];
+        links: any[];
+        total: number;
+        current_page: number;
+        last_page: number;
+        from?: number;
+        to?: number;
+    };
     branches: Array<{ id: number; name: string }>;
     expenseCategories: Array<{ id: number; name: string }>;
     registerTypes: Array<{ id: number; code: string; name: string }>;

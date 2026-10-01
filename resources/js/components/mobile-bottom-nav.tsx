@@ -23,12 +23,12 @@ export function MobileBottomNav() {
             icon: FolderGit2,
         },
         {
-            title: t('sidebar.students', 'O\'quvchilar'),
+            title: t('sidebar.students', "O'quvchilar"),
             href: '/admin/students',
             icon: Users,
         },
         {
-            title: t('sidebar.drivings', 'Mashg\'ulotlar'),
+            title: t('sidebar.drivings', "Mashg'ulotlar"),
             href: '/admin/drivings',
             icon: CarFront,
         },
@@ -39,9 +39,9 @@ export function MobileBottomNav() {
     }
 
     return (
-        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 md:hidden">
             {/* Main pill container */}
-            <div className="flex items-center gap-2 bg-primary p-2 rounded-full shadow-2xl">
+            <div className="flex items-center gap-2 rounded-full bg-primary p-2 shadow-2xl">
                 {navItems.map((item) => {
                     const isActive = url.startsWith(item.href);
                     const Icon = item.icon;
@@ -51,15 +51,15 @@ export function MobileBottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center justify-center transition-all duration-300 ease-in-out",
+                                'flex items-center justify-center transition-all duration-300 ease-in-out',
                                 isActive
-                                    ? "bg-background text-primary w-16 h-11 rounded-full shadow-sm"
-                                    : "bg-black/20 dark:bg-white/10 text-primary-foreground/90 w-11 h-11 rounded-full hover:bg-black/30 dark:hover:bg-white/20 active:scale-95"
+                                    ? 'h-11 w-16 rounded-full bg-background text-primary shadow-sm'
+                                    : 'h-11 w-11 rounded-full bg-black/20 text-primary-foreground/90 hover:bg-black/30 active:scale-95 dark:bg-white/10 dark:hover:bg-white/20',
                             )}
                         >
-                            <Icon 
-                                className="w-6 h-6 shrink-0 transition-transform duration-300" 
-                                strokeWidth={isActive ? 2.5 : 2} 
+                            <Icon
+                                className="h-6 w-6 shrink-0 transition-transform duration-300"
+                                strokeWidth={isActive ? 2.5 : 2}
                             />
                         </Link>
                     );

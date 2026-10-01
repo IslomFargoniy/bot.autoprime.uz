@@ -33,14 +33,18 @@ export default function AttendanceScreen({
 }: ScreenProps) {
     const { t } = useTranslation();
     const [qrToken, setQrToken] = useState(initialQrToken);
-    const [attendances, setAttendances] = useState<StudentAttendance[]>(initialAttendances || []);
+    const [attendances, setAttendances] = useState<StudentAttendance[]>(
+        initialAttendances || [],
+    );
     const [countdown, setCountdown] = useState(15);
 
     // Dynamic rotation polling every 15s
     useEffect(() => {
         const interval = setInterval(async () => {
             try {
-                const res = await fetch(`/admin/attendance/session/${session.id}/qr`);
+                const res = await fetch(
+                    `/admin/attendance/session/${session.id}/qr`,
+                );
 
                 if (res.ok) {
                     const data = await res.json();
@@ -68,7 +72,14 @@ export default function AttendanceScreen({
     }, [session.id]);
 
     const handleFinish = () => {
-        if (confirm(t('attendance.confirm_finish', 'Dars sessiyasini yakunlamoqchimisiz?'))) {
+        if (
+            confirm(
+                t(
+                    'attendance.confirm_finish',
+                    'Dars sessiyasini yakunlamoqchimisiz?',
+                ),
+            )
+        ) {
             router.post(`/admin/attendance/session/${session.id}/finish`);
         }
     };
@@ -76,92 +87,126 @@ export default function AttendanceScreen({
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(qrToken)}`;
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between p-8 font-sans">
+        <div className="flex min-h-screen flex-col justify-between bg-slate-950 p-8 font-sans text-white">
             <Head title={`QR Davomat: ${session.group?.name || 'Dars'}`} />
 
             {/* Top Bar */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-6">
                 <div>
-                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold text-xs tracking-wider uppercase border border-blue-500/30">
-                        {session.group?.category || 'B'} TOIFA • {session.group?.name}
+                    <span className="rounded-full border border-blue-500/30 bg-blue-500/20 px-3 py-1 text-xs font-semibold tracking-wider text-blue-400 uppercase">
+                        {session.group?.category || 'B'} TOIFA •{' '}
+                        {session.group?.name}
                     </span>
-                    <h1 className="text-3xl font-extrabold mt-2 text-white">
-                        {session.topic?.title || t('attendance.theory_lesson', 'Nazariy Dars Mashg\'uloti')}
+                    <h1 className="mt-2 text-3xl font-extrabold text-white">
+                        {session.topic?.title ||
+                            t(
+                                'attendance.theory_lesson',
+                                "Nazariy Dars Mashg'uloti",
+                            )}
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">
+                    <p className="mt-1 text-sm text-slate-400">
                         👨‍🏫 {session.teacher?.name} • AutoPrime LMS
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <div className="text-right">
-                        <span className="text-slate-400 text-xs block">{t('attendance.present_count', 'Qatnashuvchilar')}</span>
+                        <span className="block text-xs text-slate-400">
+                            {t('attendance.present_count', 'Qatnashuvchilar')}
+                        </span>
                         <span className="text-3xl font-black text-emerald-400">
-                            {attendances.length} <span className="text-slate-500 text-base font-normal">/ {studentsCount}</span>
+                            {attendances.length}{' '}
+                            <span className="text-base font-normal text-slate-500">
+                                / {studentsCount}
+                            </span>
                         </span>
                     </div>
 
-                    <Button onClick={handleFinish} variant="destructive" className="bg-red-600 hover:bg-red-700">
-                        <StopCircle className="w-4 h-4 mr-2" />
+                    <Button
+                        onClick={handleFinish}
+                        variant="destructive"
+                        className="bg-red-600 hover:bg-red-700"
+                    >
+                        <StopCircle className="mr-2 h-4 w-4" />
                         {t('attendance.finish_session', 'Darsni Tugatish')}
                     </Button>
                 </div>
             </div>
 
             {/* Middle Main Section: Dynamic QR Display & Live Log */}
-            <div className="flex flex-col lg:flex-row items-center justify-center gap-12 my-auto">
+            <div className="my-auto flex flex-col items-center justify-center gap-12 lg:flex-row">
                 {/* QR Container */}
                 <div className="flex flex-col items-center">
-                    <div className="p-6 bg-white rounded-3xl shadow-2xl shadow-blue-500/10 border-4 border-blue-500/30">
+                    <div className="rounded-3xl border-4 border-blue-500/30 bg-white p-6 shadow-2xl shadow-blue-500/10">
                         <img
                             src={qrImageUrl}
                             alt="Dynamic QR Code"
-                            className="w-80 h-80 object-contain rounded-xl"
+                            className="h-80 w-80 rounded-xl object-contain"
                         />
                     </div>
 
                     {/* Rotation Progress & Indicator */}
                     <div className="mt-6 flex flex-col items-center">
-                        <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
-                            <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                            <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />
                             <span>
-                                {t('attendance.rotating_in', 'Kodni yangilanishi')}: <strong className="text-blue-400 font-mono text-base">{countdown}s</strong>
+                                {t(
+                                    'attendance.rotating_in',
+                                    'Kodni yangilanishi',
+                                )}
+                                :{' '}
+                                <strong className="font-mono text-base text-blue-400">
+                                    {countdown}s
+                                </strong>
                             </span>
                         </div>
-                        <p className="text-slate-500 text-xs mt-1">
-                            {t('attendance.scan_instruction', 'Telegram Mini App orqali kamerani QR kodga qarating')}
+                        <p className="mt-1 text-xs text-slate-500">
+                            {t(
+                                'attendance.scan_instruction',
+                                'Telegram Mini App orqali kamerani QR kodga qarating',
+                            )}
                         </p>
                     </div>
                 </div>
 
                 {/* Real-time Students List */}
-                <div className="w-full lg:w-96 bg-slate-900/80 backdrop-blur-sm rounded-3xl p-6 border border-slate-800 shadow-xl max-h-[460px] flex flex-col">
-                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex max-h-[460px] w-full flex-col rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl backdrop-blur-sm lg:w-96">
+                    <h3 className="mb-4 flex items-center justify-between border-b border-slate-800 pb-3 text-sm font-bold tracking-wider text-slate-400 uppercase">
                         <span className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-emerald-400" />
-                            {t('attendance.scanned_students', 'Kelgan Talabalar')}
+                            <Users className="h-4 w-4 text-emerald-400" />
+                            {t(
+                                'attendance.scanned_students',
+                                'Kelgan Talabalar',
+                            )}
                         </span>
-                        <span className="text-xs font-mono text-emerald-400 font-bold">{attendances.length} ta</span>
+                        <span className="font-mono text-xs font-bold text-emerald-400">
+                            {attendances.length} ta
+                        </span>
                     </h3>
 
-                    <div className="overflow-y-auto space-y-2.5 pr-2 flex-1">
+                    <div className="flex-1 space-y-2.5 overflow-y-auto pr-2">
                         {attendances.length === 0 ? (
-                            <div className="text-center py-16 text-slate-500 text-xs">
-                                {t('attendance.waiting_for_scans', 'Hali hech kim skanerlamadi. QR kodni o\'quvchilarga ko\'rsating.')}
+                            <div className="py-16 text-center text-xs text-slate-500">
+                                {t(
+                                    'attendance.waiting_for_scans',
+                                    "Hali hech kim skanerlamadi. QR kodni o'quvchilarga ko'rsating.",
+                                )}
                             </div>
                         ) : (
                             attendances.map((att, idx) => (
                                 <div
                                     key={att.id}
-                                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/40 text-xs animate-in fade-in"
+                                    className="flex animate-in items-center justify-between rounded-xl border border-slate-700/40 bg-slate-800/60 p-2.5 text-xs fade-in"
                                 >
                                     <div className="flex items-center gap-2.5">
-                                        <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">
+                                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold text-emerald-400">
                                             {idx + 1}
                                         </span>
-                                        <span className="font-medium text-slate-200">{att.student?.full_name}</span>
+                                        <span className="font-medium text-slate-200">
+                                            {att.student?.full_name}
+                                        </span>
                                     </div>
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
                                 </div>
                             ))
                         )}
@@ -170,8 +215,9 @@ export default function AttendanceScreen({
             </div>
 
             {/* Bottom Bar Info */}
-            <div className="text-center text-xs text-slate-500 border-t border-slate-800/80 pt-4">
-                AutoPrime LMS &bull; Dinamik HMAC QR Texnologiyasi &bull; {formatDate(new Date())}
+            <div className="border-t border-slate-800/80 pt-4 text-center text-xs text-slate-500">
+                AutoPrime LMS &bull; Dinamik HMAC QR Texnologiyasi &bull;{' '}
+                {formatDate(new Date())}
             </div>
         </div>
     );

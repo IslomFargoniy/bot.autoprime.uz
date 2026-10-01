@@ -22,7 +22,12 @@ export function AppSidebarHeader({
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    const isTg = isMobile && typeof window !== 'undefined' && (isTelegramWebApp() || !!(window as any).Telegram?.WebApp?.initData || !!(window as any).Telegram?.WebApp?.platform);
+    const isTg =
+        isMobile &&
+        typeof window !== 'undefined' &&
+        (isTelegramWebApp() ||
+            !!(window as any).Telegram?.WebApp?.initData ||
+            !!(window as any).Telegram?.WebApp?.platform);
 
     return (
         <header
@@ -31,13 +36,13 @@ export function AppSidebarHeader({
                     ? 'calc(max(var(--tg-content-safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), env(safe-area-inset-top, 44px)) + 3.25rem)'
                     : undefined,
             }}
-            className="sticky top-0 z-40 flex shrink-0 items-end justify-between gap-2 border-b border-sidebar-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 pb-3 transition-[width,height] ease-linear md:h-16 md:items-center md:pb-0 md:!pt-0 md:px-6 min-h-16"
+            className="sticky top-0 z-40 flex min-h-16 shrink-0 items-end justify-between gap-2 border-b border-sidebar-border/50 bg-background/95 px-4 pb-3 backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/80 md:h-16 md:items-center md:px-6 md:!pt-0 md:pb-0"
         >
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            
+
             <div className="flex items-center gap-2">
                 <BranchSelector />
                 <LanguageSwitcher />

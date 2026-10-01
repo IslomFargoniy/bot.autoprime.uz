@@ -21,7 +21,11 @@ export function parseDate(value: string | Date): Date {
         return value;
     }
 
-    return new Date(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value) ? value.replace(' ', 'T') : value);
+    return new Date(
+        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value)
+            ? value.replace(' ', 'T')
+            : value,
+    );
 }
 
 /**
@@ -29,18 +33,21 @@ export function parseDate(value: string | Date): Date {
  */
 export function formatDateTime(dateStr?: string | Date | null): string {
     if (!dateStr) {
-return '-';
-}
+        return '-';
+    }
 
-    if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateStr)) {
+    if (
+        typeof dateStr === 'string' &&
+        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateStr)
+    ) {
         return dateStr;
     }
 
     const d = parseDate(dateStr);
 
     if (isNaN(d.getTime())) {
-return typeof dateStr === 'string' ? dateStr : '-';
-}
+        return typeof dateStr === 'string' ? dateStr : '-';
+    }
 
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -57,8 +64,8 @@ return typeof dateStr === 'string' ? dateStr : '-';
  */
 export function formatDate(dateStr?: string | Date | null): string {
     if (!dateStr) {
-return '-';
-}
+        return '-';
+    }
 
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         return dateStr;
@@ -67,8 +74,8 @@ return '-';
     const d = parseDate(dateStr);
 
     if (isNaN(d.getTime())) {
-return typeof dateStr === 'string' ? dateStr : '-';
-}
+        return typeof dateStr === 'string' ? dateStr : '-';
+    }
 
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -82,8 +89,8 @@ return typeof dateStr === 'string' ? dateStr : '-';
  */
 export function formatTime(dateStr?: string | Date | null): string {
     if (!dateStr) {
-return '-';
-}
+        return '-';
+    }
 
     if (typeof dateStr === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
         return dateStr.slice(0, 5);
@@ -92,8 +99,8 @@ return '-';
     const d = parseDate(dateStr);
 
     if (isNaN(d.getTime())) {
-return typeof dateStr === 'string' ? dateStr : '-';
-}
+        return typeof dateStr === 'string' ? dateStr : '-';
+    }
 
     const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
@@ -106,25 +113,26 @@ return typeof dateStr === 'string' ? dateStr : '-';
  */
 export function formatNumber(val?: number | string | null): string {
     if (val === undefined || val === null || val === '') {
-return '0';
-}
+        return '0';
+    }
 
     const numStr = String(val).trim();
 
     if (numStr === '' || numStr === 'NaN') {
-return '0';
-}
+        return '0';
+    }
 
     const isNegative = numStr.startsWith('-');
     const cleanNum = numStr.replace(/[^\d.]/g, '');
 
     if (!cleanNum) {
-return '0';
-}
+        return '0';
+    }
 
     const parts = cleanNum.split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    const formatted = parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0];
+    const formatted =
+        parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0];
 
     return isNegative ? `-${formatted}` : formatted;
 }
@@ -132,7 +140,10 @@ return '0';
 /**
  * Format money with space as thousands separator: "1 380 000 UZS"
  */
-export function formatMoney(val?: number | string | null, currency = 'UZS'): string {
+export function formatMoney(
+    val?: number | string | null,
+    currency = 'UZS',
+): string {
     const formatted = formatNumber(val);
 
     return currency ? `${formatted} ${currency}` : formatted;
@@ -143,9 +154,8 @@ export function formatMoney(val?: number | string | null, currency = 'UZS'): str
  */
 export function unformatNumber(val?: string | number | null): string {
     if (val === undefined || val === null) {
-return '';
-}
+        return '';
+    }
 
     return String(val).replace(/[^\d.]/g, '');
 }
-

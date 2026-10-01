@@ -1,5 +1,16 @@
 import { Head, useForm, router, usePage, Link } from '@inertiajs/react';
-import { Trash2, Edit2, Plus, AlertTriangle, Star, Filter, Download, Eye, User as UserIcon, Car } from 'lucide-react';
+import {
+    Trash2,
+    Edit2,
+    Plus,
+    AlertTriangle,
+    Star,
+    Filter,
+    Download,
+    Eye,
+    User as UserIcon,
+    Car,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -79,7 +90,11 @@ interface PageProps {
     };
 }
 
-export default function InstructorsIndex({ instructors, branches = [], filters = {} }: PageProps) {
+export default function InstructorsIndex({
+    instructors,
+    branches = [],
+    filters = {},
+}: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
     const { auth } = usePage<SharedData>().props;
@@ -94,7 +109,15 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-    const { data, setData, post, delete: destroy, reset, errors, processing } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        delete: destroy,
+        reset,
+        errors,
+        processing,
+    } = useForm({
         name: '',
         phone: '',
         telegram_id: '',
@@ -106,23 +129,27 @@ export default function InstructorsIndex({ instructors, branches = [], filters =
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/admin/instructors', { search, from, to, per_page: perPage }, { preserveState: true, replace: true });
+        router.get(
+            '/admin/instructors',
+            { search, from, to, per_page: perPage },
+            { preserveState: true, replace: true },
+        );
     };
 
     const handleExport = () => {
         const params = new URLSearchParams();
 
         if (search) {
-params.append('search', search);
-}
+            params.append('search', search);
+        }
 
         if (from) {
-params.append('from', from);
-}
+            params.append('from', from);
+        }
 
         if (to) {
-params.append('to', to);
-}
+            params.append('to', to);
+        }
 
         window.location.href = `/admin/instructors/export?${params.toString()}`;
     };
@@ -143,16 +170,28 @@ params.append('to', to);
     };
 
     const handleDelete = (id: number) => {
-        if (confirm(t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"))) {
+        if (
+            confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
             setIsDeleting(id);
             destroy(`/admin/instructors/${id}`, {
                 onSuccess: () => {
-                    toast.success(t('instructors.deleted_success', 'Instruktor muvaffaqiyatli o\'chirildi'));
+                    toast.success(
+                        t(
+                            'instructors.deleted_success',
+                            "Instruktor muvaffaqiyatli o'chirildi",
+                        ),
+                    );
                 },
                 onError: (err) => {
-                    toast.error(Object.values(err)[0] as string || t('instructors.error', 'Xatolik yuz berdi'));
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('instructors.error', 'Xatolik yuz berdi'),
+                    );
                 },
-                onFinish: () => setIsDeleting(null)
+                onFinish: () => setIsDeleting(null),
             });
         }
     };
@@ -170,32 +209,52 @@ params.append('to', to);
         e.preventDefault();
 
         if (processing) {
-return;
-}
+            return;
+        }
 
         if (editing) {
-            router.post(`/admin/instructors/${editing.id}`, {
-                _method: 'put',
-                ...data,
-            }, {
-                onSuccess: () => {
-                    closeForm();
-                    toast.success(t('instructors.updated_success', 'Instruktor muvaffaqiyatli yangilandi'));
+            router.post(
+                `/admin/instructors/${editing.id}`,
+                {
+                    _method: 'put',
+                    ...data,
                 },
-                onError: (err) => {
-                    toast.error(Object.values(err)[0] as string || t('instructors.error', 'Xatolik yuz berdi'));
-                }
-            });
+                {
+                    onSuccess: () => {
+                        closeForm();
+                        toast.success(
+                            t(
+                                'instructors.updated_success',
+                                'Instruktor muvaffaqiyatli yangilandi',
+                            ),
+                        );
+                    },
+                    onError: (err) => {
+                        toast.error(
+                            (Object.values(err)[0] as string) ||
+                                t('instructors.error', 'Xatolik yuz berdi'),
+                        );
+                    },
+                },
+            );
         } else {
             post('/admin/instructors', {
                 forceFormData: true,
                 onSuccess: () => {
                     closeForm();
-                    toast.success(t('instructors.created_success', 'Instruktor muvaffaqiyatli yaratildi'));
+                    toast.success(
+                        t(
+                            'instructors.created_success',
+                            'Instruktor muvaffaqiyatli yaratildi',
+                        ),
+                    );
                 },
                 onError: (err) => {
-                    toast.error(Object.values(err)[0] as string || t('instructors.error', 'Xatolik yuz berdi'));
-                }
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('instructors.error', 'Xatolik yuz berdi'),
+                    );
+                },
             });
         }
     };
@@ -211,17 +270,29 @@ return;
         <div className="p-6">
             <Head title={t('instructors.title', 'Instruktorlar')} />
 
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('instructors.title', 'Instruktorlar')}</h1>
+            <div className="mb-6 flex items-center justify-between gap-4">
+                <h1 className="text-2xl font-bold">
+                    {t('instructors.title', 'Instruktorlar')}
+                </h1>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={handleExport} className="gap-2">
-                        <Download className="w-4 h-4" />
-                        <span className="hidden sm:inline">{t('common.download_excel', 'Excel yuklab olish')}</span>
+                    <Button
+                        variant="outline"
+                        onClick={handleExport}
+                        className="gap-2"
+                    >
+                        <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                            {t('common.download_excel', 'Excel yuklab olish')}
+                        </span>
                     </Button>
                     {can('users.manage') && (
-                        <Button onClick={() => setShowForm(true)} variant="brand" className="gap-2">
-                            <Plus className="w-4 h-4" /> 
-                            <span>{t('common.add', 'Qo\'shish')}</span>
+                        <Button
+                            onClick={() => setShowForm(true)}
+                            variant="brand"
+                            className="gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            <span>{t('common.add', "Qo'shish")}</span>
                         </Button>
                     )}
                 </div>
@@ -229,13 +300,17 @@ return;
 
             {/* Filters Bar Card */}
             <PageFilterBar className="mb-6">
-                <div className="hidden md:flex gap-2 items-center flex-1">
+                <div className="hidden flex-1 items-center gap-2 md:flex">
                     <DatePicker
                         placeholder="YYYY-MM-DD"
                         value={from}
                         onChange={(val) => {
                             setFrom(val);
-                            router.get('/admin/instructors', { search, from: val, to, per_page: perPage }, { preserveState: true, replace: true });
+                            router.get(
+                                '/admin/instructors',
+                                { search, from: val, to, per_page: perPage },
+                                { preserveState: true, replace: true },
+                            );
                         }}
                         className="w-36"
                     />
@@ -244,45 +319,72 @@ return;
                         value={to}
                         onChange={(val) => {
                             setTo(val);
-                            router.get('/admin/instructors', { search, from, to: val, per_page: perPage }, { preserveState: true, replace: true });
+                            router.get(
+                                '/admin/instructors',
+                                { search, from, to: val, per_page: perPage },
+                                { preserveState: true, replace: true },
+                            );
                         }}
                         className="w-36"
                     />
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="flex w-full items-center gap-2 md:w-auto">
                     <PageFilterSearch
                         value={search}
                         onChange={setSearch}
                         onSubmit={handleSearch}
-                        placeholder={t('instructors.search_placeholder', 'Ism, tel yoki mashina...')}
+                        placeholder={t(
+                            'instructors.search_placeholder',
+                            'Ism, tel yoki mashina...',
+                        )}
                         perPage={perPage}
                         onPerPageChange={(val) => {
                             setPerPage(val);
-                            router.get('/admin/instructors', { search, from, to, per_page: val }, { preserveState: true, replace: true });
+                            router.get(
+                                '/admin/instructors',
+                                { search, from, to, per_page: val },
+                                { preserveState: true, replace: true },
+                            );
                         }}
                     >
                         {/* Mobile Filter Drawer */}
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="outline" size="icon" className="md:hidden shrink-0 h-10 w-10">
-                                    <Filter className="w-4 h-4" />
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-10 w-10 shrink-0 md:hidden"
+                                >
+                                    <Filter className="h-4 w-4" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
+                            <SheetContent
+                                side="bottom"
+                                className="h-[80vh] rounded-t-xl"
+                            >
                                 <SheetHeader>
-                                    <SheetTitle>{t('common.filter', 'Filtrlar')}</SheetTitle>
+                                    <SheetTitle>
+                                        {t('common.filter', 'Filtrlar')}
+                                    </SheetTitle>
                                     <SheetDescription className="sr-only">
                                         {t('common.filter', 'Filtrlar')}
                                     </SheetDescription>
                                 </SheetHeader>
                                 <div className="space-y-4 py-4">
                                     <div>
-                                        <Label>{t('common.per_page', 'Ko\'rsatish soni')}</Label>
+                                        <Label>
+                                            {t(
+                                                'common.per_page',
+                                                "Ko'rsatish soni",
+                                            )}
+                                        </Label>
                                         <div className="mt-1">
                                             <PerPageSelect
                                                 value={perPage}
-                                                onChange={(val) => setPerPage(val)}
+                                                onChange={(val) =>
+                                                    setPerPage(val)
+                                                }
                                                 className="w-full"
                                             />
                                         </div>
@@ -293,7 +395,7 @@ return;
                                             placeholder="YYYY-MM-DD"
                                             value={from}
                                             onChange={(val) => setFrom(val)}
-                                            className="w-full mt-1"
+                                            className="mt-1 w-full"
                                         />
                                     </div>
                                     <div>
@@ -302,11 +404,21 @@ return;
                                             placeholder="YYYY-MM-DD"
                                             value={to}
                                             onChange={(val) => setTo(val)}
-                                            className="w-full mt-1"
+                                            className="mt-1 w-full"
                                         />
                                     </div>
-                                    <Button className="w-full mt-4" onClick={() => router.get('/admin/instructors', { search, from, to, per_page: perPage })}>
-                                        {t('common.apply', 'Qo\'llash')}
+                                    <Button
+                                        className="mt-4 w-full"
+                                        onClick={() =>
+                                            router.get('/admin/instructors', {
+                                                search,
+                                                from,
+                                                to,
+                                                per_page: perPage,
+                                            })
+                                        }
+                                    >
+                                        {t('common.apply', "Qo'llash")}
                                     </Button>
                                 </div>
                             </SheetContent>
@@ -315,93 +427,236 @@ return;
                 </div>
             </PageFilterBar>
 
-            <Dialog open={showForm} onOpenChange={(open) => !open && closeForm()}>
-                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+            <Dialog
+                open={showForm}
+                onOpenChange={(open) => !open && closeForm()}
+            >
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            <span>{editing ? t('common.edit', 'Tahrirlash') : t('instructors.new', 'Yangi Instruktor')}</span>
+                            <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <span>
+                                {editing
+                                    ? t('common.edit', 'Tahrirlash')
+                                    : t('instructors.new', 'Yangi Instruktor')}
+                            </span>
                         </DialogTitle>
                         <DialogDescription className="sr-only">
-                            {editing ? t('common.edit', 'Tahrirlash') : t('common.add', 'Qo\'shish')}
+                            {editing
+                                ? t('common.edit', 'Tahrirlash')
+                                : t('common.add', "Qo'shish")}
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="flex flex-col items-center justify-center gap-2">
-                            <div className="w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted relative group">
+                            <div className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted">
                                 {photoPreview ? (
-                                    <img src={photoPreview} alt="Instructor preview" className="w-full h-full object-cover" />
+                                    <img
+                                        src={photoPreview}
+                                        alt="Instructor preview"
+                                        className="h-full w-full object-cover"
+                                    />
                                 ) : (
-                                    <UserIcon className="w-8 h-8 text-muted-foreground" />
+                                    <UserIcon className="h-8 w-8 text-muted-foreground" />
                                 )}
                             </div>
-                            <Label htmlFor="photo" className="cursor-pointer text-xs text-primary hover:underline">
+                            <Label
+                                htmlFor="photo"
+                                className="cursor-pointer text-xs text-primary hover:underline"
+                            >
                                 {t('instructors.upload_photo', 'Rasm yuklash')}
                             </Label>
-                            <Input id="photo" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                            {errors.photo && <div className="text-destructive text-xs mt-1">{errors.photo}</div>}
+                            <Input
+                                id="photo"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
+                            {errors.photo && (
+                                <div className="mt-1 text-xs text-destructive">
+                                    {errors.photo}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label htmlFor="name" required>{t('instructors.name', 'F.I.SH')}</Label>
-                            <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} required />
-                            {errors.name && <div className="text-destructive text-xs mt-1">{errors.name}</div>}
+                            <Label htmlFor="name" required>
+                                {t('instructors.name', 'F.I.SH')}
+                            </Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                required
+                            />
+                            {errors.name && (
+                                <div className="mt-1 text-xs text-destructive">
+                                    {errors.name}
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label htmlFor="phone" required>{t('instructors.phone', 'Telefon')}</Label>
-                                <Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} placeholder="+998901234567" required />
-                                {errors.phone && <div className="text-destructive text-xs mt-1">{errors.phone}</div>}
+                                <Label htmlFor="phone" required>
+                                    {t('instructors.phone', 'Telefon')}
+                                </Label>
+                                <Input
+                                    id="phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
+                                    placeholder="+998901234567"
+                                    required
+                                />
+                                {errors.phone && (
+                                    <div className="mt-1 text-xs text-destructive">
+                                        {errors.phone}
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="telegram_id">{t('common.telegram_id', 'Telegram ID')}</Label>
-                                <Input id="telegram_id" value={data.telegram_id} onChange={e => setData('telegram_id', e.target.value)} placeholder="12345678" />
-                                {errors.telegram_id && <div className="text-destructive text-xs mt-1">{errors.telegram_id}</div>}
+                                <Label htmlFor="telegram_id">
+                                    {t('common.telegram_id', 'Telegram ID')}
+                                </Label>
+                                <Input
+                                    id="telegram_id"
+                                    value={data.telegram_id}
+                                    onChange={(e) =>
+                                        setData('telegram_id', e.target.value)
+                                    }
+                                    placeholder="12345678"
+                                />
+                                {errors.telegram_id && (
+                                    <div className="mt-1 text-xs text-destructive">
+                                        {errors.telegram_id}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className={isSuperAdmin ? "grid grid-cols-2 gap-3" : "space-y-1.5"}>
+                        <div
+                            className={
+                                isSuperAdmin
+                                    ? 'grid grid-cols-2 gap-3'
+                                    : 'space-y-1.5'
+                            }
+                        >
                             <div className="space-y-1.5">
-                                <Label htmlFor="car_name">{t('instructors.car_name', 'Biriktirilgan mashina')}</Label>
-                                <Input id="car_name" value={data.car_name} onChange={e => setData('car_name', e.target.value)} placeholder="Gentra 01 A 777 AA" />
-                                {errors.car_name && <div className="text-destructive text-xs mt-1">{errors.car_name}</div>}
+                                <Label htmlFor="car_name">
+                                    {t(
+                                        'instructors.car_name',
+                                        'Biriktirilgan mashina',
+                                    )}
+                                </Label>
+                                <Input
+                                    id="car_name"
+                                    value={data.car_name}
+                                    onChange={(e) =>
+                                        setData('car_name', e.target.value)
+                                    }
+                                    placeholder="Gentra 01 A 777 AA"
+                                />
+                                {errors.car_name && (
+                                    <div className="mt-1 text-xs text-destructive">
+                                        {errors.car_name}
+                                    </div>
+                                )}
                             </div>
                             {isSuperAdmin && (
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="branch_id">{t('branches.branch', 'Filial')}</Label>
+                                    <Label htmlFor="branch_id">
+                                        {t('branches.branch', 'Filial')}
+                                    </Label>
                                     <SearchableSelect
                                         id="branch_id"
                                         value={data.branch_id}
-                                        onChange={(val) => setData('branch_id', val ? String(val) : '')}
+                                        onChange={(val) =>
+                                            setData(
+                                                'branch_id',
+                                                val ? String(val) : '',
+                                            )
+                                        }
                                         options={[
-                                            { value: '', label: t('branches.branch_optional', 'Filial (Ixtiyoriy)') },
-                                            ...branches.map((b) => ({ value: b.id, label: b.name })),
+                                            {
+                                                value: '',
+                                                label: t(
+                                                    'branches.branch_optional',
+                                                    'Filial (Ixtiyoriy)',
+                                                ),
+                                            },
+                                            ...branches.map((b) => ({
+                                                value: b.id,
+                                                label: b.name,
+                                            })),
                                         ]}
-                                        placeholder={t('branches.branch_optional', 'Filial (Ixtiyoriy)')}
+                                        placeholder={t(
+                                            'branches.branch_optional',
+                                            'Filial (Ixtiyoriy)',
+                                        )}
                                         allowClear
                                     />
-                                    {errors.branch_id && <div className="text-destructive text-xs mt-1">{errors.branch_id}</div>}
+                                    {errors.branch_id && (
+                                        <div className="mt-1 text-xs text-destructive">
+                                            {errors.branch_id}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
 
                         <div className="space-y-1.5">
                             <Label htmlFor="password" required={!editing}>
-                                {editing ? t('instructors.password_edit', 'Parol (o\'zgartirish uchun)') : t('instructors.password', 'Parol')}
+                                {editing
+                                    ? t(
+                                          'instructors.password_edit',
+                                          "Parol (o'zgartirish uchun)",
+                                      )
+                                    : t('instructors.password', 'Parol')}
                             </Label>
                             <PasswordInput
                                 id="password"
                                 value={data.password}
-                                onChange={e => setData('password', e.target.value)}
-                                placeholder={editing ? "••••••••" : t('instructors.password_placeholder', 'Parolni kiriting')}
+                                onChange={(e) =>
+                                    setData('password', e.target.value)
+                                }
+                                placeholder={
+                                    editing
+                                        ? '••••••••'
+                                        : t(
+                                              'instructors.password_placeholder',
+                                              'Parolni kiriting',
+                                          )
+                                }
                                 required={!editing}
                             />
-                            {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+                            {errors.password && (
+                                <p className="text-xs text-destructive">
+                                    {errors.password}
+                                </p>
+                            )}
                         </div>
-                        <div className="flex gap-2 justify-end pt-4">
-                            <Button type="button" variant="outline" onClick={closeForm}>{t('common.cancel', 'Bekor qilish')}</Button>
-                            <Button type="submit" disabled={processing} variant="brand">{processing ? t('common.saving', 'Saqlanmoqda...') : t('common.save', 'Saqlash')}</Button>
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={closeForm}
+                            >
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                variant="brand"
+                            >
+                                {processing
+                                    ? t('common.saving', 'Saqlanmoqda...')
+                                    : t('common.save', 'Saqlash')}
+                            </Button>
                         </div>
                     </form>
                 </DialogContent>
@@ -413,108 +668,208 @@ return;
                     <TableHeader>
                         <TableRow>
                             <TableHead>{t('common.number', '№')}</TableHead>
-                            <TableHead>{t('instructors.name', 'Instruktor')}</TableHead>
-                            <TableHead>{t('branches.branch', 'Filial')}</TableHead>
-                            <TableHead>{t('instructors.car', 'Mashina')}</TableHead>
-                            <TableHead className="text-center">{t('instructors.groups_count', 'Guruhlar')}</TableHead>
-                            <TableHead className="text-center">{t('instructors.students_count', 'O\'quvchilar')}</TableHead>
-                            <TableHead className="text-center">{t('instructors.drivings_count', 'Darslar')}</TableHead>
-                            <TableHead className="text-center">{t('instructors.rating', 'Reyting')}</TableHead>
-                            <TableHead className="text-center">{t('instructors.kpi', 'KPI')}</TableHead>
-                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            <TableHead>
+                                {t('instructors.name', 'Instruktor')}
+                            </TableHead>
+                            <TableHead>
+                                {t('branches.branch', 'Filial')}
+                            </TableHead>
+                            <TableHead>
+                                {t('instructors.car', 'Mashina')}
+                            </TableHead>
+                            <TableHead className="text-center">
+                                {t('instructors.groups_count', 'Guruhlar')}
+                            </TableHead>
+                            <TableHead className="text-center">
+                                {t('instructors.students_count', "O'quvchilar")}
+                            </TableHead>
+                            <TableHead className="text-center">
+                                {t('instructors.drivings_count', 'Darslar')}
+                            </TableHead>
+                            <TableHead className="text-center">
+                                {t('instructors.rating', 'Reyting')}
+                            </TableHead>
+                            <TableHead className="text-center">
+                                {t('instructors.kpi', 'KPI')}
+                            </TableHead>
+                            <TableHead className="text-right">
+                                {t('common.actions', 'Amallar')}
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {instructors.data.length === 0 ? (
                             <TableEmpty
                                 icon={UserIcon}
-                                title={t('common.empty_state_title', 'Ma\'lumot topilmadi')}
-                                description={t('common.empty_state_desc', 'Qidiruv parametrlarini o\'zgartirib ko\'ring')}
+                                title={t(
+                                    'common.empty_state_title',
+                                    "Ma'lumot topilmadi",
+                                )}
+                                description={t(
+                                    'common.empty_state_desc',
+                                    "Qidiruv parametrlarini o'zgartirib ko'ring",
+                                )}
                                 colSpan={10}
                             />
                         ) : (
                             instructors.data.map((item, index) => (
                                 <TableRow key={item.id}>
-                                    <TableCell>{(instructors.from || 1) + index}</TableCell>
+                                    <TableCell>
+                                        {(instructors.from || 1) + index}
+                                    </TableCell>
                                     <TableCell className="font-semibold">
-                                        <Link href={`/admin/instructors/${item.id}`} className="flex items-center gap-3 group">
-                                            <div className="w-10 h-10 rounded-full bg-muted shrink-0 overflow-hidden border">
+                                        <Link
+                                            href={`/admin/instructors/${item.id}`}
+                                            className="group flex items-center gap-3"
+                                        >
+                                            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border bg-muted">
                                                 {item.photo_url ? (
-                                                    <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={item.photo_url}
+                                                        alt={item.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                                        <UserIcon className="w-5 h-5" />
+                                                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                                        <UserIcon className="h-5 w-5" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                                                    {item.needs_attention && <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />}
-                                                    <span className="font-semibold">{item.name}</span>
+                                                <div className="flex items-center gap-1.5 transition-colors group-hover:text-primary">
+                                                    {item.needs_attention && (
+                                                        <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
+                                                    )}
+                                                    <span className="font-semibold">
+                                                        {item.name}
+                                                    </span>
                                                 </div>
-                                                <div className="text-xs text-muted-foreground font-mono">{item.phone}</div>
+                                                <div className="font-mono text-xs text-muted-foreground">
+                                                    {item.phone}
+                                                </div>
                                             </div>
                                         </Link>
                                     </TableCell>
-                                    <TableCell className="text-xs">{item.branch?.name || '-'}</TableCell>
+                                    <TableCell className="text-xs">
+                                        {item.branch?.name || '-'}
+                                    </TableCell>
                                     <TableCell>
                                         {item.car_name ? (
-                                            <div className="flex items-center gap-1.5 text-xs font-medium bg-muted/50 px-2.5 py-1 rounded-md border w-fit">
-                                                <Car className="w-3.5 h-3.5 text-muted-foreground" />
+                                            <div className="flex w-fit items-center gap-1.5 rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium">
+                                                <Car className="h-3.5 w-3.5 text-muted-foreground" />
                                                 <span>{item.car_name}</span>
                                             </div>
                                         ) : (
-                                            <span className="text-xs text-muted-foreground">{t('common.none', 'Yo\'q')}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {t('common.none', "Yo'q")}
+                                            </span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="text-center">{item.groups_count}</TableCell>
-                                    <TableCell className="text-center">{item.students_count}</TableCell>
                                     <TableCell className="text-center">
-                                        <div className="text-xs space-y-0.5 font-medium whitespace-nowrap">
-                                            <div className="text-blue-600 dark:text-blue-400">{item.total_drivings} {t('instructors.scheduled_drivings', 'dars belgilangan')}</div>
-                                            <div className="text-green-600 dark:text-green-400">{item.completed_drivings} {t('instructors.completed_drivings', 'ta yakunlangan')}</div>
+                                        {item.groups_count}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {item.students_count}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="space-y-0.5 text-xs font-medium whitespace-nowrap">
+                                            <div className="text-blue-600 dark:text-blue-400">
+                                                {item.total_drivings}{' '}
+                                                {t(
+                                                    'instructors.scheduled_drivings',
+                                                    'dars belgilangan',
+                                                )}
+                                            </div>
+                                            <div className="text-green-600 dark:text-green-400">
+                                                {item.completed_drivings}{' '}
+                                                {t(
+                                                    'instructors.completed_drivings',
+                                                    'ta yakunlangan',
+                                                )}
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex flex-col items-center gap-1">
-                                            <div className={`inline-flex items-center gap-1 text-xs font-semibold ${
-                                                item.reviewed_drivings > 0 && item.average_rating <= 3
-                                                    ? 'text-red-600 dark:text-red-400'
-                                                    : 'text-amber-600 dark:text-amber-400'
-                                            }`}>
-                                                {item.reviewed_drivings > 0 && item.average_rating <= 3 ? (
-                                                    <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                                            <div
+                                                className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                                                    item.reviewed_drivings >
+                                                        0 &&
+                                                    item.average_rating <= 3
+                                                        ? 'text-red-600 dark:text-red-400'
+                                                        : 'text-amber-600 dark:text-amber-400'
+                                                }`}
+                                            >
+                                                {item.reviewed_drivings > 0 &&
+                                                item.average_rating <= 3 ? (
+                                                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-600" />
                                                 ) : (
-                                                    <Star className="w-3.5 h-3.5 fill-current shrink-0" />
+                                                    <Star className="h-3.5 w-3.5 shrink-0 fill-current" />
                                                 )}
-                                                <span>{item.average_rating}</span>
-                                                <span className="text-[11px] text-muted-foreground font-normal">({item.reviewed_drivings})</span>
+                                                <span>
+                                                    {item.average_rating}
+                                                </span>
+                                                <span className="text-[11px] font-normal text-muted-foreground">
+                                                    ({item.reviewed_drivings})
+                                                </span>
                                             </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                            item.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                            item.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                        }`}>
+                                        <span
+                                            className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+                                                item.kpi_percentage >= 80
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                    : item.kpi_percentage >= 50
+                                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                            }`}
+                                        >
                                             {item.kpi_percentage}%
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-1">
-                                            <Link href={`/admin/instructors/${item.id}`}>
-                                                <Button variant="ghost" size="icon" title={t('common.view', 'Batafsil')}>
-                                                    <Eye className="w-4 h-4" />
+                                            <Link
+                                                href={`/admin/instructors/${item.id}`}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title={t(
+                                                        'common.view',
+                                                        'Batafsil',
+                                                    )}
+                                                >
+                                                    <Eye className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                             {can('users.manage') && (
                                                 <>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                                                        <Edit2 className="w-4 h-4" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            handleEdit(item)
+                                                        }
+                                                    >
+                                                        <Edit2 className="h-4 w-4" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id}>
-                                                        <Trash2 className="w-4 h-4" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive"
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isDeleting ===
+                                                            item.id
+                                                        }
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </>
                                             )}
@@ -526,87 +881,159 @@ return;
                     </TableBody>
                 </Table>
             </div>
-                
-                {/* Mobile Cards */}
-                <div className="md:hidden p-3 space-y-3 bg-muted/20">
-                    {instructors.data.map((item) => (
-                        <div key={item.id} className="p-4 space-y-3 bg-card border rounded-xl shadow-xs">
-                            <div className="flex justify-between items-start">
-                                <Link href={`/admin/instructors/${item.id}`} className="flex items-center gap-3">
-                                    <div className="w-11 h-11 rounded-full bg-muted shrink-0 overflow-hidden border">
-                                        {item.photo_url ? (
-                                            <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                                <UserIcon className="w-5 h-5" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-base flex items-center gap-1.5">
-                                            {item.needs_attention && <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />}
-                                            <span>{item.name}</span>
+
+            {/* Mobile Cards */}
+            <div className="space-y-3 bg-muted/20 p-3 md:hidden">
+                {instructors.data.map((item) => (
+                    <div
+                        key={item.id}
+                        className="space-y-3 rounded-xl border bg-card p-4 shadow-xs"
+                    >
+                        <div className="flex items-start justify-between">
+                            <Link
+                                href={`/admin/instructors/${item.id}`}
+                                className="flex items-center gap-3"
+                            >
+                                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border bg-muted">
+                                    {item.photo_url ? (
+                                        <img
+                                            src={item.photo_url}
+                                            alt={item.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                            <UserIcon className="h-5 w-5" />
                                         </div>
-                                        <div className="text-xs text-muted-foreground">{item.phone}</div>
-                                        {item.car_name && (
-                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5 font-medium">
-                                                <Car className="w-3 h-3" />
-                                                <span>{item.car_name}</span>
-                                            </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-1.5 text-base font-semibold">
+                                        {item.needs_attention && (
+                                            <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
                                         )}
+                                        <span>{item.name}</span>
                                     </div>
-                                </Link>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                    item.kpi_percentage >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                    item.kpi_percentage >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                }`}>
-                                    {item.kpi_percentage}% KPI
+                                    <div className="text-xs text-muted-foreground">
+                                        {item.phone}
+                                    </div>
+                                    {item.car_name && (
+                                        <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                                            <Car className="h-3 w-3" />
+                                            <span>{item.car_name}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </Link>
+                            <span
+                                className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+                                    item.kpi_percentage >= 80
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                        : item.kpi_percentage >= 50
+                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                }`}
+                            >
+                                {item.kpi_percentage}% KPI
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 border-y py-2.5 text-sm">
+                            <div>
+                                <span className="block text-xs text-muted-foreground">
+                                    {t('instructors.groups_count', 'Guruhlar')}{' '}
+                                    /{' '}
+                                    {t(
+                                        'instructors.students_count',
+                                        "O'quvchilar",
+                                    )}
+                                    :
+                                </span>
+                                <span className="text-xs font-medium">
+                                    {item.groups_count} guruh (
+                                    {item.students_count} o'quvchi)
                                 </span>
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-2 text-sm border-y py-2.5">
-                                <div>
-                                    <span className="text-muted-foreground block text-xs">{t('instructors.groups_count', 'Guruhlar')} / {t('instructors.students_count', 'O\'quvchilar')}:</span>
-                                    <span className="font-medium text-xs">{item.groups_count} guruh ({item.students_count} o'quvchi)</span>
-                                </div>
-                                <div>
-                                    <span className="text-muted-foreground block text-xs">{t('instructors.rating', 'O\'rtacha reyting')}:</span>
-                                    <div className="flex items-center gap-1 font-semibold text-xs text-yellow-600 dark:text-yellow-400">
-                                        <Star className="w-3.5 h-3.5 fill-current" />
-                                        <span>{item.average_rating} ({item.reviewed_drivings} baho)</span>
-                                    </div>
-                                </div>
-                                <div className="col-span-2 pt-2 border-t mt-1">
-                                    <span className="text-muted-foreground block text-xs mb-1">{t('instructors.drivings_proportion', 'Darslar proporsiyasi')}:</span>
-                                    <div className="flex justify-between items-center text-xs font-semibold">
-                                        <span className="text-blue-600 dark:text-blue-400">{item.total_drivings} {t('instructors.scheduled_drivings', 'dars belgilangan')}</span>
-                                        <span className="text-green-600 dark:text-green-400">{item.completed_drivings} {t('instructors.completed_drivings', 'ta yakunlangan')}</span>
-                                    </div>
+                            <div>
+                                <span className="block text-xs text-muted-foreground">
+                                    {t(
+                                        'instructors.rating',
+                                        "O'rtacha reyting",
+                                    )}
+                                    :
+                                </span>
+                                <div className="flex items-center gap-1 text-xs font-semibold text-yellow-600 dark:text-yellow-400">
+                                    <Star className="h-3.5 w-3.5 fill-current" />
+                                    <span>
+                                        {item.average_rating} (
+                                        {item.reviewed_drivings} baho)
+                                    </span>
                                 </div>
                             </div>
-                            
-                            <div className="flex gap-2 justify-end pt-1">
-                                <Link href={`/admin/instructors/${item.id}`}>
-                                    <Button variant="outline" size="sm" className="gap-1.5">
-                                        <Eye className="w-3.5 h-3.5" />
-                                        <span>{t('common.view', 'Batafsil')}</span>
-                                    </Button>
-                                </Link>
-                                {can('users.manage') && (
-                                    <>
-                                        <Button variant="outline" size="icon" onClick={() => handleEdit(item)} title={t('common.edit', 'Tahrirlash')}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={isDeleting === item.id} title={t('common.delete', 'O\'chirish')}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </>
-                                )}
+                            <div className="col-span-2 mt-1 border-t pt-2">
+                                <span className="mb-1 block text-xs text-muted-foreground">
+                                    {t(
+                                        'instructors.drivings_proportion',
+                                        'Darslar proporsiyasi',
+                                    )}
+                                    :
+                                </span>
+                                <div className="flex items-center justify-between text-xs font-semibold">
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                        {item.total_drivings}{' '}
+                                        {t(
+                                            'instructors.scheduled_drivings',
+                                            'dars belgilangan',
+                                        )}
+                                    </span>
+                                    <span className="text-green-600 dark:text-green-400">
+                                        {item.completed_drivings}{' '}
+                                        {t(
+                                            'instructors.completed_drivings',
+                                            'ta yakunlangan',
+                                        )}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    ))}
-                </div>
+
+                        <div className="flex justify-end gap-2 pt-1">
+                            <Link href={`/admin/instructors/${item.id}`}>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                >
+                                    <Eye className="h-3.5 w-3.5" />
+                                    <span>{t('common.view', 'Batafsil')}</span>
+                                </Button>
+                            </Link>
+                            {can('users.manage') && (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleEdit(item)}
+                                        title={t('common.edit', 'Tahrirlash')}
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="border-destructive/20 text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleDelete(item.id)}
+                                        disabled={isDeleting === item.id}
+                                        title={t('common.delete', "O'chirish")}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             <Pagination
                 links={instructors.links}

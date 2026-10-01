@@ -3,13 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
 import type { User } from '@/types';
 
-
-export function UserInfo({
-    user,
-}: {
-    user: User;
-    showEmail?: boolean;
-}) {
+export function UserInfo({ user }: { user: User; showEmail?: boolean }) {
     const { t } = useTranslation();
     const getInitials = useInitials();
 
@@ -24,7 +18,9 @@ export function UserInfo({
             case 'student':
                 return `🎓 ${t('roles.student', "O'quvchi")}`;
             default:
-                return role ? `👑 ${t('roles.superadmin', 'Bosh Admin')}` : `👑 ${t('roles.superadmin', 'Bosh Admin')}`;
+                return role
+                    ? `👑 ${t('roles.superadmin', 'Bosh Admin')}`
+                    : `👑 ${t('roles.superadmin', 'Bosh Admin')}`;
         }
     };
 

@@ -109,17 +109,23 @@ export default function AttendanceIndex({
     const { t } = useTranslation();
     const can = useCan();
     const [showSessionModal, setShowSessionModal] = useState(false);
-    const [showManualModal, setShowManualModal] = useState(Boolean(filters.action === 'mark' || filters.group_id));
-    const [attendanceMode, setAttendanceMode] = useState<'group' | 'single'>('group');
+    const [showManualModal, setShowManualModal] = useState(
+        Boolean(filters.action === 'mark' || filters.group_id),
+    );
+    const [attendanceMode, setAttendanceMode] = useState<'group' | 'single'>(
+        'group',
+    );
 
     // Page filter states
-    const [filterGroupId, setFilterGroupId] = useState(filters.group_id?.toString() || '');
+    const [filterGroupId, setFilterGroupId] = useState(
+        filters.group_id?.toString() || '',
+    );
     const [filterDate, setFilterDate] = useState(filters.date || '');
     const [perPage, setPerPage] = useState(filters?.per_page || '15');
 
     // Group journal state inside modal
     const [rosterGroupId, setRosterGroupId] = useState<number | string>(
-        filters.group_id || ''
+        filters.group_id || '',
     );
 
     useEffect(() => {
@@ -133,7 +139,7 @@ export default function AttendanceIndex({
         }
     }, [filters.action, filters.group_id]);
     const [rosterDate, setRosterDate] = useState<string>(
-        formatDate(new Date())
+        formatDate(new Date()),
     );
     const [rosterTopic, setRosterTopic] = useState<string>('Nazariy dars');
     const [rosterList, setRosterList] = useState<GroupRosterStudent[]>([]);
@@ -149,24 +155,26 @@ export default function AttendanceIndex({
         student_id: '' as string | number,
         date: formatDate(new Date()),
         status: 'present',
-        manual_reason: 'Telefoni yo\'q',
+        manual_reason: "Telefoni yo'q",
     });
 
     // Fetch roster whenever modal opens or group/date changes
     useEffect(() => {
         if (!showManualModal || !rosterGroupId) {
-return;
-}
+            return;
+        }
 
         let isMounted = true;
         setIsLoadingRoster(true);
 
-        fetch(`/admin/attendance/group-attendances?group_id=${rosterGroupId}&date=${rosterDate}`)
+        fetch(
+            `/admin/attendance/group-attendances?group_id=${rosterGroupId}&date=${rosterDate}`,
+        )
             .then((res) => res.json())
             .then((data) => {
                 if (!isMounted) {
-return;
-}
+                    return;
+                }
 
                 setIsLoadingRoster(false);
 
@@ -180,8 +188,8 @@ return;
             })
             .catch(() => {
                 if (!isMounted) {
-return;
-}
+                    return;
+                }
 
                 setIsLoadingRoster(false);
                 const filtered = students
@@ -211,7 +219,7 @@ return;
                 ...s,
                 is_attended: true,
                 status: 'present',
-            }))
+            })),
         );
     };
 
@@ -221,7 +229,7 @@ return;
                 ...s,
                 is_attended: false,
                 status: 'absent',
-            }))
+            })),
         );
     };
 
@@ -239,13 +247,15 @@ return;
                 }
 
                 return s;
-            })
+            }),
         );
     };
 
     const handleUpdateReason = (studentId: number, reason: string) => {
         setRosterList((prev) =>
-            prev.map((s) => (s.id === studentId ? { ...s, manual_reason: reason } : s))
+            prev.map((s) =>
+                s.id === studentId ? { ...s, manual_reason: reason } : s,
+            ),
         );
     };
 
@@ -253,7 +263,12 @@ return;
         e.preventDefault();
 
         if (rosterList.length === 0) {
-            toast.error(t('attendance.no_students_in_group', 'Ushbu guruhda faol talabalar topilmadi'));
+            toast.error(
+                t(
+                    'attendance.no_students_in_group',
+                    'Ushbu guruhda faol talabalar topilmadi',
+                ),
+            );
 
             return;
         }
@@ -267,21 +282,35 @@ return;
                 topic: rosterTopic,
                 attendances: rosterList.map((st) => ({
                     student_id: st.id,
-                    status: st.is_attended ? (st.status === 'late' ? 'late' : 'present') : 'absent',
-                    manual_reason: st.manual_reason || (st.is_attended ? 'Guruh jurnali orqali' : 'Kelmagan'),
+                    status: st.is_attended
+                        ? st.status === 'late'
+                            ? 'late'
+                            : 'present'
+                        : 'absent',
+                    manual_reason:
+                        st.manual_reason ||
+                        (st.is_attended ? 'Guruh jurnali orqali' : 'Kelmagan'),
                 })),
             },
             {
                 onSuccess: () => {
                     setShowManualModal(false);
                     setIsSubmittingRoster(false);
-                    toast.success(t('attendance.group_saved', 'Guruh davomati muvaffaqiyatli saqlandi'));
+                    toast.success(
+                        t(
+                            'attendance.group_saved',
+                            'Guruh davomati muvaffaqiyatli saqlandi',
+                        ),
+                    );
                 },
                 onError: (err) => {
                     setIsSubmittingRoster(false);
-                    toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    );
                 },
-            }
+            },
         );
     };
 
@@ -290,9 +319,15 @@ return;
         sessionForm.post('/admin/attendance/start-session', {
             onSuccess: () => {
                 setShowSessionModal(false);
-                toast.success(t('attendance.session_started', 'Dars sessiyasi ochildi'));
+                toast.success(
+                    t('attendance.session_started', 'Dars sessiyasi ochildi'),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
@@ -302,9 +337,15 @@ return;
             onSuccess: () => {
                 setShowManualModal(false);
                 manualForm.reset();
-                toast.success(t('attendance.manual_saved', 'Davomat belgilandi'));
+                toast.success(
+                    t('attendance.manual_saved', 'Davomat belgilandi'),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
@@ -313,12 +354,12 @@ return;
         const nextDate = key === 'date' ? value : filterDate;
 
         if (key === 'group_id') {
-setFilterGroupId(value);
-}
+            setFilterGroupId(value);
+        }
 
         if (key === 'date') {
-setFilterDate(value);
-}
+            setFilterDate(value);
+        }
 
         router.get(
             '/admin/attendance',
@@ -327,7 +368,7 @@ setFilterDate(value);
                 date: nextDate || undefined,
                 per_page: perPage,
             },
-            { preserveState: true, replace: true }
+            { preserveState: true, replace: true },
         );
     };
 
@@ -340,14 +381,18 @@ setFilterDate(value);
                 date: filterDate || undefined,
                 per_page: newPerPage,
             },
-            { preserveState: true, replace: true }
+            { preserveState: true, replace: true },
         );
     };
 
     const handleClearFilters = () => {
         setFilterGroupId('');
         setFilterDate('');
-        router.get('/admin/attendance', { per_page: perPage }, { preserveState: true, replace: true });
+        router.get(
+            '/admin/attendance',
+            { per_page: perPage },
+            { preserveState: true, replace: true },
+        );
     };
 
     const presentCount = rosterList.filter((s) => s.is_attended).length;
@@ -357,19 +402,35 @@ setFilterDate(value);
             <Head title={t('attendance.title', 'Davomat Jurnali')} />
 
             {/* Page Title & Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('attendance.title', 'Davomat Jurnali')}</h1>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <h1 className="text-2xl font-bold">
+                    {t('attendance.title', 'Davomat Jurnali')}
+                </h1>
                 <div className="flex flex-wrap gap-2">
                     {can('attendance.start_session') && (
-                        <Button onClick={() => setShowSessionModal(true)} variant="brand" className="text-xs">
-                            <Tv className="w-4 h-4 mr-1.5" />
-                            {t('attendance.start_session_button', 'Dars Ochish (QR Doska)')}
+                        <Button
+                            onClick={() => setShowSessionModal(true)}
+                            variant="brand"
+                            className="text-xs"
+                        >
+                            <Tv className="mr-1.5 h-4 w-4" />
+                            {t(
+                                'attendance.start_session_button',
+                                'Dars Ochish (QR Doska)',
+                            )}
                         </Button>
                     )}
                     {can('attendance.mark_manual') && (
-                        <Button onClick={() => setShowManualModal(true)} variant="outline" className="text-xs">
-                            <UserCheck className="w-4 h-4 mr-1.5" />
-                            {t('attendance.manual_mark_button', 'Qo\'lda Belgilash')}
+                        <Button
+                            onClick={() => setShowManualModal(true)}
+                            variant="outline"
+                            className="text-xs"
+                        >
+                            <UserCheck className="mr-1.5 h-4 w-4" />
+                            {t(
+                                'attendance.manual_mark_button',
+                                "Qo'lda Belgilash",
+                            )}
                         </Button>
                     )}
                 </div>
@@ -377,25 +438,36 @@ setFilterDate(value);
 
             {/* Active Sessions Banner */}
             {activeSessions.length > 0 && (
-                <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
-                    <h3 className="font-bold text-xs text-blue-900 dark:text-blue-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <QrCode className="w-4 h-4 text-blue-600 animate-pulse" />
-                        {t('attendance.active_sessions', 'Hozirda Faol Dars Sessiyalari')}
+                <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/40">
+                    <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold tracking-wider text-blue-900 uppercase dark:text-blue-300">
+                        <QrCode className="h-4 w-4 animate-pulse text-blue-600" />
+                        {t(
+                            'attendance.active_sessions',
+                            'Hozirda Faol Dars Sessiyalari',
+                        )}
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                         {activeSessions.map((s) => (
-                            <div key={s.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-blue-100 dark:border-blue-900 shadow-xs flex items-center justify-between">
+                            <div
+                                key={s.id}
+                                className="flex items-center justify-between rounded-lg border border-blue-100 bg-white p-3 shadow-xs dark:border-blue-900 dark:bg-gray-800"
+                            >
                                 <div>
-                                    <p className="font-bold text-xs text-gray-900 dark:text-white">{s.group?.name} ({s.group?.category || 'B'})</p>
-                                    <p className="text-[11px] text-gray-500">👨‍🏫 {s.teacher?.name}</p>
+                                    <p className="text-xs font-bold text-gray-900 dark:text-white">
+                                        {s.group?.name} (
+                                        {s.group?.category || 'B'})
+                                    </p>
+                                    <p className="text-[11px] text-gray-500">
+                                        👨‍🏫 {s.teacher?.name}
+                                    </p>
                                 </div>
                                 <a
                                     href={`/admin/attendance/session/${s.id}/screen`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-semibold hover:bg-blue-700 flex items-center gap-1"
+                                    className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
                                 >
-                                    <Tv className="w-3.5 h-3.5" />
+                                    <Tv className="h-3.5 w-3.5" />
                                     {t('attendance.view_screen', 'Ekran')}
                                 </a>
                             </div>
@@ -409,12 +481,26 @@ setFilterDate(value);
                 <div className="flex flex-wrap items-center gap-2">
                     <SearchableSelect
                         value={filterGroupId}
-                        onChange={(val) => handleFilterChange('group_id', val ? String(val) : '')}
+                        onChange={(val) =>
+                            handleFilterChange(
+                                'group_id',
+                                val ? String(val) : '',
+                            )
+                        }
                         options={[
-                            { value: '', label: t('common.all', 'Barcha guruhlar') },
-                            ...groups.map((g) => ({ value: String(g.id), label: g.name })),
+                            {
+                                value: '',
+                                label: t('common.all', 'Barcha guruhlar'),
+                            },
+                            ...groups.map((g) => ({
+                                value: String(g.id),
+                                label: g.name,
+                            })),
                         ]}
-                        placeholder={t('attendance.all_groups', 'Barcha guruhlar')}
+                        placeholder={t(
+                            'attendance.all_groups',
+                            'Barcha guruhlar',
+                        )}
                         className="w-full sm:w-56"
                         triggerClassName="h-10 text-sm"
                         allowClear
@@ -425,7 +511,10 @@ setFilterDate(value);
                         onChange={(val) => handleFilterChange('date', val)}
                         className="w-full sm:w-44"
                     />
-                    <PerPageSelect value={perPage} onChange={handlePerPageChange} />
+                    <PerPageSelect
+                        value={perPage}
+                        onChange={handlePerPageChange}
+                    />
                     {(filterGroupId || filterDate) && (
                         <Button
                             type="button"
@@ -435,129 +524,223 @@ setFilterDate(value);
                             className="h-10 w-10 shrink-0"
                             title={t('common.clear', 'Tozalash')}
                         >
-                            <RotateCcw className="w-4 h-4" />
+                            <RotateCcw className="h-4 w-4" />
                         </Button>
                     )}
                 </div>
             </PageFilterBar>
 
             {/* Attendance Records Table / Desktop & Tablet */}
-            <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs mb-4">
+            <div className="mb-4 hidden overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs md:block dark:border-gray-700 dark:bg-gray-800">
                 <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow className="bg-gray-50/80 dark:bg-gray-700/50">
-                            <TableHead className="font-semibold">{t('attendance.date', 'Sana')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.student', 'Talaba')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.group', 'Guruh')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.status', 'Holat')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.type', 'Turi')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.teacher', 'O\'qituvchi')}</TableHead>
-                            <TableHead className="font-semibold">{t('attendance.time', 'Vaqt')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {attendances.data.length === 0 ? (
-                            <TableEmpty
-                                colSpan={7}
-                                icon={QrCode}
-                                title={t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
-                                description={t('attendance.no_records_desc', 'Tanlangan sana yoki guruh bo\'yicha davomat yozuvi mavjud emas')}
-                            />
-                        ) : (
-                            attendances.data.map((att) => (
-                                <TableRow key={att.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                                    <TableCell className="font-medium text-gray-900 dark:text-white font-mono text-xs">{formatDate(att.date)}</TableCell>
-                                    <TableCell className="font-medium">{att.student?.full_name}</TableCell>
-                                    <TableCell className="text-gray-500 dark:text-gray-400">{att.student?.group?.name || '-'}</TableCell>
-                                    <TableCell>
-                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                            att.status === 'present'
-                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                                : att.status === 'late'
-                                                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                                                : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                                        }`}>
-                                            {att.status === 'present'
-                                                ? t('attendance.present', 'Bor')
-                                                : att.status === 'late'
-                                                ? t('attendance.late', 'Kechikkan')
-                                                : t('attendance.absent', 'Yo\'q')}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-gray-500">
-                                        {att.is_manual ? (
-                                            <span className="text-amber-600">✍️ {t('attendance.manual', 'Qo\'lda')} {att.manual_reason ? `(${att.manual_reason})` : ''}</span>
-                                        ) : (
-                                            <span className="text-blue-600">📷 {t('attendance.qr_scanned', 'Dinamik QR')}</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-gray-500">{att.session?.teacher?.name || att.marked_by?.name || '-'}</TableCell>
-                                    <TableCell className="text-gray-400 font-mono text-xs">{formatDateTime(att.scanned_at)}</TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="bg-gray-50/80 dark:bg-gray-700/50">
+                                <TableHead className="font-semibold">
+                                    {t('attendance.date', 'Sana')}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.student', 'Talaba')}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.group', 'Guruh')}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.status', 'Holat')}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.type', 'Turi')}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.teacher', "O'qituvchi")}
+                                </TableHead>
+                                <TableHead className="font-semibold">
+                                    {t('attendance.time', 'Vaqt')}
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {attendances.data.length === 0 ? (
+                                <TableEmpty
+                                    colSpan={7}
+                                    icon={QrCode}
+                                    title={t(
+                                        'attendance.no_records',
+                                        'Davomat yozuvlari topilmadi',
+                                    )}
+                                    description={t(
+                                        'attendance.no_records_desc',
+                                        "Tanlangan sana yoki guruh bo'yicha davomat yozuvi mavjud emas",
+                                    )}
+                                />
+                            ) : (
+                                attendances.data.map((att) => (
+                                    <TableRow
+                                        key={att.id}
+                                        className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
+                                    >
+                                        <TableCell className="font-mono text-xs font-medium text-gray-900 dark:text-white">
+                                            {formatDate(att.date)}
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {att.student?.full_name}
+                                        </TableCell>
+                                        <TableCell className="text-gray-500 dark:text-gray-400">
+                                            {att.student?.group?.name || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span
+                                                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                                                    att.status === 'present'
+                                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                                        : att.status === 'late'
+                                                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                                                          : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
+                                                }`}
+                                            >
+                                                {att.status === 'present'
+                                                    ? t(
+                                                          'attendance.present',
+                                                          'Bor',
+                                                      )
+                                                    : att.status === 'late'
+                                                      ? t(
+                                                            'attendance.late',
+                                                            'Kechikkan',
+                                                        )
+                                                      : t(
+                                                            'attendance.absent',
+                                                            "Yo'q",
+                                                        )}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-gray-500">
+                                            {att.is_manual ? (
+                                                <span className="text-amber-600">
+                                                    ✍️{' '}
+                                                    {t(
+                                                        'attendance.manual',
+                                                        "Qo'lda",
+                                                    )}{' '}
+                                                    {att.manual_reason
+                                                        ? `(${att.manual_reason})`
+                                                        : ''}
+                                                </span>
+                                            ) : (
+                                                <span className="text-blue-600">
+                                                    📷{' '}
+                                                    {t(
+                                                        'attendance.qr_scanned',
+                                                        'Dinamik QR',
+                                                    )}
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-gray-500">
+                                            {att.session?.teacher?.name ||
+                                                att.marked_by?.name ||
+                                                '-'}
+                                        </TableCell>
+                                        <TableCell className="font-mono text-xs text-gray-400">
+                                            {formatDateTime(att.scanned_at)}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
 
             {/* Attendance Records Mobile Cards Feed */}
-            <div className="md:hidden space-y-3 mb-4">
+            <div className="mb-4 space-y-3 md:hidden">
                 {attendances.data.length === 0 ? (
-                    <div className="bg-card border rounded-xl p-8 text-center text-sm text-muted-foreground shadow-xs">
-                        {t('attendance.no_records', 'Davomat yozuvlari topilmadi')}
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground shadow-xs">
+                        {t(
+                            'attendance.no_records',
+                            'Davomat yozuvlari topilmadi',
+                        )}
                     </div>
                 ) : (
                     attendances.data.map((att) => (
-                        <div key={att.id} className="bg-card border rounded-xl p-4 space-y-2.5 shadow-xs">
+                        <div
+                            key={att.id}
+                            className="space-y-2.5 rounded-xl border bg-card p-4 shadow-xs"
+                        >
                             {/* Header: Student Name + Status Badge */}
                             <div className="flex items-start justify-between gap-2">
                                 <div>
-                                    <div className="font-semibold text-sm text-foreground">{att.student?.full_name}</div>
-                                    <div className="text-xs text-muted-foreground mt-0.5">{att.student?.group?.name || '-'}</div>
+                                    <div className="text-sm font-semibold text-foreground">
+                                        {att.student?.full_name}
+                                    </div>
+                                    <div className="mt-0.5 text-xs text-muted-foreground">
+                                        {att.student?.group?.name || '-'}
+                                    </div>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${
-                                    att.status === 'present'
-                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                        : att.status === 'late'
-                                        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                                        : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                                }`}>
+                                <span
+                                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                                        att.status === 'present'
+                                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                            : att.status === 'late'
+                                              ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                                              : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
+                                    }`}
+                                >
                                     {att.status === 'present'
                                         ? t('attendance.present', 'Bor')
                                         : att.status === 'late'
-                                        ? t('attendance.late', 'Kechikkan')
-                                        : t('attendance.absent', 'Yo\'q')}
+                                          ? t('attendance.late', 'Kechikkan')
+                                          : t('attendance.absent', "Yo'q")}
                                 </span>
                             </div>
 
                             {/* Date & Mode info */}
-                            <div className="grid grid-cols-2 gap-2 p-2 bg-muted/40 rounded-lg text-xs">
+                            <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/40 p-2 text-xs">
                                 <div>
-                                    <span className="text-[10px] text-muted-foreground block">{t('attendance.date', 'Sana')}:</span>
-                                    <span className="font-medium font-mono">{formatDate(att.date)}</span>
+                                    <span className="block text-[10px] text-muted-foreground">
+                                        {t('attendance.date', 'Sana')}:
+                                    </span>
+                                    <span className="font-mono font-medium">
+                                        {formatDate(att.date)}
+                                    </span>
                                 </div>
                                 <div>
-                                    <span className="text-[10px] text-muted-foreground block">{t('attendance.time', 'Vaqt')}:</span>
-                                    <span className="font-mono text-muted-foreground">{formatDateTime(att.scanned_at)}</span>
+                                    <span className="block text-[10px] text-muted-foreground">
+                                        {t('attendance.time', 'Vaqt')}:
+                                    </span>
+                                    <span className="font-mono text-muted-foreground">
+                                        {formatDateTime(att.scanned_at)}
+                                    </span>
                                 </div>
                             </div>
 
                             {/* Footer: Scan type & Teacher */}
-                            <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
+                            <div className="flex items-center justify-between border-t pt-2 text-xs text-muted-foreground">
                                 <div>
                                     {att.is_manual ? (
-                                        <span className="text-amber-600 dark:text-amber-400 font-medium">
-                                            ✍️ {t('attendance.manual', "Qo'lda")} {att.manual_reason ? `(${att.manual_reason})` : ''}
+                                        <span className="font-medium text-amber-600 dark:text-amber-400">
+                                            ✍️{' '}
+                                            {t('attendance.manual', "Qo'lda")}{' '}
+                                            {att.manual_reason
+                                                ? `(${att.manual_reason})`
+                                                : ''}
                                         </span>
                                     ) : (
-                                        <span className="text-blue-600 dark:text-blue-400 font-medium">
-                                            📷 {t('attendance.qr_scanned', 'Dinamik QR')}
+                                        <span className="font-medium text-blue-600 dark:text-blue-400">
+                                            📷{' '}
+                                            {t(
+                                                'attendance.qr_scanned',
+                                                'Dinamik QR',
+                                            )}
                                         </span>
                                     )}
                                 </div>
-                                <div>👨‍🏫 {att.session?.teacher?.name || att.marked_by?.name || '-'}</div>
+                                <div>
+                                    👨‍🏫{' '}
+                                    {att.session?.teacher?.name ||
+                                        att.marked_by?.name ||
+                                        '-'}
+                                </div>
                             </div>
                         </div>
                     ))
@@ -574,31 +757,57 @@ setFilterDate(value);
 
             {/* Start Session Modal */}
             <Dialog open={showSessionModal} onOpenChange={setShowSessionModal}>
-                <DialogContent className="w-[95vw] max-w-sm max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-sm overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <Tv className="w-5 h-5 text-blue-600" />
-                            <span>{t('attendance.start_session_title', 'Dars Sessiyasini Boshlash')}</span>
+                            <Tv className="h-5 w-5 text-blue-600" />
+                            <span>
+                                {t(
+                                    'attendance.start_session_title',
+                                    'Dars Sessiyasini Boshlash',
+                                )}
+                            </span>
                         </DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleStartSession} className="space-y-4 text-xs">
+                    <form
+                        onSubmit={handleStartSession}
+                        className="space-y-4 text-xs"
+                    >
                         <div>
-                            <Label htmlFor="sess_group" required>{t('attendance.group', 'Guruhni Tanlang')}</Label>
+                            <Label htmlFor="sess_group" required>
+                                {t('attendance.group', 'Guruhni Tanlang')}
+                            </Label>
                             <SearchableSelect
                                 id="sess_group"
                                 value={sessionForm.data.group_id}
-                                onChange={(val) => sessionForm.setData('group_id', val)}
-                                options={groups.map((g) => ({ value: g.id, label: g.name }))}
-                                placeholder={t('attendance.select_group', 'Guruhni tanlang')}
+                                onChange={(val) =>
+                                    sessionForm.setData('group_id', val)
+                                }
+                                options={groups.map((g) => ({
+                                    value: g.id,
+                                    label: g.name,
+                                }))}
+                                placeholder={t(
+                                    'attendance.select_group',
+                                    'Guruhni tanlang',
+                                )}
                                 className="mt-1"
                                 required
                             />
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                            <Button type="button" variant="outline" onClick={() => setShowSessionModal(false)}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowSessionModal(false)}
+                            >
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" variant="brand" disabled={sessionForm.processing}>
+                            <Button
+                                type="submit"
+                                variant="brand"
+                                disabled={sessionForm.processing}
+                            >
                                 {t('attendance.launch_qr', 'QR Doskani Ochish')}
                             </Button>
                         </div>
@@ -608,62 +817,89 @@ setFilterDate(value);
 
             {/* Group Journal & Manual Attendance Modal */}
             <Dialog open={showManualModal} onOpenChange={setShowManualModal}>
-                <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
+                <DialogContent className="flex max-h-[90vh] w-[95vw] max-w-3xl flex-col overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-blue-600" />
-                            <span>{t('attendance.group_journal_modal_title', 'Guruh Davomat Jurnali')}</span>
+                            <Users className="h-5 w-5 text-blue-600" />
+                            <span>
+                                {t(
+                                    'attendance.group_journal_modal_title',
+                                    'Guruh Davomat Jurnali',
+                                )}
+                            </span>
                         </DialogTitle>
                     </DialogHeader>
 
                     {/* Mode Tabs */}
-                    <div className="flex border-b border-gray-200 dark:border-gray-700 -mt-1 mb-3">
+                    <div className="-mt-1 mb-3 flex border-b border-gray-200 dark:border-gray-700">
                         <button
                             type="button"
                             onClick={() => setAttendanceMode('group')}
-                            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+                            className={`flex items-center gap-1.5 border-b-2 px-3 pb-2 text-xs font-semibold transition-colors ${
                                 attendanceMode === 'group'
                                     ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                         >
-                            <Users className="w-3.5 h-3.5" />
+                            <Users className="h-3.5 w-3.5" />
                             {t('attendance.group_roster', 'Guruh jurnali')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setAttendanceMode('single')}
-                            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+                            className={`flex items-center gap-1.5 border-b-2 px-3 pb-2 text-xs font-semibold transition-colors ${
                                 attendanceMode === 'single'
                                     ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                         >
-                            <UserCheck className="w-3.5 h-3.5" />
+                            <UserCheck className="h-3.5 w-3.5" />
                             {t('attendance.single_student', 'Yakka talaba')}
                         </button>
                     </div>
 
                     {attendanceMode === 'group' ? (
                         /* Group Journal Form */
-                        <form onSubmit={handleSaveGroupAttendance} className="space-y-3 text-xs flex-1 flex flex-col min-h-0">
+                        <form
+                            onSubmit={handleSaveGroupAttendance}
+                            className="flex min-h-0 flex-1 flex-col space-y-3 text-xs"
+                        >
                             {/* Group, Date, Topic row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div>
-                                    <Label htmlFor="roster_group" required className="text-xs mb-1 block">
-                                        {t('attendance.select_group', 'Guruhni tanlang')}
+                                    <Label
+                                        htmlFor="roster_group"
+                                        required
+                                        className="mb-1 block text-xs"
+                                    >
+                                        {t(
+                                            'attendance.select_group',
+                                            'Guruhni tanlang',
+                                        )}
                                     </Label>
                                     <SearchableSelect
                                         id="roster_group"
                                         value={rosterGroupId}
-                                        onChange={(val) => setRosterGroupId(val)}
-                                        options={groups.map((g) => ({ value: g.id, label: g.name }))}
-                                        placeholder={t('attendance.select_group', 'Guruhni tanlang')}
+                                        onChange={(val) =>
+                                            setRosterGroupId(val)
+                                        }
+                                        options={groups.map((g) => ({
+                                            value: g.id,
+                                            label: g.name,
+                                        }))}
+                                        placeholder={t(
+                                            'attendance.select_group',
+                                            'Guruhni tanlang',
+                                        )}
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="roster_date" required className="text-xs mb-1 block">
+                                    <Label
+                                        htmlFor="roster_date"
+                                        required
+                                        className="mb-1 block text-xs"
+                                    >
                                         {t('attendance.date', 'Sana')}
                                     </Label>
                                     <DatePicker
@@ -675,13 +911,21 @@ setFilterDate(value);
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="roster_topic" className="text-xs mb-1 block">
-                                        {t('attendance.lesson_topic', 'Dars mavzusi')}
+                                    <Label
+                                        htmlFor="roster_topic"
+                                        className="mb-1 block text-xs"
+                                    >
+                                        {t(
+                                            'attendance.lesson_topic',
+                                            'Dars mavzusi',
+                                        )}
                                     </Label>
                                     <Input
                                         id="roster_topic"
                                         value={rosterTopic}
-                                        onChange={(e) => setRosterTopic(e.target.value)}
+                                        onChange={(e) =>
+                                            setRosterTopic(e.target.value)
+                                        }
                                         placeholder="Nazariy dars..."
                                         className="h-9 text-xs"
                                     />
@@ -689,13 +933,24 @@ setFilterDate(value);
                             </div>
 
                             {/* Summary & Quick Check Controls */}
-                            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2.5 dark:border-gray-700 dark:bg-gray-800/80">
                                 <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                    {t('attendance.present_stats', '{{present}} / {{total}} ta talaba bor ({{percent}}%)', {
-                                        present: presentCount,
-                                        total: rosterList.length,
-                                        percent: rosterList.length > 0 ? Math.round((presentCount / rosterList.length) * 100) : 0,
-                                    })}
+                                    {t(
+                                        'attendance.present_stats',
+                                        '{{present}} / {{total}} ta talaba bor ({{percent}}%)',
+                                        {
+                                            present: presentCount,
+                                            total: rosterList.length,
+                                            percent:
+                                                rosterList.length > 0
+                                                    ? Math.round(
+                                                          (presentCount /
+                                                              rosterList.length) *
+                                                              100,
+                                                      )
+                                                    : 0,
+                                        },
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     <Button
@@ -703,56 +958,104 @@ setFilterDate(value);
                                         size="sm"
                                         variant="outline"
                                         onClick={handleCheckAll}
-                                        className="h-7 text-xs px-2.5 text-emerald-700 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                        className="h-7 border-emerald-300 px-2.5 text-xs text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950/40"
                                     >
-                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                                        {t('attendance.all_present', 'Barchasi bor')}
+                                        <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                                        {t(
+                                            'attendance.all_present',
+                                            'Barchasi bor',
+                                        )}
                                     </Button>
                                     <Button
                                         type="button"
                                         size="sm"
                                         variant="outline"
                                         onClick={handleUncheckAll}
-                                        className="h-7 text-xs px-2.5 text-rose-700 border-rose-300 dark:border-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                        className="h-7 border-rose-300 px-2.5 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:hover:bg-rose-950/40"
                                     >
-                                        <XCircle className="w-3.5 h-3.5 mr-1" />
-                                        {t('attendance.all_absent', 'Barchasi yo\'q')}
+                                        <XCircle className="mr-1 h-3.5 w-3.5" />
+                                        {t(
+                                            'attendance.all_absent',
+                                            "Barchasi yo'q",
+                                        )}
                                     </Button>
                                 </div>
                             </div>
 
                             {/* Roster Table */}
-                            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex-1 min-h-[220px] max-h-[360px] overflow-y-auto">
+                            <div className="max-h-[360px] min-h-[220px] flex-1 overflow-hidden overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="bg-gray-50 dark:bg-gray-700/60 sticky top-0 z-10">
+                                        <TableRow className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/60">
                                             <TableHead className="w-10 text-center">
                                                 <input
                                                     type="checkbox"
-                                                    checked={rosterList.length > 0 && rosterList.every((s) => s.is_attended)}
-                                                    onChange={(e) => (e.target.checked ? handleCheckAll() : handleUncheckAll())}
-                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                    title={t('attendance.check_all', 'Barchasini belgilash')}
+                                                    checked={
+                                                        rosterList.length > 0 &&
+                                                        rosterList.every(
+                                                            (s) =>
+                                                                s.is_attended,
+                                                        )
+                                                    }
+                                                    onChange={(e) =>
+                                                        e.target.checked
+                                                            ? handleCheckAll()
+                                                            : handleUncheckAll()
+                                                    }
+                                                    className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    title={t(
+                                                        'attendance.check_all',
+                                                        'Barchasini belgilash',
+                                                    )}
                                                 />
                                             </TableHead>
-                                            <TableHead className="w-8 font-semibold">№</TableHead>
-                                            <TableHead className="font-semibold">{t('attendance.student', 'Talaba')}</TableHead>
-                                            <TableHead className="font-semibold w-24">{t('attendance.status', 'Holat')}</TableHead>
-                                            <TableHead className="font-semibold">{t('attendance.notes_placeholder', 'Izoh (ixtiyoriy)')}</TableHead>
+                                            <TableHead className="w-8 font-semibold">
+                                                №
+                                            </TableHead>
+                                            <TableHead className="font-semibold">
+                                                {t(
+                                                    'attendance.student',
+                                                    'Talaba',
+                                                )}
+                                            </TableHead>
+                                            <TableHead className="w-24 font-semibold">
+                                                {t(
+                                                    'attendance.status',
+                                                    'Holat',
+                                                )}
+                                            </TableHead>
+                                            <TableHead className="font-semibold">
+                                                {t(
+                                                    'attendance.notes_placeholder',
+                                                    'Izoh (ixtiyoriy)',
+                                                )}
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {isLoadingRoster ? (
                                             <TableRow>
-                                                <TableCell colSpan={5} className="p-8 text-center text-gray-400">
-                                                    <Loader2 className="w-5 h-5 mx-auto animate-spin mb-1 text-blue-600" />
-                                                    {t('attendance.loading_roster', 'Guruh ro\'yxati yuklanmoqda...')}
+                                                <TableCell
+                                                    colSpan={5}
+                                                    className="p-8 text-center text-gray-400"
+                                                >
+                                                    <Loader2 className="mx-auto mb-1 h-5 w-5 animate-spin text-blue-600" />
+                                                    {t(
+                                                        'attendance.loading_roster',
+                                                        "Guruh ro'yxati yuklanmoqda...",
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ) : rosterList.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={5} className="p-8 text-center text-gray-400">
-                                                    {t('attendance.no_students_in_group', 'Ushbu guruhda faol talabalar topilmadi')}
+                                                <TableCell
+                                                    colSpan={5}
+                                                    className="p-8 text-center text-gray-400"
+                                                >
+                                                    {t(
+                                                        'attendance.no_students_in_group',
+                                                        'Ushbu guruhda faol talabalar topilmadi',
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
@@ -768,21 +1071,37 @@ setFilterDate(value);
                                                     <TableCell className="text-center">
                                                         <input
                                                             type="checkbox"
-                                                            checked={st.is_attended}
-                                                            onChange={() => handleToggleStudent(st.id)}
-                                                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                            checked={
+                                                                st.is_attended
+                                                            }
+                                                            onChange={() =>
+                                                                handleToggleStudent(
+                                                                    st.id,
+                                                                )
+                                                            }
+                                                            className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                         />
                                                     </TableCell>
-                                                    <TableCell className="text-gray-400 font-mono">{idx + 1}</TableCell>
+                                                    <TableCell className="font-mono text-gray-400">
+                                                        {idx + 1}
+                                                    </TableCell>
                                                     <TableCell>
-                                                        <p className="font-semibold text-gray-900 dark:text-white">{st.full_name}</p>
-                                                        <p className="text-[11px] text-gray-500">{st.phone}</p>
+                                                        <p className="font-semibold text-gray-900 dark:text-white">
+                                                            {st.full_name}
+                                                        </p>
+                                                        <p className="text-[11px] text-gray-500">
+                                                            {st.phone}
+                                                        </p>
                                                     </TableCell>
                                                     <TableCell>
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleToggleStudent(st.id)}
-                                                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-transform active:scale-95 ${
+                                                            onClick={() =>
+                                                                handleToggleStudent(
+                                                                    st.id,
+                                                                )
+                                                            }
+                                                            className={`flex cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-transform active:scale-95 ${
                                                                 st.is_attended
                                                                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200'
                                                                     : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200'
@@ -790,22 +1109,40 @@ setFilterDate(value);
                                                         >
                                                             {st.is_attended ? (
                                                                 <>
-                                                                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                                                    {t('attendance.present', 'Bor')}
+                                                                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                                                                    {t(
+                                                                        'attendance.present',
+                                                                        'Bor',
+                                                                    )}
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                    <XCircle className="w-3 h-3 text-rose-600" />
-                                                                    {t('attendance.absent', 'Yo\'q')}
+                                                                    <XCircle className="h-3 w-3 text-rose-600" />
+                                                                    {t(
+                                                                        'attendance.absent',
+                                                                        "Yo'q",
+                                                                    )}
                                                                 </>
                                                             )}
                                                         </button>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Input
-                                                            value={st.manual_reason || ''}
-                                                            onChange={(e) => handleUpdateReason(st.id, e.target.value)}
-                                                            placeholder={t('attendance.notes_placeholder', 'Izoh...')}
+                                                            value={
+                                                                st.manual_reason ||
+                                                                ''
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleUpdateReason(
+                                                                    st.id,
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            placeholder={t(
+                                                                'attendance.notes_placeholder',
+                                                                'Izoh...',
+                                                            )}
                                                             className="h-7 text-xs"
                                                         />
                                                     </TableCell>
@@ -817,20 +1154,38 @@ setFilterDate(value);
                             </div>
 
                             {/* Actions */}
-                            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                <Button type="button" variant="outline" onClick={() => setShowManualModal(false)}>
+                            <div className="flex justify-end gap-2 border-t border-gray-100 pt-2 dark:border-gray-700">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowManualModal(false)}
+                                >
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" variant="brand" disabled={isSubmittingRoster || rosterList.length === 0}>
+                                <Button
+                                    type="submit"
+                                    variant="brand"
+                                    disabled={
+                                        isSubmittingRoster ||
+                                        rosterList.length === 0
+                                    }
+                                >
                                     {isSubmittingRoster ? (
                                         <>
-                                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                                            {t('common.saving', 'Saqlanmoqda...')}
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                            {t(
+                                                'common.saving',
+                                                'Saqlanmoqda...',
+                                            )}
                                         </>
                                     ) : (
                                         <>
-                                            <Check className="w-3.5 h-3.5 mr-1.5" />
-                                            {t('attendance.save_roster', 'Davomatni Saqlash')} ({presentCount})
+                                            <Check className="mr-1.5 h-3.5 w-3.5" />
+                                            {t(
+                                                'attendance.save_roster',
+                                                'Davomatni Saqlash',
+                                            )}{' '}
+                                            ({presentCount})
                                         </>
                                     )}
                                 </Button>
@@ -838,20 +1193,33 @@ setFilterDate(value);
                         </form>
                     ) : (
                         /* Single Student Manual Form */
-                        <form onSubmit={handleManualSubmit} className="space-y-4 text-xs">
+                        <form
+                            onSubmit={handleManualSubmit}
+                            className="space-y-4 text-xs"
+                        >
                             <div>
-                                <Label htmlFor="man_student" required>{t('attendance.student', 'Talaba')}</Label>
+                                <Label htmlFor="man_student" required>
+                                    {t('attendance.student', 'Talaba')}
+                                </Label>
                                 <SearchableSelect
                                     id="man_student"
                                     value={manualForm.data.student_id}
-                                    onChange={(val) => manualForm.setData('student_id', val)}
+                                    onChange={(val) =>
+                                        manualForm.setData('student_id', val)
+                                    }
                                     options={students.map((st) => ({
                                         value: st.id,
                                         label: st.full_name,
                                         sublabel: st.phone,
                                     }))}
-                                    placeholder={t('attendance.select_student', 'Talabani tanlang')}
-                                    searchPlaceholder={t('common.search_student', 'Talaba ismi yoki telefon...')}
+                                    placeholder={t(
+                                        'attendance.select_student',
+                                        'Talabani tanlang',
+                                    )}
+                                    searchPlaceholder={t(
+                                        'common.search_student',
+                                        'Talaba ismi yoki telefon...',
+                                    )}
                                     allowClear
                                     className="mt-1"
                                     required
@@ -860,25 +1228,45 @@ setFilterDate(value);
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="man_date" required>{t('attendance.date', 'Sana')}</Label>
+                                    <Label htmlFor="man_date" required>
+                                        {t('attendance.date', 'Sana')}
+                                    </Label>
                                     <DatePicker
                                         id="man_date"
                                         value={manualForm.data.date}
-                                        onChange={(val) => manualForm.setData('date', val)}
+                                        onChange={(val) =>
+                                            manualForm.setData('date', val)
+                                        }
                                         required
                                         className="mt-1 h-9 text-xs"
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="man_status" required>{t('attendance.status', 'Holat')}</Label>
+                                    <Label htmlFor="man_status" required>
+                                        {t('attendance.status', 'Holat')}
+                                    </Label>
                                     <SearchableSelect
                                         id="man_status"
                                         value={manualForm.data.status}
-                                        onChange={(val) => manualForm.setData('status', val as any)}
+                                        onChange={(val) =>
+                                            manualForm.setData(
+                                                'status',
+                                                val as any,
+                                            )
+                                        }
                                         options={[
-                                            { value: 'present', label: '✅ Darsda Bor' },
-                                            { value: 'absent', label: '❌ Kelmagan' },
-                                            { value: 'late', label: '🟡 Kechikkan' },
+                                            {
+                                                value: 'present',
+                                                label: '✅ Darsda Bor',
+                                            },
+                                            {
+                                                value: 'absent',
+                                                label: '❌ Kelmagan',
+                                            },
+                                            {
+                                                value: 'late',
+                                                label: '🟡 Kechikkan',
+                                            },
                                         ]}
                                         className="mt-1"
                                     />
@@ -886,11 +1274,21 @@ setFilterDate(value);
                             </div>
 
                             <div>
-                                <Label htmlFor="man_reason" required>{t('attendance.manual_reason', 'Qo\'lda belgilash sababi')}</Label>
+                                <Label htmlFor="man_reason" required>
+                                    {t(
+                                        'attendance.manual_reason',
+                                        "Qo'lda belgilash sababi",
+                                    )}
+                                </Label>
                                 <Input
                                     id="man_reason"
                                     value={manualForm.data.manual_reason}
-                                    onChange={(e) => manualForm.setData('manual_reason', e.target.value)}
+                                    onChange={(e) =>
+                                        manualForm.setData(
+                                            'manual_reason',
+                                            e.target.value,
+                                        )
+                                    }
                                     placeholder="Smartfoni quvvati tugagan / Telefonsiz kelgan"
                                     required
                                     className="mt-1"
@@ -898,10 +1296,18 @@ setFilterDate(value);
                             </div>
 
                             <div className="flex justify-end gap-2 pt-2">
-                                <Button type="button" variant="outline" onClick={() => setShowManualModal(false)}>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowManualModal(false)}
+                                >
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" variant="brand" disabled={manualForm.processing}>
+                                <Button
+                                    type="submit"
+                                    variant="brand"
+                                    disabled={manualForm.processing}
+                                >
                                     {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>

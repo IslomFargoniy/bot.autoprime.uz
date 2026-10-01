@@ -20,7 +20,6 @@ import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 import TMALayout from '@/layouts/tma-layout';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
 
-
 interface StudentProps {
     student: {
         id: number;
@@ -40,7 +39,11 @@ interface StudentProps {
         has_theory: boolean;
         has_driving: boolean;
         has_lms: boolean;
-        contract_type?: { name: string; category: string; min_theory_payment_percent: number };
+        contract_type?: {
+            name: string;
+            category: string;
+            min_theory_payment_percent: number;
+        };
     } | null;
     group: {
         id: number;
@@ -93,8 +96,14 @@ export default function MiniApp({
     attendances = [],
 }: StudentProps) {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'lms' | 'driving' | 'tests'>('overview');
-    const [scanStatus, setScanStatus] = useState<{ loading: boolean; message?: string; success?: boolean } | null>(null);
+    const [activeTab, setActiveTab] = useState<
+        'overview' | 'schedule' | 'lms' | 'driving' | 'tests'
+    >('overview');
+    const [scanStatus, setScanStatus] = useState<{
+        loading: boolean;
+        message?: string;
+        success?: boolean;
+    } | null>(null);
     const [manualToken, setManualToken] = useState('');
     const [showManualModal, setShowManualModal] = useState(false);
     const hasRequestedIdentity = useRef(false);
@@ -104,7 +113,11 @@ export default function MiniApp({
     useEffect(() => {
         const headers = telegramInitDataHeaders();
 
-        if (student || hasRequestedIdentity.current || !headers['X-Telegram-Init-Data']) {
+        if (
+            student ||
+            hasRequestedIdentity.current ||
+            !headers['X-Telegram-Init-Data']
+        ) {
             return;
         }
 
@@ -114,18 +127,24 @@ export default function MiniApp({
 
     const handleQrScan = () => {
         const tgWindow = window as any;
-        const tg = typeof window !== 'undefined' ? tgWindow.Telegram?.WebApp : null;
+        const tg =
+            typeof window !== 'undefined' ? tgWindow.Telegram?.WebApp : null;
         const isQrSupported = Boolean(
             tg &&
             typeof tg.isVersionAtLeast === 'function' &&
             tg.isVersionAtLeast('6.4') &&
-            typeof tg.showScanQrPopup === 'function'
+            typeof tg.showScanQrPopup === 'function',
         );
 
         if (isQrSupported) {
             try {
                 tg.showScanQrPopup(
-                    { text: t('tma.scan_prompt', 'Doskadagi dars QR kodini skanerlang') },
+                    {
+                        text: t(
+                            'tma.scan_prompt',
+                            'Doskadagi dars QR kodini skanerlang',
+                        ),
+                    },
                     (scannedText: string) => {
                         if (scannedText) {
                             try {
@@ -140,7 +159,7 @@ export default function MiniApp({
                         }
 
                         return false;
-                    }
+                    },
                 );
 
                 return;
@@ -161,7 +180,7 @@ export default function MiniApp({
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     'X-Telegram-Init-Data': tgInitData,
                 },
                 body: JSON.stringify({
@@ -173,12 +192,32 @@ export default function MiniApp({
             const data = await res.json();
 
             if (res.ok && data.success) {
-                setScanStatus({ loading: false, success: true, message: data.message });
+                setScanStatus({
+                    loading: false,
+                    success: true,
+                    message: data.message,
+                });
             } else {
-                setScanStatus({ loading: false, success: false, message: data.message || t('tma.scan_error', 'QR kod tekshirishda xatolik yuz berdi.') });
+                setScanStatus({
+                    loading: false,
+                    success: false,
+                    message:
+                        data.message ||
+                        t(
+                            'tma.scan_error',
+                            'QR kod tekshirishda xatolik yuz berdi.',
+                        ),
+                });
             }
         } catch {
-            setScanStatus({ loading: false, success: false, message: t('tma.network_error', 'Server bilan bog\'lanishda xatolik yuz berdi.') });
+            setScanStatus({
+                loading: false,
+                success: false,
+                message: t(
+                    'tma.network_error',
+                    "Server bilan bog'lanishda xatolik yuz berdi.",
+                ),
+            });
         }
     };
 
@@ -197,27 +236,30 @@ export default function MiniApp({
 
     if (!student) {
         return (
-            <TMALayout title={t('tma.dashboard_title', 'O\'quvchi Kabineti')}>
-                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 py-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm mt-4">
-                    <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 ring-8 ring-blue-500/5">
-                        <GraduationCap className="w-8 h-8" />
+            <TMALayout title={t('tma.dashboard_title', "O'quvchi Kabineti")}>
+                <div className="mt-4 flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-gray-100 bg-white px-4 py-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-8 ring-blue-500/5 dark:bg-blue-900/30 dark:text-blue-400">
+                        <GraduationCap className="h-8 w-8" />
                     </div>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                        {t('tma.auth_required_title', 'Faqat O\'quvchilar Uchun')}
+                    <h2 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+                        {t(
+                            'tma.auth_required_title',
+                            "Faqat O'quvchilar Uchun",
+                        )}
                     </h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mb-6 leading-relaxed">
+                    <p className="mb-6 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
                         {t(
                             'tma.auth_required_desc',
-                            'Ushbu tizim faqat AutoPrime avtomaktabi o\'quvchilari uchun mo\'ljallangan. Iltimos, Telegram boti orqali shaxsiy kabinetingizga kiring.'
+                            "Ushbu tizim faqat AutoPrime avtomaktabi o'quvchilari uchun mo'ljallangan. Iltimos, Telegram boti orqali shaxsiy kabinetingizga kiring.",
                         )}
                     </p>
                     <a
                         href="https://t.me/autoprimeuz_bot"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
                     >
-                        <Phone className="w-4 h-4" />
+                        <Phone className="h-4 w-4" />
                         {t('tma.open_telegram_bot', 'Telegram Botni Ochish')}
                     </a>
                 </div>
@@ -226,25 +268,34 @@ export default function MiniApp({
     }
 
     return (
-        <TMALayout title={t('tma.dashboard_title', 'O\'quvchi Kabineti')}>
+        <TMALayout title={t('tma.dashboard_title', "O'quvchi Kabineti")}>
             {/* Top Student Header Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 mb-4">
+            <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
-                            {student?.full_name ? student.full_name.charAt(0) : <User className="w-6 h-6" />}
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-lg font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            {student?.full_name ? (
+                                student.full_name.charAt(0)
+                            ) : (
+                                <User className="h-6 w-6" />
+                            )}
                         </div>
                         <div>
-                            <h2 className="font-bold text-base text-gray-900 dark:text-white leading-tight">
-                                {student?.full_name || t('tma.guest_student', 'Mehmon O\'quvchi')}
+                            <h2 className="text-base leading-tight font-bold text-gray-900 dark:text-white">
+                                {student?.full_name ||
+                                    t('tma.guest_student', "Mehmon O'quvchi")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                {group?.name ? `${group.name} (${group.category || 'B'})` : (student?.branch?.name || 'AutoPrime LMS')}
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                {group?.name
+                                    ? `${group.name} (${group.category || 'B'})`
+                                    : student?.branch?.name || 'AutoPrime LMS'}
                             </p>
                         </div>
                     </div>
                     {contract && (
-                        <div className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${getBadgeStyle(contract.payment_badge_color)}`}>
+                        <div
+                            className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${getBadgeStyle(contract.payment_badge_color)}`}
+                        >
                             {contract.payment_percentage}%
                         </div>
                     )}
@@ -252,16 +303,20 @@ export default function MiniApp({
 
                 {/* Financial Summary Card */}
                 {contract && (
-                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
-                            <span className="text-gray-500 dark:text-gray-400 block">{t('contracts.paid_amount', 'To\'langan')}</span>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5 block">
+                    <div className="mt-4 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 text-xs dark:border-gray-700/60">
+                        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-700/40">
+                            <span className="block text-gray-500 dark:text-gray-400">
+                                {t('contracts.paid_amount', "To'langan")}
+                            </span>
+                            <span className="mt-0.5 block text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                 {formatMoney(contract.paid_amount)}
                             </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
-                            <span className="text-gray-500 dark:text-gray-400 block">{t('contracts.debt_amount', 'Qoldiq qarz')}</span>
-                            <span className="font-bold text-red-500 text-sm mt-0.5 block">
+                        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-700/40">
+                            <span className="block text-gray-500 dark:text-gray-400">
+                                {t('contracts.debt_amount', 'Qoldiq qarz')}
+                            </span>
+                            <span className="mt-0.5 block text-sm font-bold text-red-500">
                                 {formatMoney(contract.debt_amount)}
                             </span>
                         </div>
@@ -272,10 +327,13 @@ export default function MiniApp({
                 <div className="mt-4">
                     <button
                         onClick={handleQrScan}
-                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition-colors text-sm"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 active:bg-blue-800"
                     >
-                        <QrCode className="w-5 h-5" />
-                        {t('tma.scan_attendance_button', 'Dinamik QR Davomatni Skanerlash')}
+                        <QrCode className="h-5 w-5" />
+                        {t(
+                            'tma.scan_attendance_button',
+                            'Dinamik QR Davomatni Skanerlash',
+                        )}
                     </button>
                 </div>
             </div>
@@ -283,19 +341,23 @@ export default function MiniApp({
             {/* Scan Status Toast / Alert */}
             {scanStatus && (
                 <div
-                    className={`p-3.5 rounded-xl mb-4 text-xs flex items-center justify-between border ${
+                    className={`mb-4 flex items-center justify-between rounded-xl border p-3.5 text-xs ${
                         scanStatus.success
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                            : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                            : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300'
                     }`}
                 >
                     <div className="flex items-center gap-2">
-                        {scanStatus.success ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
+                        {scanStatus.success ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        ) : (
+                            <XCircle className="h-4 w-4 shrink-0" />
+                        )}
                         <span>{scanStatus.message}</span>
                     </div>
                     <button
                         onClick={() => setScanStatus(null)}
-                        className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+                        className="ml-2 text-xs font-bold opacity-70 hover:opacity-100"
                     >
                         ✕
                     </button>
@@ -303,12 +365,12 @@ export default function MiniApp({
             )}
 
             {/* Tabs Navigation */}
-            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-4 text-xs font-medium">
+            <div className="mb-4 flex rounded-xl bg-gray-100 p-1 text-xs font-medium dark:bg-gray-800">
                 <button
                     onClick={() => setActiveTab('overview')}
-                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                    className={`flex-1 rounded-lg py-2 text-center transition-all ${
                         activeTab === 'overview'
-                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -316,9 +378,9 @@ export default function MiniApp({
                 </button>
                 <button
                     onClick={() => setActiveTab('schedule')}
-                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                    className={`flex-1 rounded-lg py-2 text-center transition-all ${
                         activeTab === 'schedule'
-                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -326,9 +388,9 @@ export default function MiniApp({
                 </button>
                 <button
                     onClick={() => setActiveTab('lms')}
-                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                    className={`flex-1 rounded-lg py-2 text-center transition-all ${
                         activeTab === 'lms'
-                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -336,9 +398,9 @@ export default function MiniApp({
                 </button>
                 <button
                     onClick={() => setActiveTab('driving')}
-                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                    className={`flex-1 rounded-lg py-2 text-center transition-all ${
                         activeTab === 'driving'
-                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -346,9 +408,9 @@ export default function MiniApp({
                 </button>
                 <button
                     onClick={() => setActiveTab('tests')}
-                    className={`flex-1 py-2 rounded-lg transition-all text-center ${
+                    className={`flex-1 rounded-lg py-2 text-center transition-all ${
                         activeTab === 'tests'
-                            ? 'bg-white dark:bg-gray-700 shadow-xs text-blue-600 dark:text-white font-bold'
+                            ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
                             : 'text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -361,19 +423,35 @@ export default function MiniApp({
                 <div className="space-y-4">
                     {/* Contract Details */}
                     {contract && (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-xs space-y-2.5">
-                            <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                        <div className="space-y-2.5 rounded-2xl border border-gray-100 bg-white p-4 text-xs shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-2 dark:border-gray-700">
                                 <span className="font-semibold text-gray-700 dark:text-gray-300">
-                                    {t('contracts.contract_number', 'Shartnoma')}: #{contract.contract_number}
+                                    {t(
+                                        'contracts.contract_number',
+                                        'Shartnoma',
+                                    )}
+                                    : #{contract.contract_number}
                                 </span>
-                                <span className="text-gray-500">{contract.contract_type?.name}</span>
+                                <span className="text-gray-500">
+                                    {contract.contract_type?.name}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">{t('contracts.modules', 'Modullar')}:</span>
+                                <span className="text-gray-500">
+                                    {t('contracts.modules', 'Modullar')}:
+                                </span>
                                 <span className="font-medium text-gray-800 dark:text-gray-200">
                                     {[
-                                        contract.has_theory && t('contracts.has_theory', 'Nazariya'),
-                                        contract.has_driving && t('contracts.has_driving', 'Amaliy'),
+                                        contract.has_theory &&
+                                            t(
+                                                'contracts.has_theory',
+                                                'Nazariya',
+                                            ),
+                                        contract.has_driving &&
+                                            t(
+                                                'contracts.has_driving',
+                                                'Amaliy',
+                                            ),
                                         contract.has_lms && 'LMS Video',
                                     ]
                                         .filter(Boolean)
@@ -381,30 +459,53 @@ export default function MiniApp({
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">{t('contracts.total_amount', 'Jami to\'lov')}:</span>
-                                <span className="font-semibold">{formatMoney(contract.total_amount)}</span>
+                                <span className="text-gray-500">
+                                    {t('contracts.total_amount', "Jami to'lov")}
+                                    :
+                                </span>
+                                <span className="font-semibold">
+                                    {formatMoney(contract.total_amount)}
+                                </span>
                             </div>
                         </div>
                     )}
 
                     {/* Recent Attendances */}
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <h3 className="mb-3 flex items-center gap-1.5 text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
                             {t('tma.recent_attendances', 'Oxirgi Davomatlar')}
                         </h3>
                         {attendances.length === 0 ? (
-                            <p className="text-xs text-gray-400 py-2 text-center">{t('tma.no_attendances', 'Hozircha davomat yozuvlari mavjud emas')}</p>
+                            <p className="py-2 text-center text-xs text-gray-400">
+                                {t(
+                                    'tma.no_attendances',
+                                    'Hozircha davomat yozuvlari mavjud emas',
+                                )}
+                            </p>
                         ) : (
                             <div className="space-y-2">
                                 {attendances.map((att) => (
-                                    <div key={att.id} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
+                                    <div
+                                        key={att.id}
+                                        className="flex items-center justify-between border-b border-gray-50 py-1.5 text-xs last:border-0 dark:border-gray-700/50"
+                                    >
                                         <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                            <span className="text-gray-700 dark:text-gray-300 font-medium font-mono">{formatDate(att.date)}</span>
+                                            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                            <span className="font-mono font-medium text-gray-700 dark:text-gray-300">
+                                                {formatDate(att.date)}
+                                            </span>
                                         </div>
                                         <span className="text-xs text-gray-400">
-                                            {att.is_manual ? t('attendance.manual', 'Qo\'lda belgilangan') : t('attendance.qr_scanned', 'QR skanerlangan')}
+                                            {att.is_manual
+                                                ? t(
+                                                      'attendance.manual',
+                                                      "Qo'lda belgilangan",
+                                                  )
+                                                : t(
+                                                      'attendance.qr_scanned',
+                                                      'QR skanerlangan',
+                                                  )}
                                         </span>
                                     </div>
                                 ))}
@@ -417,40 +518,65 @@ export default function MiniApp({
             {/* Tab: Schedule */}
             {activeTab === 'schedule' && (
                 <div className="space-y-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-blue-600" />
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+                            <Calendar className="h-4 w-4 text-blue-600" />
                             {group?.name || t('groups.title', 'Dars Jadvali')}
                         </h3>
                         {group ? (
                             <div className="space-y-3 text-xs">
                                 <div className="flex items-start gap-2.5">
-                                    <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                                    <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                                     <div>
-                                        <span className="text-gray-500 block">{t('groups.time', 'Dars vaqti')}:</span>
+                                        <span className="block text-gray-500">
+                                            {t('groups.time', 'Dars vaqti')}:
+                                        </span>
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">
-                                            {group.start_time || '09:00'} - {group.end_time || '11:00'}
+                                            {group.start_time || '09:00'} -{' '}
+                                            {group.end_time || '11:00'}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2.5">
-                                    <MapPin className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                                     <div>
-                                        <span className="text-gray-500 block">{t('groups.room', 'Auditoriya / Xona')}:</span>
+                                        <span className="block text-gray-500">
+                                            {t(
+                                                'groups.room',
+                                                'Auditoriya / Xona',
+                                            )}
+                                            :
+                                        </span>
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">
-                                            {group.room || t('groups.main_room', 'Asosiy o\'quv zali')}
+                                            {group.room ||
+                                                t(
+                                                    'groups.main_room',
+                                                    "Asosiy o'quv zali",
+                                                )}
                                         </span>
                                     </div>
                                 </div>
                                 {group.teacher && (
-                                    <div className="flex items-start gap-2.5 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                        <GraduationCap className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                                    <div className="flex items-start gap-2.5 border-t border-gray-100 pt-2 dark:border-gray-700">
+                                        <GraduationCap className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                                         <div>
-                                            <span className="text-gray-500 block">{t('groups.teacher', 'O\'qituvchi')}:</span>
-                                            <span className="font-semibold text-gray-800 dark:text-gray-200 block">{group.teacher.name}</span>
+                                            <span className="block text-gray-500">
+                                                {t(
+                                                    'groups.teacher',
+                                                    "O'qituvchi",
+                                                )}
+                                                :
+                                            </span>
+                                            <span className="block font-semibold text-gray-800 dark:text-gray-200">
+                                                {group.teacher.name}
+                                            </span>
                                             {group.teacher.phone && (
-                                                <a href={`tel:${group.teacher.phone}`} className="text-blue-600 dark:text-blue-400 text-xs flex items-center gap-1 mt-0.5">
-                                                    <Phone className="w-3 h-3" /> {group.teacher.phone}
+                                                <a
+                                                    href={`tel:${group.teacher.phone}`}
+                                                    className="mt-0.5 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400"
+                                                >
+                                                    <Phone className="h-3 w-3" />{' '}
+                                                    {group.teacher.phone}
                                                 </a>
                                             )}
                                         </div>
@@ -458,7 +584,12 @@ export default function MiniApp({
                                 )}
                             </div>
                         ) : (
-                            <p className="text-xs text-gray-400 py-3 text-center">{t('groups.not_assigned', 'Siz hali guruhga biriktirilmagansiz.')}</p>
+                            <p className="py-3 text-center text-xs text-gray-400">
+                                {t(
+                                    'groups.not_assigned',
+                                    'Siz hali guruhga biriktirilmagansiz.',
+                                )}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -468,52 +599,75 @@ export default function MiniApp({
             {activeTab === 'lms' && (
                 <div className="space-y-3">
                     {topics.length === 0 ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center text-xs text-gray-400 shadow-sm border border-gray-100 dark:border-gray-700">
-                            {t('lms.no_lessons_yet', 'Ushbu toifa bo\'yicha video darsliklar tez kunda yuklanadi.')}
+                        <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center text-xs text-gray-400 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                            {t(
+                                'lms.no_lessons_yet',
+                                "Ushbu toifa bo'yicha video darsliklar tez kunda yuklanadi.",
+                            )}
                         </div>
                     ) : (
                         topics.map((topic, idx) => (
-                            <div key={topic.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <div
+                                key={topic.id}
+                                className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                            >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-start gap-2.5">
-                                        <span className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center shrink-0">
+                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                             {topic.order_number || idx + 1}
                                         </span>
                                         <div>
-                                            <h4 className="font-semibold text-xs text-gray-900 dark:text-white">{topic.title}</h4>
-                                            {topic.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{topic.description}</p>}
+                                            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">
+                                                {topic.title}
+                                            </h4>
+                                            {topic.description && (
+                                                <p className="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                                    {topic.description}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     {topic.duration_minutes && (
-                                        <span className="text-xs text-gray-400 shrink-0 flex items-center gap-1">
-                                            <Clock className="w-3 h-3" /> {topic.duration_minutes}m
+                                        <span className="flex shrink-0 items-center gap-1 text-xs text-gray-400">
+                                            <Clock className="h-3 w-3" />{' '}
+                                            {topic.duration_minutes}m
                                         </span>
                                     )}
                                 </div>
 
-                                <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700/60 flex items-center gap-2">
+                                <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-2.5 dark:border-gray-700/60">
                                     {topic.video_url && (
                                         <a
                                             href={topic.video_url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-blue-100"
+                                            className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
                                         >
-                                            <Play className="w-3.5 h-3.5 fill-current" />
-                                            {t('lms.watch_video', 'Videoni ko\'rish')}
+                                            <Play className="h-3.5 w-3.5 fill-current" />
+                                            {t(
+                                                'lms.watch_video',
+                                                "Videoni ko'rish",
+                                            )}
                                         </a>
                                     )}
-                                    {topic.lesson_materials && topic.lesson_materials.length > 0 && (
-                                        <a
-                                            href={topic.lesson_materials[0].file_url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                                        >
-                                            <Download className="w-3.5 h-3.5" />
-                                            {t('lms.download_pdf', 'PDF Material')}
-                                        </a>
-                                    )}
+                                    {topic.lesson_materials &&
+                                        topic.lesson_materials.length > 0 && (
+                                            <a
+                                                href={
+                                                    topic.lesson_materials[0]
+                                                        .file_url
+                                                }
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                            >
+                                                <Download className="h-3.5 w-3.5" />
+                                                {t(
+                                                    'lms.download_pdf',
+                                                    'PDF Material',
+                                                )}
+                                            </a>
+                                        )}
                                 </div>
                             </div>
                         ))
@@ -525,39 +679,57 @@ export default function MiniApp({
             {activeTab === 'driving' && (
                 <div className="space-y-3">
                     {drivings.length === 0 ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center text-xs text-gray-400 shadow-sm border border-gray-100 dark:border-gray-700">
-                            {t('drivings.no_drivings_yet', 'Hozircha amaliy haydash mashg\'ulotlari rejalashtirilmagan.')}
+                        <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center text-xs text-gray-400 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                            {t(
+                                'drivings.no_drivings_yet',
+                                "Hozircha amaliy haydash mashg'ulotlari rejalashtirilmagan.",
+                            )}
                         </div>
                     ) : (
                         drivings.map((drv) => (
-                            <div key={drv.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-xs space-y-2">
+                            <div
+                                key={drv.id}
+                                className="space-y-2 rounded-2xl border border-gray-100 bg-white p-4 text-xs shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                            >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Car className="w-4 h-4 text-blue-600" />
-                                        <span className="font-semibold text-gray-800 dark:text-gray-200 font-mono">
+                                        <Car className="h-4 w-4 text-blue-600" />
+                                        <span className="font-mono font-semibold text-gray-800 dark:text-gray-200">
                                             {formatDateTime(drv.start_time)}
                                         </span>
                                     </div>
                                     <span
-                                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                                             drv.status === 'completed'
                                                 ? 'bg-emerald-100 text-emerald-700'
                                                 : drv.status === 'scheduled'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-gray-100 text-gray-600'
+                                                  ? 'bg-blue-100 text-blue-700'
+                                                  : 'bg-gray-100 text-gray-600'
                                         }`}
                                     >
-                                        {drv.status === 'completed' ? t('drivings.status_completed', 'O\'tildi') : t('drivings.status_scheduled', 'Rejalashtirilgan')}
+                                        {drv.status === 'completed'
+                                            ? t(
+                                                  'drivings.status_completed',
+                                                  "O'tildi",
+                                              )
+                                            : t(
+                                                  'drivings.status_scheduled',
+                                                  'Rejalashtirilgan',
+                                              )}
                                     </span>
                                 </div>
                                 {drv.instructor && (
                                     <div className="text-gray-500">
-                                        👨‍🏫 {drv.instructor.name} {drv.vehicle ? `(${drv.vehicle.model} - ${drv.vehicle.plate_number})` : ''}
+                                        👨‍🏫 {drv.instructor.name}{' '}
+                                        {drv.vehicle
+                                            ? `(${drv.vehicle.model} - ${drv.vehicle.plate_number})`
+                                            : ''}
                                     </div>
                                 )}
                                 {drv.autodrome && (
-                                    <div className="text-gray-400 flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" /> {drv.autodrome.name}
+                                    <div className="flex items-center gap-1 text-gray-400">
+                                        <MapPin className="h-3 w-3" />{' '}
+                                        {drv.autodrome.name}
                                     </div>
                                 )}
                             </div>
@@ -575,25 +747,31 @@ export default function MiniApp({
 
             {/* Manual QR Input Modal (Fallback for desktop/regular browser) */}
             {showManualModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 max-w-sm w-full shadow-xl border border-gray-100 dark:border-gray-700">
-                        <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-2">
-                            {t('tma.manual_scan_title', 'QR Kod Skaneri (Veb Rejim)')}
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-5 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <h3 className="mb-2 text-sm font-bold text-gray-900 dark:text-white">
+                            {t(
+                                'tma.manual_scan_title',
+                                'QR Kod Skaneri (Veb Rejim)',
+                            )}
                         </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                            {t('tma.manual_scan_desc', 'Doskadagi dars sessiyasi QR kodi tokenini kiriting yoki nusxalang:')}
+                        <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+                            {t(
+                                'tma.manual_scan_desc',
+                                'Doskadagi dars sessiyasi QR kodi tokenini kiriting yoki nusxalang:',
+                            )}
                         </p>
                         <input
                             type="text"
                             value={manualToken}
                             onChange={(e) => setManualToken(e.target.value)}
                             placeholder="SESSION-..."
-                            className="w-full px-3 py-2 text-xs border rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="mb-4 w-full rounded-xl border border-gray-300 px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setShowManualModal(false)}
-                                className="px-3 py-2 text-xs rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                className="rounded-xl bg-gray-100 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                             >
                                 {t('common.cancel', 'Bekor qilish')}
                             </button>
@@ -605,7 +783,7 @@ export default function MiniApp({
                                     }
                                 }}
                                 disabled={!manualToken.trim()}
-                                className="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                             >
                                 {t('tma.submit_scan', 'Yuborish')}
                             </button>

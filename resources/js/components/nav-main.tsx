@@ -31,13 +31,16 @@ export function NavMain({ items, groups }: NavMainProps) {
         <div className="space-y-1">
             {effectiveGroups.map((group, groupIdx) => {
                 if (!group.items || group.items.length === 0) {
-return null;
-}
+                    return null;
+                }
 
                 return (
-                    <SidebarGroup key={group.title || groupIdx} className="px-2 py-1">
+                    <SidebarGroup
+                        key={group.title || groupIdx}
+                        className="px-2 py-1"
+                    >
                         {group.title && (
-                            <SidebarGroupLabel className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/70 px-2 py-1">
+                            <SidebarGroupLabel className="px-2 py-1 text-[10px] font-bold tracking-wider text-muted-foreground/70 uppercase">
                                 {group.title}
                             </SidebarGroupLabel>
                         )}
@@ -49,7 +52,10 @@ return null;
                                         isActive={isCurrentUrl(item.href)}
                                         tooltip={{ children: item.title }}
                                     >
-                                        <Link href={item.href} onClick={handleNavClick}>
+                                        <Link
+                                            href={item.href}
+                                            onClick={handleNavClick}
+                                        >
                                             {item.icon && <item.icon />}
                                             <span>{item.title}</span>
                                         </Link>
@@ -63,4 +69,3 @@ return null;
         </div>
     );
 }
-

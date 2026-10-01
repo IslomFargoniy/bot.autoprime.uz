@@ -20,7 +20,11 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { PageFilterBar, PageFilterPills, PageFilterSearch } from '@/components/page-filter-bar';
+import {
+    PageFilterBar,
+    PageFilterPills,
+    PageFilterSearch,
+} from '@/components/page-filter-bar';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +67,12 @@ interface Lead {
     passport_photo_url?: string;
     medical_certificate_photo_url?: string;
     source: string;
-    stage: 'new_lead' | 'form_sent' | 'form_completed' | 'contract_signed' | 'rejected';
+    stage:
+        | 'new_lead'
+        | 'form_sent'
+        | 'form_completed'
+        | 'contract_signed'
+        | 'rejected';
     notes?: string;
     lost_reason?: string;
     telegram_id?: string | number;
@@ -110,13 +119,22 @@ interface PageProps {
     };
 }
 
-export default function LeadsIndex({ leads, contractTypes, groups, branches, filters }: PageProps) {
+export default function LeadsIndex({
+    leads,
+    contractTypes,
+    groups,
+    branches,
+    filters,
+}: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
     const [viewingLead, setViewingLead] = useState<Lead | null>(null);
-    const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+    const [previewImage, setPreviewImage] = useState<{
+        src: string;
+        title: string;
+    } | null>(null);
     const [copiedPinfl, setCopiedPinfl] = useState(false);
     const [search, setSearch] = useState(filters.search || '');
 
@@ -149,21 +167,26 @@ export default function LeadsIndex({ leads, contractTypes, groups, branches, fil
 
     const isLeadConverted = (lead?: Lead | null) => {
         if (!lead) {
-return false;
-}
+            return false;
+        }
 
         return Boolean(
             lead.contract_id ||
             lead.student_id ||
             lead.stage === 'contract_signed' ||
             lead.convertedStudent ||
-            lead.contract
+            lead.contract,
         );
     };
 
     const openConvertModal = (lead: Lead) => {
         if (isLeadConverted(lead)) {
-            toast.error(t('leads.already_converted', 'Ushbu lid bilan allaqachon shartnoma tuzilgan.'));
+            toast.error(
+                t(
+                    'leads.already_converted',
+                    'Ushbu lid bilan allaqachon shartnoma tuzilgan.',
+                ),
+            );
 
             return;
         }
@@ -182,16 +205,32 @@ return false;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/admin/leads', { ...filters, search, per_page: perPage }, { preserveState: true });
+        router.get(
+            '/admin/leads',
+            { ...filters, search, per_page: perPage },
+            { preserveState: true },
+        );
     };
 
     const handleStageChange = (stage: string) => {
-        router.get('/admin/leads', { ...filters, stage: stage === 'all' ? '' : stage, per_page: perPage }, { preserveState: true });
+        router.get(
+            '/admin/leads',
+            {
+                ...filters,
+                stage: stage === 'all' ? '' : stage,
+                per_page: perPage,
+            },
+            { preserveState: true },
+        );
     };
 
     const handlePerPageChange = (newPerPage: string) => {
         setPerPage(newPerPage);
-        router.get('/admin/leads', { ...filters, search, per_page: newPerPage }, { preserveState: true, replace: true });
+        router.get(
+            '/admin/leads',
+            { ...filters, search, per_page: newPerPage },
+            { preserveState: true, replace: true },
+        );
     };
 
     const handleCreateSubmit = (e: React.FormEvent) => {
@@ -200,9 +239,15 @@ return false;
             onSuccess: () => {
                 setShowCreateModal(false);
                 createForm.reset();
-                toast.success(t('leads.created_success', 'Lid muvaffaqiyatli saqlandi'));
+                toast.success(
+                    t('leads.created_success', 'Lid muvaffaqiyatli saqlandi'),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
@@ -210,31 +255,42 @@ return false;
         e.preventDefault();
 
         if (!convertingLead) {
-return;
-}
+            return;
+        }
 
         convertForm.post(`/admin/leads/${convertingLead.id}/convert`, {
             onSuccess: () => {
                 setConvertingLead(null);
                 setViewingLead(null);
-                toast.success(t('leads.converted_success', 'O\'quvchi ochildi va shartnoma tuzildi'));
+                toast.success(
+                    t(
+                        'leads.converted_success',
+                        "O'quvchi ochildi va shartnoma tuzildi",
+                    ),
+                );
             },
             onError: (err) => {
                 const first = Object.values(err)[0] as string;
-                toast.error(t(first, first) || t('common.error', 'Xatolik yuz berdi'));
+                toast.error(
+                    t(first, first) || t('common.error', 'Xatolik yuz berdi'),
+                );
             },
         });
     };
 
     const handleDelete = (lead: Lead) => {
-        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+        if (
+            confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
             router.delete(`/admin/leads/${lead.id}`, {
                 onSuccess: () => {
                     if (viewingLead?.id === lead.id) {
-setViewingLead(null);
-}
+                        setViewingLead(null);
+                    }
 
-                    toast.success(t('common.deleted', 'O\'chirildi'));
+                    toast.success(t('common.deleted', "O'chirildi"));
                 },
             });
         }
@@ -287,16 +343,23 @@ setViewingLead(null);
     };
 
     return (
-        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="space-y-4 p-4 md:space-y-6 md:p-6">
             <Head title={t('leads.title', 'CRM Lidlar')} />
 
             {/* Page Title & Add Button */}
             <div className="flex items-center justify-between gap-3">
-                <h1 className="text-xl sm:text-2xl font-bold">{t('leads.title', 'CRM Lidlar')}</h1>
+                <h1 className="text-xl font-bold sm:text-2xl">
+                    {t('leads.title', 'CRM Lidlar')}
+                </h1>
                 {can('leads.manage') && (
-                    <Button onClick={() => setShowCreateModal(true)} variant="brand" size="sm" className="text-xs shrink-0">
-                        <Plus className="w-4 h-4 mr-1.5" />
-                        <span>{t('common.add', 'Qo\'shish')}</span>
+                    <Button
+                        onClick={() => setShowCreateModal(true)}
+                        variant="brand"
+                        size="sm"
+                        className="shrink-0 text-xs"
+                    >
+                        <Plus className="mr-1.5 h-4 w-4" />
+                        <span>{t('common.add', "Qo'shish")}</span>
                     </Button>
                 )}
             </div>
@@ -307,12 +370,39 @@ setViewingLead(null);
                     activeValue={filters.stage || 'all'}
                     onChange={handleStageChange}
                     items={[
-                        { value: 'all', label: t('leads.stage_all', 'Barchasi') },
-                        { value: 'new_lead', label: t('leads.stage_new_lead', 'Yangi lid') },
-                        { value: 'form_sent', label: t('leads.stage_form_sent', 'Anketa yuborildi') },
-                        { value: 'form_completed', label: t('leads.stage_form_completed', "To'ldirildi") },
-                        { value: 'contract_signed', label: t('leads.stage_contract_signed', 'Shartnoma tuzildi') },
-                        { value: 'rejected', label: t('leads.stage_rejected', 'Rad etildi') },
+                        {
+                            value: 'all',
+                            label: t('leads.stage_all', 'Barchasi'),
+                        },
+                        {
+                            value: 'new_lead',
+                            label: t('leads.stage_new_lead', 'Yangi lid'),
+                        },
+                        {
+                            value: 'form_sent',
+                            label: t(
+                                'leads.stage_form_sent',
+                                'Anketa yuborildi',
+                            ),
+                        },
+                        {
+                            value: 'form_completed',
+                            label: t(
+                                'leads.stage_form_completed',
+                                "To'ldirildi",
+                            ),
+                        },
+                        {
+                            value: 'contract_signed',
+                            label: t(
+                                'leads.stage_contract_signed',
+                                'Shartnoma tuzildi',
+                            ),
+                        },
+                        {
+                            value: 'rejected',
+                            label: t('leads.stage_rejected', 'Rad etildi'),
+                        },
                     ]}
                 />
 
@@ -327,17 +417,23 @@ setViewingLead(null);
             </PageFilterBar>
 
             {/* Desktop/Tablet Table */}
-            <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs">
+            <div className="hidden overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs md:block dark:border-gray-700 dark:bg-gray-800">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>{t('leads.client', 'Mijoz (F.I.O)')}</TableHead>
+                            <TableHead>
+                                {t('leads.client', 'Mijoz (F.I.O)')}
+                            </TableHead>
                             <TableHead>{t('leads.phone', 'Telefon')}</TableHead>
-                            <TableHead>{t('leads.category', 'Toifa')}</TableHead>
+                            <TableHead>
+                                {t('leads.category', 'Toifa')}
+                            </TableHead>
                             <TableHead>{t('leads.source', 'Manba')}</TableHead>
                             <TableHead>{t('leads.stage', 'Holat')}</TableHead>
                             <TableHead>{t('leads.branch', 'Filial')}</TableHead>
-                            <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                            <TableHead className="text-right">
+                                {t('common.actions', 'Amallar')}
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -345,7 +441,10 @@ setViewingLead(null);
                             <TableEmpty
                                 colSpan={7}
                                 icon={UserCheck}
-                                title={t('leads.no_leads', 'Hech qanday lid topilmadi')}
+                                title={t(
+                                    'leads.no_leads',
+                                    'Hech qanday lid topilmadi',
+                                )}
                             />
                         ) : (
                             leads.data.map((lead) => (
@@ -354,71 +453,93 @@ setViewingLead(null);
                                         <button
                                             type="button"
                                             onClick={() => setViewingLead(lead)}
-                                            className="hover:underline text-left font-semibold text-blue-600 dark:text-blue-400"
+                                            className="text-left font-semibold text-blue-600 hover:underline dark:text-blue-400"
                                         >
                                             {lead.full_name}
                                         </button>
                                     </TableCell>
                                     <TableCell className="text-gray-600 dark:text-gray-300">
-                                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 font-mono text-xs">
-                                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                        <a
+                                            href={`tel:${lead.phone}`}
+                                            className="flex items-center gap-1 font-mono text-xs hover:text-blue-600 dark:hover:text-blue-400"
+                                        >
+                                            <Phone className="h-3.5 w-3.5 text-gray-400" />
                                             {lead.phone}
                                         </a>
                                     </TableCell>
                                     <TableCell>
-                                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 font-semibold text-xs">
+                                        <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold dark:bg-gray-700">
                                             {lead.category || 'B'}
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-gray-600 dark:text-gray-300">
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-xs font-medium text-foreground">
+                                        <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                                             {getSourceLabel(lead.source)}
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        <span className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${getStageBadge(lead.stage)}`}>
-                                            {t(`leads.stage_${lead.stage}`, lead.stage)}
+                                        <span
+                                            className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${getStageBadge(lead.stage)}`}
+                                        >
+                                            {t(
+                                                `leads.stage_${lead.stage}`,
+                                                lead.stage,
+                                            )}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="text-gray-500 dark:text-gray-400 text-xs">
+                                    <TableCell className="text-xs text-gray-500 dark:text-gray-400">
                                         {lead.branch?.name || '-'}
                                     </TableCell>
-                                    <TableCell className="text-right space-x-1">
+                                    <TableCell className="space-x-1 text-right">
                                         <Button
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => setViewingLead(lead)}
-                                            title={t('leads.view_details', 'Lid tafsilotlari')}
-                                            className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                            title={t(
+                                                'leads.view_details',
+                                                'Lid tafsilotlari',
+                                            )}
+                                            className="h-7 text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/30"
                                         >
-                                            <Eye className="w-3.5 h-3.5" />
+                                            <Eye className="h-3.5 w-3.5" />
                                         </Button>
                                         {isLeadConverted(lead) ? (
-                                            <Badge variant="outline" className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium shrink-0 inline-flex items-center">
-                                                <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                                {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
+                                            <Badge
+                                                variant="outline"
+                                                className="inline-flex h-7 shrink-0 items-center border-emerald-200 bg-emerald-50 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                            >
+                                                <CheckCircle className="mr-1 h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                                {t(
+                                                    'leads.contract_created_badge',
+                                                    'Shartnoma tuzilgan',
+                                                )}
                                             </Badge>
-                                        ) : (
-                                            can('contracts.create') ? (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => openConvertModal(lead)}
-                                                    className="h-7 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
-                                                >
-                                                    <UserCheck className="w-3.5 h-3.5 mr-1" />
-                                                    {t('leads.convert_button', 'Shartnoma tuzish')}
-                                                </Button>
-                                            ) : null
-                                        )}
+                                        ) : can('contracts.create') ? (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    openConvertModal(lead)
+                                                }
+                                                className="h-7 border-emerald-200 bg-emerald-50 text-xs text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
+                                            >
+                                                <UserCheck className="mr-1 h-3.5 w-3.5" />
+                                                {t(
+                                                    'leads.convert_button',
+                                                    'Shartnoma tuzish',
+                                                )}
+                                            </Button>
+                                        ) : null}
                                         {can('leads.manage') && (
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => handleDelete(lead)}
-                                                className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                                onClick={() =>
+                                                    handleDelete(lead)
+                                                }
+                                                className="h-7 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         )}
                                     </TableCell>
@@ -430,88 +551,113 @@ setViewingLead(null);
             </div>
 
             {/* Mobile Cards Feed */}
-            <div className="md:hidden space-y-3">
+            <div className="space-y-3 md:hidden">
                 {leads.data.length === 0 ? (
-                    <div className="text-center py-8 bg-card border border-dashed rounded-xl p-4">
-                        <UserCheck className="w-8 h-8 mx-auto text-muted-foreground mb-2 opacity-50" />
-                        <div className="font-medium text-sm">{t('leads.no_leads', 'Hech qanday lid topilmadi')}</div>
+                    <div className="rounded-xl border border-dashed bg-card p-4 py-8 text-center">
+                        <UserCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-50" />
+                        <div className="text-sm font-medium">
+                            {t('leads.no_leads', 'Hech qanday lid topilmadi')}
+                        </div>
                     </div>
                 ) : (
                     leads.data.map((lead) => (
-                        <div key={lead.id} className="bg-card border rounded-xl p-3.5 shadow-2xs space-y-2.5">
+                        <div
+                            key={lead.id}
+                            className="space-y-2.5 rounded-xl border bg-card p-3.5 shadow-2xs"
+                        >
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                    <div className="flex flex-wrap items-center gap-1.5">
                                         <button
                                             type="button"
                                             onClick={() => setViewingLead(lead)}
-                                            className="font-bold text-sm text-foreground hover:underline text-left"
+                                            className="text-left text-sm font-bold text-foreground hover:underline"
                                         >
                                             {lead.full_name}
                                         </button>
-                                        <span className="px-1.5 py-0.2 rounded-md bg-muted font-bold text-[10px]">
+                                        <span className="py-0.2 rounded-md bg-muted px-1.5 text-[10px] font-bold">
                                             {lead.category || 'B'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline font-mono">
-                                            <Phone className="w-3 h-3 text-muted-foreground" />
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <a
+                                            href={`tel:${lead.phone}`}
+                                            className="flex items-center gap-1 font-mono text-xs font-semibold text-primary hover:underline"
+                                        >
+                                            <Phone className="h-3 w-3 text-muted-foreground" />
                                             <span>{lead.phone}</span>
                                         </a>
                                     </div>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded-md border text-[10px] font-medium shrink-0 ${getStageBadge(lead.stage)}`}>
+                                <span
+                                    className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-medium ${getStageBadge(lead.stage)}`}
+                                >
                                     {t(`leads.stage_${lead.stage}`, lead.stage)}
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t text-muted-foreground">
+                            <div className="grid grid-cols-2 gap-2 border-t pt-1.5 text-xs text-muted-foreground">
                                 <div className="truncate">
-                                    <span className="text-[10px] block opacity-70">{t('leads.source', 'Manba')}:</span>
-                                    <span className="truncate font-medium text-foreground">{getSourceLabel(lead.source)}</span>
+                                    <span className="block text-[10px] opacity-70">
+                                        {t('leads.source', 'Manba')}:
+                                    </span>
+                                    <span className="truncate font-medium text-foreground">
+                                        {getSourceLabel(lead.source)}
+                                    </span>
                                 </div>
                                 <div className="truncate text-right">
-                                    <span className="text-[10px] block opacity-70">{t('leads.branch', 'Filial')}:</span>
-                                    <span className="truncate">{lead.branch?.name || '-'}</span>
+                                    <span className="block text-[10px] opacity-70">
+                                        {t('leads.branch', 'Filial')}:
+                                    </span>
+                                    <span className="truncate">
+                                        {lead.branch?.name || '-'}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between pt-2 border-t gap-2">
+                            <div className="flex items-center justify-between gap-2 border-t pt-2">
                                 <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => setViewingLead(lead)}
-                                    className="h-8 text-xs flex-1"
+                                    className="h-8 flex-1 text-xs"
                                 >
-                                    <Eye className="w-3.5 h-3.5 mr-1" />
+                                    <Eye className="mr-1 h-3.5 w-3.5" />
                                     {t('common.details', 'Batafsil')}
                                 </Button>
                                 {isLeadConverted(lead) ? (
-                                    <Badge variant="outline" className="h-8 flex-1 justify-center text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium">
-                                        <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                        {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
+                                    <Badge
+                                        variant="outline"
+                                        className="h-8 flex-1 justify-center border-emerald-200 bg-emerald-50 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                    >
+                                        <CheckCircle className="mr-1 h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                        {t(
+                                            'leads.contract_created_badge',
+                                            'Shartnoma tuzilgan',
+                                        )}
                                     </Badge>
-                                ) : (
-                                    can('contracts.create') ? (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => openConvertModal(lead)}
-                                            className="h-8 flex-1 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                        >
-                                            <UserCheck className="w-3.5 h-3.5 mr-1" />
-                                            {t('leads.convert_button', 'Shartnoma tuzish')}
-                                        </Button>
-                                    ) : null
-                                )}
+                                ) : can('contracts.create') ? (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openConvertModal(lead)}
+                                        className="h-8 flex-1 border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                    >
+                                        <UserCheck className="mr-1 h-3.5 w-3.5" />
+                                        {t(
+                                            'leads.convert_button',
+                                            'Shartnoma tuzish',
+                                        )}
+                                    </Button>
+                                ) : null}
                                 {can('leads.manage') && (
                                     <Button
                                         size="sm"
                                         variant="ghost"
                                         onClick={() => handleDelete(lead)}
-                                        className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                        className="h-8 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                                     >
-                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                 )}
                             </div>
@@ -521,72 +667,124 @@ setViewingLead(null);
             </div>
 
             {/* Pagination */}
-            <Pagination links={leads.links} total={leads.total} from={leads.from} to={leads.to} />
+            <Pagination
+                links={leads.links}
+                total={leads.total}
+                from={leads.from}
+                to={leads.to}
+            />
 
             {/* View Lead Details Modal */}
-            <Dialog open={!!viewingLead} onOpenChange={(open) => !open && setViewingLead(null)}>
-                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+            <Dialog
+                open={!!viewingLead}
+                onOpenChange={(open) => !open && setViewingLead(null)}
+            >
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-2xl overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center justify-between gap-2 border-b pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                    <User className="w-5 h-5" />
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                                    <User className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <span className="text-base font-bold block">{viewingLead?.full_name}</span>
-                                    <span className="text-xs text-muted-foreground font-normal">
-                                        ID: #{viewingLead?.id} • {viewingLead?.created_at ? formatDateTime(viewingLead.created_at) : ''}
+                                    <span className="block text-base font-bold">
+                                        {viewingLead?.full_name}
+                                    </span>
+                                    <span className="text-xs font-normal text-muted-foreground">
+                                        ID: #{viewingLead?.id} •{' '}
+                                        {viewingLead?.created_at
+                                            ? formatDateTime(
+                                                  viewingLead.created_at,
+                                              )
+                                            : ''}
                                     </span>
                                 </div>
                             </div>
                             {viewingLead && (
-                                <span className={`px-2.5 py-1 rounded-md border text-xs font-medium ${getStageBadge(viewingLead.stage)}`}>
-                                    {t(`leads.stage_${viewingLead.stage}`, viewingLead.stage)}
+                                <span
+                                    className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getStageBadge(viewingLead.stage)}`}
+                                >
+                                    {t(
+                                        `leads.stage_${viewingLead.stage}`,
+                                        viewingLead.stage,
+                                    )}
                                 </span>
                             )}
                         </DialogTitle>
-                        <DialogDescription className="sr-only">Lidning barcha shaxsiy, pasport, hujjat va CRM ma'lumotlari</DialogDescription>
+                        <DialogDescription className="sr-only">
+                            Lidning barcha shaxsiy, pasport, hujjat va CRM
+                            ma'lumotlari
+                        </DialogDescription>
                     </DialogHeader>
 
                     {viewingLead && (
                         <div className="space-y-4 pt-2 text-xs">
                             {/* Personal & Contact Details */}
-                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
-                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
-                                    <Phone className="w-4 h-4 text-blue-600" />
-                                    {t('leads.personal_info', 'Shaxsiy va Aloqa Ma\'lumotlari')}
+                            <div className="space-y-3 rounded-xl border bg-muted/40 p-3.5">
+                                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                                    <Phone className="h-4 w-4 text-blue-600" />
+                                    {t(
+                                        'leads.personal_info',
+                                        "Shaxsiy va Aloqa Ma'lumotlari",
+                                    )}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.phone', 'Telefon')}</span>
-                                        <a href={`tel:${viewingLead.phone}`} className="font-semibold text-blue-600 dark:text-blue-400 hover:underline font-mono">
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t('leads.phone', 'Telefon')}
+                                        </span>
+                                        <a
+                                            href={`tel:${viewingLead.phone}`}
+                                            className="font-mono font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                                        >
                                             {viewingLead.phone}
                                         </a>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.category', 'Toifa')}</span>
-                                        <span className="font-semibold px-2 py-0.5 bg-background border rounded inline-block">
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t('leads.category', 'Toifa')}
+                                        </span>
+                                        <span className="inline-block rounded border bg-background px-2 py-0.5 font-semibold">
                                             {viewingLead.category || 'B'} toifa
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.preferred_time', 'Qulay o\'qish vaqti')}</span>
-                                        <span className="font-medium flex items-center gap-1 mt-0.5">
-                                            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t(
+                                                'leads.preferred_time',
+                                                "Qulay o'qish vaqti",
+                                            )}
+                                        </span>
+                                        <span className="mt-0.5 flex items-center gap-1 font-medium">
+                                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                             {viewingLead.preferred_time || '-'}
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.birth_date', 'Tug\'ilgan sana')}</span>
-                                        <span className="font-medium flex items-center gap-1 mt-0.5">
-                                            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                            {viewingLead.birth_date ? formatDate(viewingLead.birth_date) : '-'}
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t(
+                                                'leads.birth_date',
+                                                "Tug'ilgan sana",
+                                            )}
+                                        </span>
+                                        <span className="mt-0.5 flex items-center gap-1 font-medium">
+                                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                            {viewingLead.birth_date
+                                                ? formatDate(
+                                                      viewingLead.birth_date,
+                                                  )
+                                                : '-'}
                                         </span>
                                     </div>
                                     <div className="sm:col-span-2">
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.address', 'Yashash manzili')}</span>
-                                        <span className="font-medium flex items-center gap-1 mt-0.5">
-                                            <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t(
+                                                'leads.address',
+                                                'Yashash manzili',
+                                            )}
+                                        </span>
+                                        <span className="mt-0.5 flex items-center gap-1 font-medium">
+                                            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                             {viewingLead.address || '-'}
                                         </span>
                                     </div>
@@ -594,98 +792,201 @@ setViewingLead(null);
                             </div>
 
                             {/* Passport & PINFL */}
-                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
-                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
-                                    <Shield className="w-4 h-4 text-emerald-600" />
-                                    {t('leads.passport_and_id', 'Pasport va JSHSHIR (PINFL)')}
+                            <div className="space-y-3 rounded-xl border bg-muted/40 p-3.5">
+                                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                                    <Shield className="h-4 w-4 text-emerald-600" />
+                                    {t(
+                                        'leads.passport_and_id',
+                                        'Pasport va JSHSHIR (PINFL)',
+                                    )}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.passport_series_num', 'Pasport seriya va raqami')}</span>
-                                        <span className="font-mono font-semibold text-sm mt-0.5 inline-block">
-                                            {viewingLead.passport_series || viewingLead.passport_number
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t(
+                                                'leads.passport_series_num',
+                                                'Pasport seriya va raqami',
+                                            )}
+                                        </span>
+                                        <span className="mt-0.5 inline-block font-mono text-sm font-semibold">
+                                            {viewingLead.passport_series ||
+                                            viewingLead.passport_number
                                                 ? `${viewingLead.passport_series || ''} ${viewingLead.passport_number || ''}`
                                                 : '-'}
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.pinfl', 'JSHSHIR (PINFL)')}</span>
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t(
+                                                'leads.pinfl',
+                                                'JSHSHIR (PINFL)',
+                                            )}
+                                        </span>
                                         {viewingLead.pinfl ? (
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="font-mono font-semibold text-sm">{viewingLead.pinfl}</span>
+                                            <div className="mt-0.5 flex items-center gap-2">
+                                                <span className="font-mono text-sm font-semibold">
+                                                    {viewingLead.pinfl}
+                                                </span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => copyToClipboard(viewingLead.pinfl || '')}
-                                                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
-                                                    title={t('common.copy', 'Nusxalash')}
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            viewingLead.pinfl ||
+                                                                '',
+                                                        )
+                                                    }
+                                                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                                    title={t(
+                                                        'common.copy',
+                                                        'Nusxalash',
+                                                    )}
                                                 >
-                                                    {copiedPinfl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                                    {copiedPinfl ? (
+                                                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5" />
+                                                    )}
                                                 </button>
                                             </div>
                                         ) : (
-                                            <span className="text-muted-foreground">-</span>
+                                            <span className="text-muted-foreground">
+                                                -
+                                            </span>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Uploaded Documents / Photos */}
-                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
-                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
-                                    <ImageIcon className="w-4 h-4 text-purple-600" />
-                                    {t('leads.documents_and_photos', 'Hujjatlar va Yuklangan Rasmlar')}
+                            <div className="space-y-3 rounded-xl border bg-muted/40 p-3.5">
+                                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                                    <ImageIcon className="h-4 w-4 text-purple-600" />
+                                    {t(
+                                        'leads.documents_and_photos',
+                                        'Hujjatlar va Yuklangan Rasmlar',
+                                    )}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                     {/* 3x4 Photo */}
-                                    <div className="rounded-lg border bg-background p-2.5 flex flex-col items-center text-center space-y-2">
-                                        <span className="text-[11px] font-medium text-muted-foreground">{t('leads.photo_3x4', '3x4 rasm / Selfi')}</span>
+                                    <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-2.5 text-center">
+                                        <span className="text-[11px] font-medium text-muted-foreground">
+                                            {t(
+                                                'leads.photo_3x4',
+                                                '3x4 rasm / Selfi',
+                                            )}
+                                        </span>
                                         {viewingLead.photo_url ? (
                                             <div
-                                                onClick={() => setPreviewImage({ src: viewingLead.photo_url!, title: t('leads.photo_3x4', '3x4 rasm / Selfi') })}
-                                                className="w-24 h-28 rounded-md overflow-hidden border cursor-pointer hover:opacity-90 transition-opacity bg-muted flex items-center justify-center"
+                                                onClick={() =>
+                                                    setPreviewImage({
+                                                        src: viewingLead.photo_url!,
+                                                        title: t(
+                                                            'leads.photo_3x4',
+                                                            '3x4 rasm / Selfi',
+                                                        ),
+                                                    })
+                                                }
+                                                className="flex h-28 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-md border bg-muted transition-opacity hover:opacity-90"
                                             >
-                                                <img src={viewingLead.photo_url} alt="3x4" className="w-full h-full object-cover" />
+                                                <img
+                                                    src={viewingLead.photo_url}
+                                                    alt="3x4"
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
                                         ) : (
-                                            <div className="w-24 h-28 rounded-md border border-dashed flex flex-col items-center justify-center text-muted-foreground/60 text-[10px]">
-                                                <ImageIcon className="w-6 h-6 mb-1 opacity-40" />
-                                                <span>{t('leads.no_documents', 'Mavjud emas')}</span>
+                                            <div className="flex h-28 w-24 flex-col items-center justify-center rounded-md border border-dashed text-[10px] text-muted-foreground/60">
+                                                <ImageIcon className="mb-1 h-6 w-6 opacity-40" />
+                                                <span>
+                                                    {t(
+                                                        'leads.no_documents',
+                                                        'Mavjud emas',
+                                                    )}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Passport Photo */}
-                                    <div className="rounded-lg border bg-background p-2.5 flex flex-col items-center text-center space-y-2">
-                                        <span className="text-[11px] font-medium text-muted-foreground">{t('leads.passport_photo', 'Pasport / ID karta')}</span>
+                                    <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-2.5 text-center">
+                                        <span className="text-[11px] font-medium text-muted-foreground">
+                                            {t(
+                                                'leads.passport_photo',
+                                                'Pasport / ID karta',
+                                            )}
+                                        </span>
                                         {viewingLead.passport_photo_url ? (
                                             <div
-                                                onClick={() => setPreviewImage({ src: viewingLead.passport_photo_url!, title: t('leads.passport_photo', 'Pasport / ID karta') })}
-                                                className="w-24 h-28 rounded-md overflow-hidden border cursor-pointer hover:opacity-90 transition-opacity bg-muted flex items-center justify-center"
+                                                onClick={() =>
+                                                    setPreviewImage({
+                                                        src: viewingLead.passport_photo_url!,
+                                                        title: t(
+                                                            'leads.passport_photo',
+                                                            'Pasport / ID karta',
+                                                        ),
+                                                    })
+                                                }
+                                                className="flex h-28 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-md border bg-muted transition-opacity hover:opacity-90"
                                             >
-                                                <img src={viewingLead.passport_photo_url} alt="Passport" className="w-full h-full object-cover" />
+                                                <img
+                                                    src={
+                                                        viewingLead.passport_photo_url
+                                                    }
+                                                    alt="Passport"
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
                                         ) : (
-                                            <div className="w-24 h-28 rounded-md border border-dashed flex flex-col items-center justify-center text-muted-foreground/60 text-[10px]">
-                                                <ImageIcon className="w-6 h-6 mb-1 opacity-40" />
-                                                <span>{t('leads.no_documents', 'Mavjud emas')}</span>
+                                            <div className="flex h-28 w-24 flex-col items-center justify-center rounded-md border border-dashed text-[10px] text-muted-foreground/60">
+                                                <ImageIcon className="mb-1 h-6 w-6 opacity-40" />
+                                                <span>
+                                                    {t(
+                                                        'leads.no_documents',
+                                                        'Mavjud emas',
+                                                    )}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Medical Certificate */}
-                                    <div className="rounded-lg border bg-background p-2.5 flex flex-col items-center text-center space-y-2">
-                                        <span className="text-[11px] font-medium text-muted-foreground">{t('leads.medical_cert', '083 Ma\'lumotnoma')}</span>
+                                    <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-2.5 text-center">
+                                        <span className="text-[11px] font-medium text-muted-foreground">
+                                            {t(
+                                                'leads.medical_cert',
+                                                "083 Ma'lumotnoma",
+                                            )}
+                                        </span>
                                         {viewingLead.medical_certificate_photo_url ? (
                                             <div
-                                                onClick={() => setPreviewImage({ src: viewingLead.medical_certificate_photo_url!, title: t('leads.medical_cert', '083 Ma\'lumotnoma') })}
-                                                className="w-24 h-28 rounded-md overflow-hidden border cursor-pointer hover:opacity-90 transition-opacity bg-muted flex items-center justify-center"
+                                                onClick={() =>
+                                                    setPreviewImage({
+                                                        src: viewingLead.medical_certificate_photo_url!,
+                                                        title: t(
+                                                            'leads.medical_cert',
+                                                            "083 Ma'lumotnoma",
+                                                        ),
+                                                    })
+                                                }
+                                                className="flex h-28 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-md border bg-muted transition-opacity hover:opacity-90"
                                             >
-                                                <img src={viewingLead.medical_certificate_photo_url} alt="Medical" className="w-full h-full object-cover" />
+                                                <img
+                                                    src={
+                                                        viewingLead.medical_certificate_photo_url
+                                                    }
+                                                    alt="Medical"
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
                                         ) : (
-                                            <div className="w-24 h-28 rounded-md border border-dashed flex flex-col items-center justify-center text-muted-foreground/60 text-[10px]">
-                                                <ImageIcon className="w-6 h-6 mb-1 opacity-40" />
-                                                <span>{t('leads.no_documents', 'Mavjud emas')}</span>
+                                            <div className="flex h-28 w-24 flex-col items-center justify-center rounded-md border border-dashed text-[10px] text-muted-foreground/60">
+                                                <ImageIcon className="mb-1 h-6 w-6 opacity-40" />
+                                                <span>
+                                                    {t(
+                                                        'leads.no_documents',
+                                                        'Mavjud emas',
+                                                    )}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -693,60 +994,108 @@ setViewingLead(null);
                             </div>
 
                             {/* CRM & System Info */}
-                            <div className="bg-muted/40 rounded-xl p-3.5 border space-y-3">
-                                <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground">
-                                    <FileText className="w-4 h-4 text-amber-600" />
-                                    {t('leads.crm_info', 'CRM va Tizim Ma\'lumotlari')}
+                            <div className="space-y-3 rounded-xl border bg-muted/40 p-3.5">
+                                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                                    <FileText className="h-4 w-4 text-amber-600" />
+                                    {t(
+                                        'leads.crm_info',
+                                        "CRM va Tizim Ma'lumotlari",
+                                    )}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.source', 'Manba')}</span>
-                                        <span className="font-medium mt-0.5 inline-block">{getSourceLabel(viewingLead.source)}</span>
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t('leads.source', 'Manba')}
+                                        </span>
+                                        <span className="mt-0.5 inline-block font-medium">
+                                            {getSourceLabel(viewingLead.source)}
+                                        </span>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] text-muted-foreground block">{t('leads.branch', 'Filial')}</span>
-                                        <span className="font-medium mt-0.5 inline-block">{viewingLead.branch?.name || '-'}</span>
+                                        <span className="block text-[11px] text-muted-foreground">
+                                            {t('leads.branch', 'Filial')}
+                                        </span>
+                                        <span className="mt-0.5 inline-block font-medium">
+                                            {viewingLead.branch?.name || '-'}
+                                        </span>
                                     </div>
                                     {viewingLead.telegram_id && (
                                         <div>
-                                            <span className="text-[11px] text-muted-foreground block">{t('leads.telegram_id', 'Telegram ID')}</span>
-                                            <span className="font-mono font-medium mt-0.5 inline-block">{viewingLead.telegram_id}</span>
+                                            <span className="block text-[11px] text-muted-foreground">
+                                                {t(
+                                                    'leads.telegram_id',
+                                                    'Telegram ID',
+                                                )}
+                                            </span>
+                                            <span className="mt-0.5 inline-block font-mono font-medium">
+                                                {viewingLead.telegram_id}
+                                            </span>
                                         </div>
                                     )}
                                     {viewingLead.assignedTo && (
                                         <div>
-                                            <span className="text-[11px] text-muted-foreground block">{t('leads.assigned_manager', 'Mas\'ul xodim')}</span>
-                                            <span className="font-medium mt-0.5 inline-block">{viewingLead.assignedTo.name}</span>
+                                            <span className="block text-[11px] text-muted-foreground">
+                                                {t(
+                                                    'leads.assigned_manager',
+                                                    "Mas'ul xodim",
+                                                )}
+                                            </span>
+                                            <span className="mt-0.5 inline-block font-medium">
+                                                {viewingLead.assignedTo.name}
+                                            </span>
                                         </div>
                                     )}
                                     {viewingLead.notes && (
                                         <div className="sm:col-span-2">
-                                            <span className="text-[11px] text-muted-foreground block">{t('leads.notes', 'Izoh')}</span>
-                                            <p className="mt-0.5 text-foreground bg-background p-2 rounded border">{viewingLead.notes}</p>
+                                            <span className="block text-[11px] text-muted-foreground">
+                                                {t('leads.notes', 'Izoh')}
+                                            </span>
+                                            <p className="mt-0.5 rounded border bg-background p-2 text-foreground">
+                                                {viewingLead.notes}
+                                            </p>
                                         </div>
                                     )}
                                     {viewingLead.lost_reason && (
                                         <div className="sm:col-span-2">
-                                            <span className="text-[11px] text-rose-600 font-semibold block">{t('leads.lost_reason', 'Rad etilish sababi')}</span>
-                                            <p className="mt-0.5 text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 p-2 rounded border border-rose-200">{viewingLead.lost_reason}</p>
+                                            <span className="block text-[11px] font-semibold text-rose-600">
+                                                {t(
+                                                    'leads.lost_reason',
+                                                    'Rad etilish sababi',
+                                                )}
+                                            </span>
+                                            <p className="mt-0.5 rounded border border-rose-200 bg-rose-50 p-2 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+                                                {viewingLead.lost_reason}
+                                            </p>
                                         </div>
                                     )}
                                     {viewingLead.convertedStudent && (
-                                        <div className="sm:col-span-2 p-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center justify-between">
+                                        <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 sm:col-span-2 dark:border-emerald-800 dark:bg-emerald-950/30">
                                             <div>
-                                                <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-semibold block">
-                                                    {t('leads.converted_student', 'O\'quvchi profili ochilgan')}
+                                                <span className="block text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                                                    {t(
+                                                        'leads.converted_student',
+                                                        "O'quvchi profili ochilgan",
+                                                    )}
                                                 </span>
-                                                <span className="text-xs text-foreground font-medium">
-                                                    {viewingLead.convertedStudent.full_name}
+                                                <span className="text-xs font-medium text-foreground">
+                                                    {
+                                                        viewingLead
+                                                            .convertedStudent
+                                                            .full_name
+                                                    }
                                                 </span>
                                             </div>
                                             <Link
                                                 href={`/admin/students/${viewingLead.student_id}`}
-                                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-medium"
+                                                className="inline-flex items-center gap-1 rounded bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                                             >
-                                                <span>{t('leads.view_student', 'Profilni ochish')}</span>
-                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                <span>
+                                                    {t(
+                                                        'leads.view_student',
+                                                        'Profilni ochish',
+                                                    )}
+                                                </span>
+                                                <ExternalLink className="h-3.5 w-3.5" />
                                             </Link>
                                         </div>
                                     )}
@@ -754,40 +1103,59 @@ setViewingLead(null);
                             </div>
 
                             {/* Actions in Footer */}
-                            <div className="flex items-center justify-between pt-2 border-t gap-2">
-                                <Button type="button" variant="outline" onClick={() => setViewingLead(null)}>
+                            <div className="flex items-center justify-between gap-2 border-t pt-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setViewingLead(null)}
+                                >
                                     {t('common.close', 'Yopish')}
                                 </Button>
                                 <div className="flex items-center gap-2">
                                     {isLeadConverted(viewingLead) ? (
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <Badge variant="outline" className="h-9 px-3 text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 font-medium">
-                                                <CheckCircle className="w-4 h-4 mr-1.5 text-emerald-600 dark:text-emerald-400" />
-                                                {t('leads.contract_created_badge', 'Shartnoma tuzilgan')}
-                                                {viewingLead.contract?.contract_number ? ` (#${viewingLead.contract.contract_number})` : ''}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Badge
+                                                variant="outline"
+                                                className="h-9 border-emerald-200 bg-emerald-50 px-3 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                            >
+                                                <CheckCircle className="mr-1.5 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                                {t(
+                                                    'leads.contract_created_badge',
+                                                    'Shartnoma tuzilgan',
+                                                )}
+                                                {viewingLead.contract
+                                                    ?.contract_number
+                                                    ? ` (#${viewingLead.contract.contract_number})`
+                                                    : ''}
                                             </Badge>
                                             {viewingLead.contract?.id && (
                                                 <a
                                                     href={`/admin/contracts?search=${encodeURIComponent(viewingLead.contract.contract_number || '')}`}
-                                                    className="inline-flex items-center h-9 px-3 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800"
+                                                    className="inline-flex h-9 items-center rounded-lg border border-blue-200 bg-blue-50 px-3 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
                                                 >
-                                                    <FileText className="w-3.5 h-3.5 mr-1.5" />
-                                                    {t('leads.view_contract', 'Shartnomani ko\'rish')}
+                                                    <FileText className="mr-1.5 h-3.5 w-3.5" />
+                                                    {t(
+                                                        'leads.view_contract',
+                                                        "Shartnomani ko'rish",
+                                                    )}
                                                 </a>
                                             )}
                                         </div>
-                                    ) : (
-                                        can('contracts.create') ? (
-                                            <Button
-                                                type="button"
-                                                onClick={() => openConvertModal(viewingLead)}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                                            >
-                                                <UserCheck className="w-4 h-4 mr-1.5" />
-                                                {t('leads.convert_button', 'Shartnoma tuzish')}
-                                            </Button>
-                                        ) : null
-                                    )}
+                                    ) : can('contracts.create') ? (
+                                        <Button
+                                            type="button"
+                                            onClick={() =>
+                                                openConvertModal(viewingLead)
+                                            }
+                                            className="bg-emerald-600 text-white hover:bg-emerald-700"
+                                        >
+                                            <UserCheck className="mr-1.5 h-4 w-4" />
+                                            {t(
+                                                'leads.convert_button',
+                                                'Shartnoma tuzish',
+                                            )}
+                                        </Button>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -796,14 +1164,23 @@ setViewingLead(null);
             </Dialog>
 
             {/* Image Preview Modal */}
-            <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+            <Dialog
+                open={!!previewImage}
+                onOpenChange={(open) => !open && setPreviewImage(null)}
+            >
                 <DialogContent className="w-[95vw] max-w-2xl p-3">
                     <DialogHeader>
-                        <DialogTitle className="text-sm font-semibold">{previewImage?.title}</DialogTitle>
+                        <DialogTitle className="text-sm font-semibold">
+                            {previewImage?.title}
+                        </DialogTitle>
                     </DialogHeader>
                     {previewImage && (
-                        <div className="rounded-lg overflow-hidden border bg-background flex items-center justify-center max-h-[75vh]">
-                            <img src={previewImage.src} alt={previewImage.title} className="max-w-full max-h-[70vh] object-contain" />
+                        <div className="flex max-h-[75vh] items-center justify-center overflow-hidden rounded-lg border bg-background">
+                            <img
+                                src={previewImage.src}
+                                alt={previewImage.title}
+                                className="max-h-[70vh] max-w-full object-contain"
+                            />
                         </div>
                     )}
                 </DialogContent>
@@ -811,21 +1188,33 @@ setViewingLead(null);
 
             {/* Create Lead Modal */}
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-lg overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            {t('leads.create_lead_title', 'Yangi Lid Qo\'shish')}
+                            <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            {t('leads.create_lead_title', "Yangi Lid Qo'shish")}
                         </DialogTitle>
-                        <DialogDescription className="sr-only">Yangi lid ma'lumotlarini to'ldiring</DialogDescription>
+                        <DialogDescription className="sr-only">
+                            Yangi lid ma'lumotlarini to'ldiring
+                        </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreateSubmit} className="space-y-3.5 text-xs">
+                    <form
+                        onSubmit={handleCreateSubmit}
+                        className="space-y-3.5 text-xs"
+                    >
                         <div>
-                            <Label required htmlFor="full_name">{t('leads.full_name', 'Mijoz F.I.O')}</Label>
+                            <Label required htmlFor="full_name">
+                                {t('leads.full_name', 'Mijoz F.I.O')}
+                            </Label>
                             <Input
                                 id="full_name"
                                 value={createForm.data.full_name}
-                                onChange={(e) => createForm.setData('full_name', e.target.value)}
+                                onChange={(e) =>
+                                    createForm.setData(
+                                        'full_name',
+                                        e.target.value,
+                                    )
+                                }
                                 placeholder="Familiya Ism Sharif"
                                 required
                                 className="mt-1"
@@ -833,22 +1222,36 @@ setViewingLead(null);
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label required htmlFor="phone">{t('leads.phone', 'Telefon')}</Label>
+                                <Label required htmlFor="phone">
+                                    {t('leads.phone', 'Telefon')}
+                                </Label>
                                 <Input
                                     id="phone"
                                     value={createForm.data.phone}
-                                    onChange={(e) => createForm.setData('phone', e.target.value)}
+                                    onChange={(e) =>
+                                        createForm.setData(
+                                            'phone',
+                                            e.target.value,
+                                        )
+                                    }
                                     placeholder="+998"
                                     required
                                     className="mt-1 font-mono"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="category">{t('leads.category', 'Toifa')}</Label>
+                                <Label htmlFor="category">
+                                    {t('leads.category', 'Toifa')}
+                                </Label>
                                 <SearchableSelect
                                     id="category"
                                     value={createForm.data.category}
-                                    onChange={(val) => createForm.setData('category', String(val))}
+                                    onChange={(val) =>
+                                        createForm.setData(
+                                            'category',
+                                            String(val),
+                                        )
+                                    }
                                     options={[
                                         { value: 'B', label: 'B toifa' },
                                         { value: 'A', label: 'A toifa' },
@@ -862,29 +1265,82 @@ setViewingLead(null);
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="branch_id">{t('leads.branch', 'Filial')}</Label>
+                                <Label htmlFor="branch_id">
+                                    {t('leads.branch', 'Filial')}
+                                </Label>
                                 <SearchableSelect
                                     id="branch_id"
                                     value={createForm.data.branch_id}
-                                    onChange={(val) => createForm.setData('branch_id', val ? String(val) : '')}
-                                    options={branches.map((b) => ({ value: String(b.id), label: b.name }))}
+                                    onChange={(val) =>
+                                        createForm.setData(
+                                            'branch_id',
+                                            val ? String(val) : '',
+                                        )
+                                    }
+                                    options={branches.map((b) => ({
+                                        value: String(b.id),
+                                        label: b.name,
+                                    }))}
                                     placeholder={t('leads.branch', 'Filial')}
                                     className="mt-1"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="source">{t('leads.source', 'Manba')}</Label>
+                                <Label htmlFor="source">
+                                    {t('leads.source', 'Manba')}
+                                </Label>
                                 <SearchableSelect
                                     id="source"
                                     value={createForm.data.source}
-                                    onChange={(val) => createForm.setData('source', String(val))}
+                                    onChange={(val) =>
+                                        createForm.setData(
+                                            'source',
+                                            String(val),
+                                        )
+                                    }
                                     options={[
-                                        { value: 'reception_manual', label: t('leads.source_reception_manual', 'Reception') },
-                                        { value: 'telegram_bot', label: t('leads.source_telegram_bot', 'Telegram bot') },
-                                        { value: 'instagram', label: t('leads.source_instagram', 'Instagram') },
-                                        { value: 'website', label: t('leads.source_website', 'Vebsayt') },
-                                        { value: 'recommendation', label: t('leads.source_recommendation', 'Tavsiya') },
-                                        { value: 'walk_in', label: t('leads.source_walk_in', "O'zi kelgan (Ofis)") },
+                                        {
+                                            value: 'reception_manual',
+                                            label: t(
+                                                'leads.source_reception_manual',
+                                                'Reception',
+                                            ),
+                                        },
+                                        {
+                                            value: 'telegram_bot',
+                                            label: t(
+                                                'leads.source_telegram_bot',
+                                                'Telegram bot',
+                                            ),
+                                        },
+                                        {
+                                            value: 'instagram',
+                                            label: t(
+                                                'leads.source_instagram',
+                                                'Instagram',
+                                            ),
+                                        },
+                                        {
+                                            value: 'website',
+                                            label: t(
+                                                'leads.source_website',
+                                                'Vebsayt',
+                                            ),
+                                        },
+                                        {
+                                            value: 'recommendation',
+                                            label: t(
+                                                'leads.source_recommendation',
+                                                'Tavsiya',
+                                            ),
+                                        },
+                                        {
+                                            value: 'walk_in',
+                                            label: t(
+                                                'leads.source_walk_in',
+                                                "O'zi kelgan (Ofis)",
+                                            ),
+                                        },
                                     ]}
                                     className="mt-1"
                                 />
@@ -892,21 +1348,35 @@ setViewingLead(null);
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="preferred_time">{t('leads.preferred_time', 'Qulay o\'qish vaqti')}</Label>
+                                <Label htmlFor="preferred_time">
+                                    {t(
+                                        'leads.preferred_time',
+                                        "Qulay o'qish vaqti",
+                                    )}
+                                </Label>
                                 <Input
                                     id="preferred_time"
                                     value={createForm.data.preferred_time}
-                                    onChange={(e) => createForm.setData('preferred_time', e.target.value)}
+                                    onChange={(e) =>
+                                        createForm.setData(
+                                            'preferred_time',
+                                            e.target.value,
+                                        )
+                                    }
                                     placeholder="09:00 - 11:00 / Kechki"
                                     className="mt-1"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="birth_date">{t('leads.birth_date', 'Tug\'ilgan sana')}</Label>
+                                <Label htmlFor="birth_date">
+                                    {t('leads.birth_date', "Tug'ilgan sana")}
+                                </Label>
                                 <DatePicker
                                     id="birth_date"
                                     value={createForm.data.birth_date}
-                                    onChange={(val) => createForm.setData('birth_date', val)}
+                                    onChange={(val) =>
+                                        createForm.setData('birth_date', val)
+                                    }
                                     placeholder="YYYY-MM-DD"
                                     className="mt-1"
                                 />
@@ -914,33 +1384,54 @@ setViewingLead(null);
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                             <div>
-                                <Label htmlFor="passport_series">{t('leads.passport_series', 'Seriya')}</Label>
+                                <Label htmlFor="passport_series">
+                                    {t('leads.passport_series', 'Seriya')}
+                                </Label>
                                 <Input
                                     id="passport_series"
                                     value={createForm.data.passport_series}
-                                    onChange={(e) => createForm.setData('passport_series', e.target.value.toUpperCase())}
+                                    onChange={(e) =>
+                                        createForm.setData(
+                                            'passport_series',
+                                            e.target.value.toUpperCase(),
+                                        )
+                                    }
                                     placeholder="AA"
                                     maxLength={10}
                                     className="mt-1 font-mono uppercase"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="passport_number">{t('leads.passport_number', 'Raqam')}</Label>
+                                <Label htmlFor="passport_number">
+                                    {t('leads.passport_number', 'Raqam')}
+                                </Label>
                                 <Input
                                     id="passport_number"
                                     value={createForm.data.passport_number}
-                                    onChange={(e) => createForm.setData('passport_number', e.target.value)}
+                                    onChange={(e) =>
+                                        createForm.setData(
+                                            'passport_number',
+                                            e.target.value,
+                                        )
+                                    }
                                     placeholder="1234567"
                                     maxLength={20}
                                     className="mt-1 font-mono"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="pinfl">{t('leads.pinfl', 'JSHSHIR')}</Label>
+                                <Label htmlFor="pinfl">
+                                    {t('leads.pinfl', 'JSHSHIR')}
+                                </Label>
                                 <Input
                                     id="pinfl"
                                     value={createForm.data.pinfl}
-                                    onChange={(e) => createForm.setData('pinfl', e.target.value)}
+                                    onChange={(e) =>
+                                        createForm.setData(
+                                            'pinfl',
+                                            e.target.value,
+                                        )
+                                    }
                                     placeholder="14 xonali"
                                     maxLength={20}
                                     className="mt-1 font-mono"
@@ -948,30 +1439,49 @@ setViewingLead(null);
                             </div>
                         </div>
                         <div>
-                            <Label htmlFor="address">{t('leads.address', 'Yashash manzili')}</Label>
+                            <Label htmlFor="address">
+                                {t('leads.address', 'Yashash manzili')}
+                            </Label>
                             <Input
                                 id="address"
                                 value={createForm.data.address}
-                                onChange={(e) => createForm.setData('address', e.target.value)}
+                                onChange={(e) =>
+                                    createForm.setData(
+                                        'address',
+                                        e.target.value,
+                                    )
+                                }
                                 placeholder="Toshkent sh., Chilonzor tumani..."
                                 className="mt-1"
                             />
                         </div>
                         <div>
-                            <Label htmlFor="notes">{t('leads.notes', 'Izoh')}</Label>
+                            <Label htmlFor="notes">
+                                {t('leads.notes', 'Izoh')}
+                            </Label>
                             <Input
                                 id="notes"
                                 value={createForm.data.notes}
-                                onChange={(e) => createForm.setData('notes', e.target.value)}
+                                onChange={(e) =>
+                                    createForm.setData('notes', e.target.value)
+                                }
                                 placeholder="Qo'shimcha eslatma..."
                                 className="mt-1"
                             />
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                            <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowCreateModal(false)}
+                            >
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" variant="brand" disabled={createForm.processing}>
+                            <Button
+                                type="submit"
+                                variant="brand"
+                                disabled={createForm.processing}
+                            >
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>
@@ -980,15 +1490,31 @@ setViewingLead(null);
             </Dialog>
 
             {/* Convert to Student / Create Contract Modal */}
-            <Dialog open={!!convertingLead} onOpenChange={(open) => !open && setConvertingLead(null)}>
-                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
+            <Dialog
+                open={!!convertingLead}
+                onOpenChange={(open) => !open && setConvertingLead(null)}
+            >
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-lg overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{t('contracts.create_title', 'Yangi Shartnoma Rasmiylashtirish')}</DialogTitle>
+                        <DialogTitle>
+                            {t(
+                                'contracts.create_title',
+                                'Yangi Shartnoma Rasmiylashtirish',
+                            )}
+                        </DialogTitle>
                     </DialogHeader>
                     {convertingLead && (
-                        <form onSubmit={handleConvertSubmit} className="space-y-4 text-xs">
+                        <form
+                            onSubmit={handleConvertSubmit}
+                            className="space-y-4 text-xs"
+                        >
                             <div>
-                                <Label required htmlFor="lead_student">{t('contracts.select_student', 'Talaba (O\'quvchi)')}</Label>
+                                <Label required htmlFor="lead_student">
+                                    {t(
+                                        'contracts.select_student',
+                                        "Talaba (O'quvchi)",
+                                    )}
+                                </Label>
                                 <SearchableSelect
                                     id="lead_student"
                                     value={String(convertingLead.id)}
@@ -1001,23 +1527,36 @@ setViewingLead(null);
                                             sublabel: convertingLead.phone,
                                         },
                                     ]}
-                                    placeholder={t('contracts.select_student', 'Talabani tanlang')}
+                                    placeholder={t(
+                                        'contracts.select_student',
+                                        'Talabani tanlang',
+                                    )}
                                     className="mt-1"
                                 />
                             </div>
 
                             <div>
-                                <Label required htmlFor="conv_contract_type_id">{t('contracts.select_tariff', 'Tarif')}</Label>
+                                <Label required htmlFor="conv_contract_type_id">
+                                    {t('contracts.select_tariff', 'Tarif')}
+                                </Label>
                                 <SearchableSelect
                                     id="conv_contract_type_id"
                                     value={convertForm.data.contract_type_id}
-                                    onChange={(val) => convertForm.setData('contract_type_id', val)}
+                                    onChange={(val) =>
+                                        convertForm.setData(
+                                            'contract_type_id',
+                                            val,
+                                        )
+                                    }
                                     options={contractTypes.map((ct) => ({
                                         value: String(ct.id),
                                         label: ct.name,
                                         sublabel: `${formatMoney(ct.price)} (${ct.category})`,
                                     }))}
-                                    placeholder={t('contracts.select_tariff', 'Tarifni tanlang')}
+                                    placeholder={t(
+                                        'contracts.select_tariff',
+                                        'Tarifni tanlang',
+                                    )}
                                     allowClear
                                     className="mt-1"
                                 />
@@ -1025,24 +1564,44 @@ setViewingLead(null);
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="conv_group_id">{t('contracts.select_group', 'Guruh')}</Label>
+                                    <Label htmlFor="conv_group_id">
+                                        {t('contracts.select_group', 'Guruh')}
+                                    </Label>
                                     <SearchableSelect
                                         id="conv_group_id"
                                         value={convertForm.data.group_id}
-                                        onChange={(val) => convertForm.setData('group_id', val)}
-                                        options={groups.map((g) => ({ value: String(g.id), label: g.name }))}
-                                        placeholder={t('contracts.select_group', 'Guruhni tanlang')}
+                                        onChange={(val) =>
+                                            convertForm.setData('group_id', val)
+                                        }
+                                        options={groups.map((g) => ({
+                                            value: String(g.id),
+                                            label: g.name,
+                                        }))}
+                                        placeholder={t(
+                                            'contracts.select_group',
+                                            'Guruhni tanlang',
+                                        )}
                                         allowClear
                                         className="mt-1"
                                     />
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="conv_discount_amount">{t('contracts.discount_amount', 'Chegirma Miqdori (UZS)')}</Label>
+                                    <Label htmlFor="conv_discount_amount">
+                                        {t(
+                                            'contracts.discount_amount',
+                                            'Chegirma Miqdori (UZS)',
+                                        )}
+                                    </Label>
                                     <MoneyInput
                                         id="conv_discount_amount"
                                         value={convertForm.data.discount_amount}
-                                        onChange={(val) => convertForm.setData('discount_amount', Number(val) || 0)}
+                                        onChange={(val) =>
+                                            convertForm.setData(
+                                                'discount_amount',
+                                                Number(val) || 0,
+                                            )
+                                        }
                                         className="mt-1"
                                         placeholder="0"
                                         suffix="UZS"
@@ -1052,47 +1611,89 @@ setViewingLead(null);
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label htmlFor="conv_start_date">{t('contracts.start_date', 'Boshlanish Sanasi')}</Label>
+                                    <Label htmlFor="conv_start_date">
+                                        {t(
+                                            'contracts.start_date',
+                                            'Boshlanish Sanasi',
+                                        )}
+                                    </Label>
                                     <DatePicker
                                         id="conv_start_date"
                                         value={convertForm.data.start_date}
-                                        onChange={(val) => convertForm.setData('start_date', val)}
+                                        onChange={(val) =>
+                                            convertForm.setData(
+                                                'start_date',
+                                                val,
+                                            )
+                                        }
                                         className="mt-1"
                                     />
                                     {convertForm.errors.start_date && (
-                                        <p className="text-red-500 text-xs mt-1">{t(convertForm.errors.start_date, convertForm.errors.start_date)}</p>
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {t(
+                                                convertForm.errors.start_date,
+                                                convertForm.errors.start_date,
+                                            )}
+                                        </p>
                                     )}
                                 </div>
                                 <div>
-                                    <Label htmlFor="conv_end_date">{t('contracts.end_date', 'Tugash Sanasi')}</Label>
+                                    <Label htmlFor="conv_end_date">
+                                        {t(
+                                            'contracts.end_date',
+                                            'Tugash Sanasi',
+                                        )}
+                                    </Label>
                                     <DatePicker
                                         id="conv_end_date"
                                         value={convertForm.data.end_date}
-                                        onChange={(val) => convertForm.setData('end_date', val)}
+                                        onChange={(val) =>
+                                            convertForm.setData('end_date', val)
+                                        }
                                         className="mt-1"
                                     />
                                     {convertForm.errors.end_date && (
-                                        <p className="text-red-500 text-xs mt-1">{t(convertForm.errors.end_date, convertForm.errors.end_date)}</p>
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {t(
+                                                convertForm.errors.end_date,
+                                                convertForm.errors.end_date,
+                                            )}
+                                        </p>
                                     )}
                                 </div>
                             </div>
 
                             <div>
-                                <Label htmlFor="conv_terms">{t('common.description', 'Tavsif')}</Label>
+                                <Label htmlFor="conv_terms">
+                                    {t('common.description', 'Tavsif')}
+                                </Label>
                                 <Input
                                     id="conv_terms"
                                     value={convertForm.data.terms}
-                                    onChange={(e) => convertForm.setData('terms', e.target.value)}
+                                    onChange={(e) =>
+                                        convertForm.setData(
+                                            'terms',
+                                            e.target.value,
+                                        )
+                                    }
                                     className="mt-1"
                                     placeholder="Maxsus kelishuvlar..."
                                 />
                             </div>
 
                             <div className="flex justify-end gap-2 pt-2">
-                                <Button type="button" variant="outline" onClick={() => setConvertingLead(null)}>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setConvertingLead(null)}
+                                >
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>
-                                <Button type="submit" variant="brand" disabled={convertForm.processing}>
+                                <Button
+                                    type="submit"
+                                    variant="brand"
+                                    disabled={convertForm.processing}
+                                >
                                     {t('common.save', 'Saqlash')}
                                 </Button>
                             </div>

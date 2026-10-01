@@ -19,7 +19,15 @@ import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { Payment } from '../types';
 
 interface Props {
-    payments: { data: Payment[]; links: any[]; total: number; current_page: number; last_page: number; from?: number; to?: number };
+    payments: {
+        data: Payment[];
+        links: any[];
+        total: number;
+        current_page: number;
+        last_page: number;
+        from?: number;
+        to?: number;
+    };
     onDeletePayment: (payment: Payment) => void;
     filters?: {
         branch_id?: string | number;
@@ -28,18 +36,26 @@ interface Props {
     };
 }
 
-export function PaymentsTab({ payments, onDeletePayment, filters = {} }: Props) {
+export function PaymentsTab({
+    payments,
+    onDeletePayment,
+    filters = {},
+}: Props) {
     const { t } = useTranslation();
     const can = useCan();
 
     const handlePerPageChange = (newPerPage: string) => {
-        router.get('/admin/finance', {
-            ...filters,
-            per_page: newPerPage,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            '/admin/finance',
+            {
+                ...filters,
+                per_page: newPerPage,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     const getMethodLabel = (method: string) => {
@@ -64,68 +80,111 @@ export function PaymentsTab({ payments, onDeletePayment, filters = {} }: Props) 
     };
 
     return (
-        <div className="space-y-4 w-full max-w-full min-w-0">
+        <div className="w-full max-w-full min-w-0 space-y-4">
             {/* Top Toolbar */}
             <PageFilterBar>
                 <div className="flex-1" />
-                <PerPageSelect value={filters?.per_page || '15'} onChange={handlePerPageChange} />
+                <PerPageSelect
+                    value={filters?.per_page || '15'}
+                    onChange={handlePerPageChange}
+                />
             </PageFilterBar>
 
             {/* Desktop & Tablet Table with dedicated Horizontal Scrollbar */}
-            <div className="hidden md:block w-full max-w-full overflow-hidden">
-                <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs">
+            <div className="hidden w-full max-w-full overflow-hidden md:block">
+                <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-800">
                     <Table className="w-full min-w-[850px]">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>{t('finance.receipt', 'Chek №')}</TableHead>
-                                <TableHead>{t('finance.student', 'Talaba')}</TableHead>
-                                <TableHead>{t('finance.contract', 'Shartnoma')}</TableHead>
-                                <TableHead>{t('finance.amount', 'Summa')}</TableHead>
-                                <TableHead>{t('finance.method', 'Usul')}</TableHead>
-                                <TableHead>{t('finance.register', 'Kassa')}</TableHead>
-                                <TableHead>{t('finance.receiver', 'Qabul qildi')}</TableHead>
-                                <TableHead>{t('finance.date', 'Sana')}</TableHead>
-                                <TableHead className="text-right">{t('common.actions', 'Amallar')}</TableHead>
+                                <TableHead>
+                                    {t('finance.receipt', 'Chek №')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.student', 'Talaba')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.contract', 'Shartnoma')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.amount', 'Summa')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.method', 'Usul')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.register', 'Kassa')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.receiver', 'Qabul qildi')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('finance.date', 'Sana')}
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    {t('common.actions', 'Amallar')}
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {payments.data.length === 0 ? (
                                 <TableEmpty
                                     colSpan={9}
-                                    icon={<ArrowDownRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />}
-                                    title={t('finance.no_payments', 'To\'lovlar topilmadi')}
+                                    icon={
+                                        <ArrowDownRight className="h-12 w-12 text-gray-300 dark:text-gray-600" />
+                                    }
+                                    title={t(
+                                        'finance.no_payments',
+                                        "To'lovlar topilmadi",
+                                    )}
                                 />
                             ) : (
                                 payments.data.map((p) => (
                                     <TableRow key={p.id}>
-                                        <TableCell className="font-mono font-medium whitespace-nowrap">{p.receipt_number}</TableCell>
-                                        <TableCell className="font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                        <TableCell className="font-mono font-medium whitespace-nowrap">
+                                            {p.receipt_number}
+                                        </TableCell>
+                                        <TableCell className="font-medium whitespace-nowrap text-gray-900 dark:text-white">
                                             {p.student?.full_name}
                                         </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                            {p.contract?.contract_number ? `#${p.contract.contract_number}` : '-'}
+                                        <TableCell className="whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                            {p.contract?.contract_number
+                                                ? `#${p.contract.contract_number}`
+                                                : '-'}
                                         </TableCell>
-                                        <TableCell className="font-bold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
+                                        <TableCell className="font-mono font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400">
                                             +{formatMoney(p.amount)}
                                         </TableCell>
                                         <TableCell className="whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                                {getMethodLabel(p.payment_method)}
+                                            <span className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                                {getMethodLabel(
+                                                    p.payment_method,
+                                                )}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.cash_register?.name}</TableCell>
-                                        <TableCell className="text-gray-500 dark:text-gray-400 whitespace-nowrap">{p.received_by?.name || '-'}</TableCell>
-                                        <TableCell className="text-gray-400 dark:text-gray-500 whitespace-nowrap font-mono text-xs">{formatDateTime(p.paid_at)}</TableCell>
+                                        <TableCell className="whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                            {p.cash_register?.name}
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                            {p.received_by?.name || '-'}
+                                        </TableCell>
+                                        <TableCell className="font-mono text-xs whitespace-nowrap text-gray-400 dark:text-gray-500">
+                                            {formatDateTime(p.paid_at)}
+                                        </TableCell>
                                         <TableCell className="text-right whitespace-nowrap">
                                             {can('payments.edit') && (
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() => onDeletePayment(p)}
-                                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                    title={t('common.delete', "O'chirish")}
+                                                    onClick={() =>
+                                                        onDeletePayment(p)
+                                                    }
+                                                    className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+                                                    title={t(
+                                                        'common.delete',
+                                                        "O'chirish",
+                                                    )}
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
                                             )}
                                         </TableCell>
@@ -138,57 +197,79 @@ export function PaymentsTab({ payments, onDeletePayment, filters = {} }: Props) 
             </div>
 
             {/* Mobile Payments Card Feed */}
-            <div className="md:hidden space-y-3 w-full max-w-full min-w-0">
+            <div className="w-full max-w-full min-w-0 space-y-3 md:hidden">
                 {payments.data.length === 0 ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-100 dark:border-gray-700">
-                        <ArrowDownRight className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-                        <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{t('finance.no_payments', 'To\'lovlar topilmadi')}</p>
+                    <div className="rounded-xl border border-gray-100 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <ArrowDownRight className="mx-auto mb-2 h-10 w-10 text-gray-300 dark:text-gray-600" />
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            {t('finance.no_payments', "To'lovlar topilmadi")}
+                        </p>
                     </div>
                 ) : (
                     payments.data.map((p) => (
                         <div
                             key={p.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl p-3.5 border border-gray-100 dark:border-gray-700 shadow-xs space-y-2.5 min-w-0"
+                            className="min-w-0 space-y-2.5 rounded-xl border border-gray-100 bg-white p-3.5 shadow-xs dark:border-gray-700 dark:bg-gray-800"
                         >
-                            <div className="flex items-start justify-between gap-2 min-w-0">
+                            <div className="flex min-w-0 items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <div className="font-bold text-sm text-gray-900 dark:text-white truncate">{p.student?.full_name || '-'}</div>
-                                    <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 truncate">
+                                    <div className="truncate text-sm font-bold text-gray-900 dark:text-white">
+                                        {p.student?.full_name || '-'}
+                                    </div>
+                                    <div className="mt-0.5 flex items-center gap-1.5 truncate font-mono text-[11px] text-gray-500 dark:text-gray-400">
                                         <span>#{p.receipt_number}</span>
                                         {p.contract?.contract_number && (
                                             <>
                                                 <span>•</span>
-                                                <span>#{p.contract.contract_number}</span>
+                                                <span>
+                                                    #
+                                                    {p.contract.contract_number}
+                                                </span>
                                             </>
                                         )}
                                     </div>
                                 </div>
-                                <div className="text-right shrink-0">
-                                    <div className="font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
-                                        +{formatNumber(p.amount)} <span className="text-[10px] font-normal">UZS</span>
+                                <div className="shrink-0 text-right">
+                                    <div className="font-mono text-sm font-bold text-emerald-600 sm:text-base dark:text-emerald-400">
+                                        +{formatNumber(p.amount)}{' '}
+                                        <span className="text-[10px] font-normal">
+                                            UZS
+                                        </span>
                                     </div>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
+                                    <span className="mt-0.5 inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                         {getMethodLabel(p.payment_method)}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between text-xs pt-1.5 border-t border-gray-50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 gap-2 min-w-0">
-                                <div className="truncate min-w-0 flex-1">
-                                    <span className="truncate">{p.cash_register?.name}</span>
-                                    {p.received_by?.name && <span className="text-[11px] text-gray-400"> ({p.received_by.name})</span>}
+                            <div className="flex min-w-0 items-center justify-between gap-2 border-t border-gray-50 pt-1.5 text-xs text-gray-500 dark:border-gray-700/50 dark:text-gray-400">
+                                <div className="min-w-0 flex-1 truncate">
+                                    <span className="truncate">
+                                        {p.cash_register?.name}
+                                    </span>
+                                    {p.received_by?.name && (
+                                        <span className="text-[11px] text-gray-400">
+                                            {' '}
+                                            ({p.received_by.name})
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                    <span className="text-[11px] font-mono">{formatDateTime(p.paid_at)}</span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <span className="font-mono text-[11px]">
+                                        {formatDateTime(p.paid_at)}
+                                    </span>
                                     {can('payments.edit') && (
                                         <Button
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => onDeletePayment(p)}
-                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                            title={t('common.delete', "O'chirish")}
+                                            className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+                                            title={t(
+                                                'common.delete',
+                                                "O'chirish",
+                                            )}
                                         >
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                            <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                     )}
                                 </div>

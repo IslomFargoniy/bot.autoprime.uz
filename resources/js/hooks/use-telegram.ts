@@ -7,8 +7,8 @@ import { useEffect } from 'react';
  */
 export function isTelegramWebApp(): boolean {
     if (typeof window === 'undefined') {
-return false;
-}
+        return false;
+    }
 
     return !!(window as any).Telegram?.WebApp?.initData;
 }
@@ -19,8 +19,8 @@ return false;
  */
 export function telegramInitDataHeaders(): Record<string, string> {
     if (typeof window === 'undefined') {
-return {};
-}
+        return {};
+    }
 
     const initData = (window as any).Telegram?.WebApp?.initData;
 
@@ -33,19 +33,19 @@ return {};
 export function useTelegramBackButton(backUrl?: string) {
     useEffect(() => {
         if (typeof window === 'undefined') {
-return;
-}
+            return;
+        }
 
         const tg = (window as any).Telegram?.WebApp;
 
         if (!tg || !backUrl) {
-return;
-}
+            return;
+        }
 
         try {
             if (!tg.isVersionAtLeast?.('6.1') || !tg.BackButton) {
-return;
-}
+                return;
+            }
 
             tg.BackButton.show();
             const handler = () => router.visit(backUrl);
@@ -72,57 +72,87 @@ export function useTelegramHaptic() {
     return {
         light: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('light');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
         medium: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('medium');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
         heavy: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('heavy');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
         success: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
         error: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
         warning: () => {
             try {
-                const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : undefined;
+                const tg =
+                    typeof window !== 'undefined'
+                        ? (window as any).Telegram?.WebApp
+                        : undefined;
 
                 if (tg && tg.isVersionAtLeast?.('6.1') && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('warning');
                 }
-            } catch { /* not running inside Telegram */ }
+            } catch {
+                /* not running inside Telegram */
+            }
         },
     };
 }
@@ -132,32 +162,46 @@ export function useTelegramHaptic() {
  */
 export function initTelegramWebApp() {
     if (typeof window === 'undefined') {
-return;
-}
+        return;
+    }
 
     const tg = (window as any).Telegram?.WebApp;
 
     if (!tg) {
-return;
-}
+        return;
+    }
 
     try {
         tg.ready();
-    } catch { /* not running inside Telegram */ }
+    } catch {
+        /* not running inside Telegram */
+    }
 
     try {
         tg.expand();
-    } catch { /* not running inside Telegram */ }
-
-    if (tg.isVersionAtLeast?.('8.0') && typeof tg.requestFullscreen === 'function') {
-        try {
-            tg.requestFullscreen();
-        } catch { /* not running inside Telegram */ }
+    } catch {
+        /* not running inside Telegram */
     }
 
-    if (tg.isVersionAtLeast?.('7.7') && typeof tg.disableVerticalSwipes === 'function') {
+    if (
+        tg.isVersionAtLeast?.('8.0') &&
+        typeof tg.requestFullscreen === 'function'
+    ) {
+        try {
+            tg.requestFullscreen();
+        } catch {
+            /* not running inside Telegram */
+        }
+    }
+
+    if (
+        tg.isVersionAtLeast?.('7.7') &&
+        typeof tg.disableVerticalSwipes === 'function'
+    ) {
         try {
             tg.disableVerticalSwipes();
-        } catch { /* not running inside Telegram */ }
+        } catch {
+            /* not running inside Telegram */
+        }
     }
 }

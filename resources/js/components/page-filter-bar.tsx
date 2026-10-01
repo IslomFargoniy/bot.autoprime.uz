@@ -28,7 +28,12 @@ export function PageFilterPills<T = string>({
     className,
 }: PageFilterPillsProps<T>) {
     return (
-        <div className={cn("flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full md:w-auto flex-nowrap md:flex-wrap", className)}>
+        <div
+            className={cn(
+                'no-scrollbar flex w-full flex-nowrap items-center gap-1.5 overflow-x-auto py-0.5 md:w-auto md:flex-wrap',
+                className,
+            )}
+        >
             {items.map((item) => {
                 const isActive = item.value === activeValue;
 
@@ -38,18 +43,23 @@ export function PageFilterPills<T = string>({
                         type="button"
                         onClick={() => onChange(item.value)}
                         className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors shrink-0 flex items-center gap-1.5",
+                            'flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
                             isActive
-                                ? (item.color || "bg-blue-600 text-white border-blue-600 shadow-xs")
-                                : "bg-muted/50 text-foreground border-input hover:bg-muted"
+                                ? item.color ||
+                                      'border-blue-600 bg-blue-600 text-white shadow-xs'
+                                : 'border-input bg-muted/50 text-foreground hover:bg-muted',
                         )}
                     >
                         <span>{item.label}</span>
                         {item.count !== undefined && (
-                            <span className={cn(
-                                "px-1.5 py-0.2 rounded-full text-[10px]",
-                                isActive ? "bg-white/20 text-white" : "bg-background/80 text-foreground/80"
-                            )}>
+                            <span
+                                className={cn(
+                                    'py-0.2 rounded-full px-1.5 text-[10px]',
+                                    isActive
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-background/80 text-foreground/80',
+                                )}
+                            >
                                 {item.count}
                             </span>
                         )}
@@ -98,15 +108,23 @@ export function PageFilterSearch({
     };
 
     return (
-        <form onSubmit={handleFormSubmit} className={cn("flex gap-2 w-full md:w-auto items-center flex-wrap sm:flex-nowrap", className)}>
+        <form
+            onSubmit={handleFormSubmit}
+            className={cn(
+                'flex w-full flex-wrap items-center gap-2 sm:flex-nowrap md:w-auto',
+                className,
+            )}
+        >
             {onChange !== undefined && (
-                <div className={cn("relative flex-1", searchWidth)}>
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <div className={cn('relative flex-1', searchWidth)}>
+                    <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         value={value || ''}
                         onChange={(e) => onChange(e.target.value)}
-                        placeholder={placeholder || t('common.search', 'Qidirish...')}
-                        className="pl-9 h-10 text-sm bg-background text-foreground"
+                        placeholder={
+                            placeholder || t('common.search', 'Qidirish...')
+                        }
+                        className="h-10 bg-background pl-9 text-sm text-foreground"
                     />
                 </div>
             )}
@@ -114,13 +132,22 @@ export function PageFilterSearch({
             {children}
 
             {perPage !== undefined && onPerPageChange && (
-                <PerPageSelect value={String(perPage)} onChange={onPerPageChange} />
+                <PerPageSelect
+                    value={String(perPage)}
+                    onChange={onPerPageChange}
+                />
             )}
 
             {showSubmitButton && (
-                <Button type="submit" variant="secondary" className="shrink-0 h-10 px-4">
-                    <Search className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{submitLabel || t('common.find', 'Qidiruv')}</span>
+                <Button
+                    type="submit"
+                    variant="secondary"
+                    className="h-10 shrink-0 px-4"
+                >
+                    <Search className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">
+                        {submitLabel || t('common.find', 'Qidiruv')}
+                    </span>
                 </Button>
             )}
         </form>
@@ -134,10 +161,12 @@ interface PageFilterBarProps {
 
 export function PageFilterBar({ children, className }: PageFilterBarProps) {
     return (
-        <div className={cn(
-            "bg-card border border-border rounded-xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between",
-            className
-        )}>
+        <div
+            className={cn(
+                'flex flex-col items-stretch justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-xs sm:p-4 md:flex-row md:items-center',
+                className,
+            )}
+        >
             {children}
         </div>
     );

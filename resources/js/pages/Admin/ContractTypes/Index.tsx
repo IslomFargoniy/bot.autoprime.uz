@@ -51,7 +51,10 @@ interface PageProps {
     };
 }
 
-export default function ContractTypesIndex({ contractTypes, filters = {} }: PageProps) {
+export default function ContractTypesIndex({
+    contractTypes,
+    filters = {},
+}: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
     const [perPage, setPerPage] = useState(filters?.per_page || '15');
@@ -60,13 +63,17 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
 
     const handlePerPageChange = (val: string) => {
         setPerPage(val);
-        router.get('/admin/contract-types', {
-            ...filters,
-            per_page: val,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            '/admin/contract-types',
+            {
+                ...filters,
+                per_page: val,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     const form = useForm({
@@ -114,27 +121,54 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
             form.put(`/admin/contract-types/${editingType.id}`, {
                 onSuccess: () => {
                     setShowModal(false);
-                    toast.success(t('contract_types.updated', 'Tarif muvaffaqiyatli yangilandi'));
+                    toast.success(
+                        t(
+                            'contract_types.updated',
+                            'Tarif muvaffaqiyatli yangilandi',
+                        ),
+                    );
                 },
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
             });
         } else {
             form.post('/admin/contract-types', {
                 onSuccess: () => {
                     setShowModal(false);
                     form.reset();
-                    toast.success(t('contract_types.created', 'Tarif muvaffaqiyatli yaratildi'));
+                    toast.success(
+                        t(
+                            'contract_types.created',
+                            'Tarif muvaffaqiyatli yaratildi',
+                        ),
+                    );
                 },
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
             });
         }
     };
 
     const handleDelete = (ct: ContractType) => {
-        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+        if (
+            confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
             router.delete(`/admin/contract-types/${ct.id}`, {
-                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                onSuccess: () =>
+                    toast.success(t('common.deleted', "O'chirildi")),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
             });
         }
     };
@@ -144,12 +178,18 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
             <Head title={t('contract_types.title', 'Shartnoma Tariflari')} />
 
             {/* Page Title & Add Button */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold">{t('contract_types.title', 'Shartnoma Tariflari')}</h1>
+            <div className="mb-6 flex items-center justify-between gap-4">
+                <h1 className="text-2xl font-bold">
+                    {t('contract_types.title', 'Shartnoma Tariflari')}
+                </h1>
                 {can('contract_types.manage') && (
-                    <Button onClick={openCreate} variant="brand" className="shrink-0">
-                        <Plus className="w-4 h-4 mr-2" />
-                        <span>{t('common.add', 'Qo\'shish')}</span>
+                    <Button
+                        onClick={openCreate}
+                        variant="brand"
+                        className="shrink-0"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        <span>{t('common.add', "Qo'shish")}</span>
                     </Button>
                 )}
             </div>
@@ -162,80 +202,159 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
 
             {/* Contract Types Grid / Table */}
             {contractTypes.data.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-800">
                     <Table>
                         <TableBody>
                             <TableEmpty
                                 icon={FileText}
-                                title={t('contract_types.no_tariffs', 'Tariflar mavjud emas')}
-                                description={t('contract_types.no_tariffs_desc', 'Hozircha hech qanday shartnoma tarifi yaratilmagan.')}
+                                title={t(
+                                    'contract_types.no_tariffs',
+                                    'Tariflar mavjud emas',
+                                )}
+                                description={t(
+                                    'contract_types.no_tariffs_desc',
+                                    'Hozircha hech qanday shartnoma tarifi yaratilmagan.',
+                                )}
                                 action={
-                                    (can('contract_types.manage') ? <Button variant="brand" size="sm" onClick={openCreate} className="mt-2">
-                                        <Plus className="w-4 h-4 mr-1.5" />
-                                        {t('contract_types.add_new', 'Yangi tarif qo\'shish')}
-                                    </Button> : null)
+                                    can('contract_types.manage') ? (
+                                        <Button
+                                            variant="brand"
+                                            size="sm"
+                                            onClick={openCreate}
+                                            className="mt-2"
+                                        >
+                                            <Plus className="mr-1.5 h-4 w-4" />
+                                            {t(
+                                                'contract_types.add_new',
+                                                "Yangi tarif qo'shish",
+                                            )}
+                                        </Button>
+                                    ) : null
                                 }
                             />
                         </TableBody>
                     </Table>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {contractTypes.data.map((ct) => (
                         <div
                             key={ct.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col justify-between"
+                            className="flex flex-col justify-between rounded-xl border border-gray-100 bg-white p-5 shadow-xs dark:border-gray-700 dark:bg-gray-800"
                         >
                             <div>
-                                <div className="flex items-center justify-between gap-2 mb-2">
-                                    <span className="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-xs">
-                                        {ct.category} {t('contract_types.category_suffix', 'toifa')}
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                    <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                        {ct.category}{' '}
+                                        {t(
+                                            'contract_types.category_suffix',
+                                            'toifa',
+                                        )}
                                     </span>
-                                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${ct.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                                        {ct.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
+                                    <span
+                                        className={`rounded-full px-2 py-0.5 text-[11px] ${ct.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}
+                                    >
+                                        {ct.is_active
+                                            ? t('common.active', 'Faol')
+                                            : t('common.inactive', 'Nofaol')}
                                     </span>
                                 </div>
 
-                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{ct.name}</h3>
-                                <p className="text-xl font-extrabold text-gray-900 dark:text-white mt-2">
-                                    {formatNumber(ct.price)} <span className="text-xs font-normal text-gray-500">UZS</span>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                                    {ct.name}
+                                </h3>
+                                <p className="mt-2 text-xl font-extrabold text-gray-900 dark:text-white">
+                                    {formatNumber(ct.price)}{' '}
+                                    <span className="text-xs font-normal text-gray-500">
+                                        UZS
+                                    </span>
                                 </p>
 
                                 {ct.description && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">{ct.description}</p>
+                                    <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {ct.description}
+                                    </p>
                                 )}
 
                                 {/* Modules Checklist */}
-                                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 space-y-1.5 text-xs">
+                                <div className="mt-4 space-y-1.5 border-t border-gray-100 pt-3 text-xs dark:border-gray-700/60">
                                     <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                        <span>{t('contracts.has_theory', 'Nazariya')}:</span>
-                                        <span className="font-semibold">{ct.has_theory ? `${t('common.yes', 'Ha')} (${ct.required_theory_lessons} ${t('common.lessons', 'dars')})` : t('common.no', 'Yo\'q')}</span>
+                                        <span>
+                                            {t(
+                                                'contracts.has_theory',
+                                                'Nazariya',
+                                            )}
+                                            :
+                                        </span>
+                                        <span className="font-semibold">
+                                            {ct.has_theory
+                                                ? `${t('common.yes', 'Ha')} (${ct.required_theory_lessons} ${t('common.lessons', 'dars')})`
+                                                : t('common.no', "Yo'q")}
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                        <span>{t('contracts.has_driving', 'Amaliy haydash')}:</span>
-                                        <span className="font-semibold">{ct.has_driving ? `${t('common.yes', 'Ha')} (${ct.required_driving_lessons} ${t('common.lessons', 'dars')})` : t('common.no', 'Yo\'q')}</span>
+                                        <span>
+                                            {t(
+                                                'contracts.has_driving',
+                                                'Amaliy haydash',
+                                            )}
+                                            :
+                                        </span>
+                                        <span className="font-semibold">
+                                            {ct.has_driving
+                                                ? `${t('common.yes', 'Ha')} (${ct.required_driving_lessons} ${t('common.lessons', 'dars')})`
+                                                : t('common.no', "Yo'q")}
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                        <span>{t('contracts.has_lms', 'LMS Testlar')}:</span>
-                                        <span className="font-semibold">{ct.has_lms ? t('common.yes', 'Ha') : t('common.no', 'Yo\'q')}</span>
+                                        <span>
+                                            {t(
+                                                'contracts.has_lms',
+                                                'LMS Testlar',
+                                            )}
+                                            :
+                                        </span>
+                                        <span className="font-semibold">
+                                            {ct.has_lms
+                                                ? t('common.yes', 'Ha')
+                                                : t('common.no', "Yo'q")}
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                        <span>{t('contract_types.min_payment', 'Minimal to\'lov')}:</span>
-                                        <span className="font-semibold">{ct.min_theory_payment_percent}%</span>
+                                        <span>
+                                            {t(
+                                                'contract_types.min_payment',
+                                                "Minimal to'lov",
+                                            )}
+                                            :
+                                        </span>
+                                        <span className="font-semibold">
+                                            {ct.min_theory_payment_percent}%
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-2">
+                            <div className="mt-5 flex items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-700/60">
                                 {can('contract_types.manage') && (
-                                    <Button size="sm" variant="outline" onClick={() => openEdit(ct)} className="h-8 text-xs">
-                                        <Edit2 className="w-3.5 h-3.5 mr-1" />
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openEdit(ct)}
+                                        className="h-8 text-xs"
+                                    >
+                                        <Edit2 className="mr-1 h-3.5 w-3.5" />
                                         {t('common.edit', 'Tahrirlash')}
                                     </Button>
                                 )}
                                 {can('contract_types.manage') && (
-                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(ct)} className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400">
-                                        <Trash2 className="w-3.5 h-3.5" />
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleDelete(ct)}
+                                        className="h-8 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                 )}
                             </div>
@@ -254,34 +373,50 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-lg overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-blue-600" />
+                            <FileText className="h-5 w-5 text-blue-600" />
                             <span>
-                                {editingType ? t('contract_types.edit_title', 'Tarifni Tahrirlash') : t('contract_types.create_title', 'Yangi Tarif Yaratish')}
+                                {editingType
+                                    ? t(
+                                          'contract_types.edit_title',
+                                          'Tarifni Tahrirlash',
+                                      )
+                                    : t(
+                                          'contract_types.create_title',
+                                          'Yangi Tarif Yaratish',
+                                      )}
                             </span>
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="name" required>{t('contract_types.name', 'Tarif Nomi')}</Label>
+                                <Label htmlFor="name" required>
+                                    {t('contract_types.name', 'Tarif Nomi')}
+                                </Label>
                                 <Input
                                     id="name"
                                     value={form.data.name}
-                                    onChange={(e) => form.setData('name', e.target.value)}
+                                    onChange={(e) =>
+                                        form.setData('name', e.target.value)
+                                    }
                                     placeholder="Standart B toifa"
                                     required
                                     className="mt-1"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="category" required>{t('contract_types.category', 'Toifa')}</Label>
+                                <Label htmlFor="category" required>
+                                    {t('contract_types.category', 'Toifa')}
+                                </Label>
                                 <SearchableSelect
                                     id="category"
                                     value={form.data.category}
-                                    onChange={(val) => form.setData('category', String(val))}
+                                    onChange={(val) =>
+                                        form.setData('category', String(val))
+                                    }
                                     options={[
                                         { value: 'B', label: 'B toifa' },
                                         { value: 'A', label: 'A toifa' },
@@ -297,11 +432,15 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="price" required>{t('contract_types.price', 'Narx (UZS)')}</Label>
+                                <Label htmlFor="price" required>
+                                    {t('contract_types.price', 'Narx (UZS)')}
+                                </Label>
                                 <MoneyInput
                                     id="price"
                                     value={form.data.price}
-                                    onChange={(val) => form.setData('price', val)}
+                                    onChange={(val) =>
+                                        form.setData('price', val)
+                                    }
                                     required
                                     suffix="UZS"
                                     placeholder="0"
@@ -309,12 +448,22 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="min_pct">{t('contract_types.min_theory_pct', 'Darsga minimal to\'lov (%)')}</Label>
+                                <Label htmlFor="min_pct">
+                                    {t(
+                                        'contract_types.min_theory_pct',
+                                        "Darsga minimal to'lov (%)",
+                                    )}
+                                </Label>
                                 <Input
                                     id="min_pct"
                                     type="number"
                                     value={form.data.min_theory_payment_percent}
-                                    onChange={(e) => form.setData('min_theory_payment_percent', Number(e.target.value))}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'min_theory_payment_percent',
+                                            Number(e.target.value),
+                                        )
+                                    }
                                     min={0}
                                     max={100}
                                     className="mt-1"
@@ -324,66 +473,124 @@ export default function ContractTypesIndex({ contractTypes, filters = {} }: Page
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="theory_lessons" required>{t('contract_types.theory_count', 'Nazariya Darslari Soni')}</Label>
+                                <Label htmlFor="theory_lessons" required>
+                                    {t(
+                                        'contract_types.theory_count',
+                                        'Nazariya Darslari Soni',
+                                    )}
+                                </Label>
                                 <Input
                                     id="theory_lessons"
                                     type="number"
                                     value={form.data.required_theory_lessons}
-                                    onChange={(e) => form.setData('required_theory_lessons', Number(e.target.value))}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'required_theory_lessons',
+                                            Number(e.target.value),
+                                        )
+                                    }
                                     className="mt-1"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="driving_lessons" required>{t('contract_types.driving_count', 'Vajdeniya Darslari Soni')}</Label>
+                                <Label htmlFor="driving_lessons" required>
+                                    {t(
+                                        'contract_types.driving_count',
+                                        'Vajdeniya Darslari Soni',
+                                    )}
+                                </Label>
                                 <Input
                                     id="driving_lessons"
                                     type="number"
                                     value={form.data.required_driving_lessons}
-                                    onChange={(e) => form.setData('required_driving_lessons', Number(e.target.value))}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'required_driving_lessons',
+                                            Number(e.target.value),
+                                        )
+                                    }
                                     className="mt-1"
                                 />
                             </div>
                         </div>
 
                         {/* Module Checkboxes */}
-                        <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 space-y-2">
-                            <span className="font-semibold block mb-1">{t('contract_types.included_modules', 'Kiritilgan Modullar')}:</span>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <label className="flex items-center gap-2 cursor-pointer">
+                        <div className="space-y-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40">
+                            <span className="mb-1 block font-semibold">
+                                {t(
+                                    'contract_types.included_modules',
+                                    'Kiritilgan Modullar',
+                                )}
+                                :
+                            </span>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={form.data.has_theory}
-                                        onChange={(e) => form.setData('has_theory', e.target.checked)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'has_theory',
+                                                e.target.checked,
+                                            )
+                                        }
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
-                                    <span>{t('contracts.has_theory', 'Nazariya')}</span>
+                                    <span>
+                                        {t('contracts.has_theory', 'Nazariya')}
+                                    </span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={form.data.has_driving}
-                                        onChange={(e) => form.setData('has_driving', e.target.checked)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'has_driving',
+                                                e.target.checked,
+                                            )
+                                        }
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
-                                    <span>{t('contracts.has_driving', 'Vajdeniya')}</span>
+                                    <span>
+                                        {t(
+                                            'contracts.has_driving',
+                                            'Vajdeniya',
+                                        )}
+                                    </span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={form.data.has_lms}
-                                        onChange={(e) => form.setData('has_lms', e.target.checked)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'has_lms',
+                                                e.target.checked,
+                                            )
+                                        }
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
-                                    <span>{t('contracts.has_lms', 'LMS Testlar')}</span>
+                                    <span>
+                                        {t('contracts.has_lms', 'LMS Testlar')}
+                                    </span>
                                 </label>
                             </div>
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowModal(false)}
+                            >
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>
-                            <Button type="submit" variant="brand" disabled={form.processing}>
+                            <Button
+                                type="submit"
+                                variant="brand"
+                                disabled={form.processing}
+                            >
                                 {t('common.save', 'Saqlash')}
                             </Button>
                         </div>

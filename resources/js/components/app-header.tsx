@@ -80,11 +80,15 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    const isTg = isMobile && typeof window !== 'undefined' && (!!(window as any).Telegram?.WebApp?.initData || !!(window as any).Telegram?.WebApp?.platform);
+    const isTg =
+        isMobile &&
+        typeof window !== 'undefined' &&
+        (!!(window as any).Telegram?.WebApp?.initData ||
+            !!(window as any).Telegram?.WebApp?.platform);
 
     return (
         <>
-            <div 
+            <div
                 style={{
                     paddingTop: isTg
                         ? 'calc(max(var(--tg-content-safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), env(safe-area-inset-top, 44px)) + 3.25rem)'

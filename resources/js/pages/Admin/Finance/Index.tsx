@@ -21,7 +21,13 @@ import { TransferModal } from './components/modals/TransferModal';
 import { PaymentsTab } from './components/PaymentsTab';
 import { RegisterCardsGrid } from './components/RegisterCardsGrid';
 import { TransfersTab } from './components/TransfersTab';
-import type { PageProps, Payment, Expense, CashTransfer, SweepItem } from './types';
+import type {
+    PageProps,
+    Payment,
+    Expense,
+    CashTransfer,
+    SweepItem,
+} from './types';
 
 export default function FinanceIndex({
     cashRegisters,
@@ -41,7 +47,9 @@ export default function FinanceIndex({
     // The backend decides who may review a transfer (receiving branch, superadmin, never the sender).
     const canReviewTransfer = (transfer: CashTransfer) => !!transfer.can_review;
 
-    const [activeTab, setActiveTab] = useState<'registers' | 'history' | 'payments' | 'expenses' | 'transfers'>('registers');
+    const [activeTab, setActiveTab] = useState<
+        'registers' | 'history' | 'payments' | 'expenses' | 'transfers'
+    >('registers');
 
     // Modals visibility
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -80,21 +88,35 @@ export default function FinanceIndex({
     });
 
     const openSweepModal = (specificRegId?: number) => {
-        const branchRegs = cashRegisters.filter((r) => r.branch_id !== null && r.branch_id !== undefined);
+        const branchRegs = cashRegisters.filter(
+            (r) => r.branch_id !== null && r.branch_id !== undefined,
+        );
         const mapped = branchRegs.map((reg) => {
             const currentBal = Number(reg.balance) || 0;
-            const targetSuper = superadminRegisters.find(
-                (s) => s.type?.id === reg.type?.id || s.cash_register_type_id === reg.cash_register_type_id
-            ) || superadminRegisters[0];
+            const targetSuper =
+                superadminRegisters.find(
+                    (s) =>
+                        s.type?.id === reg.type?.id ||
+                        s.cash_register_type_id === reg.cash_register_type_id,
+                ) || superadminRegisters[0];
 
-            const isTarget = specificRegId ? reg.id === specificRegId : currentBal > 0;
+            const isTarget = specificRegId
+                ? reg.id === specificRegId
+                : currentBal > 0;
 
             return {
                 cash_register_id: reg.id,
                 name: reg.name,
-                branch_name: reg.branch?.name || t('branches.unknown', 'Filial'),
-                type_name: reg.type?.name || t('finance.cash_register', 'Kassa'),
-                target_name: targetSuper ? targetSuper.name : t('finance.superadmin_cash_register', 'Bosh kassa (Superadmin)'),
+                branch_name:
+                    reg.branch?.name || t('branches.unknown', 'Filial'),
+                type_name:
+                    reg.type?.name || t('finance.cash_register', 'Kassa'),
+                target_name: targetSuper
+                    ? targetSuper.name
+                    : t(
+                          'finance.superadmin_cash_register',
+                          'Bosh kassa (Superadmin)',
+                      ),
                 balance: currentBal,
                 amount: currentBal,
                 selected: isTarget,
@@ -108,13 +130,17 @@ export default function FinanceIndex({
 
     const handleSelectRegisterHistory = (registerId: number) => {
         setActiveTab('history');
-        router.get('/admin/finance', {
-            ...filters,
-            history_register_id: registerId,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            '/admin/finance',
+            {
+                ...filters,
+                history_register_id: registerId,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     const handleSweepSubmit = (e: React.FormEvent) => {
@@ -127,27 +153,44 @@ export default function FinanceIndex({
             }));
 
         if (selected.length === 0) {
-            toast.error(t('finance.no_registers_selected', 'Kamida bitta kassani tanlang'));
+            toast.error(
+                t(
+                    'finance.no_registers_selected',
+                    'Kamida bitta kassani tanlang',
+                ),
+            );
 
             return;
         }
 
         setIsSweeping(true);
-        router.post('/admin/finance/sweep', {
-            registers: selected,
-            notes: sweepNotes,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setShowSweepModal(false);
-                setIsSweeping(false);
-                toast.success(t('finance.sweep_request_sent', 'Kassa bo\'shatish so\'rovi yuborildi! Admin tasdiqlashi kutilmoqda.'));
+        router.post(
+            '/admin/finance/sweep',
+            {
+                registers: selected,
+                notes: sweepNotes,
             },
-            onError: (err) => {
-                setIsSweeping(false);
-                toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi'));
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setShowSweepModal(false);
+                    setIsSweeping(false);
+                    toast.success(
+                        t(
+                            'finance.sweep_request_sent',
+                            "Kassa bo'shatish so'rovi yuborildi! Admin tasdiqlashi kutilmoqda.",
+                        ),
+                    );
+                },
+                onError: (err) => {
+                    setIsSweeping(false);
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    );
+                },
             },
-        });
+        );
     };
 
     const handlePaymentSubmit = (e: React.FormEvent) => {
@@ -156,9 +199,15 @@ export default function FinanceIndex({
             onSuccess: () => {
                 setShowPaymentModal(false);
                 paymentForm.reset('amount', 'notes');
-                toast.success(t('finance.payment_success', 'To\'lov qabul qilindi'));
+                toast.success(
+                    t('finance.payment_success', "To'lov qabul qilindi"),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
@@ -168,9 +217,15 @@ export default function FinanceIndex({
             onSuccess: () => {
                 setShowExpenseModal(false);
                 expenseForm.reset('amount', 'description');
-                toast.success(t('finance.expense_success', 'Xarajat kiritildi'));
+                toast.success(
+                    t('finance.expense_success', 'Xarajat kiritildi'),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
@@ -180,59 +235,120 @@ export default function FinanceIndex({
             onSuccess: () => {
                 setShowTransferModal(false);
                 transferForm.reset('amount', 'notes');
-                toast.success(t('finance.transfer_success', 'Transfer so\'rovi yuborildi'));
+                toast.success(
+                    t('finance.transfer_success', "Transfer so'rovi yuborildi"),
+                );
             },
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
         });
     };
 
     const handleApproveTransfer = (transfer: CashTransfer) => {
-        if (confirm(t('finance.confirm_approve_transfer', 'Ushbu transferni tasdiqlab mablag\'ni o\'tkazmoqchimisiz?'))) {
-            router.post(`/admin/finance/transfer/${transfer.id}/approve`, {}, {
-                onSuccess: () => toast.success(t('finance.transfer_approved', 'Transfer tasdiqlandi')),
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
-            });
+        if (
+            confirm(
+                t(
+                    'finance.confirm_approve_transfer',
+                    "Ushbu transferni tasdiqlab mablag'ni o'tkazmoqchimisiz?",
+                ),
+            )
+        ) {
+            router.post(
+                `/admin/finance/transfer/${transfer.id}/approve`,
+                {},
+                {
+                    onSuccess: () =>
+                        toast.success(
+                            t(
+                                'finance.transfer_approved',
+                                'Transfer tasdiqlandi',
+                            ),
+                        ),
+                    onError: (err) =>
+                        toast.error(
+                            (Object.values(err)[0] as string) ||
+                                t('common.error', 'Xatolik yuz berdi'),
+                        ),
+                },
+            );
         }
     };
 
     const handleRejectTransfer = (transfer: CashTransfer) => {
-        const reason = prompt(t('finance.prompt_reject_reason', 'Transferni rad etish sababini kiriting (masalan: pul kam chiqdi, xatolik va h.k.):'));
+        const reason = prompt(
+            t(
+                'finance.prompt_reject_reason',
+                'Transferni rad etish sababini kiriting (masalan: pul kam chiqdi, xatolik va h.k.):',
+            ),
+        );
 
         if (reason === null) {
             return;
         }
 
-        router.post(`/admin/finance/transfer/${transfer.id}/reject`, { reason }, {
-            onSuccess: () => toast.success(t('finance.transfer_rejected', 'Transfer rad etildi')),
-            onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
-        });
+        router.post(
+            `/admin/finance/transfer/${transfer.id}/reject`,
+            { reason },
+            {
+                onSuccess: () =>
+                    toast.success(
+                        t('finance.transfer_rejected', 'Transfer rad etildi'),
+                    ),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
+            },
+        );
     };
 
     const handleDeletePayment = (payment: Payment) => {
-        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+        if (
+            confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
             router.delete(`/admin/finance/payment/${payment.id}`, {
-                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                onSuccess: () =>
+                    toast.success(t('common.deleted', "O'chirildi")),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
             });
         }
     };
 
     const handleDeleteExpense = (expense: Expense) => {
-        if (confirm(t('common.confirm_delete', 'Rostdan ham o\'chirmoqchimisiz?'))) {
+        if (
+            confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
             router.delete(`/admin/finance/expense/${expense.id}`, {
-                onSuccess: () => toast.success(t('common.deleted', 'O\'chirildi')),
-                onError: (err) => toast.error(Object.values(err)[0] as string || t('common.error', 'Xatolik yuz berdi')),
+                onSuccess: () =>
+                    toast.success(t('common.deleted', "O'chirildi")),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
             });
         }
     };
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden min-w-0 w-full">
+        <div className="w-full max-w-full min-w-0 space-y-4 overflow-x-hidden p-3 sm:space-y-6 sm:p-4 md:p-6">
             <Head title={t('finance.title', 'Moliya va Kassalar')} />
 
             {/* Page Title & Action Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 w-full">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground shrink-0">
+            <div className="flex w-full min-w-0 flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <h1 className="shrink-0 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t('finance.title', 'Moliya va Kassalar')}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
@@ -241,20 +357,30 @@ export default function FinanceIndex({
                             type="button"
                             onClick={() => openSweepModal()}
                             variant="brand"
-                            className="text-xs h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs"
+                            className="h-8 justify-center px-2.5 text-xs shadow-xs sm:h-9 sm:px-3"
                         >
-                            <ArrowDownToLine className="w-3.5 h-3.5 mr-1.5 shrink-0" />
-                            <span>{t('finance.empty_registers', 'Kassalarni bo\'shatish')}</span>
+                            <ArrowDownToLine className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                            <span>
+                                {t(
+                                    'finance.empty_registers',
+                                    "Kassalarni bo'shatish",
+                                )}
+                            </span>
                         </Button>
                     )}
                     {can('payments.create') && (
                         <Button
                             type="button"
                             onClick={() => setShowPaymentModal(true)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-xs text-white h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs"
+                            className="h-8 justify-center bg-emerald-600 px-2.5 text-xs text-white shadow-xs hover:bg-emerald-700 sm:h-9 sm:px-3"
                         >
-                            <ArrowDownRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
-                            <span>{t('finance.accept_payment', 'To\'lov Qabul Qilish')}</span>
+                            <ArrowDownRight className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                            <span>
+                                {t(
+                                    'finance.accept_payment',
+                                    "To'lov Qabul Qilish",
+                                )}
+                            </span>
                         </Button>
                     )}
                     {can('expenses.create') && (
@@ -262,10 +388,12 @@ export default function FinanceIndex({
                             type="button"
                             onClick={() => setShowExpenseModal(true)}
                             variant="outline"
-                            className="text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs"
+                            className="h-8 justify-center border-red-200 px-2.5 text-xs text-red-600 shadow-xs hover:bg-red-50 sm:h-9 sm:px-3 dark:border-red-900/60 dark:text-red-400 dark:hover:bg-red-950/40"
                         >
-                            <ArrowUpRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
-                            <span>{t('finance.add_expense', 'Chiqim Qilish')}</span>
+                            <ArrowUpRight className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                            <span>
+                                {t('finance.add_expense', 'Chiqim Qilish')}
+                            </span>
                         </Button>
                     )}
                     {can('cash_transfers.create') && (
@@ -273,9 +401,9 @@ export default function FinanceIndex({
                             type="button"
                             onClick={() => setShowTransferModal(true)}
                             variant="outline"
-                            className="text-xs h-8 sm:h-9 px-2.5 sm:px-3 justify-center shadow-xs"
+                            className="h-8 justify-center px-2.5 text-xs shadow-xs sm:h-9 sm:px-3"
                         >
-                            <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                            <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5 shrink-0" />
                             <span>{t('finance.transfer', 'Transfer')}</span>
                         </Button>
                     )}
@@ -290,15 +418,15 @@ export default function FinanceIndex({
             />
 
             {/* Navigation Tabs */}
-            <div className="w-full max-w-full overflow-x-auto no-scrollbar pb-0.5">
-                <div className="inline-flex items-center whitespace-nowrap bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-medium gap-1 min-w-max">
+            <div className="no-scrollbar w-full max-w-full overflow-x-auto pb-0.5">
+                <div className="inline-flex min-w-max items-center gap-1 rounded-xl bg-gray-100 p-1 text-xs font-medium whitespace-nowrap dark:bg-gray-800">
                     <button
                         type="button"
                         onClick={() => setActiveTab('registers')}
-                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                        className={`shrink-0 rounded-lg px-3.5 py-2 transition-all sm:px-4 ${
                             activeTab === 'registers'
-                                ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
+                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         {t('finance.tab_registers', 'Kassalar')}
@@ -306,10 +434,10 @@ export default function FinanceIndex({
                     <button
                         type="button"
                         onClick={() => setActiveTab('history')}
-                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                        className={`shrink-0 rounded-lg px-3.5 py-2 transition-all sm:px-4 ${
                             activeTab === 'history'
-                                ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
+                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         {t('finance.tab_history', 'Kassa Tarixi')}
@@ -317,21 +445,21 @@ export default function FinanceIndex({
                     <button
                         type="button"
                         onClick={() => setActiveTab('payments')}
-                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                        className={`shrink-0 rounded-lg px-3.5 py-2 transition-all sm:px-4 ${
                             activeTab === 'payments'
-                                ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
+                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
-                        {t('finance.tab_payments', 'Kirim To\'lovlar')}
+                        {t('finance.tab_payments', "Kirim To'lovlar")}
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('expenses')}
-                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                        className={`shrink-0 rounded-lg px-3.5 py-2 transition-all sm:px-4 ${
                             activeTab === 'expenses'
-                                ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
+                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         {t('finance.tab_expenses', 'Chiqim Xarajatlar')}
@@ -339,10 +467,10 @@ export default function FinanceIndex({
                     <button
                         type="button"
                         onClick={() => setActiveTab('transfers')}
-                        className={`px-3.5 sm:px-4 py-2 rounded-lg transition-all shrink-0 ${
+                        className={`shrink-0 rounded-lg px-3.5 py-2 transition-all sm:px-4 ${
                             activeTab === 'transfers'
-                                ? 'bg-white dark:bg-gray-700 shadow-xs font-bold text-blue-600 dark:text-white'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                ? 'bg-white font-bold text-blue-600 shadow-xs dark:bg-gray-700 dark:text-white'
+                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         {t('finance.tab_transfers', 'Transferlar')}

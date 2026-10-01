@@ -7,8 +7,7 @@ import krill from './locales/krill.json';
 import ru from './locales/ru.json';
 import uz from './locales/uz.json';
 
-i18n
-    .use(LanguageDetector)
+i18n.use(LanguageDetector)
     .use(initReactI18next)
     .init({
         resources: {
@@ -18,7 +17,10 @@ i18n
             en: { translation: en },
         },
         fallbackLng: 'uz',
-        lng: typeof window !== 'undefined' ? (localStorage.getItem('i18nextLng') || 'uz') : 'uz',
+        lng:
+            typeof window !== 'undefined'
+                ? localStorage.getItem('i18nextLng') || 'uz'
+                : 'uz',
         load: 'languageOnly',
         interpolation: {
             escapeValue: false,
