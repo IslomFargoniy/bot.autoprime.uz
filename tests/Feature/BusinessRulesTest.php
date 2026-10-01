@@ -1,6 +1,5 @@
 <?php
 
-use App\Imports\StudentsImport;
 use App\Jobs\SendDrivingCreatedNotificationJob;
 use App\Jobs\SendDrivingReminderJob;
 use App\Models\Answer;
@@ -180,34 +179,12 @@ test('editing a question keeps answer ids and requires exactly one correct answe
         ->and(Answer::where('question_id', $question->id)->count())->toBe(2);
 });
 
-test('student phones are normalized so manual entry and import match the same student', function () {
+test('student phones are normalized so differently formatted entries match the same student', function () {
     $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali', 'phone' => '90 123 45 67'])->assertSessionHasNoErrors();
     $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali 2', 'phone' => '+998901234567'])->assertSessionHasErrors('phone');
 
-    $group = Group::create(['name' => 'Import', 'branch_id' => $this->branch->id]);
-    $import = new StudentsImport($group->id, $this->branch->id);
-    $import->collection(collect([
-        ['full_name' => 'Ali Valiyev', 'phone' => '998901234567'],
-        ['full_name' => 'Telefonsiz', 'phone' => null],
-    ]));
-
     expect(Student::count())->toBe(1)
-        ->and(Student::first()->phone)->toBe('+998901234567')
-        ->and(Student::first()->group_id)->toBe($group->id)
-        ->and($import->importedCount)->toBe(1)
-        ->and($import->skippedCount)->toBe(1);
-});
-
-test('import does not pull a student out of another branch', function () {
-    $otherBranch = Branch::firstOrCreate(['code' => 'rules-2'], ['name' => 'Boshqa', 'status' => 'active']);
-    $student = Student::factory()->create(['branch_id' => $otherBranch->id, 'phone' => '+998907654321']);
-    $group = Group::create(['name' => 'Import', 'branch_id' => $this->branch->id]);
-
-    $import = new StudentsImport($group->id, $this->branch->id);
-    $import->collection(collect([['full_name' => 'Boshqa filial', 'phone' => '+998907654321']]));
-
-    expect($student->fresh()->group_id)->toBeNull()
-        ->and($import->skippedCount)->toBe(1);
+        ->and(Student::first()->phone)->toBe('+998901234567');
 });
 
 test('dashboard student count matches the branch student list', function () {

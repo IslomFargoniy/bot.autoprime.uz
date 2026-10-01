@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Concerns\BranchScopedValidationRules;
 use App\Exports\GroupStudentsExport;
 use App\Http\Controllers\Controller;
-use App\Imports\StudentsImport;
 use App\Models\Branch;
 use App\Models\Course;
 use App\Models\Group;
@@ -15,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
 
 class GroupController extends Controller
@@ -186,42 +184,5 @@ class GroupController extends Controller
             'group' => $group,
             'students' => $students,
         ]);
-    }
-
-    public function downloadTemplate()
-    {
-        $export = new class implements FromArray
-        {
-            public function array(): array
-            {
-                return [
-                    ['full_name', 'phone'],
-                    ['Eshmatov Toshmat', '+998901234567'],
-                    ['Toshmatova Eshmatxon', '+998901234568'],
-                ];
-            }
-        };
-
-        return Excel::download($export, 'talabalar_shabloni.xlsx');
-    }
-
-    public function importStudents(Request $request, Group $group)
-    {
-        $this->ensureGroupAccess($request->user(), $group);
-
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,csv,xls',
-        ]);
-
-        $branchId = $group->branch_id ?? $request->user()->branch_id;
-        $import = new StudentsImport($group->id, $branchId);
-        Excel::import($import, $request->file('file'));
-
-        $message = "{$import->importedCount} ta o'quvchi muvaffaqiyatli yuklandi";
-        if ($import->skippedCount > 0) {
-            $message .= " ({$import->skippedCount} ta qator o'tkazib yuborildi: telefon yo'q yoki o'quvchi boshqa filialda)";
-        }
-
-        return redirect()->back()->with('success', $message);
     }
 }
