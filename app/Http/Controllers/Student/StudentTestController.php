@@ -49,8 +49,12 @@ class StudentTestController extends Controller
     /**
      * Get all active tickets with question counts.
      */
-    public function getTickets(): JsonResponse
+    public function getTickets(Request $request): JsonResponse
     {
+        if (! $this->isIdentified($request)) {
+            return $this->unauthenticatedResponse();
+        }
+
         $tickets = Ticket::where('is_active', true)
             ->withCount('questions')
             ->orderBy('ticket_number')
@@ -65,8 +69,12 @@ class StudentTestController extends Controller
     /**
      * Get questions for a specific ticket.
      */
-    public function getTicketQuestions(Ticket $ticket): JsonResponse
+    public function getTicketQuestions(Request $request, Ticket $ticket): JsonResponse
     {
+        if (! $this->isIdentified($request)) {
+            return $this->unauthenticatedResponse();
+        }
+
         abort_unless($ticket->is_active, 404);
 
         $ticket->load([
@@ -94,7 +102,7 @@ class StudentTestController extends Controller
         $student = $this->resolveStudent($request);
 
         if (! $student) {
-            return $this->unauthenticatedExamResponse();
+            return $this->unauthenticatedResponse();
         }
 
         $questions = Question::where('is_active', true)
@@ -176,7 +184,7 @@ class StudentTestController extends Controller
 
         if ($attemptType === 'random_mock') {
             if (! $student) {
-                return $this->unauthenticatedExamResponse();
+                return $this->unauthenticatedResponse();
             }
 
             return $this->submitMockExam($request, (int) $validated['attempt_id'], $student->id, $submittedAnswers);
@@ -225,11 +233,20 @@ class StudentTestController extends Controller
         return $this->attemptResponse($attempt, $graded['details']);
     }
 
-    private function unauthenticatedExamResponse(): JsonResponse
+    /**
+     * The question bank (with answer keys) is only served to a known student or
+     * a signed-in staff member, so it cannot be scraped anonymously.
+     */
+    private function isIdentified(Request $request): bool
+    {
+        return $request->user() !== null || $this->resolveStudent($request) !== null;
+    }
+
+    private function unauthenticatedResponse(): JsonResponse
     {
         return response()->json([
             'success' => false,
-            'message' => 'Imtihon topshirish uchun tizimga kiring (Telegram yoki desktop orqali).',
+            'message' => 'Testlarga kirish uchun tizimga kiring (Telegram yoki desktop orqali).',
         ], 401);
     }
 

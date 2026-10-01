@@ -2,9 +2,11 @@
 
 use App\Models\Answer;
 use App\Models\Attempt;
+use App\Models\Branch;
 use App\Models\Question;
 use App\Models\Student;
 use App\Models\Ticket;
+use App\Models\User;
 
 /**
  * Seed a ticket with the given number of questions, each with one correct answer.
@@ -237,4 +239,22 @@ test('an inactive ticket cannot be opened', function () {
     $ticket->update(['is_active' => false]);
 
     $this->getJson("/api/tests/ticket/{$ticket->id}")->assertNotFound();
+});
+
+test('the question bank is not served to anonymous callers', function () {
+    $ticket = seedTicketWithQuestions(3, 9);
+
+    $this->getJson('/api/tests/tickets')->assertSuccessful();
+    $this->getJson("/api/tests/ticket/{$ticket->id}")->assertSuccessful();
+
+    $this->flushSession();
+    $this->withoutHeader('X-Telegram-Init-Data')->getJson('/api/tests/tickets')->assertUnauthorized();
+    $this->getJson("/api/tests/ticket/{$ticket->id}")->assertUnauthorized();
+});
+
+test('signed-in staff can preview a ticket', function () {
+    $ticket = seedTicketWithQuestions(3, 10);
+    $admin = User::factory()->create(['role' => 'admin', 'branch_id' => Branch::firstOrCreate(['code' => 'q'], ['name' => 'Q', 'status' => 'active'])->id]);
+
+    $this->withoutHeader('X-Telegram-Init-Data')->actingAs($admin)->getJson("/api/tests/ticket/{$ticket->id}")->assertSuccessful();
 });

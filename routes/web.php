@@ -92,8 +92,8 @@ Route::post('/api/attendance/scan-qr', [MiniAppController::class, 'scanQr'])->na
 Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
 
 // Student Tests & Mock Exam Endpoints (TMA & Desktop)
-Route::get('/api/tests/tickets', [StudentTestController::class, 'getTickets'])->name('tests.tickets');
-Route::get('/api/tests/ticket/{ticket}', [StudentTestController::class, 'getTicketQuestions'])->name('tests.ticket.questions');
+Route::get('/api/tests/tickets', [StudentTestController::class, 'getTickets'])->middleware('throttle:60,1')->name('tests.tickets');
+Route::get('/api/tests/ticket/{ticket}', [StudentTestController::class, 'getTicketQuestions'])->middleware('throttle:60,1')->name('tests.ticket.questions');
 Route::get('/api/tests/exam', [StudentTestController::class, 'getMockExam'])->middleware('throttle:20,1')->name('tests.exam');
 Route::post('/api/tests/submit', [StudentTestController::class, 'submitAttempt'])->middleware('throttle:30,1')->name('tests.submit');
 Route::get('/api/tests/signs', [StudentTestController::class, 'getSigns'])->name('tests.signs');
