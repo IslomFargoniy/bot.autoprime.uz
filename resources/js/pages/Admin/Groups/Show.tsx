@@ -1,5 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Users, ArrowLeft, Download, Trash2, CheckSquare } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { Users, ArrowLeft, Download, CheckSquare } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import GroupAttendanceModal from '@/components/GroupAttendanceModal';
@@ -42,20 +42,7 @@ interface PageProps {
 export default function GroupShow({ group, students }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
-    const canDeleteStudents = can('students.delete');
     const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
-
-    const handleDeleteStudent = (studentId: number) => {
-        if (
-            confirm(
-                t('common.confirm_delete', "Haqiqatdan ham o'chirmoqchimisiz?"),
-            )
-        ) {
-            router.delete(`/admin/students/${studentId}`, {
-                preserveScroll: true,
-            });
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8 dark:bg-gray-900">
@@ -142,17 +129,12 @@ export default function GroupShow({ group, students }: PageProps) {
                                                 'Tugagan darslar',
                                             )}
                                         </TableHead>
-                                        {canDeleteStudents && (
-                                            <TableHead className="text-right">
-                                                {t('common.actions', 'Amallar')}
-                                            </TableHead>
-                                        )}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {students.length === 0 ? (
                                         <TableEmpty
-                                            colSpan={canDeleteStudents ? 5 : 4}
+                                            colSpan={4}
                                             icon={Users}
                                             title={t(
                                                 'groups.no_students_in_group',
@@ -181,22 +163,6 @@ export default function GroupShow({ group, students }: PageProps) {
                                                             0}
                                                     </span>
                                                 </TableCell>
-                                                {canDeleteStudents && (
-                                                    <TableCell className="text-right">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() =>
-                                                                handleDeleteStudent(
-                                                                    student.id,
-                                                                )
-                                                            }
-                                                            className="h-8 w-8 text-destructive hover:text-destructive/90"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </TableCell>
-                                                )}
                                             </TableRow>
                                         ))
                                     )}
@@ -250,26 +216,6 @@ export default function GroupShow({ group, students }: PageProps) {
                                                 </div>
                                             </div>
                                         </div>
-                                        {canDeleteStudents && (
-                                            <div className="flex justify-end border-t pt-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        handleDeleteStudent(
-                                                            student.id,
-                                                        )
-                                                    }
-                                                    className="h-8 gap-1 border-destructive/30 text-xs text-destructive"
-                                                >
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                    {t(
-                                                        'common.delete',
-                                                        "O'chirish",
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        )}
                                     </div>
                                 ))
                             )}
