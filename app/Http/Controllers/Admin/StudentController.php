@@ -158,6 +158,7 @@ class StudentController extends Controller
         ]);
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
+        $this->ensureGroupHasRoom($validated['group_id'] ?? null);
 
         $user = $request->user();
         if ($user->isBranchRestricted()) {
@@ -191,6 +192,10 @@ class StudentController extends Controller
         }
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
+
+        if ((int) ($validated['group_id'] ?? 0) !== (int) $student->group_id) {
+            $this->ensureGroupHasRoom($validated['group_id'] ?? null);
+        }
 
         $student->update($validated);
 

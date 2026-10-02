@@ -23,6 +23,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -68,7 +69,26 @@ interface Group {
     branch?: Branch | null;
     course_id?: number | null;
     course?: Course | null;
+    category?: string;
+    days_of_week?: string[] | null;
+    start_time?: string | null;
+    end_time?: string | null;
+    room?: string | null;
+    max_students?: number;
+    start_date?: string | null;
+    end_date?: string | null;
+    is_active?: boolean;
 }
+
+const WEEK_DAYS: Array<{ code: string; label: string }> = [
+    { code: 'mon', label: 'Du' },
+    { code: 'tue', label: 'Se' },
+    { code: 'wed', label: 'Ch' },
+    { code: 'thu', label: 'Pa' },
+    { code: 'fri', label: 'Ju' },
+    { code: 'sat', label: 'Sh' },
+    { code: 'sun', label: 'Ya' },
+];
 
 interface PageProps {
     groups: {
@@ -148,6 +168,15 @@ export default function GroupsIndex({
         teacher_id: '',
         branch_id: '' as string | number,
         course_id: '' as string | number,
+        category: 'B',
+        days_of_week: [] as string[],
+        start_time: '',
+        end_time: '',
+        room: '',
+        max_students: '30' as string | number,
+        start_date: '',
+        end_date: '',
+        is_active: true,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -206,6 +235,15 @@ export default function GroupsIndex({
             teacher_id: group.teacher_id ? String(group.teacher_id) : '',
             branch_id: group.branch_id ? String(group.branch_id) : '',
             course_id: group.course_id ? String(group.course_id) : '',
+            category: group.category || 'B',
+            days_of_week: group.days_of_week ?? [],
+            start_time: group.start_time ?? '',
+            end_time: group.end_time ?? '',
+            room: group.room ?? '',
+            max_students: String(group.max_students ?? 30),
+            start_date: group.start_date ? group.start_date.slice(0, 10) : '',
+            end_date: group.end_date ? group.end_date.slice(0, 10) : '',
+            is_active: group.is_active ?? true,
         });
         setShowForm(true);
     };
@@ -550,6 +588,189 @@ export default function GroupsIndex({
                                 )}
                             </div>
                         </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label htmlFor="category">
+                                    {t('groups.category', 'Toifa')}
+                                </Label>
+                                <SearchableSelect
+                                    id="category"
+                                    value={data.category}
+                                    onChange={(val) =>
+                                        setData('category', String(val))
+                                    }
+                                    options={[
+                                        'A',
+                                        'B',
+                                        'C',
+                                        'BC',
+                                        'D',
+                                        'E',
+                                    ].map((c) => ({ value: c, label: c }))}
+                                />
+                                {errors.category && (
+                                    <div className="mt-1 text-sm text-destructive">
+                                        {errors.category}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <Label htmlFor="max_students">
+                                    {t(
+                                        'groups.max_students',
+                                        "Maksimal o'quvchi",
+                                    )}
+                                </Label>
+                                <Input
+                                    id="max_students"
+                                    type="number"
+                                    min={1}
+                                    max={500}
+                                    value={data.max_students}
+                                    onChange={(e) =>
+                                        setData('max_students', e.target.value)
+                                    }
+                                />
+                                {errors.max_students && (
+                                    <div className="mt-1 text-sm text-destructive">
+                                        {errors.max_students}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <Label>{t('groups.days', 'Dars kunlari')}</Label>
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                                {WEEK_DAYS.map((day) => {
+                                    const selected = data.days_of_week.includes(
+                                        day.code,
+                                    );
+
+                                    return (
+                                        <button
+                                            key={day.code}
+                                            type="button"
+                                            onClick={() =>
+                                                setData(
+                                                    'days_of_week',
+                                                    selected
+                                                        ? data.days_of_week.filter(
+                                                              (d) =>
+                                                                  d !==
+                                                                  day.code,
+                                                          )
+                                                        : [
+                                                              ...data.days_of_week,
+                                                              day.code,
+                                                          ],
+                                                )
+                                            }
+                                            className={`h-8 w-10 rounded-md border text-xs font-semibold transition-colors ${
+                                                selected
+                                                    ? 'border-primary bg-primary text-primary-foreground'
+                                                    : 'border-input bg-background text-muted-foreground hover:bg-muted'
+                                            }`}
+                                        >
+                                            {day.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div>
+                                <Label htmlFor="start_time">
+                                    {t('groups.start_time', 'Boshlanish')}
+                                </Label>
+                                <Input
+                                    id="start_time"
+                                    type="time"
+                                    value={data.start_time}
+                                    onChange={(e) =>
+                                        setData('start_time', e.target.value)
+                                    }
+                                />
+                                {errors.start_time && (
+                                    <div className="mt-1 text-sm text-destructive">
+                                        {errors.start_time}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <Label htmlFor="end_time">
+                                    {t('groups.end_time', 'Tugash')}
+                                </Label>
+                                <Input
+                                    id="end_time"
+                                    type="time"
+                                    value={data.end_time}
+                                    onChange={(e) =>
+                                        setData('end_time', e.target.value)
+                                    }
+                                />
+                                {errors.end_time && (
+                                    <div className="mt-1 text-sm text-destructive">
+                                        {errors.end_time}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <Label htmlFor="room">
+                                    {t('groups.room', 'Xona')}
+                                </Label>
+                                <Input
+                                    id="room"
+                                    value={data.room}
+                                    onChange={(e) =>
+                                        setData('room', e.target.value)
+                                    }
+                                    maxLength={100}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label htmlFor="start_date">
+                                    {t(
+                                        'groups.start_date',
+                                        'Boshlanish sanasi',
+                                    )}
+                                </Label>
+                                <DatePicker
+                                    id="start_date"
+                                    value={data.start_date}
+                                    onChange={(val) =>
+                                        setData('start_date', val)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="end_date">
+                                    {t('groups.end_date', 'Tugash sanasi')}
+                                </Label>
+                                <DatePicker
+                                    id="end_date"
+                                    value={data.end_date}
+                                    onChange={(val) => setData('end_date', val)}
+                                />
+                                {errors.end_date && (
+                                    <div className="mt-1 text-sm text-destructive">
+                                        {errors.end_date}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                checked={data.is_active}
+                                onChange={(e) =>
+                                    setData('is_active', e.target.checked)
+                                }
+                                className="h-4 w-4 rounded border-input"
+                            />
+                            {t('groups.is_active', 'Guruh faol')}
+                        </label>
                         <div className="flex justify-end gap-2 pt-4">
                             <Button
                                 type="button"
@@ -624,6 +845,14 @@ export default function GroupsIndex({
                                                 >
                                                     {item.name}
                                                 </Link>
+                                                {item.is_active === false && (
+                                                    <span className="inline-flex w-fit items-center rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-normal text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                                                        {t(
+                                                            'groups.inactive',
+                                                            'Nofaol',
+                                                        )}
+                                                    </span>
+                                                )}
                                                 {item.course && (
                                                     <span className="inline-flex w-fit items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-normal text-blue-700 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                                                         <GraduationCap className="h-3 w-3" />
@@ -730,6 +959,11 @@ export default function GroupsIndex({
                                     >
                                         {item.name}
                                     </Link>
+                                    {item.is_active === false && (
+                                        <span className="mt-1 inline-flex w-fit items-center rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-normal text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                                            {t('groups.inactive', 'Nofaol')}
+                                        </span>
+                                    )}
                                     {item.course && (
                                         <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-normal text-blue-700 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                                             <GraduationCap className="h-3 w-3" />

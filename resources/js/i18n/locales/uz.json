@@ -220,7 +220,16 @@
         "select_instructor": "-- Tanlang --",
         "teacher": "O'qituvchi",
         "time": "Dars vaqti",
-        "updated_success": "Guruh muvaffaqiyatli yangilandi"
+        "updated_success": "Guruh muvaffaqiyatli yangilandi",
+        "category": "Toifa",
+        "max_students": "Maksimal o'quvchi",
+        "days": "Dars kunlari",
+        "start_time": "Boshlanish",
+        "end_time": "Tugash",
+        "start_date": "Boshlanish sanasi",
+        "end_date": "Tugash sanasi",
+        "is_active": "Guruh faol",
+        "inactive": "Nofaol"
     },
     "students": {
         "title": "O'quvchilar",

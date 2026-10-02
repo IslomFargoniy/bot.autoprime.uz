@@ -209,6 +209,15 @@ class LeadController extends Controller
             return redirect()->back()->withErrors(['contract_type_id' => 'Tanlangan tarif faol emas.']);
         }
 
+        $this->ensureGroupHasRoom($validated['group_id'] ?? null);
+
+        $leadGroup = ! empty($validated['group_id']) ? Group::find($validated['group_id']) : null;
+        if ($leadGroup && $leadGroup->category !== $contractType->category) {
+            return redirect()->back()->withErrors([
+                'group_id' => "Guruh toifasi ({$leadGroup->category}) tarif toifasiga ({$contractType->category}) mos emas.",
+            ]);
+        }
+
         $branchId = $validated['branch_id'] ?? $lead->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = (float) $contractType->price;

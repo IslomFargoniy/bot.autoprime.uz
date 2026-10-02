@@ -220,7 +220,16 @@
         "select_instructor": "-- Select --",
         "teacher": "Teacher",
         "time": "Lesson time",
-        "updated_success": "Group updated successfully"
+        "updated_success": "Group updated successfully",
+        "category": "Category",
+        "max_students": "Max students",
+        "days": "Class days",
+        "start_time": "Start",
+        "end_time": "End",
+        "start_date": "Start date",
+        "end_date": "End date",
+        "is_active": "Group is active",
+        "inactive": "Inactive"
     },
     "students": {
         "title": "Students",

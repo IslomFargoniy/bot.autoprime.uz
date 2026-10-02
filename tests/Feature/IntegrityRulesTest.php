@@ -323,3 +323,71 @@ test('a certificate can be revoked once and then fails verification and download
     $this->getJson(route('certificates.verify', 'hash-revoke'))->assertJson(['valid' => false]);
     $this->actingAs($this->admin)->get(route('certificates.download-pdf', $certificate))->assertForbidden();
 });
+
+test('a group stores its schedule and rejects inconsistent times and dates', function () {
+    $payload = [
+        'name' => 'Jadvalli', 'category' => 'C', 'days_of_week' => ['mon', 'wed', 'fri'],
+        'start_time' => '09:00', 'end_time' => '11:30', 'room' => '204', 'max_students' => 25,
+        'start_date' => '2026-11-01', 'end_date' => '2027-01-31', 'is_active' => true,
+    ];
+
+    $this->actingAs($this->admin)->post('/admin/groups', $payload)->assertSessionHasNoErrors();
+    $group = Group::where('name', 'Jadvalli')->firstOrFail();
+
+    expect($group->category)->toBe('C')
+        ->and($group->days_of_week)->toBe(['mon', 'wed', 'fri'])
+        ->and($group->start_time)->toBe('09:00')
+        ->and($group->end_time)->toBe('11:30')
+        ->and($group->room)->toBe('204')
+        ->and($group->max_students)->toBe(25);
+
+    $this->actingAs($this->admin)->put("/admin/groups/{$group->id}", [...$payload, 'end_time' => '08:00'])->assertSessionHasErrors('end_time');
+    $this->actingAs($this->admin)->put("/admin/groups/{$group->id}", [...$payload, 'end_date' => '2026-10-01'])->assertSessionHasErrors('end_date');
+    $this->actingAs($this->admin)->put("/admin/groups/{$group->id}", [...$payload, 'days_of_week' => ['xyz']])->assertSessionHasErrors('days_of_week.0');
+    $this->actingAs($this->admin)->put("/admin/groups/{$group->id}", [...$payload, 'max_students' => 0])->assertSessionHasErrors('max_students');
+
+    $this->actingAs($this->admin)->put("/admin/groups/{$group->id}", [...$payload, 'is_active' => false])->assertSessionHasNoErrors();
+    expect($group->fresh()->is_active)->toBeFalse()->and($group->fresh()->status)->toBe('inactive');
+});
+
+test('a full group takes no more students', function () {
+    $group = Group::create(['name' => 'To\'la', 'branch_id' => $this->branch->id, 'max_students' => 1]);
+    Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
+
+    $this->actingAs($this->admin)->post('/admin/students', [
+        'full_name' => 'Ortiqcha', 'phone' => '+998901234511', 'group_id' => $group->id,
+    ])->assertSessionHasErrors('group_id');
+
+    $loose = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $this->actingAs($this->admin)->put("/admin/students/{$loose->id}", [
+        'full_name' => $loose->full_name, 'phone' => $loose->phone, 'group_id' => $group->id,
+    ])->assertSessionHasErrors('group_id');
+    expect($loose->fresh()->group_id)->toBeNull();
+
+    $member = Student::where('group_id', $group->id)->firstOrFail();
+    $this->actingAs($this->admin)->put("/admin/students/{$member->id}", [
+        'full_name' => 'Yangi Ism', 'phone' => $member->phone, 'group_id' => $group->id,
+    ])->assertSessionHasNoErrors();
+    expect($member->fresh()->full_name)->toBe('Yangi Ism');
+
+    $type = integrityContractType($this->branch);
+    $this->actingAs($this->admin)->post('/admin/contracts', [
+        'student_id' => $loose->id, 'contract_type_id' => $type->id, 'group_id' => $group->id,
+    ])->assertSessionHasErrors('group_id');
+    expect(Contract::where('student_id', $loose->id)->exists())->toBeFalse();
+});
+
+test('a contract needs a tariff whose category matches the group', function () {
+    $group = Group::create(['name' => 'B guruh', 'branch_id' => $this->branch->id, 'category' => 'B']);
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $wrong = integrityContractType($this->branch, ['category' => 'C']);
+    $right = integrityContractType($this->branch, ['category' => 'B']);
+
+    $this->actingAs($this->admin)->post('/admin/contracts', ['student_id' => $student->id, 'contract_type_id' => $wrong->id, 'group_id' => $group->id])
+        ->assertSessionHasErrors('group_id');
+    expect(Contract::where('student_id', $student->id)->exists())->toBeFalse();
+
+    $this->actingAs($this->admin)->post('/admin/contracts', ['student_id' => $student->id, 'contract_type_id' => $right->id, 'group_id' => $group->id])
+        ->assertSessionHasNoErrors();
+    expect(Contract::where('student_id', $student->id)->count())->toBe(1);
+});

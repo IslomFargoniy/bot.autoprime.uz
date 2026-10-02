@@ -220,7 +220,16 @@
         "select_instructor": "-- Танланг --",
         "teacher": "Ўқитувчи",
         "time": "Дарс вақти",
-        "updated_success": "Гуруҳ муваффақиятли янгиланди"
+        "updated_success": "Гуруҳ муваффақиятли янгиланди",
+        "category": "Тоифа",
+        "max_students": "Максимал ўқувчи",
+        "days": "Дарс кунлари",
+        "start_time": "Бошланиш",
+        "end_time": "Тугаш",
+        "start_date": "Бошланиш санаси",
+        "end_date": "Тугаш санаси",
+        "is_active": "Гуруҳ фаол",
+        "inactive": "Нофаол"
     },
     "students": {
         "title": "Ўқувчилар",

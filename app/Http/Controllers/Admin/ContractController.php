@@ -148,6 +148,17 @@ class ContractController extends Controller
 
         $groupId = $validated['group_id'] ?? null;
 
+        $effectiveGroup = ($groupId ?? $student->group_id) ? Group::find($groupId ?? $student->group_id) : null;
+        if ($effectiveGroup && $effectiveGroup->category !== $contractType->category) {
+            return redirect()->back()->withErrors([
+                'group_id' => "Guruh toifasi ({$effectiveGroup->category}) tarif toifasiga ({$contractType->category}) mos emas.",
+            ]);
+        }
+
+        if ($groupId && ! $student->group_id) {
+            $this->ensureGroupHasRoom($groupId);
+        }
+
         $contract = DB::transaction(function () use ($validated, $request, $student, $contractType, $branchId, $groupId, $total, $discount, $final) {
             // Serialize on the student so two clerks cannot both open a contract for them.
             Student::whereKey($student->id)->lockForUpdate()->first();

@@ -220,7 +220,16 @@
         "select_instructor": "-- Выберите --",
         "teacher": "Преподаватель",
         "time": "Время занятий",
-        "updated_success": "Группа успешно обновлена"
+        "updated_success": "Группа успешно обновлена",
+        "category": "Категория",
+        "max_students": "Макс. учеников",
+        "days": "Дни занятий",
+        "start_time": "Начало",
+        "end_time": "Окончание",
+        "start_date": "Дата начала",
+        "end_date": "Дата окончания",
+        "is_active": "Группа активна",
+        "inactive": "Неактивна"
     },
     "students": {
         "title": "Ученики",

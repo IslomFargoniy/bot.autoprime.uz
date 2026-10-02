@@ -2,12 +2,14 @@
 
 namespace App\Concerns;
 
+use App\Models\Group;
 use App\Models\User;
 use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\ValidationException;
 
 trait BranchScopedValidationRules
 {
@@ -27,6 +29,22 @@ trait BranchScopedValidationRules
         }
 
         return $rule;
+    }
+
+    /**
+     * Refuse to put one more student into a group that is already full.
+     *
+     * @throws ValidationException
+     */
+    protected function ensureGroupHasRoom(int|string|null $groupId): void
+    {
+        $group = $groupId ? Group::withCount('students')->find($groupId) : null;
+
+        if ($group && $group->students_count >= $group->max_students) {
+            throw ValidationException::withMessages([
+                'group_id' => "Guruh to'lgan ({$group->students_count}/{$group->max_students}).",
+            ]);
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -62,6 +63,15 @@ class GroupController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
             'course_id' => 'nullable|exists:courses,id',
             'is_active' => 'sometimes|boolean',
+            'category' => 'nullable|string|in:A,B,C,BC,D,E',
+            'days_of_week' => 'nullable|array',
+            'days_of_week.*' => 'string|in:mon,tue,wed,thu,fri,sat,sun',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => ['nullable', 'date_format:H:i', Rule::when($request->filled('start_time'), 'after:start_time')],
+            'room' => 'nullable|string|max:100',
+            'max_students' => 'nullable|integer|min:1|max:500',
+            'start_date' => 'nullable|date',
+            'end_date' => ['nullable', 'date', Rule::when($request->filled('start_date'), 'after_or_equal:start_date')],
         ];
     }
 
@@ -75,6 +85,13 @@ class GroupController extends Controller
     {
         if (array_key_exists('is_active', $validated)) {
             $validated['status'] = $validated['is_active'] ? 'active' : 'inactive';
+        }
+
+        // Columns with a database default keep it when the form leaves them empty.
+        foreach (['category', 'max_students'] as $column) {
+            if (array_key_exists($column, $validated) && $validated[$column] === null) {
+                unset($validated[$column]);
+            }
         }
 
         return $validated;
