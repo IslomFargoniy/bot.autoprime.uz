@@ -360,6 +360,11 @@ export default function LeadsIndex({
             )
         ) {
             router.delete(`/admin/leads/${lead.id}`, {
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
                 onSuccess: () => {
                     if (viewingLead?.id === lead.id) {
                         setViewingLead(null);
@@ -622,18 +627,19 @@ export default function LeadsIndex({
                                                     <Pencil className="h-3.5 w-3.5" />
                                                 </Button>
                                             )}
-                                        {can('leads.manage') && (
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() =>
-                                                    handleDelete(lead)
-                                                }
-                                                className="h-7 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
-                                        )}
+                                        {can('leads.manage') &&
+                                            !isLeadConverted(lead) && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        handleDelete(lead)
+                                                    }
+                                                    className="h-7 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            )}
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -757,16 +763,17 @@ export default function LeadsIndex({
                                             <Pencil className="h-3.5 w-3.5" />
                                         </Button>
                                     )}
-                                {can('leads.manage') && (
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => handleDelete(lead)}
-                                        className="h-8 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                )}
+                                {can('leads.manage') &&
+                                    !isLeadConverted(lead) && (
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDelete(lead)}
+                                            className="h-8 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    )}
                             </div>
                         </div>
                     ))

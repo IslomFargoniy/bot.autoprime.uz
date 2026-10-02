@@ -122,7 +122,7 @@ class ContractController extends Controller
         $validated = $request->validate([
             'student_id' => ['required', $this->existsInUserBranch($request, 'students')],
             'contract_type_id' => 'required|exists:contract_types,id',
-            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
             'branch_id' => 'nullable|exists:branches,id',
             'discount_amount' => 'nullable|numeric|min:0|max:9999999999',
             'start_date' => 'nullable|date',

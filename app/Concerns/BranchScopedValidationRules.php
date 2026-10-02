@@ -30,6 +30,30 @@ trait BranchScopedValidationRules
     }
 
     /**
+     * Like existsInUserBranch() for groups, but only accepts active groups
+     * (plus the group the record already belongs to, so unrelated edits still save).
+     */
+    protected function activeGroupInUserBranch(Request $request, ?int $keepGroupId = null): Exists
+    {
+        $rule = Rule::exists('groups', 'id');
+        $user = $request->user();
+
+        $rule->where(function (Builder $query) use ($keepGroupId, $user): void {
+            $query->where(function (Builder $active) use ($keepGroupId): void {
+                $active->where('is_active', true)->when($keepGroupId, fn (Builder $q) => $q->orWhere('id', $keepGroupId));
+            });
+
+            if ($user?->isBranchRestricted()) {
+                $query->where(fn (Builder $branch) => $branch
+                    ->where('branch_id', $user->branch_id)
+                    ->orWhereNull('branch_id'));
+            }
+        });
+
+        return $rule;
+    }
+
+    /**
      * An `exists` rule for a cash register that money is moved out of or paid
      * into by the actor. Unlike other records, the central (branch-less) registers
      * belong to the superadmin, so branch-restricted users get their own branch only.

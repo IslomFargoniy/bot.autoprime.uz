@@ -60,6 +60,12 @@ class CourseController extends Controller
 
     public function destroy(Course $course): RedirectResponse
     {
+        if ($course->groups()->exists()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Kurs guruhlarga biriktirilgan. Avval guruhlardan olib tashlang yoki kursni nofaol qiling.',
+            ]);
+        }
+
         $course->delete();
 
         return redirect()->back()->with('success', 'Kurs o\'chirildi.');

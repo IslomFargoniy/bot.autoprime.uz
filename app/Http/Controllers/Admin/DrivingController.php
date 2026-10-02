@@ -167,7 +167,7 @@ class DrivingController extends Controller
             'instructor_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'student_ids' => 'required|array',
             'student_ids.*' => [$this->existsInUserBranch($request, 'students')],
-            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
             'autodrome_id' => ['nullable', $this->existsInUserBranch($request, 'autodromes')],
             'vehicle_id' => ['nullable', $this->existsInUserBranch($request, 'vehicles')],
             'start_time' => 'required|date',

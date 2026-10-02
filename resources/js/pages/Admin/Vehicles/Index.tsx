@@ -311,6 +311,11 @@ export default function VehiclesIndex({
             )
         ) {
             router.delete(`/admin/vehicles/${v.id}`, {
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
                 onSuccess: () =>
                     toast.success(t('common.deleted', "O'chirildi")),
             });

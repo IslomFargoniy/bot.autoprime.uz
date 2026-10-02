@@ -394,6 +394,11 @@ export default function TestsIndex({
             )
         ) {
             router.delete(`/admin/tests/tickets/${tkt.id}`, {
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
                 onSuccess: () => {
                     if (inspectingTicket?.id === tkt.id) {
                         setInspectingTicket(null);
@@ -607,6 +612,11 @@ export default function TestsIndex({
             )
         ) {
             router.delete(`/admin/tests/questions/${q.id}`, {
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
                 onSuccess: () => {
                     if (inspectingTicket) {
                         openTicketDetails(inspectingTicket);

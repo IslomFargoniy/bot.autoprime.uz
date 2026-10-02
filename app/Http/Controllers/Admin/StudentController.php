@@ -153,7 +153,7 @@ class StudentController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students',
             'telegram_id' => 'nullable|string|unique:students',
-            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
@@ -181,7 +181,7 @@ class StudentController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:students,phone,'.$student->id,
             'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
-            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['nullable', $this->activeGroupInUserBranch($request, $student->group_id)],
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 

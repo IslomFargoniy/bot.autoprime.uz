@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\Attempt;
+use App\Models\AttemptAnswer;
 use App\Models\Question;
 use App\Models\RoadLine;
 use App\Models\Sign;
@@ -148,6 +149,12 @@ class TestController extends Controller
      */
     public function destroyTicket(Ticket $ticket): RedirectResponse
     {
+        if (AttemptAnswer::whereIn('question_id', $ticket->questions()->select('id'))->exists() || $ticket->attempts()->exists()) {
+            return back()->withErrors([
+                'delete' => 'Bu biletning test natijalari bor. O\'chirish o\'rniga biletni nofaol qiling.',
+            ]);
+        }
+
         DB::transaction(function () use ($ticket) {
             $questionIds = $ticket->questions()->pluck('id');
             Answer::whereIn('question_id', $questionIds)->delete();
@@ -291,6 +298,12 @@ class TestController extends Controller
      */
     public function destroyQuestion(Question $question): RedirectResponse
     {
+        if (AttemptAnswer::where('question_id', $question->id)->exists()) {
+            return back()->withErrors([
+                'delete' => 'Bu savolga test natijalari bog\'langan. O\'chirish o\'rniga savolni nofaol qiling.',
+            ]);
+        }
+
         $question->answers()->delete();
         $question->delete();
 

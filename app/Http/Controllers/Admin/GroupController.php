@@ -61,7 +61,23 @@ class GroupController extends Controller
             'teacher_id' => ['nullable', $this->existsInUserBranch($request, 'users'), $this->userWithCapability('lessons.teach', 'Tanlangan xodim o\'qituvchi emas.')],
             'branch_id' => 'nullable|exists:branches,id',
             'course_id' => 'nullable|exists:courses,id',
+            'is_active' => 'sometimes|boolean',
         ];
+    }
+
+    /**
+     * Keep the legacy `status` column in step with `is_active`.
+     *
+     * @param  array<string, mixed>  $validated
+     * @return array<string, mixed>
+     */
+    private function withStatus(array $validated): array
+    {
+        if (array_key_exists('is_active', $validated)) {
+            $validated['status'] = $validated['is_active'] ? 'active' : 'inactive';
+        }
+
+        return $validated;
     }
 
     public function exportStudents(Request $request, Group $group)
@@ -141,7 +157,7 @@ class GroupController extends Controller
             $validated['branch_id'] = $user->branch_id;
         }
 
-        Group::create($validated);
+        Group::create($this->withStatus($validated));
 
         return redirect()->back();
     }
@@ -153,7 +169,7 @@ class GroupController extends Controller
         $validated = $request->validate($this->groupRules($request));
         $this->ensureStaysOwner($request->user(), $validated);
 
-        $group->update($validated);
+        $group->update($this->withStatus($validated));
 
         return redirect()->back();
     }
@@ -161,6 +177,17 @@ class GroupController extends Controller
     public function destroy(Group $group, Request $request)
     {
         $this->ensureGroupAccess($request->user(), $group);
+
+        // Sessions, attendance and lessons cascade with the group, which would erase
+        // the history that graduation and payroll depend on.
+        if ($group->students()->exists()
+            || $group->lessonSessions()->exists()
+            || $group->contracts()->exists()
+            || $group->drivings()->exists()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Guruhda o\'quvchi, dars yoki shartnoma tarixi bor. O\'chirish o\'rniga guruhni nofaol qiling.',
+            ]);
+        }
 
         $group->delete();
 

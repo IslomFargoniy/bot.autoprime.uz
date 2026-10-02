@@ -108,7 +108,7 @@ class AttendanceController extends Controller
     public function startSession(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'group_id' => ['required', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['required', $this->activeGroupInUserBranch($request)],
             'topic_id' => 'nullable|exists:topics,id',
         ]);
 

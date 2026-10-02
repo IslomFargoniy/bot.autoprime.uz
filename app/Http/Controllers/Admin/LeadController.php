@@ -185,7 +185,7 @@ class LeadController extends Controller
         $validated = $request->validate([
             'contract_type_id' => 'required|exists:contract_types,id',
             'branch_id' => 'nullable|exists:branches,id',
-            'group_id' => ['nullable', $this->existsInUserBranch($request, 'groups')],
+            'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
             'discount_amount' => 'nullable|numeric|min:0|max:9999999999',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -293,6 +293,12 @@ class LeadController extends Controller
 
     public function destroy(Lead $lead): RedirectResponse
     {
+        if ($this->isConverted($lead)) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Shartnoma tuzilgan lidni o\'chirib bo\'lmaydi.',
+            ]);
+        }
+
         $lead->delete();
 
         return redirect()->back()->with('success', 'Lid o\'chirildi.');

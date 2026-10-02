@@ -146,6 +146,12 @@ class VehicleController extends Controller
 
     public function destroy(Vehicle $vehicle): RedirectResponse
     {
+        if ($vehicle->drivings()->exists() || $vehicle->maintenances()->exists()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Avtomobilning dars yoki texnik xizmat tarixi bor. O\'chirish o\'rniga holatini "xizmatdan chiqqan" qiling.',
+            ]);
+        }
+
         $vehicle->delete();
 
         return redirect()->back()->with('success', __('vehicles.deleted_success', [], app()->getLocale()));
