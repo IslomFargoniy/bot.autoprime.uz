@@ -47,6 +47,7 @@ import type { Branch, SharedData } from '@/types/auth';
 interface Group {
     id: number;
     name: string;
+    is_active?: boolean;
 }
 
 interface Student {
@@ -54,6 +55,7 @@ interface Student {
     full_name: string;
     phone: string;
     telegram_id?: string;
+    status?: 'active' | 'graduated' | 'dropped';
     group_id?: number;
     group?: Group;
     branch_id?: number | null;
@@ -130,6 +132,7 @@ export default function StudentsIndex({
         telegram_id: '',
         group_id: '',
         branch_id: '' as string | number,
+        status: 'active' as string,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -186,6 +189,7 @@ export default function StudentsIndex({
             telegram_id: student.telegram_id || '',
             group_id: student.group_id ? String(student.group_id) : '',
             branch_id: student.branch_id ? String(student.branch_id) : '',
+            status: student.status || 'active',
         });
         setShowForm(true);
     };
@@ -490,10 +494,17 @@ export default function StudentsIndex({
                                     id="group_id"
                                     value={data.group_id}
                                     onChange={(val) => setData('group_id', val)}
-                                    options={groups.map((grp) => ({
-                                        value: grp.id,
-                                        label: grp.name,
-                                    }))}
+                                    options={groups
+                                        .filter(
+                                            (grp) =>
+                                                grp.is_active !== false ||
+                                                String(grp.id) ===
+                                                    data.group_id,
+                                        )
+                                        .map((grp) => ({
+                                            value: grp.id,
+                                            label: grp.name,
+                                        }))}
                                     placeholder={t(
                                         'common.select',
                                         '-- Tanlang --',
@@ -506,6 +517,41 @@ export default function StudentsIndex({
                                     </div>
                                 )}
                             </div>
+                            {editing && editing.status !== 'graduated' && (
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="student_status">
+                                        {t('students.status', 'Holat')}
+                                    </Label>
+                                    <SearchableSelect
+                                        id="student_status"
+                                        value={data.status}
+                                        onChange={(val) =>
+                                            setData('status', String(val))
+                                        }
+                                        options={[
+                                            {
+                                                value: 'active',
+                                                label: t(
+                                                    'students.status_active',
+                                                    'Faol',
+                                                ),
+                                            },
+                                            {
+                                                value: 'dropped',
+                                                label: t(
+                                                    'students.status_dropped',
+                                                    "O'qishni tashlagan",
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                    {errors.status && (
+                                        <div className="mt-1 text-xs text-destructive">
+                                            {errors.status}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {isSuperAdmin && (
                                 <div className="space-y-1.5">
                                     <Label htmlFor="branch_id">

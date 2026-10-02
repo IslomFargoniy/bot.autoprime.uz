@@ -50,6 +50,7 @@ class Certificate extends Model
         'qr_verify_hash',
         'status',
         'file_url',
+        'notes',
     ];
 
     protected $casts = [

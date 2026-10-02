@@ -183,7 +183,12 @@ class StudentController extends Controller
             'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
             'group_id' => ['nullable', $this->activeGroupInUserBranch($request, $student->group_id)],
             'branch_id' => 'nullable|exists:branches,id',
+            'status' => 'sometimes|in:active,dropped',
         ]);
+
+        if (isset($validated['status']) && $student->status === 'graduated') {
+            throw ValidationException::withMessages(['status' => 'Bitirgan o\'quvchining holatini o\'zgartirib bo\'lmaydi.']);
+        }
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
 

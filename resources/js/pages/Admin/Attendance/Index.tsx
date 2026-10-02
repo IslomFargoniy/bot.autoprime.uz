@@ -76,6 +76,7 @@ interface GroupRosterStudent {
     is_manual: boolean;
     manual_reason?: string | null;
     already_recorded: boolean;
+    payment_warning?: string | null;
 }
 
 interface PageProps {
@@ -904,6 +905,9 @@ export default function AttendanceIndex({
                                     </Label>
                                     <DatePicker
                                         id="roster_date"
+                                        max={new Date().toLocaleDateString(
+                                            'en-CA',
+                                        )}
                                         value={rosterDate}
                                         onChange={(val) => setRosterDate(val)}
                                         className="h-9 text-xs"
@@ -1092,6 +1096,14 @@ export default function AttendanceIndex({
                                                         <p className="text-[11px] text-gray-500">
                                                             {st.phone}
                                                         </p>
+                                                        {st.payment_warning && (
+                                                            <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                                                ⚠{' '}
+                                                                {
+                                                                    st.payment_warning
+                                                                }
+                                                            </p>
+                                                        )}
                                                     </TableCell>
                                                     <TableCell>
                                                         <button
@@ -1233,6 +1245,9 @@ export default function AttendanceIndex({
                                     </Label>
                                     <DatePicker
                                         id="man_date"
+                                        max={new Date().toLocaleDateString(
+                                            'en-CA',
+                                        )}
                                         value={manualForm.data.date}
                                         onChange={(val) =>
                                             manualForm.setData('date', val)

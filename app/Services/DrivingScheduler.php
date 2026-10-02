@@ -58,6 +58,10 @@ class DrivingScheduler
      */
     public function studentRestrictionMessage(Student $student, CarbonInterface|string $startTime): ?string
     {
+        if ($student->status !== 'active') {
+            return "{$student->full_name} faol o'quvchi emas (holati: {$student->status}).";
+        }
+
         $activeContract = $student->activeContract;
         if (! $activeContract) {
             return "{$student->full_name} talabasining faol shartnomasi yo'q.";

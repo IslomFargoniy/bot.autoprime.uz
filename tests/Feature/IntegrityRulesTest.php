@@ -234,3 +234,92 @@ test('a contract with a certificate can be neither refunded nor deleted', functi
     ])->assertSessionHasErrors('amount');
     expect((float) $register->fresh()->balance)->toEqual(1000000.0);
 });
+
+test('attendance cannot be marked for a future date', function () {
+    $group = Group::create(['name' => 'Davomat', 'branch_id' => $this->branch->id, 'teacher_id' => $this->admin->id]);
+    $student = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
+    $tomorrow = now()->addDay()->toDateString();
+
+    $this->actingAs($this->admin)->post('/admin/attendance/mark-group', [
+        'group_id' => $group->id, 'date' => $tomorrow, 'attendances' => [['student_id' => $student->id, 'status' => 'present']],
+    ])->assertSessionHasErrors('date');
+
+    $this->actingAs($this->admin)->post('/admin/attendance/mark-manual', [
+        'student_id' => $student->id, 'date' => $tomorrow, 'status' => 'present', 'manual_reason' => 'Test',
+    ])->assertSessionHasErrors('date');
+
+    $this->actingAs($this->admin)->post('/admin/attendance/mark-group', [
+        'group_id' => $group->id, 'date' => now()->toDateString(), 'attendances' => [['student_id' => $student->id, 'status' => 'present']],
+    ])->assertSessionHasNoErrors();
+    expect(LessonSession::where('group_id', $group->id)->count())->toBe(1);
+});
+
+test('the attendance roster warns about students the QR check would refuse', function () {
+    $group = Group::create(['name' => 'Ogohlantirish', 'branch_id' => $this->branch->id, 'teacher_id' => $this->admin->id]);
+    $paid = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
+    $unpaid = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
+    $none = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
+    openDrivingContract($paid);
+    openDrivingContract($unpaid, ['paid_amount' => 0, 'debt_amount' => 1000000, 'payment_status' => 'unpaid']);
+
+    $roster = collect($this->actingAs($this->admin)->getJson('/admin/attendance/group-attendances?group_id='.$group->id)->json('students'))->keyBy('id');
+
+    expect($roster[$paid->id]['payment_warning'])->toBeNull()
+        ->and($roster[$unpaid->id]['payment_warning'])->toContain('To\'lov')
+        ->and($roster[$none->id]['payment_warning'])->toContain('shartnoma');
+});
+
+test('issuing a certificate graduates the student', function () {
+    $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id]);
+    $contract = graduateCandidate($this->branch, $instructor, presentLessons: 8);
+
+    $this->actingAs($this->admin)->post('/admin/certificates', ['contract_id' => $contract->id])->assertSessionHasNoErrors();
+
+    expect($contract->student->fresh()->status)->toBe('graduated');
+
+    $this->actingAs($this->admin)->put("/admin/students/{$contract->student_id}", [
+        'full_name' => $contract->student->full_name, 'phone' => $contract->student->phone, 'status' => 'dropped',
+    ])->assertSessionHasErrors('status');
+});
+
+test('a student can be marked as dropped and then cannot be booked', function () {
+    Queue::fake();
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    openDrivingContract($student);
+
+    $this->actingAs($this->admin)->put("/admin/students/{$student->id}", [
+        'full_name' => $student->full_name, 'phone' => $student->phone, 'status' => 'graduated',
+    ])->assertSessionHasErrors('status');
+
+    $this->actingAs($this->admin)->put("/admin/students/{$student->id}", [
+        'full_name' => $student->full_name, 'phone' => $student->phone, 'status' => 'dropped',
+    ])->assertSessionHasNoErrors();
+    expect($student->fresh()->status)->toBe('dropped');
+
+    $this->actingAs($this->admin)->post('/admin/drivings', [
+        'instructor_id' => User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id])->id,
+        'student_ids' => [$student->id],
+        'start_time' => now()->addDays(2)->setTime(10, 0)->toDateTimeString(),
+        'end_time' => now()->addDays(2)->setTime(11, 0)->toDateTimeString(),
+    ])->assertSessionHasErrors('student_ids');
+});
+
+test('a certificate can be revoked once and then fails verification and download', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = openDrivingContract($student, ['status' => 'completed']);
+    $certificate = Certificate::create([
+        'branch_id' => $this->branch->id, 'student_id' => $student->id, 'contract_id' => $contract->id,
+        'certificate_number' => 'CERT-R-0001', 'qr_verify_hash' => 'hash-revoke', 'category' => 'B',
+        'issued_date' => now()->toDateString(), 'status' => 'issued',
+    ]);
+
+    $this->actingAs($this->admin)->post(route('certificates.revoke', $certificate), [])->assertSessionHasErrors('reason');
+
+    $this->actingAs($this->admin)->post(route('certificates.revoke', $certificate), ['reason' => 'Xato ma\'lumot'])->assertSessionHasNoErrors();
+    expect($certificate->fresh()->status)->toBe('revoked')
+        ->and($certificate->fresh()->notes)->toContain('Xato ma\'lumot');
+
+    $this->actingAs($this->admin)->post(route('certificates.revoke', $certificate), ['reason' => 'Yana'])->assertSessionHasErrors('reason');
+    $this->getJson(route('certificates.verify', 'hash-revoke'))->assertJson(['valid' => false]);
+    $this->actingAs($this->admin)->get(route('certificates.download-pdf', $certificate))->assertForbidden();
+});

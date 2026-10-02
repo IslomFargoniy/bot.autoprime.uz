@@ -252,7 +252,10 @@
         "total_paid": "To'langan summa",
         "debt_remaining": "Qoldiq qarz",
         "financial_ledger": "Moliyaviy amaliyotlar daftari",
-        "financial_ledger_desc": "Barcha to'lovlar, hisoblangan qarzlar va pul o'tkazmalari tarixi"
+        "financial_ledger_desc": "Barcha to'lovlar, hisoblangan qarzlar va pul o'tkazmalari tarixi",
+        "status": "Holat",
+        "status_active": "Faol",
+        "status_dropped": "O'qishni tashlagan"
     },
     "staff": {
         "title": "Xodimlar",
@@ -942,7 +945,11 @@
         "select_and_issue": "Guvohnoma Berish",
         "notes": "Qo'shimcha izoh",
         "confirm_issue": "Rasmiy Guvohnoma Chop Etish",
-        "issued_success": "Bitiruv guvohnomasi rasmiylashtirildi"
+        "issued_success": "Bitiruv guvohnomasi rasmiylashtirildi",
+        "revoke": "Bekor qilish",
+        "revoked": "Bekor qilingan",
+        "revoke_prompt": "Guvohnomani bekor qilish sababini kiriting:",
+        "revoked_success": "Guvohnoma bekor qilindi"
     },
     "courses": {
         "title": "LMS Kurslar va Materiallar",

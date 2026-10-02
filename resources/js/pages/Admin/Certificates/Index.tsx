@@ -131,6 +131,59 @@ export default function CertificatesIndex({
         notes: '',
     });
 
+    const handleRevoke = (cert: Certificate) => {
+        const reason = prompt(
+            t(
+                'certificates.revoke_prompt',
+                'Guvohnomani bekor qilish sababini kiriting:',
+            ),
+        );
+
+        if (!reason || !reason.trim()) {
+            return;
+        }
+
+        router.post(
+            `/admin/certificates/${cert.id}/revoke`,
+            { reason },
+            {
+                preserveScroll: true,
+                onSuccess: () =>
+                    toast.success(
+                        t(
+                            'certificates.revoked_success',
+                            'Guvohnoma bekor qilindi',
+                        ),
+                    ),
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
+            },
+        );
+    };
+
+    const renderRevokeControl = (cert: Certificate) => {
+        if (cert.status === 'revoked') {
+            return (
+                <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                    {t('certificates.revoked', 'Bekor qilingan')}
+                </span>
+            );
+        }
+
+        return can('certificates.create') ? (
+            <button
+                type="button"
+                onClick={() => handleRevoke(cert)}
+                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+            >
+                {t('certificates.revoke', 'Bekor qilish')}
+            </button>
+        ) : null;
+    };
+
     const handleIssueSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -267,17 +320,19 @@ export default function CertificatesIndex({
                                             {cert.issued_by?.name || '-'}
                                         </TableCell>
                                         <TableCell className="space-x-1 text-right">
-                                            {can('certificates.print') && (
-                                                <a
-                                                    href={`/admin/certificates/${cert.id}/download-pdf`}
-                                                    className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                >
-                                                    <Download className="mr-1 h-3.5 w-3.5" />
-                                                    PDF
-                                                </a>
-                                            )}
+                                            {can('certificates.print') &&
+                                                cert.status !== 'revoked' && (
+                                                    <a
+                                                        href={`/admin/certificates/${cert.id}/download-pdf`}
+                                                        className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                    >
+                                                        <Download className="mr-1 h-3.5 w-3.5" />
+                                                        PDF
+                                                    </a>
+                                                )}
+                                            {renderRevokeControl(cert)}
                                             <a
                                                 href={`/certificates/verify/${cert.qr_verify_hash}`}
                                                 className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
@@ -358,17 +413,19 @@ export default function CertificatesIndex({
                                     {formatDate(cert.issued_date)}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    {can('certificates.print') && (
-                                        <a
-                                            href={`/admin/certificates/${cert.id}/download-pdf`}
-                                            className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            <Download className="mr-1 h-3.5 w-3.5" />
-                                            PDF
-                                        </a>
-                                    )}
+                                    {can('certificates.print') &&
+                                        cert.status !== 'revoked' && (
+                                            <a
+                                                href={`/admin/certificates/${cert.id}/download-pdf`}
+                                                className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Download className="mr-1 h-3.5 w-3.5" />
+                                                PDF
+                                            </a>
+                                        )}
+                                    {renderRevokeControl(cert)}
                                     <a
                                         href={`/certificates/verify/${cert.qr_verify_hash}`}
                                         className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted/80"

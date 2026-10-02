@@ -252,7 +252,10 @@
         "total_paid": "Total Paid",
         "debt_remaining": "Remaining Debt",
         "financial_ledger": "Financial Operations Ledger",
-        "financial_ledger_desc": "History of all tuition payments, charges, and financial transactions"
+        "financial_ledger_desc": "History of all tuition payments, charges, and financial transactions",
+        "status": "Status",
+        "status_active": "Active",
+        "status_dropped": "Dropped out"
     },
     "staff": {
         "title": "Staff & Employees",
@@ -942,7 +945,11 @@
         "select_and_issue": "Issue Certificate",
         "notes": "Notes",
         "confirm_issue": "Print Official Certificate",
-        "issued_success": "Certificate issued successfully"
+        "issued_success": "Certificate issued successfully",
+        "revoke": "Revoke",
+        "revoked": "Revoked",
+        "revoke_prompt": "Enter the reason for revoking the certificate:",
+        "revoked_success": "Certificate revoked"
     },
     "courses": {
         "title": "LMS Courses & Materials",

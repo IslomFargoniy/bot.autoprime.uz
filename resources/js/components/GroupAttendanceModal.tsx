@@ -43,6 +43,7 @@ export interface GroupRosterStudent {
     is_manual: boolean;
     manual_reason?: string | null;
     already_recorded?: boolean;
+    payment_warning?: string | null;
 }
 
 interface GroupOption {
@@ -363,6 +364,7 @@ export default function GroupAttendanceModal({
                             </Label>
                             <DatePicker
                                 id="modal_roster_date"
+                                max={new Date().toLocaleDateString('en-CA')}
                                 value={selectedDate}
                                 onChange={(val) => setSelectedDate(val)}
                                 className="h-9 text-xs"
@@ -559,6 +561,11 @@ export default function GroupAttendanceModal({
                                                 <p className="font-mono text-[11px] text-muted-foreground">
                                                     {st.phone || '-'}
                                                 </p>
+                                                {st.payment_warning && (
+                                                    <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                                        ⚠ {st.payment_warning}
+                                                    </p>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center justify-center gap-1">

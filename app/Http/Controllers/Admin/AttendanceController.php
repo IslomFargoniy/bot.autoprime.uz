@@ -6,6 +6,7 @@ use App\Concerns\BranchScopedValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Branch;
+use App\Models\Contract;
 use App\Models\Group;
 use App\Models\LessonSession;
 use App\Models\Student;
@@ -200,6 +201,7 @@ class AttendanceController extends Controller
             ->where('status', 'active')
             ->orderBy('full_name')
             ->select(['id', 'full_name', 'phone', 'group_id'])
+            ->with('activeContract.contractType')
             ->get();
 
         $session = LessonSession::where('group_id', $groupId)
@@ -223,6 +225,7 @@ class AttendanceController extends Controller
                 'is_manual' => $att ? (bool) $att->is_manual : true,
                 'manual_reason' => $att ? $att->manual_reason : null,
                 'already_recorded' => $att !== null,
+                'payment_warning' => $this->theoryAccessWarning($student->activeContract),
             ];
         });
 
@@ -242,13 +245,36 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Why the student would not be admitted by the QR check (no contract, no theory
+     * module, too little paid). Manual marking stays allowed, the clerk is only warned.
+     */
+    private function theoryAccessWarning(?Contract $contract): ?string
+    {
+        if (! $contract) {
+            return 'Faol shartnoma yo\'q';
+        }
+
+        if (! $contract->has_theory) {
+            return 'Shartnomada nazariy ta\'lim yo\'q';
+        }
+
+        if (! $contract->canAccessTheory()) {
+            $minPercent = (float) ($contract->contractType ? $contract->contractType->min_theory_payment_percent : 30.0);
+
+            return "To'lov {$contract->payment_percentage}% (kamida {$minPercent}%)";
+        }
+
+        return null;
+    }
+
+    /**
      * Mark group attendance roster in bulk.
      */
     public function markGroup(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'group_id' => ['required', $this->existsInUserBranch($request, 'groups')],
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'topic' => 'nullable|string|max:255',
             'attendances' => 'required|array',
             'attendances.*.student_id' => ['required', Rule::exists('students', 'id')->where('group_id', $request->input('group_id'))],
@@ -329,7 +355,7 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'session_id' => 'nullable|exists:lesson_sessions,id',
             'student_id' => ['required', $this->existsInUserBranch($request, 'students')],
-            'date' => 'nullable|date',
+            'date' => 'nullable|date|before_or_equal:today',
             'status' => 'required|in:present,late,absent',
             'manual_reason' => 'required|string|max:255',
         ]);

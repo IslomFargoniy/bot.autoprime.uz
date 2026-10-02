@@ -221,6 +221,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     // Certificates & Graduation
     Route::get('admin/certificates', [CertificateController::class, 'index'])->middleware('permission:certificates.view')->name('certificates.index');
     Route::post('admin/certificates', [CertificateController::class, 'store'])->middleware('permission:certificates.create')->name('certificates.store');
+    Route::post('admin/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->middleware('permission:certificates.create')->name('certificates.revoke');
     Route::get('admin/certificates/{certificate}/download-pdf', [CertificateController::class, 'downloadPdf'])->middleware('permission:certificates.print')->name('certificates.download-pdf');
 
     // Courses & LMS

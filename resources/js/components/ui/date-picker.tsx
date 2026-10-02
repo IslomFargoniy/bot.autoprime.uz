@@ -11,6 +11,8 @@ interface DatePickerProps {
     required?: boolean;
     disabled?: boolean;
     title?: string;
+    min?: string; // 'YYYY-MM-DD'
+    max?: string; // 'YYYY-MM-DD'
 }
 
 export function DatePicker({
@@ -22,6 +24,8 @@ export function DatePicker({
     required,
     disabled,
     title,
+    min,
+    max,
 }: DatePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +89,8 @@ export function DatePicker({
                 onChange={handleNativeChange}
                 disabled={disabled}
                 required={required}
+                min={min}
+                max={max}
                 aria-label={placeholder}
                 style={{ fontSize: '16px' }} // Critical: Prevents auto-zoom on iOS Safari and Android
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer pointer-events-auto"

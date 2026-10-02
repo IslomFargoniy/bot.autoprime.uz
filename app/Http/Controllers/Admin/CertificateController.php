@@ -166,6 +166,7 @@ class CertificateController extends Controller
             ]);
 
             $lockedContract->update(['status' => 'completed']);
+            $student->update(['status' => 'graduated']);
 
             return $certNumber;
         });
@@ -180,11 +181,36 @@ class CertificateController extends Controller
     }
 
     /**
+     * Revoke an issued certificate; the public verification then reports it as invalid.
+     */
+    public function revoke(Request $request, Certificate $certificate): RedirectResponse
+    {
+        $this->ensureCanSeeStudent($request, $certificate->student);
+
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+        ]);
+
+        if ($certificate->status === 'revoked') {
+            return redirect()->back()->withErrors(['reason' => 'Bu guvohnoma allaqachon bekor qilingan.']);
+        }
+
+        $note = 'Bekor qilindi ('.now()->format('Y-m-d').'): '.$validated['reason'];
+        $certificate->update([
+            'status' => 'revoked',
+            'notes' => $certificate->notes ? $certificate->notes.' | '.$note : $note,
+        ]);
+
+        return redirect()->back()->with('success', "Guvohnoma #{$certificate->certificate_number} bekor qilindi.");
+    }
+
+    /**
      * Download PDF Certificate.
      */
     public function downloadPdf(Request $request, Certificate $certificate)
     {
         $this->ensureCanSeeStudent($request, $certificate->student);
+        abort_if($certificate->status === 'revoked', 403, 'Bekor qilingan guvohnomani yuklab bo\'lmaydi.');
 
         $certificate->load(['student', 'contract.contractType', 'branch', 'issuedBy']);
 
