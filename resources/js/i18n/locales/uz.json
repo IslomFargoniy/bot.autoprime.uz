@@ -605,9 +605,12 @@
         "form_not_completed": "To'ldirilmagan",
         "converted_student": "O'quvchi profili",
         "view_student": "O'quvchi profilini ochish",
-        "view_contract": "Shartnomani ko'rish",
         "assigned_manager": "Mas'ul xodim",
-        "lost_reason": "Rad etilish sababi"
+        "lost_reason": "Rad etilish sababi",
+        "edit": "Tahrirlash",
+        "edit_title": "Lidni tahrirlash",
+        "updated_success": "Lid yangilandi",
+        "lost_reason_placeholder": "Nima uchun rad etildi?"
     },
     "contracts": {
         "title": "Shartnomalar",

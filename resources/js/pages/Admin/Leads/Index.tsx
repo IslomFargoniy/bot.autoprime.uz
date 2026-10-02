@@ -16,6 +16,7 @@ import {
     Copy,
     Check,
     CheckCircle,
+    Pencil,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,6 +52,7 @@ import {
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
+import { LeadFormFields } from './components/LeadFormFields';
 
 interface Lead {
     id: number;
@@ -130,6 +132,7 @@ export default function LeadsIndex({
     const can = useCan();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
+    const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [viewingLead, setViewingLead] = useState<Lead | null>(null);
     const [previewImage, setPreviewImage] = useState<{
         src: string;
@@ -151,6 +154,23 @@ export default function LeadsIndex({
         passport_number: '',
         pinfl: '',
         notes: '',
+    });
+
+    const editForm = useForm({
+        full_name: '',
+        phone: '',
+        category: 'B',
+        branch_id: '',
+        source: 'reception_manual',
+        preferred_time: '',
+        birth_date: '',
+        address: '',
+        passport_series: '',
+        passport_number: '',
+        pinfl: '',
+        notes: '',
+        stage: 'new_lead',
+        lost_reason: '',
     });
 
     const convertForm = useForm({
@@ -177,6 +197,61 @@ export default function LeadsIndex({
             lead.convertedStudent ||
             lead.contract,
         );
+    };
+
+    const openEditModal = (lead: Lead) => {
+        if (isLeadConverted(lead)) {
+            return;
+        }
+
+        editForm.clearErrors();
+        editForm.setData({
+            full_name: lead.full_name ?? '',
+            phone: lead.phone ?? '',
+            category: lead.category || 'B',
+            branch_id: lead.branch_id ? String(lead.branch_id) : '',
+            source: lead.source || 'reception_manual',
+            preferred_time: lead.preferred_time ?? '',
+            birth_date: lead.birth_date ? lead.birth_date.slice(0, 10) : '',
+            address: lead.address ?? '',
+            passport_series: lead.passport_series ?? '',
+            passport_number: lead.passport_number ?? '',
+            pinfl: lead.pinfl ?? '',
+            notes: lead.notes ?? '',
+            stage: lead.stage,
+            lost_reason: lead.lost_reason ?? '',
+        });
+        setEditingLead(lead);
+    };
+
+    const handleEditSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!editingLead) {
+            return;
+        }
+
+        const editedId = editingLead.id;
+
+        editForm.put(`/admin/leads/${editedId}`, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const fresh = (
+                    page.props as unknown as PageProps
+                ).leads.data.find((lead) => lead.id === editedId);
+
+                setViewingLead((current) =>
+                    current && fresh ? fresh : current,
+                );
+                setEditingLead(null);
+                toast.success(t('leads.updated_success', 'Lid yangilandi'));
+            },
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        });
     };
 
     const openConvertModal = (lead: Lead) => {
@@ -530,6 +605,23 @@ export default function LeadsIndex({
                                                 )}
                                             </Button>
                                         ) : null}
+                                        {can('leads.manage') &&
+                                            !isLeadConverted(lead) && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        openEditModal(lead)
+                                                    }
+                                                    title={t(
+                                                        'leads.edit',
+                                                        'Tahrirlash',
+                                                    )}
+                                                    className="h-7 text-xs text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/30"
+                                                >
+                                                    <Pencil className="h-3.5 w-3.5" />
+                                                </Button>
+                                            )}
                                         {can('leads.manage') && (
                                             <Button
                                                 size="sm"
@@ -650,6 +742,21 @@ export default function LeadsIndex({
                                         )}
                                     </Button>
                                 ) : null}
+                                {can('leads.manage') &&
+                                    !isLeadConverted(lead) && (
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => openEditModal(lead)}
+                                            title={t(
+                                                'leads.edit',
+                                                'Tahrirlash',
+                                            )}
+                                            className="h-7 text-xs text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/30"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </Button>
+                                    )}
                                 {can('leads.manage') && (
                                     <Button
                                         size="sm"
@@ -1112,6 +1219,19 @@ export default function LeadsIndex({
                                     {t('common.close', 'Yopish')}
                                 </Button>
                                 <div className="flex items-center gap-2">
+                                    {can('leads.manage') &&
+                                        !isLeadConverted(viewingLead) && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    openEditModal(viewingLead)
+                                                }
+                                            >
+                                                <Pencil className="mr-1.5 h-4 w-4" />
+                                                {t('leads.edit', 'Tahrirlash')}
+                                            </Button>
+                                        )}
                                     {isLeadConverted(viewingLead) ? (
                                         <div className="flex flex-wrap items-center gap-2">
                                             <Badge
@@ -1202,273 +1322,14 @@ export default function LeadsIndex({
                         onSubmit={handleCreateSubmit}
                         className="space-y-3.5 text-xs"
                     >
-                        <div>
-                            <Label required htmlFor="full_name">
-                                {t('leads.full_name', 'Mijoz F.I.O')}
-                            </Label>
-                            <Input
-                                id="full_name"
-                                value={createForm.data.full_name}
-                                onChange={(e) =>
-                                    createForm.setData(
-                                        'full_name',
-                                        e.target.value,
-                                    )
-                                }
-                                placeholder="Familiya Ism Sharif"
-                                required
-                                className="mt-1"
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <Label required htmlFor="phone">
-                                    {t('leads.phone', 'Telefon')}
-                                </Label>
-                                <Input
-                                    id="phone"
-                                    value={createForm.data.phone}
-                                    onChange={(e) =>
-                                        createForm.setData(
-                                            'phone',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="+998"
-                                    required
-                                    className="mt-1 font-mono"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="category">
-                                    {t('leads.category', 'Toifa')}
-                                </Label>
-                                <SearchableSelect
-                                    id="category"
-                                    value={createForm.data.category}
-                                    onChange={(val) =>
-                                        createForm.setData(
-                                            'category',
-                                            String(val),
-                                        )
-                                    }
-                                    options={[
-                                        { value: 'B', label: 'B toifa' },
-                                        { value: 'A', label: 'A toifa' },
-                                        { value: 'C', label: 'C toifa' },
-                                        { value: 'BC', label: 'BC toifa' },
-                                        { value: 'D', label: 'D toifa' },
-                                    ]}
-                                    className="mt-1"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <Label htmlFor="branch_id">
-                                    {t('leads.branch', 'Filial')}
-                                </Label>
-                                <SearchableSelect
-                                    id="branch_id"
-                                    value={createForm.data.branch_id}
-                                    onChange={(val) =>
-                                        createForm.setData(
-                                            'branch_id',
-                                            val ? String(val) : '',
-                                        )
-                                    }
-                                    options={branches.map((b) => ({
-                                        value: String(b.id),
-                                        label: b.name,
-                                    }))}
-                                    placeholder={t('leads.branch', 'Filial')}
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="source">
-                                    {t('leads.source', 'Manba')}
-                                </Label>
-                                <SearchableSelect
-                                    id="source"
-                                    value={createForm.data.source}
-                                    onChange={(val) =>
-                                        createForm.setData(
-                                            'source',
-                                            String(val),
-                                        )
-                                    }
-                                    options={[
-                                        {
-                                            value: 'reception_manual',
-                                            label: t(
-                                                'leads.source_reception_manual',
-                                                'Reception',
-                                            ),
-                                        },
-                                        {
-                                            value: 'telegram_bot',
-                                            label: t(
-                                                'leads.source_telegram_bot',
-                                                'Telegram bot',
-                                            ),
-                                        },
-                                        {
-                                            value: 'instagram',
-                                            label: t(
-                                                'leads.source_instagram',
-                                                'Instagram',
-                                            ),
-                                        },
-                                        {
-                                            value: 'website',
-                                            label: t(
-                                                'leads.source_website',
-                                                'Vebsayt',
-                                            ),
-                                        },
-                                        {
-                                            value: 'recommendation',
-                                            label: t(
-                                                'leads.source_recommendation',
-                                                'Tavsiya',
-                                            ),
-                                        },
-                                        {
-                                            value: 'walk_in',
-                                            label: t(
-                                                'leads.source_walk_in',
-                                                "O'zi kelgan (Ofis)",
-                                            ),
-                                        },
-                                    ]}
-                                    className="mt-1"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <Label htmlFor="preferred_time">
-                                    {t(
-                                        'leads.preferred_time',
-                                        "Qulay o'qish vaqti",
-                                    )}
-                                </Label>
-                                <Input
-                                    id="preferred_time"
-                                    value={createForm.data.preferred_time}
-                                    onChange={(e) =>
-                                        createForm.setData(
-                                            'preferred_time',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="09:00 - 11:00 / Kechki"
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="birth_date">
-                                    {t('leads.birth_date', "Tug'ilgan sana")}
-                                </Label>
-                                <DatePicker
-                                    id="birth_date"
-                                    value={createForm.data.birth_date}
-                                    onChange={(val) =>
-                                        createForm.setData('birth_date', val)
-                                    }
-                                    placeholder="YYYY-MM-DD"
-                                    className="mt-1"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                            <div>
-                                <Label htmlFor="passport_series">
-                                    {t('leads.passport_series', 'Seriya')}
-                                </Label>
-                                <Input
-                                    id="passport_series"
-                                    value={createForm.data.passport_series}
-                                    onChange={(e) =>
-                                        createForm.setData(
-                                            'passport_series',
-                                            e.target.value.toUpperCase(),
-                                        )
-                                    }
-                                    placeholder="AA"
-                                    maxLength={10}
-                                    className="mt-1 font-mono uppercase"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="passport_number">
-                                    {t('leads.passport_number', 'Raqam')}
-                                </Label>
-                                <Input
-                                    id="passport_number"
-                                    value={createForm.data.passport_number}
-                                    onChange={(e) =>
-                                        createForm.setData(
-                                            'passport_number',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="1234567"
-                                    maxLength={20}
-                                    className="mt-1 font-mono"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="pinfl">
-                                    {t('leads.pinfl', 'JSHSHIR')}
-                                </Label>
-                                <Input
-                                    id="pinfl"
-                                    value={createForm.data.pinfl}
-                                    onChange={(e) =>
-                                        createForm.setData(
-                                            'pinfl',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="14 xonali"
-                                    maxLength={20}
-                                    className="mt-1 font-mono"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="address">
-                                {t('leads.address', 'Yashash manzili')}
-                            </Label>
-                            <Input
-                                id="address"
-                                value={createForm.data.address}
-                                onChange={(e) =>
-                                    createForm.setData(
-                                        'address',
-                                        e.target.value,
-                                    )
-                                }
-                                placeholder="Toshkent sh., Chilonzor tumani..."
-                                className="mt-1"
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="notes">
-                                {t('leads.notes', 'Izoh')}
-                            </Label>
-                            <Input
-                                id="notes"
-                                value={createForm.data.notes}
-                                onChange={(e) =>
-                                    createForm.setData('notes', e.target.value)
-                                }
-                                placeholder="Qo'shimcha eslatma..."
-                                className="mt-1"
-                            />
-                        </div>
+                        <LeadFormFields
+                            data={createForm.data}
+                            setData={(key, value) =>
+                                createForm.setData(key, value)
+                            }
+                            errors={createForm.errors}
+                            branches={branches}
+                        />
                         <div className="flex justify-end gap-2 pt-2">
                             <Button
                                 type="button"
@@ -1481,6 +1342,99 @@ export default function LeadsIndex({
                                 type="submit"
                                 variant="brand"
                                 disabled={createForm.processing}
+                            >
+                                {t('common.save', 'Saqlash')}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Lead Modal */}
+            <Dialog
+                open={!!editingLead}
+                onOpenChange={(open) => !open && setEditingLead(null)}
+            >
+                <DialogContent className="max-h-[90vh] w-[95vw] max-w-lg overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Pencil className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                            {t('leads.edit_title', 'Lidni tahrirlash')}
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Lid ma'lumotlarini o'zgartiring
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form
+                        onSubmit={handleEditSubmit}
+                        className="space-y-3.5 text-xs"
+                    >
+                        <LeadFormFields
+                            data={editForm.data}
+                            setData={(key, value) =>
+                                editForm.setData(key, value)
+                            }
+                            errors={editForm.errors}
+                            branches={branches}
+                        />
+                        <div>
+                            <Label htmlFor="edit_stage">
+                                {t('leads.stage', 'Holat')}
+                            </Label>
+                            <SearchableSelect
+                                id="edit_stage"
+                                value={editForm.data.stage}
+                                onChange={(val) =>
+                                    editForm.setData('stage', String(val))
+                                }
+                                options={[
+                                    'new_lead',
+                                    'form_sent',
+                                    'form_completed',
+                                    'rejected',
+                                ].map((stage) => ({
+                                    value: stage,
+                                    label: t(`leads.stage_${stage}`, stage),
+                                }))}
+                                className="mt-1"
+                            />
+                        </div>
+                        {editForm.data.stage === 'rejected' && (
+                            <div>
+                                <Label required htmlFor="lost_reason">
+                                    {t('leads.lost_reason', 'Rad etish sababi')}
+                                </Label>
+                                <Input
+                                    id="lost_reason"
+                                    value={editForm.data.lost_reason}
+                                    onChange={(e) =>
+                                        editForm.setData(
+                                            'lost_reason',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder={t(
+                                        'leads.lost_reason_placeholder',
+                                        'Nima uchun rad etildi?',
+                                    )}
+                                    maxLength={500}
+                                    required
+                                    className="mt-1"
+                                />
+                            </div>
+                        )}
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setEditingLead(null)}
+                            >
+                                {t('common.cancel', 'Bekor qilish')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="brand"
+                                disabled={editForm.processing}
                             >
                                 {t('common.save', 'Saqlash')}
                             </Button>

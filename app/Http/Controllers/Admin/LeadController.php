@@ -16,6 +16,7 @@ use App\Services\TelegramService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -82,12 +83,17 @@ class LeadController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    private const SOURCES = 'telegram_bot,website,instagram,recommendation,walk_in,reception_manual';
+
+    /**
+     * Fields shared by creating and editing a lead.
+     *
+     * @return array<string, mixed>
+     */
+    private function leadRules(): array
     {
-        $validated = $request->validate([
+        return [
             'branch_id' => 'nullable|exists:branches,id',
-            'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:50',
             'category' => 'nullable|string|in:A,B,C,BC,D,E',
             'preferred_time' => 'nullable|string|max:50',
             'birth_date' => 'nullable|date',
@@ -95,8 +101,25 @@ class LeadController extends Controller
             'passport_series' => 'nullable|string|max:10',
             'passport_number' => 'nullable|string|max:20',
             'pinfl' => 'nullable|string|max:20',
-            'source' => 'nullable|string|in:telegram_bot,website,instagram,recommendation,walk_in,reception_manual',
             'notes' => 'nullable|string',
+        ];
+    }
+
+    /**
+     * A converted lead lives on as a student and contract, so only its notes stay editable.
+     */
+    private function isConverted(Lead $lead): bool
+    {
+        return (bool) ($lead->contract_id || $lead->student_id || $lead->stage === 'contract_signed');
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            ...$this->leadRules(),
+            'full_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:50',
+            'source' => 'nullable|string|in:'.self::SOURCES,
         ]);
 
         $targetBranchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
@@ -122,24 +145,31 @@ class LeadController extends Controller
 
     public function update(Request $request, Lead $lead): RedirectResponse
     {
+        if ($this->isConverted($lead)) {
+            $locked = array_keys($request->except(['notes', '_method', '_token']));
+
+            if ($locked !== []) {
+                throw ValidationException::withMessages([
+                    $locked[0] => "Shartnoma tuzilgan lidning faqat izohini o'zgartirish mumkin.",
+                ]);
+            }
+
+            $lead->update($request->validate(['notes' => 'nullable|string']));
+
+            return redirect()->back()->with('success', 'Lid yangilandi.');
+        }
+
         $validated = $request->validate([
-            'stage' => 'sometimes|required|in:new_lead,form_sent,form_completed,contract_signed,rejected',
-            'notes' => 'nullable|string',
-            'lost_reason' => 'nullable|string',
-            'category' => 'nullable|string|in:A,B,C,BC,D,E',
-            'preferred_time' => 'nullable|string|max:50',
-            'birth_date' => 'nullable|date',
-            'address' => 'nullable|string|max:500',
-            'passport_series' => 'nullable|string|max:10',
-            'passport_number' => 'nullable|string|max:20',
-            'pinfl' => 'nullable|string|max:20',
-            'branch_id' => 'nullable|exists:branches,id',
+            ...$this->leadRules(),
+            'full_name' => 'sometimes|required|string|max:255',
+            'phone' => 'sometimes|required|string|max:50',
+            'source' => 'sometimes|required|string|in:'.self::SOURCES,
+            'stage' => 'sometimes|required|in:new_lead,form_sent,form_completed,rejected',
+            'lost_reason' => 'nullable|string|max:500|required_if:stage,rejected',
         ]);
 
-        if (($lead->contract_id || $lead->student_id || $lead->stage === 'contract_signed') && isset($validated['stage']) && $validated['stage'] !== 'contract_signed') {
-            return redirect()->back()->withErrors([
-                'stage' => "Shartnoma tuzilgan lid holatini o'zgartirib bo'lmaydi.",
-            ]);
+        if (isset($validated['stage']) && $validated['stage'] !== 'rejected') {
+            $validated['lost_reason'] = null;
         }
 
         $lead->update($validated);

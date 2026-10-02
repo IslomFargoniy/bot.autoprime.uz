@@ -605,9 +605,12 @@
         "form_not_completed": "Тўлдирилмаган",
         "converted_student": "Ўқувчи профили",
         "view_student": "Ўқувчи профилини очиш",
-        "view_contract": "Шартномани кўриш",
         "assigned_manager": "Масъул ходим",
-        "lost_reason": "Рад этилиш сабаби"
+        "lost_reason": "Рад этилиш сабаби",
+        "edit": "Таҳрирлаш",
+        "edit_title": "Лидни таҳрирлаш",
+        "updated_success": "Лид янгиланди",
+        "lost_reason_placeholder": "Нима учун рад этилди?"
     },
     "contracts": {
         "title": "Шартномалар",

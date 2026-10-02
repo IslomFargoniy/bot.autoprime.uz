@@ -605,9 +605,12 @@
         "form_not_completed": "Не заполнена",
         "converted_student": "Профиль студента",
         "view_student": "Открыть профиль студента",
-        "view_contract": "Посмотреть договор",
         "assigned_manager": "Ответственный сотрудник",
-        "lost_reason": "Причина отказа"
+        "lost_reason": "Причина отказа",
+        "edit": "Редактировать",
+        "edit_title": "Редактирование лида",
+        "updated_success": "Лид обновлён",
+        "lost_reason_placeholder": "Почему отказано?"
     },
     "contracts": {
         "title": "Договоры",

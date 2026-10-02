@@ -104,3 +104,81 @@ test('converting a lead whose phone already belongs to a student returns a valid
 
     expect(Contract::count())->toBe(0);
 });
+
+function editableLead(Branch $branch, array $attributes = []): Lead
+{
+    return Lead::create([
+        'branch_id' => $branch->id,
+        'full_name' => 'Tahrir Lid',
+        'phone' => '+998907770011',
+        'stage' => 'new_lead',
+        'source' => 'reception_manual',
+        ...$attributes,
+    ]);
+}
+
+test('staff can edit the details of a lead', function () {
+    $lead = editableLead($this->branch);
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), [
+        'full_name' => 'Yangi Ism',
+        'phone' => '+998907770022',
+        'source' => 'instagram',
+        'passport_series' => 'AB',
+        'passport_number' => '1234567',
+        'pinfl' => '12345678901234',
+        'address' => 'Toshkent',
+    ])->assertSessionHasNoErrors();
+
+    $lead = $lead->fresh();
+    expect($lead->full_name)->toBe('Yangi Ism')
+        ->and($lead->phone)->toBe('+998907770022')
+        ->and($lead->source)->toBe('instagram')
+        ->and($lead->passport_series)->toBe('AB')
+        ->and($lead->pinfl)->toBe('12345678901234')
+        ->and($lead->pinfl_hash)->toBe(hash_hmac('sha256', '12345678901234', (string) config('app.key')));
+});
+
+test('a lead cannot be marked as contract signed by hand', function () {
+    $lead = editableLead($this->branch);
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['stage' => 'contract_signed'])->assertSessionHasErrors('stage');
+
+    expect($lead->fresh()->stage)->toBe('new_lead');
+});
+
+test('rejecting a lead needs a reason and clears it when reopened', function () {
+    $lead = editableLead($this->branch);
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['stage' => 'rejected'])->assertSessionHasErrors('lost_reason');
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['stage' => 'rejected', 'lost_reason' => 'Qimmat'])->assertSessionHasNoErrors();
+    expect($lead->fresh()->stage)->toBe('rejected')->and($lead->fresh()->lost_reason)->toBe('Qimmat');
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['stage' => 'new_lead'])->assertSessionHasNoErrors();
+    expect($lead->fresh()->lost_reason)->toBeNull();
+});
+
+test('only the notes of a converted lead can be edited', function () {
+    $lead = editableLead($this->branch, ['stage' => 'contract_signed', 'student_id' => Student::factory()->create(['branch_id' => $this->branch->id])->id]);
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['full_name' => 'Boshqa Ism'])->assertSessionHasErrors('full_name');
+    expect($lead->fresh()->full_name)->toBe('Tahrir Lid');
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['notes' => 'Yangi izoh'])->assertSessionHasNoErrors();
+    expect($lead->fresh()->notes)->toBe('Yangi izoh');
+});
+
+test('editing a lead needs the manage permission and the same branch', function () {
+    $lead = editableLead($this->branch);
+
+    $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id]);
+    $this->actingAs($instructor)->put(route('leads.update', $lead), ['full_name' => 'Ruxsatsiz'])->assertForbidden();
+
+    $otherBranch = Branch::firstOrCreate(['code' => 'lead-branch-2'], ['name' => 'Boshqa Filial', 'status' => 'active']);
+    $foreignLead = editableLead($otherBranch, ['phone' => '+998907770033']);
+    $this->actingAs($this->admin)->put(route('leads.update', $foreignLead), ['full_name' => 'Begona'])->assertForbidden();
+
+    $this->actingAs($this->admin)->put(route('leads.update', $lead), ['branch_id' => $otherBranch->id])->assertSessionHasNoErrors();
+    expect($lead->fresh()->branch_id)->toBe($this->branch->id);
+});

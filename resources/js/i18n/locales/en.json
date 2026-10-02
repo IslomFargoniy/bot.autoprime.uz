@@ -605,9 +605,12 @@
         "form_not_completed": "Incomplete",
         "converted_student": "Student Profile",
         "view_student": "Open Student Profile",
-        "view_contract": "View Contract",
         "assigned_manager": "Assigned Staff",
-        "lost_reason": "Rejection Reason"
+        "lost_reason": "Rejection Reason",
+        "edit": "Edit",
+        "edit_title": "Edit lead",
+        "updated_success": "Lead updated",
+        "lost_reason_placeholder": "Why was it rejected?"
     },
     "contracts": {
         "title": "Contracts",
