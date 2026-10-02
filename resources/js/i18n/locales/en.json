@@ -980,7 +980,10 @@
         "file_url": "File URL",
         "created": "Course created",
         "topic_created": "Topic created",
-        "material_added": "Material added"
+        "material_added": "Material added",
+        "updated": "Course updated",
+        "edit_course_title": "Edit course",
+        "is_active": "Course is active"
     },
     "vehicles": {
         "title": "Fleet & Vehicles",

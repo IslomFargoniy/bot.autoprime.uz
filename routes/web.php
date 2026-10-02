@@ -20,7 +20,6 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Api\Desktop\DesktopAuthController;
-use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\MiniAppController;
 use App\Http\Controllers\Student\StudentTestController;
@@ -113,15 +112,6 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::get('/dashboard', function (Request $request) {
         return redirect($request->user()->homeUrl());
     })->name('dashboard');
-    // Instructor Routes
-    Route::get('/instructor/dashboard', function (Request $request) {
-        return redirect($request->user()->homeUrl());
-    })->name('instructor.dashboard');
-    Route::middleware('permission:drivings.manage')->group(function () {
-        Route::get('/instructor/driving/create', [InstructorController::class, 'createDriving'])->name('instructor.driving.create');
-        Route::post('/instructor/driving', [InstructorController::class, 'storeDriving'])->name('instructor.driving.store');
-        Route::post('/instructor/driving/{driving}/finish', [InstructorController::class, 'finishDriving'])->name('instructor.driving.finish');
-    });
 
     // Admin Routes
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('admin.dashboard');

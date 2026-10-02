@@ -1,5 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Plus, BookOpen, FileText, Play } from 'lucide-react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { Plus, BookOpen, FileText, Play, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -53,6 +53,7 @@ export default function CoursesIndex({ courses }: PageProps) {
 
     // Modals
     const [showCourseModal, setShowCourseModal] = useState(false);
+    const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [showTopicModal, setShowTopicModal] = useState(false);
     const [selectedTopicForMaterial, setSelectedTopicForMaterial] =
         useState<Topic | null>(null);
@@ -79,13 +80,75 @@ export default function CoursesIndex({ courses }: PageProps) {
         file_type: 'pdf',
     });
 
-    const handleCreateCourse = (e: React.FormEvent) => {
+    const closeCourseModal = () => {
+        setShowCourseModal(false);
+        setEditingCourse(null);
+        courseForm.reset();
+        courseForm.clearErrors();
+    };
+
+    const openCreateCourse = () => {
+        setEditingCourse(null);
+        courseForm.reset();
+        setShowCourseModal(true);
+    };
+
+    const openEditCourse = (course: Course) => {
+        setEditingCourse(course);
+        courseForm.clearErrors();
+        courseForm.setData({
+            category: course.category,
+            title: course.title,
+            description: course.description ?? '',
+            is_active: course.is_active,
+        });
+        setShowCourseModal(true);
+    };
+
+    const handleSaveCourse = (e: React.FormEvent) => {
         e.preventDefault();
-        courseForm.post('/admin/courses', {
+
+        const options = {
             onSuccess: () => {
-                setShowCourseModal(false);
-                courseForm.reset();
-                toast.success(t('courses.created', 'Kurs yaratildi'));
+                const wasEditing = !!editingCourse;
+
+                closeCourseModal();
+                toast.success(
+                    wasEditing
+                        ? t('courses.updated', 'Kurs yangilandi')
+                        : t('courses.created', 'Kurs yaratildi'),
+                );
+            },
+            onError: (err: Record<string, string>) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        };
+
+        if (editingCourse) {
+            courseForm.put(`/admin/courses/${editingCourse.id}`, options);
+        } else {
+            courseForm.post('/admin/courses', options);
+        }
+    };
+
+    const handleDeleteCourse = (course: Course) => {
+        if (
+            !confirm(
+                t('common.confirm_delete', "Rostdan ham o'chirmoqchimisiz?"),
+            )
+        ) {
+            return;
+        }
+
+        router.delete(`/admin/courses/${course.id}`, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const remaining = (page.props as unknown as PageProps).courses;
+
+                setSelectedCourse(remaining[0] ?? null);
+                toast.success(t('common.deleted', "O'chirildi"));
             },
             onError: (err) =>
                 toast.error(
@@ -153,7 +216,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                 </h1>
                 {can('lms.manage_materials') && (
                     <Button
-                        onClick={() => setShowCourseModal(true)}
+                        onClick={openCreateCourse}
                         variant="brand"
                         className="text-xs"
                     >
@@ -200,6 +263,31 @@ export default function CoursesIndex({ courses }: PageProps) {
                                     t('courses.no_desc', 'Tavsif berilmagan')}
                             </p>
                         </div>
+                        {can('lms.manage_materials') && (
+                            <div className="flex items-center gap-1.5">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                        openEditCourse(selectedCourse)
+                                    }
+                                    className="text-xs"
+                                >
+                                    <Pencil className="mr-1 h-3.5 w-3.5" />
+                                    {t('common.edit', 'Tahrirlash')}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                        handleDeleteCourse(selectedCourse)
+                                    }
+                                    className="border-destructive/30 text-xs text-destructive"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        )}
                         {can('lms.manage_materials') && (
                             <Button
                                 size="sm"
@@ -309,19 +397,29 @@ export default function CoursesIndex({ courses }: PageProps) {
             ) : null}
 
             {/* Create Course Modal */}
-            <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
+            <Dialog
+                open={showCourseModal}
+                onOpenChange={(open) =>
+                    open ? setShowCourseModal(true) : closeCourseModal()
+                }
+            >
                 <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            {t(
-                                'courses.create_course_title',
-                                'Yangi Kurs Yaratish',
-                            )}
+                            {editingCourse
+                                ? t(
+                                      'courses.edit_course_title',
+                                      'Kursni tahrirlash',
+                                  )
+                                : t(
+                                      'courses.create_course_title',
+                                      'Yangi Kurs Yaratish',
+                                  )}
                         </DialogTitle>
                     </DialogHeader>
                     <form
-                        onSubmit={handleCreateCourse}
+                        onSubmit={handleSaveCourse}
                         className="space-y-4 text-xs"
                     >
                         <div className="grid grid-cols-2 gap-3">
@@ -347,6 +445,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                                         { value: 'E', label: 'E toifa' },
                                     ]}
                                     className="mt-1"
+                                    disabled={!!editingCourse}
                                 />
                             </div>
                             <div>
@@ -386,11 +485,26 @@ export default function CoursesIndex({ courses }: PageProps) {
                             />
                         </div>
 
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                checked={courseForm.data.is_active}
+                                onChange={(e) =>
+                                    courseForm.setData(
+                                        'is_active',
+                                        e.target.checked,
+                                    )
+                                }
+                                className="h-4 w-4 rounded border-input"
+                            />
+                            {t('courses.is_active', 'Kurs faol')}
+                        </label>
+
                         <div className="flex justify-end gap-2 pt-2">
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => setShowCourseModal(false)}
+                                onClick={closeCourseModal}
                             >
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>

@@ -391,3 +391,14 @@ test('a contract needs a tariff whose category matches the group', function () {
         ->assertSessionHasNoErrors();
     expect(Contract::where('student_id', $student->id)->count())->toBe(1);
 });
+
+test('a course can be renamed and deactivated', function () {
+    $course = Course::create(['name' => 'Eski nom', 'category' => 'B', 'is_active' => true]);
+
+    $this->actingAs($this->admin)->put("/admin/courses/{$course->id}", [
+        'title' => 'Yangi nom', 'description' => 'Tavsif', 'is_active' => false,
+    ])->assertSessionHasNoErrors();
+
+    $course = $course->fresh();
+    expect($course->name)->toBe('Yangi nom')->and($course->is_active)->toBeFalse();
+});

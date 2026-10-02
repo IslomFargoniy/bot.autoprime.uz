@@ -139,7 +139,7 @@ export default function AutodromesIndex({
         : undefined;
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth?.user?.role === 'instructor';
+    const isInstructor = !!auth?.works_on_own_records_only;
 
     const [perPage, setPerPage] = useState(filters?.per_page || '15');
     const [editing, setEditing] = useState<Autodrome | null>(null);

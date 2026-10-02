@@ -105,7 +105,7 @@ test('a lesson that has not started yet cannot be completed by anyone', function
     $driving = auditDriving($instructor, ['start_time' => now()->addDay(), 'end_time' => now()->addDay()->addHour()]);
 
     $this->actingAs($this->admin)->put("/admin/drivings/{$driving->id}", ['status' => 'completed'])->assertSessionHasErrors('status');
-    $this->actingAs($instructor)->post("/instructor/driving/{$driving->id}/finish")->assertSessionHasErrors();
+    $this->actingAs($instructor)->put("/admin/drivings/{$driving->id}", ['status' => 'completed'])->assertSessionHasErrors('status');
 
     expect($driving->fresh()->status)->toBe('scheduled');
 });

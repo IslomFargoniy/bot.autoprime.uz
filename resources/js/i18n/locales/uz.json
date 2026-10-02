@@ -980,7 +980,10 @@
         "file_url": "PDF Fayl Havolasi (URL)",
         "created": "Kurs yaratildi",
         "topic_created": "Mavzu qo'shildi",
-        "material_added": "Material qo'shildi"
+        "material_added": "Material qo'shildi",
+        "updated": "Kurs yangilandi",
+        "edit_course_title": "Kursni tahrirlash",
+        "is_active": "Kurs faol"
     },
     "vehicles": {
         "title": "Avtopark (Mashinalar)",

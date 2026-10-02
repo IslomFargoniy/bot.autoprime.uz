@@ -152,7 +152,7 @@ export default function StudentShow({
 }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isInstructor = auth.user.role === 'instructor';
+    const isInstructor = auth.works_on_own_records_only;
     const [activeTab, setActiveTab] = useState<'drivings' | 'finance'>(
         'drivings',
     );

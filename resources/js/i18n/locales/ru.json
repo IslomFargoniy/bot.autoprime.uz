@@ -980,7 +980,10 @@
         "file_url": "URL файла",
         "created": "Курс создан",
         "topic_created": "Тема создана",
-        "material_added": "Материал добавлен"
+        "material_added": "Материал добавлен",
+        "updated": "Курс обновлён",
+        "edit_course_title": "Редактирование курса",
+        "is_active": "Курс активен"
     },
     "vehicles": {
         "title": "Автопарк",

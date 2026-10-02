@@ -99,7 +99,7 @@ export default function InstructorShow({
 }: PageProps) {
     const { t } = useTranslation();
     const { auth } = usePage<SharedData>().props;
-    const isInstructorRole = auth?.user?.role === 'instructor';
+    const isInstructorRole = !!auth?.works_on_own_records_only;
 
     const [search, setSearch] = useState('');
 

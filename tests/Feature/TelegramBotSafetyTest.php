@@ -74,8 +74,8 @@ test('an instructor cannot finish an already completed driving again', function 
     ]);
 
     $this->actingAs($instructor)
-        ->post("/instructor/driving/{$driving->id}/finish")
-        ->assertSessionHasErrors('general');
+        ->put("/admin/drivings/{$driving->id}", ['status' => 'completed'])
+        ->assertSessionHasErrors('update');
 });
 
 test('wizard skip buttons cannot jump over required steps', function () {

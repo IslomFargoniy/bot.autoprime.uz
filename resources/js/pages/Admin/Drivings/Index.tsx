@@ -126,7 +126,6 @@ interface PageProps {
 export default function DrivingsIndex({
     drivings,
     instructors,
-    students,
     groups,
     autodromes = [],
     filters = {},
@@ -139,7 +138,7 @@ export default function DrivingsIndex({
             works_on_own_records_only: boolean;
         };
     };
-    const isInstructor = auth.user.role === 'instructor';
+    const isInstructor = auth.works_on_own_records_only;
 
     const [editing, setEditing] = useState<Driving | null>(null);
     const [showForm, setShowForm] = useState(false);
