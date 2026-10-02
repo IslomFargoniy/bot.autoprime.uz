@@ -78,6 +78,7 @@ test('a student cannot be double-booked and a rescheduled lesson is re-checked',
     Queue::fake();
     $otherInstructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id]);
     $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    openDrivingContract($student);
     $slot = ['start_time' => now()->addDays(2)->setTime(10, 0)->toDateTimeString(), 'end_time' => now()->addDays(2)->setTime(11, 0)->toDateTimeString()];
 
     $this->actingAs($this->admin)->post('/admin/drivings', ['instructor_id' => $this->instructor->id, 'student_ids' => [$student->id], ...$slot])->assertSessionHasNoErrors();
@@ -96,6 +97,7 @@ test('a student cannot be double-booked and a rescheduled lesson is re-checked',
 test('booking several students is all-or-nothing', function () {
     Queue::fake();
     $paidStudent = Student::factory()->create(['branch_id' => $this->branch->id]);
+    openDrivingContract($paidStudent);
     $unpaidStudent = Student::factory()->create(['branch_id' => $this->branch->id]);
     $contractType = ContractType::firstOrCreate(['name' => 'Haydash'], ['branch_id' => $this->branch->id, 'category' => 'B', 'price' => 1000, 'has_driving' => true, 'is_active' => true]);
     Contract::create([
@@ -124,10 +126,13 @@ test('instructors follow the same booking rules and only book their own students
     $ownStudent = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $ownGroup->id]);
     $slot = ['start_time' => now()->addDays(2)->setTime(9, 0)->toDateTimeString(), 'end_time' => now()->addDays(2)->setTime(10, 0)->toDateTimeString()];
 
-    $this->actingAs($this->instructor)->post('/instructor/driving', ['group_id' => $foreignGroup->id, 'student_id' => $foreignStudent->id, ...$slot])->assertSessionHasErrors('student_id');
+    openDrivingContract($ownStudent);
+    $book = fn (Student $student) => $this->actingAs($this->instructor)->post('/admin/drivings', ['instructor_id' => $this->instructor->id, 'student_ids' => [$student->id], ...$slot]);
 
-    $this->actingAs($this->instructor)->post('/instructor/driving', ['group_id' => $ownGroup->id, 'student_id' => $ownStudent->id, ...$slot])->assertSessionHasNoErrors();
-    $this->actingAs($this->instructor)->post('/instructor/driving', ['group_id' => $ownGroup->id, 'student_id' => $ownStudent->id, ...$slot])->assertSessionHasErrors('start_time');
+    $book($foreignStudent)->assertForbidden();
+
+    $book($ownStudent)->assertSessionHasNoErrors();
+    $book($ownStudent)->assertSessionHasErrors('start_time');
 
     expect(Driving::count())->toBe(1);
 });

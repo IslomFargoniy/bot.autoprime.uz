@@ -671,7 +671,14 @@
         "overpaid": "Overpaid",
         "created_by": "Created By",
         "dates": "Study Period",
-        "lessons_count": "lessons"
+        "lessons_count": "lessons",
+        "freeze": "Freeze",
+        "unfreeze": "Reactivate",
+        "cancel_contract": "Cancel",
+        "confirm_freeze": "Freeze this contract?",
+        "confirm_unfreeze": "Reactivate this contract?",
+        "confirm_cancel_contract": "Cancel this contract? This cannot be undone.",
+        "status_updated": "Contract status updated"
     },
     "contract_types": {
         "title": "Contract Tariffs",

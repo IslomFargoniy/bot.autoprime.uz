@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Branch;
+use App\Models\Contract;
+use App\Models\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -63,4 +66,29 @@ function signedTelegramInitData(int|string $telegramUserId, ?int $authDate = nul
     $fields['hash'] = hash_hmac('sha256', $dataCheckString, $secretKey);
 
     return http_build_query($fields, '', '&', PHP_QUERY_RFC3986);
+}
+
+/**
+ * An active, fully paid contract that includes driving lessons, so the student may be booked.
+ *
+ * @param  array<string, mixed>  $overrides
+ */
+function openDrivingContract(Student $student, array $overrides = []): Contract
+{
+    return Contract::create([
+        'branch_id' => $student->branch_id ?? Branch::firstOrCreate(['code' => 'helper'], ['name' => 'Helper Filial', 'status' => 'active'])->id,
+        'student_id' => $student->id,
+        'contract_number' => 'T-'.fake()->unique()->numerify('########'),
+        'contract_date' => now()->toDateString(),
+        'has_theory' => true,
+        'has_driving' => true,
+        'required_driving_lessons' => 10,
+        'total_amount' => 1000000,
+        'final_amount' => 1000000,
+        'paid_amount' => 1000000,
+        'debt_amount' => 0,
+        'status' => 'active',
+        'payment_status' => 'paid',
+        ...$overrides,
+    ]);
 }

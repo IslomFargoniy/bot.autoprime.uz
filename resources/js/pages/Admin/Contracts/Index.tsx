@@ -118,6 +118,7 @@ interface Contract {
     terms?: string;
     file_url?: string;
     payments?: ContractPayment[];
+    certificate?: { id: number } | null;
 }
 
 interface PageProps {
@@ -267,6 +268,103 @@ export default function ContractsIndex({
                     ),
             });
         }
+    };
+
+    const changeStatus = (contract: Contract, status: string) => {
+        const questions: Record<string, string> = {
+            frozen: t(
+                'contracts.confirm_freeze',
+                'Shartnomani muzlatmoqchimisiz?',
+            ),
+            active: t(
+                'contracts.confirm_unfreeze',
+                'Shartnomani qayta faollashtirmoqchimisiz?',
+            ),
+            cancelled: t(
+                'contracts.confirm_cancel_contract',
+                "Shartnomani bekor qilmoqchimisiz? Bu amalni qaytarib bo'lmaydi.",
+            ),
+        };
+
+        if (!confirm(questions[status] ?? '')) {
+            return;
+        }
+
+        router.put(
+            `/admin/contracts/${contract.id}`,
+            { status },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setViewingContract(null);
+                    toast.success(
+                        t(
+                            'contracts.status_updated',
+                            'Shartnoma holati yangilandi',
+                        ),
+                    );
+                },
+                onError: (err) =>
+                    toast.error(
+                        (Object.values(err)[0] as string) ||
+                            t('common.error', 'Xatolik yuz berdi'),
+                    ),
+            },
+        );
+    };
+
+    const renderContractActions = (c: Contract) => {
+        if (!can('contracts.edit')) {
+            return null;
+        }
+
+        const isOpen = c.status === 'active' || c.status === 'frozen';
+        const canDelete = Number(c.paid_amount) === 0 && !c.certificate;
+
+        return (
+            <>
+                {c.status === 'active' && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => changeStatus(c, 'frozen')}
+                        className="h-7 text-xs text-sky-600 hover:bg-sky-50 hover:text-sky-700 dark:hover:bg-sky-950/30"
+                    >
+                        {t('contracts.freeze', 'Muzlatish')}
+                    </Button>
+                )}
+                {c.status === 'frozen' && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => changeStatus(c, 'active')}
+                        className="h-7 text-xs text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30"
+                    >
+                        {t('contracts.unfreeze', 'Faollashtirish')}
+                    </Button>
+                )}
+                {isOpen && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => changeStatus(c, 'cancelled')}
+                        className="h-7 text-xs text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/30"
+                    >
+                        {t('contracts.cancel_contract', 'Bekor qilish')}
+                    </Button>
+                )}
+                {canDelete && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(c)}
+                        className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                    >
+                        <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                )}
+            </>
+        );
     };
 
     const openRefund = (contract: Contract) => {
@@ -581,6 +679,7 @@ export default function ContractsIndex({
                                                 </a>
                                             )}
                                             {Number(c.paid_amount) > 0 &&
+                                                !c.certificate &&
                                                 (can('payments.edit') ? (
                                                     <Button
                                                         size="sm"
@@ -601,18 +700,7 @@ export default function ContractsIndex({
                                                         )}
                                                     </Button>
                                                 ) : null)}
-                                            {can('contracts.edit') && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleDelete(c)
-                                                    }
-                                                    className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                                >
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </Button>
-                                            )}
+                                            {renderContractActions(c)}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -735,16 +823,7 @@ export default function ContractsIndex({
                                         PDF
                                     </a>
                                 )}
-                                {can('contracts.edit') && (
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => handleDelete(c)}
-                                        className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                )}
+                                {renderContractActions(c)}
                             </div>
                         </div>
                     ))

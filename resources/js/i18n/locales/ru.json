@@ -671,7 +671,14 @@
         "overpaid": "Переплата",
         "created_by": "Оформил",
         "dates": "Сроки обучения",
-        "lessons_count": "уроков"
+        "lessons_count": "уроков",
+        "freeze": "Заморозить",
+        "unfreeze": "Активировать",
+        "cancel_contract": "Отменить",
+        "confirm_freeze": "Заморозить договор?",
+        "confirm_unfreeze": "Активировать договор снова?",
+        "confirm_cancel_contract": "Отменить договор? Это действие нельзя отменить.",
+        "status_updated": "Статус договора обновлён"
     },
     "contract_types": {
         "title": "Тарифы договоров",

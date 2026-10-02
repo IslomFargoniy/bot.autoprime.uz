@@ -33,7 +33,7 @@ class ContractController extends Controller
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
 
-        $query = Contract::with(['student', 'contractType', 'group', 'branch', 'createdBy', 'payments.cashRegister', 'payments.receivedBy'])
+        $query = Contract::with(['student', 'contractType', 'group', 'branch', 'createdBy', 'payments.cashRegister', 'payments.receivedBy', 'certificate:id,contract_id'])
             ->when($request->user()->worksOnOwnRecordsOnly(), fn ($q) => $q->whereIn('student_id', Student::query()->visibleTo($request->user())->select('id')))
             ->orderBy('created_at', 'desc');
 
@@ -66,6 +66,7 @@ class ContractController extends Controller
         $contracts = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $students = Student::orderBy('full_name')
+            ->where('status', 'active')
             ->visibleTo($request->user())
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
@@ -131,8 +132,15 @@ class ContractController extends Controller
         ]);
 
         $contractType = ContractType::findOrFail($validated['contract_type_id']);
+        if (! $contractType->is_active) {
+            return redirect()->back()->withErrors(['contract_type_id' => 'Tanlangan tarif faol emas.']);
+        }
+
         $student = Student::findOrFail($validated['student_id']);
         $this->ensureCanSeeStudent($request, $student);
+        if ($student->status !== 'active') {
+            return redirect()->back()->withErrors(['student_id' => 'Faqat faol o\'quvchi uchun shartnoma tuzish mumkin.']);
+        }
         $branchId = $validated['branch_id'] ?? $student->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $total = (float) $contractType->price;
@@ -141,6 +149,12 @@ class ContractController extends Controller
         $groupId = $validated['group_id'] ?? null;
 
         $contract = DB::transaction(function () use ($validated, $request, $student, $contractType, $branchId, $groupId, $total, $discount, $final) {
+            // Serialize on the student so two clerks cannot both open a contract for them.
+            Student::whereKey($student->id)->lockForUpdate()->first();
+            if (Contract::where('student_id', $student->id)->whereIn('status', ['active', 'frozen'])->exists()) {
+                return null;
+            }
+
             $contract = Contract::create([
                 'branch_id' => $branchId,
                 'student_id' => $student->id,
@@ -174,6 +188,12 @@ class ContractController extends Controller
             return $contract;
         });
 
+        if (! $contract) {
+            return redirect()->back()->withErrors([
+                'student_id' => 'O\'quvchining faol shartnomasi bor. Avval uni yakunlang yoki bekor qiling.',
+            ]);
+        }
+
         $telegramService->sendContractSignedNotification($contract);
 
         return redirect()->back()->with('success', "Shartnoma tuzildi: #{$contract->contract_number}");
@@ -200,11 +220,25 @@ class ContractController extends Controller
         $this->ensureCanSeeStudent($request, $contract->student);
 
         $validated = $request->validate([
-            'status' => 'sometimes|required|in:active,completed,cancelled,frozen',
+            'status' => 'sometimes|required|in:active,cancelled,frozen',
             'terms' => 'nullable|string',
             'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ], [
+            'status.in' => 'Shartnomani faqat faol, muzlatilgan yoki bekor qilingan holatga o\'tkazish mumkin. "Yakunlangan" holat guvohnoma berilganda qo\'yiladi.',
         ]);
+
+        if (isset($validated['status']) && $validated['status'] !== $contract->status) {
+            if (in_array($contract->status, ['cancelled', 'completed'], true)) {
+                return redirect()->back()->withErrors([
+                    'status' => 'Bekor qilingan yoki yakunlangan shartnoma holatini o\'zgartirib bo\'lmaydi.',
+                ]);
+            }
+
+            if ($validated['status'] === 'active' && Contract::where('student_id', $contract->student_id)->where('status', 'active')->whereKeyNot($contract->id)->exists()) {
+                return redirect()->back()->withErrors(['status' => 'O\'quvchining boshqa faol shartnomasi bor.']);
+            }
+        }
 
         $contract->update($validated);
 
@@ -218,6 +252,12 @@ class ContractController extends Controller
         if ($contract->payments()->exists()) {
             return redirect()->back()->withErrors([
                 'delete' => 'Ushbu shartnoma bo\'yicha to\'lovlar qabul qilingan. Uni o\'chirish mumkin emas.',
+            ]);
+        }
+
+        if ($contract->certificate()->exists()) {
+            return redirect()->back()->withErrors([
+                'delete' => 'Guvohnoma berilgan shartnomani o\'chirib bo\'lmaydi.',
             ]);
         }
 
@@ -237,6 +277,12 @@ class ContractController extends Controller
             'cancel_contract' => 'nullable|boolean',
             'notes' => 'nullable|string',
         ]);
+
+        if ($contract->certificate()->exists()) {
+            return redirect()->back()->withErrors([
+                'amount' => 'Guvohnoma berilgan shartnoma bo\'yicha to\'lovni qaytarib bo\'lmaydi.',
+            ]);
+        }
 
         $maxRefund = (float) $contract->paid_amount;
         if ((float) $validated['amount'] > $maxRefund) {

@@ -671,7 +671,14 @@
         "overpaid": "Ортиқча тўлов",
         "created_by": "Расмийлаштирди",
         "dates": "Ўқиш муддатлари",
-        "lessons_count": "дарс"
+        "lessons_count": "дарс",
+        "freeze": "Музлатиш",
+        "unfreeze": "Фаоллаштириш",
+        "cancel_contract": "Бекор қилиш",
+        "confirm_freeze": "Шартномани музлатмоқчимисиз?",
+        "confirm_unfreeze": "Шартномани қайта фаоллаштирмоқчимисиз?",
+        "confirm_cancel_contract": "Шартномани бекор қилмоқчимисиз? Бу амални қайтариб бўлмайди.",
+        "status_updated": "Шартнома ҳолати янгиланди"
     },
     "contract_types": {
         "title": "Шартнома Тарифлари",

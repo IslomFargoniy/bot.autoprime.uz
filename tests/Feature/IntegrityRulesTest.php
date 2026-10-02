@@ -4,6 +4,11 @@ use App\Models\Answer;
 use App\Models\Attempt;
 use App\Models\AttemptAnswer;
 use App\Models\Branch;
+use App\Models\CashRegister;
+use App\Models\CashRegisterType;
+use App\Models\Certificate;
+use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Course;
 use App\Models\Driving;
 use App\Models\Group;
@@ -15,6 +20,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\TelegramService;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     $this->mock(TelegramService::class)->shouldIgnoreMissing();
@@ -119,4 +125,112 @@ test('students cannot be put into an inactive group but may stay in one', functi
         'full_name' => 'Yangi Ism', 'phone' => $student->phone, 'group_id' => $active->id,
     ])->assertSessionHasNoErrors();
     expect($student->fresh()->group_id)->toBe($active->id);
+});
+
+function integrityContractType(Branch $branch, array $attributes = []): ContractType
+{
+    return ContractType::create([
+        'branch_id' => $branch->id, 'name' => 'Tarif '.fake()->unique()->numerify('###'), 'category' => 'B',
+        'price' => 3000000, 'is_active' => true, ...$attributes,
+    ]);
+}
+
+test('a student can have only one open contract and only an active tariff', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $type = integrityContractType($this->branch);
+    $payload = ['student_id' => $student->id, 'contract_type_id' => $type->id];
+
+    $this->actingAs($this->admin)->post('/admin/contracts', $payload)->assertSessionHasNoErrors();
+    expect(Contract::where('student_id', $student->id)->count())->toBe(1);
+
+    $this->actingAs($this->admin)->post('/admin/contracts', $payload)->assertSessionHasErrors('student_id');
+    expect(Contract::where('student_id', $student->id)->count())->toBe(1);
+
+    Contract::where('student_id', $student->id)->update(['status' => 'frozen']);
+    $this->actingAs($this->admin)->post('/admin/contracts', $payload)->assertSessionHasErrors('student_id');
+
+    Contract::where('student_id', $student->id)->update(['status' => 'cancelled']);
+    $inactive = integrityContractType($this->branch, ['is_active' => false]);
+    $this->actingAs($this->admin)->post('/admin/contracts', ['student_id' => $student->id, 'contract_type_id' => $inactive->id])->assertSessionHasErrors('contract_type_id');
+
+    $this->actingAs($this->admin)->post('/admin/contracts', $payload)->assertSessionHasNoErrors();
+    expect(Contract::where('student_id', $student->id)->count())->toBe(2);
+});
+
+test('only active students can get a new contract', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $student->update(['status' => 'dropped']);
+
+    $this->actingAs($this->admin)->post('/admin/contracts', ['student_id' => $student->id, 'contract_type_id' => integrityContractType($this->branch)->id])
+        ->assertSessionHasErrors('student_id');
+});
+
+test('driving lessons need an active driving contract with lessons left', function () {
+    Queue::fake();
+    $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id]);
+    $slot = fn (int $day) => [
+        'start_time' => now()->addDays($day)->setTime(10, 0)->toDateTimeString(),
+        'end_time' => now()->addDays($day)->setTime(11, 0)->toDateTimeString(),
+    ];
+    $book = fn (Student $student, int $day) => $this->actingAs($this->admin)->post('/admin/drivings', [
+        'instructor_id' => $instructor->id, 'student_ids' => [$student->id], ...$slot($day),
+    ]);
+
+    $noContract = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $book($noContract, 2)->assertSessionHasErrors('student_ids');
+
+    $theoryOnly = Student::factory()->create(['branch_id' => $this->branch->id]);
+    openDrivingContract($theoryOnly, ['has_driving' => false]);
+    $book($theoryOnly, 2)->assertSessionHasErrors('student_ids');
+
+    $limited = Student::factory()->create(['branch_id' => $this->branch->id]);
+    openDrivingContract($limited, ['required_driving_lessons' => 2]);
+    $book($limited, 2)->assertSessionHasNoErrors();
+    $book($limited, 3)->assertSessionHasNoErrors();
+    $book($limited, 4)->assertSessionHasErrors('student_ids');
+
+    expect(Driving::where('student_id', $limited->id)->count())->toBe(2)
+        ->and(Driving::whereIn('student_id', [$noContract->id, $theoryOnly->id])->count())->toBe(0);
+});
+
+test('contract status moves only through allowed transitions', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = openDrivingContract($student);
+
+    $this->actingAs($this->admin)->put("/admin/contracts/{$contract->id}", ['status' => 'completed'])->assertSessionHasErrors('status');
+    expect($contract->fresh()->status)->toBe('active');
+
+    $this->actingAs($this->admin)->put("/admin/contracts/{$contract->id}", ['status' => 'frozen'])->assertSessionHasNoErrors();
+    $this->actingAs($this->admin)->put("/admin/contracts/{$contract->id}", ['status' => 'active'])->assertSessionHasNoErrors();
+    $this->actingAs($this->admin)->put("/admin/contracts/{$contract->id}", ['status' => 'cancelled'])->assertSessionHasNoErrors();
+    expect($contract->fresh()->status)->toBe('cancelled');
+
+    $this->actingAs($this->admin)->put("/admin/contracts/{$contract->id}", ['status' => 'active'])->assertSessionHasErrors('status');
+    expect($contract->fresh()->status)->toBe('cancelled');
+});
+
+test('a contract with a certificate can be neither refunded nor deleted', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = openDrivingContract($student, ['paid_amount' => 0, 'debt_amount' => 0, 'status' => 'completed']);
+    Certificate::create([
+        'branch_id' => $this->branch->id, 'student_id' => $student->id, 'contract_id' => $contract->id,
+        'certificate_number' => 'CERT-I-0001', 'qr_verify_hash' => 'hash-int', 'category' => 'B',
+        'issued_date' => now()->toDateString(), 'status' => 'issued',
+    ]);
+
+    $this->actingAs($this->admin)->delete("/admin/contracts/{$contract->id}")->assertSessionHasErrors('delete');
+    expect(Contract::whereKey($contract->id)->exists())->toBeTrue();
+
+    $contract->update(['paid_amount' => 500000]);
+    $register = CashRegister::create([
+        'branch_id' => $this->branch->id,
+        'cash_register_type_id' => CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true])->id,
+        'name' => 'Kassa', 'balance' => 0, 'is_active' => true,
+    ]);
+    $register->deposit(1000000, 'initial', 'Boshlang\'ich');
+
+    $this->actingAs($this->admin)->post("/admin/contracts/{$contract->id}/refund", [
+        'cash_register_id' => $register->id, 'amount' => 100000, 'payment_method' => 'cash',
+    ])->assertSessionHasErrors('amount');
+    expect((float) $register->fresh()->balance)->toEqual(1000000.0);
 });

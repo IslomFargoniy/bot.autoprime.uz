@@ -60,14 +60,19 @@ class DrivingScheduler
     {
         $activeContract = $student->activeContract;
         if (! $activeContract) {
-            return null;
+            return "{$student->full_name} talabasining faol shartnomasi yo'q.";
         }
 
-        if ($activeContract->status === 'cancelled') {
-            return "{$student->full_name} talabasining shartnomasi bekor qilingan.";
+        if (! $activeContract->has_driving) {
+            return "{$student->full_name} talabasining shartnomasida amaliy haydash darslari yo'q.";
         }
 
-        if ($activeContract->has_driving && ! $activeContract->canAccessDriving()) {
+        $limit = (int) $activeContract->required_driving_lessons;
+        if ($limit > 0 && $activeContract->getScheduledOrCompletedDrivingsCount() >= $limit) {
+            return "{$student->full_name} uchun shartnoma bo'yicha {$limit} ta darsning hammasi rejalashtirilgan.";
+        }
+
+        if (! $activeContract->canAccessDriving()) {
             return "{$student->full_name} talabasi amaliy haydash uchun kamida 75% to'lov qilishi shart (Hozirgi to'lov: {$activeContract->payment_percentage}%).";
         }
 

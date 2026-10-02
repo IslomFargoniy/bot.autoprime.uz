@@ -671,7 +671,14 @@
         "overpaid": "Ortiqcha to'lov",
         "created_by": "Rasmiylashtirdi",
         "dates": "O'qish muddatlari",
-        "lessons_count": "dars"
+        "lessons_count": "dars",
+        "freeze": "Muzlatish",
+        "unfreeze": "Faollashtirish",
+        "cancel_contract": "Bekor qilish",
+        "confirm_freeze": "Shartnomani muzlatmoqchimisiz?",
+        "confirm_unfreeze": "Shartnomani qayta faollashtirmoqchimisiz?",
+        "confirm_cancel_contract": "Shartnomani bekor qilmoqchimisiz? Bu amalni qaytarib bo'lmaydi.",
+        "status_updated": "Shartnoma holati yangilandi"
     },
     "contract_types": {
         "title": "Shartnoma Tariflari",

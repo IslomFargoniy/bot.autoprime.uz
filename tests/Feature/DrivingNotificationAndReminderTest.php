@@ -19,6 +19,7 @@ test('admin driving creation dispatches SendDrivingCreatedNotificationJob', func
     $admin = User::factory()->create(['role' => 'admin']);
     $instructor = User::factory()->create(['role' => 'instructor']);
     $student = Student::factory()->create();
+    openDrivingContract($student);
 
     $response = $this->actingAs($admin)->post('/admin/drivings', [
         'instructor_id' => $instructor->id,
@@ -37,10 +38,11 @@ test('instructor driving creation dispatches SendDrivingCreatedNotificationJob',
     $instructor = User::factory()->create(['role' => 'instructor']);
     $group = Group::create(['name' => 'Group 101', 'instructor_id' => $instructor->id]);
     $student = Student::factory()->create(['group_id' => $group->id]);
+    openDrivingContract($student);
 
-    $response = $this->actingAs($instructor)->post('/instructor/driving', [
-        'group_id' => $group->id,
-        'student_id' => $student->id,
+    $response = $this->actingAs($instructor)->post('/admin/drivings', [
+        'instructor_id' => $instructor->id,
+        'student_ids' => [$student->id],
         'start_time' => now()->addDays(2)->format('Y-m-d H:i:s'),
         'end_time' => now()->addDays(2)->addHours(2)->format('Y-m-d H:i:s'),
     ]);
@@ -191,6 +193,7 @@ test('admin driving creation auto-assigns the instructor active vehicle when non
     $admin = User::factory()->create(['role' => 'admin']);
     $instructor = User::factory()->create(['role' => 'instructor']);
     $student = Student::factory()->create();
+    openDrivingContract($student);
     $vehicle = Vehicle::create([
         'branch_id' => Branch::firstOrCreate(['code' => 'vehicle-branch'], ['name' => 'Avto Filial', 'status' => 'active'])->id,
         'instructor_id' => $instructor->id,

@@ -205,6 +205,10 @@ class LeadController extends Controller
         }
 
         $contractType = ContractType::findOrFail($validated['contract_type_id']);
+        if (! $contractType->is_active) {
+            return redirect()->back()->withErrors(['contract_type_id' => 'Tanlangan tarif faol emas.']);
+        }
+
         $branchId = $validated['branch_id'] ?? $lead->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = (float) $contractType->price;
