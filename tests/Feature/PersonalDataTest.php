@@ -203,3 +203,11 @@ test('Phone::normalize accepts the usual spellings', function () {
         ->and(Phone::isValid('+998901234567'))->toBeTrue()
         ->and(Phone::isValid('+79123456789'))->toBeFalse();
 });
+
+test('birth dates reach the frontend as the same calendar day', function () {
+    $lead = new Lead(['birth_date' => '2000-01-01']);
+    $student = Student::factory()->create(['birth_date' => '2000-01-01']);
+
+    expect($lead->toArray()['birth_date'])->toBe('2000-01-01')
+        ->and($student->toArray()['birth_date'])->toBe('2000-01-01');
+});

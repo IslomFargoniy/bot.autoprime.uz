@@ -44,6 +44,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface Group {
@@ -666,7 +667,7 @@ export default function StudentsIndex({
                                     <TableCell className="text-xs">
                                         {item.branch?.name || '-'}
                                     </TableCell>
-                                    <TableCell>{item.phone}</TableCell>
+                                    <TableCell>{formatPhone(item.phone)}</TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {item.group?.name ||
                                             t(
@@ -754,7 +755,7 @@ export default function StudentsIndex({
                                     {item.full_name}
                                 </Link>
                                 <div className="text-sm text-muted-foreground">
-                                    {item.phone}
+                                    {formatPhone(item.phone)}
                                 </div>
                             </div>
                         </div>

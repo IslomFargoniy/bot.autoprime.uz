@@ -167,3 +167,18 @@ export function moneyDigits(value: string | number | null | undefined): string {
 
 export const groupThousands = (digits: string): string =>
     digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+/**
+ * Stored phone ("+998901234567") shown as "+998 (90) 123-45-67". Anything that is not a
+ * full Uzbek number (old or foreign data) is shown as it was stored.
+ */
+export function formatPhone(value?: string | null): string {
+    if (!value) {
+        return '';
+    }
+
+    const digits = onlyDigits(value);
+    const isUzbek = digits.length === 12 && digits.startsWith('998');
+
+    return isUzbek ? formatPhoneDisplay(digits.slice(3)) : value;
+}

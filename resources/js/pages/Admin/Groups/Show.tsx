@@ -14,6 +14,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 
 interface Group {
     id: number;
@@ -155,7 +156,7 @@ export default function GroupShow({ group, students }: PageProps) {
                                                     {student.full_name}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {student.phone || '-'}
+                                                    {formatPhone(student.phone) || '-'}
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -200,7 +201,7 @@ export default function GroupShow({ group, students }: PageProps) {
                                                     {student.full_name}
                                                 </div>
                                                 <div className="text-sm text-muted-foreground">
-                                                    {student.phone || '-'}
+                                                    {formatPhone(student.phone) || '-'}
                                                 </div>
                                             </div>
                                             <div className="text-right">

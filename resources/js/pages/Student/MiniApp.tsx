@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { TestQuiz } from '@/components/test-quiz';
 import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 import TMALayout from '@/layouts/tma-layout';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
 
 interface StudentProps {
@@ -576,7 +577,7 @@ export default function MiniApp({
                                                     className="mt-0.5 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400"
                                                 >
                                                     <Phone className="h-3 w-3" />{' '}
-                                                    {group.teacher.phone}
+                                                    {formatPhone(group.teacher.phone)}
                                                 </a>
                                             )}
                                         </div>

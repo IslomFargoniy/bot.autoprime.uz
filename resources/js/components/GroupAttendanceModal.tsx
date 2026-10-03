@@ -32,6 +32,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDate } from '@/lib/utils';
 
 export interface GroupRosterStudent {
@@ -559,7 +560,7 @@ export default function GroupAttendanceModal({
                                                     {st.full_name}
                                                 </p>
                                                 <p className="font-mono text-[11px] text-muted-foreground">
-                                                    {st.phone || '-'}
+                                                    {formatPhone(st.phone) || '-'}
                                                 </p>
                                                 {st.payment_warning && (
                                                     <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">

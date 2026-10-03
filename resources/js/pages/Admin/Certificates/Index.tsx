@@ -31,6 +31,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDate, formatMoney } from '@/lib/utils';
 
 interface Certificate {
@@ -497,7 +498,7 @@ export default function CertificatesIndex({
                                             <p className="mt-0.5 text-[11px] text-gray-500">
                                                 #{cand.contract_number} &bull;{' '}
                                                 {cand.category} toifa &bull;{' '}
-                                                {cand.phone}
+                                                {formatPhone(cand.phone)}
                                             </p>
 
                                             {/* 4 Conditions Badges */}

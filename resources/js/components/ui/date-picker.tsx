@@ -109,6 +109,13 @@ export function DatePicker({
                 placeholder={placeholder}
                 aria-invalid={problem || undefined}
                 onChange={(e) => commit(maskDateText(e.target.value))}
+                onBlur={() => {
+                    // A half-typed date is dropped on leaving the box, so a cleared filter or a
+                    // reset form never keeps stale digits; a full but wrong date stays to be fixed.
+                    if (text.length > 0 && text.length < 10) {
+                        commit('');
+                    }
+                }}
                 className="h-full min-w-0 flex-1 bg-transparent font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground"
             />
 

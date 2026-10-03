@@ -50,6 +50,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import type { SharedData, Branch } from '@/types/auth';
 
 interface Instructor {
@@ -741,7 +742,7 @@ export default function InstructorsIndex({
                                                     </span>
                                                 </div>
                                                 <div className="font-mono text-xs text-muted-foreground">
-                                                    {item.phone}
+                                                    {formatPhone(item.phone)}
                                                 </div>
                                             </div>
                                         </Link>
@@ -911,7 +912,7 @@ export default function InstructorsIndex({
                                         <span>{item.name}</span>
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                        {item.phone}
+                                        {formatPhone(item.phone)}
                                     </div>
                                     {item.car_name && (
                                         <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-muted-foreground">

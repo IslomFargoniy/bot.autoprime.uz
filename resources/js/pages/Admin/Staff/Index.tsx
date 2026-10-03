@@ -62,6 +62,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDateTime, formatMoney as formatMoneyUtil } from '@/lib/utils';
 import type { Branch, SharedData } from '@/types/auth';
 
@@ -855,7 +856,7 @@ export default function StaffIndex({
                                             </TableCell>
                                             <TableCell>
                                                 <div className="text-xs font-medium text-foreground">
-                                                    {member.phone}
+                                                    {formatPhone(member.phone)}
                                                 </div>
                                                 {member.telegram_id && (
                                                     <div className="font-mono text-[11px] text-muted-foreground">
@@ -1069,7 +1070,7 @@ export default function StaffIndex({
                                                     )}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    {member.phone}
+                                                    {formatPhone(member.phone)}
                                                 </div>
                                             </div>
                                         </div>

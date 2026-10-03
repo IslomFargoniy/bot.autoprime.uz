@@ -51,6 +51,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
 import { LeadFormFields } from './components/LeadFormFields';
 
@@ -544,7 +545,7 @@ export default function LeadsIndex({
                                             className="flex items-center gap-1 font-mono text-xs hover:text-blue-600 dark:hover:text-blue-400"
                                         >
                                             <Phone className="h-3.5 w-3.5 text-gray-400" />
-                                            {lead.phone}
+                                            {formatPhone(lead.phone)}
                                         </a>
                                     </TableCell>
                                     <TableCell>
@@ -683,7 +684,7 @@ export default function LeadsIndex({
                                             className="flex items-center gap-1 font-mono text-xs font-semibold text-primary hover:underline"
                                         >
                                             <Phone className="h-3 w-3 text-muted-foreground" />
-                                            <span>{lead.phone}</span>
+                                            <span>{formatPhone(lead.phone)}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -851,7 +852,7 @@ export default function LeadsIndex({
                                             href={`tel:${viewingLead.phone}`}
                                             className="font-mono font-semibold text-blue-600 hover:underline dark:text-blue-400"
                                         >
-                                            {viewingLead.phone}
+                                            {formatPhone(viewingLead.phone)}
                                         </a>
                                     </div>
                                     <div>

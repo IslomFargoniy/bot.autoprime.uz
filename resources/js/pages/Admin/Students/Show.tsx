@@ -38,6 +38,7 @@ import {
     TableCell,
     TableEmpty,
 } from '@/components/ui/table';
+import { formatPhone } from '@/lib/input-masks';
 import {
     formatDate,
     formatDateTime,
@@ -290,7 +291,7 @@ export default function StudentShow({
                             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground md:text-sm">
                                 <span className="flex items-center gap-1">
                                     <Phone className="h-3.5 w-3.5" />
-                                    {student.phone}
+                                    {formatPhone(student.phone)}
                                 </span>
                                 {student.group && (
                                     <span className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">

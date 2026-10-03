@@ -27,6 +27,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import { formatPhone } from '@/lib/input-masks';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface AdminUser {
@@ -448,7 +449,7 @@ export default function AdminsIndex({
                                             {admin.branch?.name || '-'}
                                         </TableCell>
                                         <TableCell className="text-xs">
-                                            {admin.phone}
+                                            {formatPhone(admin.phone)}
                                         </TableCell>
                                         <TableCell className="font-mono text-xs text-muted-foreground">
                                             {admin.telegram_id || '-'}
@@ -509,7 +510,7 @@ export default function AdminsIndex({
                                             )}
                                         </div>
                                         <div className="mt-0.5 text-sm text-muted-foreground">
-                                            {admin.phone}
+                                            {formatPhone(admin.phone)}
                                         </div>
                                     </div>
                                 </div>

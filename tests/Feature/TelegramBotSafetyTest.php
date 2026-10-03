@@ -131,3 +131,37 @@ test('completing the wizard twice updates the open lead instead of duplicating i
     expect(Lead::where('telegram_id', 535353)->count())->toBe(1)
         ->and(Lead::where('telegram_id', 535353)->value('full_name'))->toBe('Ikkinchi Ism');
 });
+
+test('wizard asks again for an invalid PINFL and takes the birth date from a valid one', function () {
+    $wizard = app(LeadWizardService::class);
+    $bot = fakeBotForUser(545454);
+    Cache::put('lead_wizard:545454', [
+        'step' => 'pinfl',
+        'telegram_id' => 545454,
+        'full_name' => 'Ali Valiyev',
+        'phone' => '+998901112233',
+    ], 3600);
+
+    $wizard->handleText($bot, '12345678901234');
+    expect(Cache::get('lead_wizard:545454')['step'])->toBe('pinfl')
+        ->and(Lead::count())->toBe(0);
+
+    $wizard->handleText($bot, '3200598 0123456');
+    $lead = Lead::firstWhere('telegram_id', 545454);
+
+    expect($lead->pinfl)->toBe('32005980123456')
+        ->and($lead->birth_date->toDateString())->toBe('1998-05-20');
+});
+
+test('wizard turns a shared foreign contact down', function () {
+    $wizard = app(LeadWizardService::class);
+    $bot = fakeBotForUser(555555);
+
+    $wizard->start($bot);
+    $wizard->handleText($bot, 'Ali Valiyev');
+    $wizard->handleContact($bot, '+79161234567');
+    expect(Cache::get('lead_wizard:555555')['step'])->toBe('phone');
+
+    $wizard->handleContact($bot, '998901112233');
+    expect(Cache::get('lead_wizard:555555'))->toMatchArray(['step' => 'category', 'phone' => '+998901112233']);
+});

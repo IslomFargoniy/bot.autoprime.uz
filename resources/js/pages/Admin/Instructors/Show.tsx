@@ -27,6 +27,7 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDateTime } from '@/lib/utils';
 import type { SharedData } from '@/types/auth';
 
@@ -169,7 +170,7 @@ export default function InstructorShow({
                             <div className="flex items-center gap-1">
                                 <Phone className="h-3.5 w-3.5" />
                                 <span className="font-mono">
-                                    {instructor.phone}
+                                    {formatPhone(instructor.phone)}
                                 </span>
                             </div>
                             {instructor.car_name && (

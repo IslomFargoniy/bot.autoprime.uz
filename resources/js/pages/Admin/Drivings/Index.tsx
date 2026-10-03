@@ -52,6 +52,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import { formatDate, formatTime } from '@/lib/utils';
 
 interface Instructor {
@@ -1104,7 +1105,7 @@ export default function DrivingsIndex({
                                         </span>
                                         {editing.student?.phone && (
                                             <span className="ml-1 font-mono text-xs text-muted-foreground">
-                                                ({editing.student.phone})
+                                                ({formatPhone(editing.student.phone)})
                                             </span>
                                         )}
                                     </div>
@@ -1435,7 +1436,7 @@ export default function DrivingsIndex({
                                                             </div>
                                                             {s.phone && (
                                                                 <span className="font-mono text-[11px] text-muted-foreground">
-                                                                    {s.phone}
+                                                                    {formatPhone(s.phone)}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -1711,7 +1712,7 @@ export default function DrivingsIndex({
                                                     '-'}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {driving.student?.phone || ''}
+                                                {formatPhone(driving.student?.phone) || ''}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-xs">
@@ -1975,7 +1976,7 @@ export default function DrivingsIndex({
                                             {driving.student?.full_name || '-'}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {driving.student?.phone || ''}
+                                            {formatPhone(driving.student?.phone) || ''}
                                         </div>
                                     </div>
                                     <div>

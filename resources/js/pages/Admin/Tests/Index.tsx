@@ -45,6 +45,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import { cn, formatDateTime, formatNumber } from '@/lib/utils';
 
 interface Attempt {
@@ -1451,7 +1452,7 @@ export default function TestsIndex({
                                                     )}
                                             </div>
                                             <div className="mt-0.5 text-xs text-muted-foreground">
-                                                {att.student?.phone || '—'}
+                                                {formatPhone(att.student?.phone) || '—'}
                                             </div>
                                         </div>
                                         {att.is_passed ? (

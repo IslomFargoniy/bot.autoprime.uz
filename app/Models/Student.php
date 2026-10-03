@@ -73,7 +73,7 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'birth_date' => 'date',
+        'birth_date' => 'date:Y-m-d',
         'medical_certificate_date' => 'date',
         'is_active' => 'boolean',
         'desktop_token_expires_at' => 'datetime',

@@ -7,6 +7,7 @@ import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PhoneInput } from '@/components/ui/phone-input';
+import { formatPhone } from '@/lib/input-masks';
 import type { User as UserType } from '@/types';
 
 interface PageProps {
@@ -77,7 +78,7 @@ export default function ProfileEdit({ user }: PageProps) {
                             </span>
                         </h2>
                         <p className="text-xs text-muted-foreground">
-                            {user.phone}
+                            {formatPhone(user.phone)}
                         </p>
                     </div>
                 </div>

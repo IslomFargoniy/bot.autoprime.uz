@@ -3,6 +3,7 @@
 namespace App\Concerns;
 
 use App\Support\Phone;
+use App\Support\Pinfl;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -117,7 +118,7 @@ trait PersonalDataRules
             'nullable',
             'digits:14',
             function (string $attribute, mixed $value, Closure $fail) use ($birthDate): void {
-                $date = self::birthDateFromPinfl((string) $value);
+                $date = Pinfl::birthDate((string) $value);
 
                 if ($date === null) {
                     $fail("JSHSHIR noto'g'ri: undagi tug'ilgan sana aniqlanmadi.");
@@ -171,22 +172,5 @@ trait PersonalDataRules
             'telegram_id.regex' => 'Telegram ID faqat raqamlardan iborat bo\'lishi kerak (5-15 ta).',
             'plate_number.regex' => 'Avtomobil raqami 01A123BC yoki 01123ABC ko\'rinishida bo\'lishi kerak.',
         ];
-    }
-
-    /**
-     * The ISO birth date a PINFL stands for, or null when it is not a valid PINFL.
-     */
-    public static function birthDateFromPinfl(string $pinfl): ?string
-    {
-        if (! preg_match('/^[1-6]\d{13}$/', $pinfl)) {
-            return null;
-        }
-
-        $century = [1 => 1800, 2 => 1800, 3 => 1900, 4 => 1900, 5 => 2000, 6 => 2000][(int) $pinfl[0]];
-        $day = (int) substr($pinfl, 1, 2);
-        $month = (int) substr($pinfl, 3, 2);
-        $year = $century + (int) substr($pinfl, 5, 2);
-
-        return checkdate($month, $day, $year) ? sprintf('%04d-%02d-%02d', $year, $month, $day) : null;
     }
 }

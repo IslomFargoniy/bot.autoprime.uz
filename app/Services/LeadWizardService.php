@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Branch;
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Phone;
+use App\Support\Pinfl;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -57,9 +59,9 @@ class LeadWizardService
      */
     protected function normalizePhone(string $phone): ?string
     {
-        $digits = preg_replace('/\D/', '', $phone);
+        $normalized = Phone::normalize($phone);
 
-        return strlen($digits) >= 9 && strlen($digits) <= 15 ? '+'.$digits : null;
+        return Phone::isValid($normalized) ? $normalized : null;
     }
 
     /**
@@ -151,9 +153,11 @@ class LeadWizardService
 
             case 'pinfl':
                 $pinfl = preg_replace('/\D/', '', $text);
-                if (strlen($pinfl) === 14) {
-                    $state['pinfl'] = $pinfl;
+                if (Pinfl::birthDate($pinfl) === null) {
+                    $bot->sendMessage("❗️ JSHSHIR noto'g'ri. U 14 ta raqamdan iborat bo'ladi (masalan: 32005980123456). Qaytadan kiriting yoki o'tkazib yuboring.");
+                    break;
                 }
+                $state['pinfl'] = $pinfl;
                 $this->finishWizard($bot, $state);
                 break;
         }
@@ -177,6 +181,8 @@ class LeadWizardService
 
         $normalizedPhone = $this->normalizePhone($phone);
         if (! $normalizedPhone) {
+            $bot->sendMessage("❗️ Faqat O'zbekiston raqami (+998) qabul qilinadi. Raqamni +998901234567 ko'rinishida qo'lda kiriting.");
+
             return;
         }
 
@@ -450,6 +456,7 @@ class LeadWizardService
             'photo_url' => $state['photo_url'] ?? null,
             'address' => $state['address'] ?? null,
             'pinfl' => $state['pinfl'] ?? null,
+            'birth_date' => isset($state['pinfl']) ? Pinfl::birthDate($state['pinfl']) : $lead->birth_date,
             'stage' => 'form_completed',
             'source' => 'telegram_bot',
             'is_form_completed' => true,

@@ -26,6 +26,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import type { Branch } from '@/types/auth';
 
 interface Props {
@@ -228,7 +229,7 @@ export default function Index({ branches, filters }: Props) {
                                             {branch.code}
                                         </code>
                                     </TableCell>
-                                    <TableCell>{branch.phone || '-'}</TableCell>
+                                    <TableCell>{formatPhone(branch.phone) || '-'}</TableCell>
                                     <TableCell className="max-w-[200px] truncate">
                                         {branch.address || '-'}
                                     </TableCell>
@@ -325,7 +326,7 @@ export default function Index({ branches, filters }: Props) {
                                 </Badge>
                             </div>
                             <div className="space-y-1 text-xs text-muted-foreground">
-                                {branch.phone && <div>📞 {branch.phone}</div>}
+                                {branch.phone && <div>📞 {formatPhone(branch.phone)}</div>}
                                 {branch.address && (
                                     <div>📍 {branch.address}</div>
                                 )}

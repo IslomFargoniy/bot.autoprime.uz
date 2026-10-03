@@ -41,7 +41,7 @@ class Lead extends Model
 
     protected $casts = [
         'is_form_completed' => 'boolean',
-        'birth_date' => 'date',
+        'birth_date' => 'date:Y-m-d',
     ];
 
     public function setPhoneAttribute(?string $value): void

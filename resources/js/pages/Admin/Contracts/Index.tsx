@@ -48,6 +48,7 @@ import {
     TableEmpty,
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
+import { formatPhone } from '@/lib/input-masks';
 import {
     formatDate,
     formatDateTime,
@@ -595,7 +596,7 @@ export default function ContractsIndex({
                                                 {c.student?.full_name}
                                             </div>
                                             <div className="font-mono text-[11px] text-muted-foreground">
-                                                {c.student?.phone}
+                                                {formatPhone(c.student?.phone)}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-xs text-muted-foreground">
@@ -738,7 +739,7 @@ export default function ContractsIndex({
                                         <span>{c.student?.full_name}</span>
                                     </div>
                                     <div className="mt-0.5 font-mono text-xs text-muted-foreground">
-                                        {c.student?.phone}
+                                        {formatPhone(c.student?.phone)}
                                     </div>
                                 </div>
                                 <span
@@ -908,7 +909,7 @@ export default function ContractsIndex({
                                             <ExternalLink className="h-3 w-3" />
                                         </Link>
                                         <div className="font-mono text-xs text-muted-foreground">
-                                            {viewingContract.student?.phone}
+                                            {formatPhone(viewingContract.student?.phone)}
                                         </div>
                                     </div>
                                     <div>
