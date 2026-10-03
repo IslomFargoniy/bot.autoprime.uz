@@ -264,7 +264,12 @@
         "financial_ledger_desc": "Барча тўловлар, ҳисобланган қарзлар ва пул ўтказмалари тарихи",
         "status": "Ҳолат",
         "status_active": "Фаол",
-        "status_dropped": "Ўқишни ташлаган"
+        "status_dropped": "Ўқишни ташлаган",
+        "status_graduated": "Битирган",
+        "status_all": "Ҳаммаси",
+        "without_contract": "Шартномасиз",
+        "contract": "Шартнома",
+        "no_contract": "Шартнома йўқ"
     },
     "staff": {
         "title": "Ходимлар",

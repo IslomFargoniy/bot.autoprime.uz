@@ -130,9 +130,8 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     // Students & Groups
     Route::get('admin/students/export', [StudentController::class, 'export'])->middleware('permission:students.view')->name('students.export');
     Route::get('admin/students/search-api', [StudentController::class, 'searchApi'])->middleware('permission:students.view')->name('students.search-api');
-    Route::resource('admin/students', StudentController::class)->except(['create', 'edit'])
+    Route::resource('admin/students', StudentController::class)->except(['create', 'store', 'edit'])
         ->middlewareFor(['index', 'show'], 'permission:students.view')
-        ->middlewareFor('store', 'permission:students.create')
         ->middlewareFor('update', 'permission:students.edit')
         ->middlewareFor('destroy', 'permission:students.delete');
     Route::get('admin/groups/{group}/export-students', [GroupController::class, 'exportStudents'])->middleware('permission:groups.view')->name('groups.export-students');

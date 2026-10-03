@@ -61,7 +61,7 @@ class InstructorsExport implements FromCollection, ShouldAutoSize, WithHeadings,
 
         $items = $query->withCount('groups')
             ->with([
-                'groups' => fn ($gQuery) => $gQuery->withCount('students'),
+                'groups' => fn ($gQuery) => $gQuery->withCount(['students' => fn ($students) => $students->where('status', 'active')]),
                 'drivings' => $drivingsQuery,
             ])
             ->get();

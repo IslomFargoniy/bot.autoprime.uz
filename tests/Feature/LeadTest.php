@@ -87,8 +87,9 @@ test('a lead cannot be converted twice', function () {
         ->and(Contract::count())->toBe(1);
 });
 
-test('converting a lead whose phone already belongs to a student returns a validation error', function () {
-    Student::factory()->create(['phone' => '+998907778899']);
+test('converting a lead whose phone belongs to a student with an open contract returns a validation error', function () {
+    $student = Student::factory()->create(['phone' => '+998907778899', 'branch_id' => $this->branch->id]);
+    openDrivingContract($student);
 
     $lead = Lead::create([
         'branch_id' => $this->branch->id,
@@ -102,7 +103,7 @@ test('converting a lead whose phone already belongs to a student returns a valid
         'contract_type_id' => $this->contractType->id,
     ])->assertSessionHasErrors('phone');
 
-    expect(Contract::count())->toBe(0);
+    expect(Contract::count())->toBe(1);
 });
 
 function editableLead(Branch $branch, array $attributes = []): Lead

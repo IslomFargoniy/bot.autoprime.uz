@@ -32,6 +32,7 @@ class SendDrivingRemindersCommand extends Command
 
         // 1. Process 24-hour reminders (for lessons starting in 23 to 25 hours)
         $drivings24h = Driving::where('status', 'scheduled')
+            ->whereHas('student', fn ($student) => $student->where('status', 'active'))
             ->whereNull('reminded_24h_at')
             ->whereBetween('start_time', [
                 $now->copy()->addHours(23),
@@ -47,6 +48,7 @@ class SendDrivingRemindersCommand extends Command
 
         // 2. Process 2-hour reminders (for lessons starting in 110 to 130 minutes)
         $drivings2h = Driving::where('status', 'scheduled')
+            ->whereHas('student', fn ($student) => $student->where('status', 'active'))
             ->whereNull('reminded_2h_at')
             ->whereBetween('start_time', [
                 $now->copy()->addMinutes(110),

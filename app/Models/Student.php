@@ -122,6 +122,20 @@ class Student extends Model
     }
 
     /**
+     * Lists show the students who are studying unless another status (or `all`) is asked for.
+     *
+     * @param  Builder<Student>  $query
+     */
+    public function scopeWithListStatus(Builder $query, ?string $status): void
+    {
+        $status = $status ?: 'active';
+
+        if (in_array($status, ['active', 'graduated', 'dropped'], true)) {
+            $query->where('status', $status);
+        }
+    }
+
+    /**
      * Canonical phone format (+998XXXXXXXXX) so manual entry, imports and lead
      * conversion all match the same student instead of creating duplicates.
      */
@@ -216,6 +230,9 @@ class Student extends Model
         return $this->belongsTo(User::class, 'registered_by_user_id');
     }
 
+    /**
+     * @return HasMany<Contract, $this>
+     */
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class);
@@ -227,6 +244,17 @@ class Student extends Model
     public function activeContract(): HasOne
     {
         return $this->hasOne(Contract::class)->where('status', 'active')->latestOfMany();
+    }
+
+    /**
+     * The newest contract in any state: the one a list shows for graduates and for students
+     * who dropped out, who no longer have an active one.
+     *
+     * @return HasOne<Contract, $this>
+     */
+    public function latestContract(): HasOne
+    {
+        return $this->hasOne(Contract::class)->latestOfMany();
     }
 
     public function payments(): HasMany

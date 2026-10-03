@@ -45,7 +45,8 @@ class DashboardController extends Controller
 
         $branchId = BranchSessionService::getActiveBranchId($request);
 
-        $totalStudents = Student::when($branchId, fn ($q) => $q->inBranch($branchId))
+        $totalStudents = Student::where('status', 'active')
+            ->when($branchId, fn ($q) => $q->inBranch($branchId))
             ->visibleTo($user)
             ->count();
 

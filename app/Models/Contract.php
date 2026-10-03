@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Carbon|null $contract_date
  * @property Carbon|null $start_date
  * @property Carbon|null $end_date
+ * @property Carbon|null $frozen_at
  * @property bool $has_theory
  * @property bool $has_driving
  * @property bool $has_lms
@@ -54,6 +55,7 @@ class Contract extends Model
         'contract_date',
         'start_date',
         'end_date',
+        'frozen_at',
         'has_theory',
         'has_driving',
         'has_lms',
@@ -75,6 +77,7 @@ class Contract extends Model
         'contract_date' => 'date',
         'start_date' => 'date',
         'end_date' => 'date',
+        'frozen_at' => 'date',
         'has_theory' => 'boolean',
         'has_driving' => 'boolean',
         'has_lms' => 'boolean',
@@ -230,11 +233,15 @@ class Contract extends Model
     }
 
     /**
-     * Get count of scheduled or completed drivings under this contract
+     * Get count of scheduled or completed drivings under this contract. A lesson that is
+     * being moved is left out, otherwise it would count against its own place.
      */
-    public function getScheduledOrCompletedDrivingsCount(): int
+    public function getScheduledOrCompletedDrivingsCount(?int $exceptDrivingId = null): int
     {
-        return $this->drivings()->whereIn('status', ['scheduled', 'completed'])->count();
+        return $this->drivings()
+            ->whereIn('status', ['scheduled', 'completed'])
+            ->when($exceptDrivingId, fn ($query) => $query->whereKeyNot($exceptDrivingId))
+            ->count();
     }
 
     /**

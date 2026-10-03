@@ -18,7 +18,7 @@ class GroupStudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, Wi
 
     public function query()
     {
-        $query = $this->group->students()->with('drivings.review');
+        $query = $this->group->students()->where('status', 'active')->with('drivings.review');
 
         if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];

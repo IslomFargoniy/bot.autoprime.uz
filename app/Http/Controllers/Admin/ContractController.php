@@ -16,6 +16,7 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Services\BranchSessionService;
 use App\Services\DocumentNumberService;
+use App\Services\StudentLifecycleService;
 use App\Services\TelegramService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -50,7 +51,7 @@ class ContractController extends Controller
         }
 
         if ($request->boolean('has_debt')) {
-            $query->where('debt_amount', '>', 0);
+            $query->where('debt_amount', '>', 0)->whereIn('status', ['active', 'frozen']);
         }
 
         if ($request->filled('search')) {
@@ -66,7 +67,7 @@ class ContractController extends Controller
         $contracts = $query->paginate($this->perPage($request, fn () => $query->count()))->withQueryString();
 
         $students = Student::orderBy('full_name')
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'graduated'])
             ->visibleTo($request->user())
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
@@ -138,8 +139,10 @@ class ContractController extends Controller
 
         $student = Student::findOrFail($validated['student_id']);
         $this->ensureCanSeeStudent($request, $student);
-        if ($student->status !== 'active') {
-            return redirect()->back()->withErrors(['student_id' => 'Faqat faol o\'quvchi uchun shartnoma tuzish mumkin.']);
+        // A graduate comes back for the next category and is active again with the new contract;
+        // someone who dropped out is reactivated on their own card first.
+        if ($student->status === 'dropped') {
+            return redirect()->back()->withErrors(['student_id' => 'O\'quvchi o\'qishni tashlagan. Shartnoma tuzishdan oldin o\'quvchi kartochkasida uni faollashtiring.']);
         }
         $branchId = $validated['branch_id'] ?? $student->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
         $discount = (float) ($validated['discount_amount'] ?? 0);
@@ -155,7 +158,10 @@ class ContractController extends Controller
             ]);
         }
 
-        if ($groupId && ! $student->group_id) {
+        // The student's own group is the one source of truth: a different group on the
+        // contract moves the student there (checked for room), it never leaves them split.
+        $movesToGroup = $groupId && (int) $groupId !== (int) $student->group_id;
+        if ($movesToGroup) {
             $this->ensureGroupHasRoom($groupId);
         }
 
@@ -192,8 +198,15 @@ class ContractController extends Controller
                 'terms' => $validated['terms'] ?? null,
             ]);
 
-            if ($groupId && ! $student->group_id) {
-                $student->update(['group_id' => $groupId]);
+            $studentChanges = [];
+            if ($groupId && (int) $groupId !== (int) $student->group_id) {
+                $studentChanges['group_id'] = $groupId;
+            }
+            if ($student->status === 'graduated') {
+                $studentChanges['status'] = 'active';
+            }
+            if ($studentChanges) {
+                $student->update($studentChanges);
             }
 
             return $contract;
@@ -251,9 +264,35 @@ class ContractController extends Controller
             }
         }
 
-        $contract->update($validated);
+        $oldStatus = $contract->status;
+        $cancelledDrivings = 0;
 
-        return redirect()->back()->with('success', 'Shartnoma yangilandi.');
+        DB::transaction(function () use ($contract, $validated, $oldStatus, &$cancelledDrivings): void {
+            $contract->update($validated);
+
+            $newStatus = $validated['status'] ?? $oldStatus;
+            $lifecycle = app(StudentLifecycleService::class);
+
+            if ($newStatus === $oldStatus) {
+                return;
+            }
+
+            if ($newStatus === 'cancelled') {
+                $contract->update(['frozen_at' => null]);
+                $cancelledDrivings = $lifecycle->contractEnded($contract);
+            } elseif ($newStatus === 'frozen') {
+                $cancelledDrivings = $lifecycle->contractFrozen($contract);
+            } elseif ($newStatus === 'active' && $oldStatus === 'frozen') {
+                $lifecycle->contractUnfrozen($contract, ! array_key_exists('end_date', $validated));
+            }
+        });
+
+        $message = 'Shartnoma yangilandi.';
+        if ($cancelledDrivings > 0) {
+            $message .= " Kelgusi {$cancelledDrivings} ta mashg'ulot bekor qilindi.";
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function destroy(Request $request, Contract $contract): RedirectResponse
@@ -405,7 +444,8 @@ class ContractController extends Controller
 
         // 6. If cancel_contract is true, set status = cancelled
         if (! empty($validated['cancel_contract'])) {
-            $lockedContract->update(['status' => 'cancelled']);
+            $lockedContract->update(['status' => 'cancelled', 'frozen_at' => null]);
+            app(StudentLifecycleService::class)->contractEnded($lockedContract);
         }
     }
 }

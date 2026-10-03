@@ -264,7 +264,12 @@
         "financial_ledger_desc": "History of all tuition payments, charges, and financial transactions",
         "status": "Status",
         "status_active": "Active",
-        "status_dropped": "Dropped out"
+        "status_dropped": "Dropped out",
+        "status_graduated": "Graduated",
+        "status_all": "All",
+        "without_contract": "Without contract",
+        "contract": "Contract",
+        "no_contract": "No contract"
     },
     "staff": {
         "title": "Staff & Employees",

@@ -248,18 +248,19 @@ test('test attempts are limited to the branch and to a teacher\'s own students',
 
 test('a teacher with extra student permissions can only place students into own groups', function () {
     $teacher = staffMember('teacher');
-    $teacher->givePermissionTo(['students.create', 'students.edit']);
+    $teacher->givePermissionTo(['students.edit']);
     $ownGroup = Group::create(['name' => 'Mening', 'branch_id' => $this->branch->id, 'teacher_id' => $teacher->id]);
     $otherGroup = Group::create(['name' => 'Begona', 'branch_id' => $this->branch->id, 'teacher_id' => staffMember('teacher')->id]);
 
-    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Ali', 'phone' => '+998901110001', 'group_id' => $otherGroup->id])
+    $student = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $ownGroup->id, 'phone' => '+998901110003']);
+
+    $this->actingAs($teacher)->put("/admin/students/{$student->id}", ['full_name' => 'Ali', 'phone' => $student->phone, 'group_id' => $otherGroup->id])
         ->assertSessionHasErrors('group_id');
-    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Vali', 'phone' => '+998901110002'])
+    $this->actingAs($teacher)->put("/admin/students/{$student->id}", ['full_name' => 'Vali', 'phone' => $student->phone])
         ->assertSessionHasErrors('group_id');
-    $this->actingAs($teacher)->post('/admin/students', ['full_name' => 'Soli', 'phone' => '+998901110003', 'group_id' => $ownGroup->id])
+    $this->actingAs($teacher)->put("/admin/students/{$student->id}", ['full_name' => 'Soli', 'phone' => $student->phone, 'group_id' => $ownGroup->id])
         ->assertSessionHasNoErrors();
 
-    $student = Student::where('phone', '+998901110003')->firstOrFail();
     $this->actingAs($teacher)->put("/admin/students/{$student->id}", ['full_name' => 'Soli', 'phone' => $student->phone, 'group_id' => $otherGroup->id])
         ->assertSessionHasErrors('group_id');
 

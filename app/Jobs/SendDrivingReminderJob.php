@@ -57,6 +57,7 @@ class SendDrivingReminderJob implements ShouldBeUnique, ShouldQueue
         // NULL, so concurrent or duplicated jobs never send the same reminder twice.
         $claimed = Driving::whereKey($this->driving->id)
             ->where('status', 'scheduled')
+            ->whereHas('student', fn ($student) => $student->where('status', 'active'))
             ->whereNull($column)
             ->update([$column => now()]);
 

@@ -146,7 +146,7 @@ class AttendanceController extends Controller
         $this->ensureGroupAccess($request, $session->group);
 
         $session->load([
-            'group' => fn ($q) => $q->withCount('students'),
+            'group' => fn ($q) => $q->withCount(['students' => fn ($students) => $students->where('status', 'active')]),
             'teacher',
             'attendances.student',
         ]);

@@ -10,7 +10,9 @@ use App\Models\Branch;
 use App\Models\Group;
 use App\Models\Student;
 use App\Services\BranchSessionService;
+use App\Services\StudentLifecycleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -50,6 +52,10 @@ class StudentController extends Controller
         $ownRecordsOnly = $user->worksOnOwnRecordsOnly();
 
         $query = Student::with(['group', 'branch'])->orderBy('full_name', 'asc');
+
+        // Pickers (lessons, attendance) only offer students who are studying; `status=all` or a
+        // single status widens the search.
+        $query->withListStatus((string) $request->get('status', 'active'));
 
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
         if ($targetBranchId) {
@@ -96,8 +102,9 @@ class StudentController extends Controller
     {
         $user = $request->user();
 
-        $query = Student::with(['group', 'branch'])
+        $query = Student::with(['group', 'branch', 'latestContract'])
             ->visibleTo($user)
+            ->withListStatus($request->input('status'))
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
                 $q->where('status', 'completed');
             }])
@@ -120,6 +127,11 @@ class StudentController extends Controller
             $query->where('group_id', $request->group_id);
         }
 
+        // Students that were added by hand and never got a contract.
+        if ($request->boolean('without_contract')) {
+            $query->doesntHave('contracts');
+        }
+
         $perPage = $this->perPage($request, fn () => $query->count());
 
         $students = $query->paginate($perPage)->withQueryString();
@@ -139,38 +151,12 @@ class StudentController extends Controller
             'filters' => [
                 'search' => $request->search,
                 'group_id' => $request->group_id,
+                'status' => $request->input('status') ?: 'active',
+                'without_contract' => $request->boolean('without_contract'),
                 'branch_id' => $targetBranchId,
                 'per_page' => $request->per_page,
             ],
         ]);
-    }
-
-    public function store(Request $request)
-    {
-        // Normalize before the unique check so +998/no-prefix variants are one number.
-        $this->normalizePersonalInput($request);
-
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'phone' => array_merge($this->phoneRules(), ['unique:students,phone']),
-            'telegram_id' => array_merge($this->telegramIdRules(), ['unique:students,telegram_id']),
-            'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
-            'branch_id' => 'nullable|exists:branches,id',
-        ], $this->personalDataMessages());
-
-        $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
-        $this->ensureGroupHasRoom($validated['group_id'] ?? null);
-
-        $user = $request->user();
-        if ($user->isBranchRestricted()) {
-            $validated['branch_id'] = $user->branch_id;
-        } elseif (empty($validated['branch_id'])) {
-            $validated['branch_id'] = $user->branch_id;
-        }
-
-        Student::create($validated);
-
-        return redirect()->back();
     }
 
     public function update(Request $request, Student $student)
@@ -202,11 +188,30 @@ class StudentController extends Controller
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
 
-        if ((int) ($validated['group_id'] ?? 0) !== (int) $student->group_id) {
+        $groupChanged = (int) ($validated['group_id'] ?? 0) !== (int) $student->group_id;
+        $newStatus = $validated['status'] ?? $student->status;
+
+        if ($groupChanged) {
+            if (! empty($validated['group_id']) && $newStatus !== 'active') {
+                throw ValidationException::withMessages(['group_id' => 'Faol bo\'lmagan o\'quvchini guruhga biriktirib bo\'lmaydi.']);
+            }
+
             $this->ensureGroupHasRoom($validated['group_id'] ?? null);
         }
 
-        $student->update($validated);
+        $lifecycle = app(StudentLifecycleService::class);
+
+        DB::transaction(function () use ($student, $validated, $newStatus, $groupChanged, $lifecycle): void {
+            $droppedNow = $newStatus === 'dropped' && $student->status !== 'dropped';
+
+            $student->update($validated);
+
+            if ($droppedNow) {
+                $lifecycle->studentDropped($student);
+            } elseif ($groupChanged) {
+                $lifecycle->syncContractGroup($student);
+            }
+        });
 
         return redirect()->back();
     }

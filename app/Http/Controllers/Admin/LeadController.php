@@ -183,6 +183,41 @@ class LeadController extends Controller
     }
 
     /**
+     * The returning student becomes active again and keeps their own record: the lead only
+     * fills details that are still empty there (it never overwrites what is on file).
+     *
+     * @throws \DomainException when the student got an open contract in the meantime
+     */
+    private function reuseStudent(Student $existing, Lead $lead, int|string|null $groupId): Student
+    {
+        $student = Student::whereKey($existing->id)->lockForUpdate()->firstOrFail();
+
+        if (Contract::where('student_id', $student->id)->whereIn('status', ['active', 'frozen'])->exists()) {
+            throw new \DomainException("{$student->full_name} o'quvchisining faol shartnomasi bor.");
+        }
+
+        $changes = [];
+        foreach (['passport_series', 'passport_number', 'pinfl', 'birth_date', 'address', 'photo_url', 'passport_photo_url', 'medical_certificate_photo_url'] as $field) {
+            if (empty($student->{$field}) && ! empty($lead->{$field})) {
+                $changes[$field] = $lead->{$field};
+            }
+        }
+
+        if (empty($student->telegram_id) && $lead->telegram_id && ! Student::where('telegram_id', $lead->telegram_id)->exists()) {
+            $changes['telegram_id'] = $lead->telegram_id;
+            $changes['telegram_chat_id'] = (int) $lead->telegram_id;
+        }
+
+        $student->update([
+            ...$changes,
+            'status' => 'active',
+            'group_id' => $groupId ?: $student->group_id,
+        ]);
+
+        return $student;
+    }
+
+    /**
      * 1-Click convert lead to Student and create Contract.
      */
     public function convert(Request $request, Lead $lead, TelegramService $telegramService): RedirectResponse
@@ -203,9 +238,32 @@ class LeadController extends Controller
             ]);
         }
 
-        if (Student::where('phone', Student::normalizePhone($lead->phone))->exists()) {
+        // A returning client (graduate, someone who dropped out) is the same person: the new
+        // contract goes on the existing student instead of creating a second record.
+        $byPhone = Student::where('phone', Student::normalizePhone($lead->phone))->first();
+        $byPinfl = $lead->pinfl
+            ? Student::where('pinfl_hash', hash_hmac('sha256', $lead->pinfl, (string) config('app.key')))->first()
+            : null;
+
+        if ($byPhone && $byPinfl && $byPhone->isNot($byPinfl)) {
             return redirect()->back()->withErrors([
-                'phone' => "Bu telefon raqami ({$lead->phone}) bilan o'quvchi allaqachon mavjud.",
+                'phone' => "Telefon raqami ({$lead->phone}) va JSHSHIR turli o'quvchilarga tegishli: {$byPhone->full_name} va {$byPinfl->full_name}. Avval ma'lumotlarni to'g'rilang.",
+            ]);
+        }
+
+        $existingStudent = $byPhone ?? $byPinfl;
+
+        if ($existingStudent) {
+            $this->ensureCanSeeStudent($request, $existingStudent);
+
+            if (Contract::where('student_id', $existingStudent->id)->whereIn('status', ['active', 'frozen'])->exists()) {
+                return redirect()->back()->withErrors([
+                    'phone' => "{$existingStudent->full_name} o'quvchisining faol shartnomasi bor. Avval uni yakunlang yoki bekor qiling.",
+                ]);
+            }
+        } elseif ($lead->telegram_id && Student::where('telegram_id', $lead->telegram_id)->exists()) {
+            return redirect()->back()->withErrors([
+                'phone' => 'Bu Telegram ID boshqa o\'quvchiga biriktirilgan. Avval lid ma\'lumotlarini to\'g\'rilang.',
             ]);
         }
 
@@ -214,9 +272,15 @@ class LeadController extends Controller
             return redirect()->back()->withErrors(['contract_type_id' => 'Tanlangan tarif faol emas.']);
         }
 
-        $this->ensureGroupHasRoom($validated['group_id'] ?? null);
+        $groupId = $validated['group_id'] ?? null;
+        $movesToGroup = $groupId && (int) $groupId !== (int) $existingStudent?->group_id;
 
-        $leadGroup = ! empty($validated['group_id']) ? Group::find($validated['group_id']) : null;
+        if ($movesToGroup) {
+            $this->ensureGroupHasRoom($groupId);
+        }
+
+        $effectiveGroupId = $groupId ?? $existingStudent?->group_id;
+        $leadGroup = $effectiveGroupId ? Group::find($effectiveGroupId) : null;
         if ($leadGroup && $leadGroup->category !== $contractType->category) {
             return redirect()->back()->withErrors([
                 'group_id' => "Guruh toifasi ({$leadGroup->category}) tarif toifasiga ({$contractType->category}) mos emas.",
@@ -232,32 +296,32 @@ class LeadController extends Controller
         $contract = null;
 
         try {
-            DB::transaction(function () use ($lead, $contractType, $branchId, $validated, $totalAmount, $discount, $finalAmount, $request, &$student, &$contract) {
+            DB::transaction(function () use ($lead, $contractType, $branchId, $validated, $totalAmount, $discount, $finalAmount, $request, $existingStudent, $groupId, &$student, &$contract) {
                 $lockedLead = Lead::where('id', $lead->id)->lockForUpdate()->firstOrFail();
                 if ($lockedLead->stage === 'contract_signed' || $lockedLead->student_id || $lockedLead->contract_id) {
                     throw new \DomainException('Ushbu lid bilan allaqachon shartnoma tuzilgan.');
                 }
 
-                // Create Student
-                $student = Student::create([
-                    'branch_id' => $branchId,
-                    'group_id' => $validated['group_id'] ?? null,
-                    'registered_by_user_id' => $request->user()->id,
-                    'full_name' => $lead->full_name,
-                    'phone' => $lead->phone,
-                    'passport_series' => $lead->passport_series,
-                    'passport_number' => $lead->passport_number,
-                    'pinfl' => $lead->pinfl,
-                    'birth_date' => $lead->birth_date,
-                    'address' => $lead->address,
-                    'photo_url' => $lead->photo_url,
-                    'passport_photo_url' => $lead->passport_photo_url,
-                    'medical_certificate_photo_url' => $lead->medical_certificate_photo_url,
-                    'telegram_id' => $lead->telegram_id,
-                    'telegram_chat_id' => $lead->telegram_id ? (int) $lead->telegram_id : null,
-                    'status' => 'active',
-                    'is_active' => true,
-                ]);
+                $student = $existingStudent
+                    ? $this->reuseStudent($existingStudent, $lead, $groupId)
+                    : Student::create([
+                        'branch_id' => $branchId,
+                        'group_id' => $groupId,
+                        'registered_by_user_id' => $request->user()->id,
+                        'full_name' => $lead->full_name,
+                        'phone' => $lead->phone,
+                        'passport_series' => $lead->passport_series,
+                        'passport_number' => $lead->passport_number,
+                        'pinfl' => $lead->pinfl,
+                        'birth_date' => $lead->birth_date,
+                        'address' => $lead->address,
+                        'photo_url' => $lead->photo_url,
+                        'passport_photo_url' => $lead->passport_photo_url,
+                        'medical_certificate_photo_url' => $lead->medical_certificate_photo_url,
+                        'telegram_id' => $lead->telegram_id,
+                        'telegram_chat_id' => $lead->telegram_id ? (int) $lead->telegram_id : null,
+                        'status' => 'active',
+                    ]);
 
                 // Generate Contract number
                 $contractNumber = DocumentNumberService::nextContractNumber();
@@ -267,7 +331,7 @@ class LeadController extends Controller
                     'branch_id' => $branchId,
                     'student_id' => $student->id,
                     'contract_type_id' => $contractType->id,
-                    'group_id' => $validated['group_id'] ?? null,
+                    'group_id' => $student->group_id,
                     'created_by_user_id' => $request->user()->id,
                     'contract_number' => $contractNumber,
                     'contract_date' => now()->toDateString(),

@@ -264,7 +264,12 @@
         "financial_ledger_desc": "История всех платежей, начислений и финансовых движений",
         "status": "Статус",
         "status_active": "Активен",
-        "status_dropped": "Бросил обучение"
+        "status_dropped": "Бросил обучение",
+        "status_graduated": "Выпускник",
+        "status_all": "Все",
+        "without_contract": "Без договора",
+        "contract": "Договор",
+        "no_contract": "Нет договора"
     },
     "staff": {
         "title": "Сотрудники",

@@ -218,6 +218,7 @@ class GroupController extends Controller
         $group->load(['instructor', 'teacher', 'course', 'branch']);
 
         $students = $group->students()
+            ->where('status', 'active')
             ->withCount(['drivings as completed_drivings_count' => function ($q) {
                 $q->where('status', 'completed');
             }])

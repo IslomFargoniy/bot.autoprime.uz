@@ -32,13 +32,14 @@ trait BranchScopedValidationRules
     }
 
     /**
-     * Refuse to put one more student into a group that is already full.
+     * Refuse to put one more student into a group that is already full. Only active students
+     * take a seat: graduates and students who dropped out have left the group.
      *
      * @throws ValidationException
      */
     protected function ensureGroupHasRoom(int|string|null $groupId): void
     {
-        $group = $groupId ? Group::withCount('students')->find($groupId) : null;
+        $group = $groupId ? Group::withCount(['students' => fn ($students) => $students->where('status', 'active')])->find($groupId) : null;
 
         if ($group && $group->students_count >= $group->max_students) {
             throw ValidationException::withMessages([

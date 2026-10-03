@@ -161,6 +161,7 @@ test('updating driving start_time resets reminder timestamps', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $instructor = User::factory()->create(['role' => 'instructor']);
     $student = Student::factory()->create();
+    openDrivingContract($student);
 
     $driving = Driving::create([
         'instructor_id' => $instructor->id,

@@ -14,6 +14,15 @@ beforeEach(function () {
     $this->admin = User::factory()->create(['role' => 'admin', 'branch_id' => $this->branch->id]);
 });
 
+/**
+ * Students are created through a lead or a contract only, so these rules are exercised
+ * on editing an existing student.
+ */
+function personalStudent(array $attributes = []): Student
+{
+    return Student::factory()->create(['branch_id' => test()->branch->id, 'phone' => '+998909990000', ...$attributes]);
+}
+
 dataset('phone formats', [
     'spaced national' => '90 123 45 67',
     'country code' => '998901234567',
@@ -24,7 +33,8 @@ dataset('phone formats', [
 dataset('bad phones', ['too short' => '12345', 'foreign' => '+7 912 345 67 89', 'letters' => 'abcdefghi']);
 
 test('phone numbers typed in any format are stored as +998XXXXXXXXX', function (string $typed) {
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali', 'phone' => $typed])->assertSessionHasNoErrors();
+    $student = personalStudent();
+    $this->actingAs($this->admin)->put("/admin/students/{$student->id}", ['full_name' => 'Ali', 'phone' => $typed])->assertSessionHasNoErrors();
     $this->actingAs($this->admin)->post(route('leads.store'), ['full_name' => 'Vali', 'phone' => $typed])->assertSessionHasNoErrors();
     $this->actingAs($this->admin)->post('/admin/staff', [
         'name' => 'Xodim', 'phone' => $typed, 'role' => 'reception', 'password' => 'secret123',
@@ -36,15 +46,19 @@ test('phone numbers typed in any format are stored as +998XXXXXXXXX', function (
 })->with('phone formats');
 
 test('invalid phone numbers are rejected', function (string $typed) {
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali', 'phone' => $typed])->assertSessionHasErrors('phone');
+    $student = personalStudent();
+    $this->actingAs($this->admin)->put("/admin/students/{$student->id}", ['full_name' => 'Ali', 'phone' => $typed])->assertSessionHasErrors('phone');
     $this->actingAs($this->admin)->post(route('leads.store'), ['full_name' => 'Vali', 'phone' => $typed])->assertSessionHasErrors('phone');
 
-    expect(Student::count())->toBe(0)->and(Lead::count())->toBe(0);
+    expect($student->fresh()->phone)->toBe('+998909990000')->and(Lead::count())->toBe(0);
 })->with('bad phones');
 
 test('the same number in another format is a duplicate', function () {
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali', 'phone' => '90 123 45 67'])->assertSessionHasNoErrors();
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali 2', 'phone' => '+998 (90) 123-45-67'])->assertSessionHasErrors('phone');
+    $first = personalStudent();
+    $second = personalStudent(['phone' => '+998909990001']);
+
+    $this->actingAs($this->admin)->put("/admin/students/{$first->id}", ['full_name' => 'Ali', 'phone' => '90 123 45 67'])->assertSessionHasNoErrors();
+    $this->actingAs($this->admin)->put("/admin/students/{$second->id}", ['full_name' => 'Ali 2', 'phone' => '+998 (90) 123-45-67'])->assertSessionHasErrors('phone');
 });
 
 test('branch and profile phones are normalized too', function () {
@@ -147,12 +161,18 @@ test('an old invalid value does not block saving a lead until it is changed', fu
 });
 
 test('telegram ids accept digits only', function () {
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Tg', 'phone' => '+998901112233', 'telegram_id' => 'username'])->assertSessionHasErrors('telegram_id');
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Tg0', 'phone' => '+998901112200', 'telegram_id' => ''])->assertSessionHasNoErrors();
-    expect(Student::where('phone', '+998901112200')->value('telegram_id'))->toBeNull();
+    $student = personalStudent(['telegram_id' => '555000111']);
+    $put = fn (string $telegramId) => $this->actingAs($this->admin)->put("/admin/students/{$student->id}", [
+        'full_name' => 'Tg', 'phone' => $student->phone, 'telegram_id' => $telegramId,
+    ]);
 
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Tg2', 'phone' => '+998901112244', 'telegram_id' => '123'])->assertSessionHasErrors('telegram_id');
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Tg3', 'phone' => '+998901112255', 'telegram_id' => '123456789'])->assertSessionHasNoErrors();
+    $put('username')->assertSessionHasErrors('telegram_id');
+    $put('')->assertSessionHasNoErrors();
+    expect($student->fresh()->telegram_id)->toBeNull();
+
+    $put('123')->assertSessionHasErrors('telegram_id');
+    $put('123456789')->assertSessionHasNoErrors();
+    expect($student->fresh()->telegram_id)->toBe('123456789');
 });
 
 test('vehicle plates are normalized and checked', function () {

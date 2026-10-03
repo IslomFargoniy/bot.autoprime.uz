@@ -185,11 +185,14 @@ test('editing a question keeps answer ids and requires exactly one correct answe
 });
 
 test('student phones are normalized so differently formatted entries match the same student', function () {
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali', 'phone' => '90 123 45 67'])->assertSessionHasNoErrors();
-    $this->actingAs($this->admin)->post('/admin/students', ['full_name' => 'Ali 2', 'phone' => '+998901234567'])->assertSessionHasErrors('phone');
+    $first = Student::factory()->create(['branch_id' => $this->branch->id, 'phone' => '+998909990000']);
+    $second = Student::factory()->create(['branch_id' => $this->branch->id, 'phone' => '+998909990001']);
 
-    expect(Student::count())->toBe(1)
-        ->and(Student::first()->phone)->toBe('+998901234567');
+    $this->actingAs($this->admin)->put("/admin/students/{$first->id}", ['full_name' => 'Ali', 'phone' => '90 123 45 67'])->assertSessionHasNoErrors();
+    $this->actingAs($this->admin)->put("/admin/students/{$second->id}", ['full_name' => 'Ali 2', 'phone' => '+998901234567'])->assertSessionHasErrors('phone');
+
+    expect($first->fresh()->phone)->toBe('+998901234567')
+        ->and($second->fresh()->phone)->toBe('+998909990001');
 });
 
 test('dashboard student count matches the branch student list', function () {

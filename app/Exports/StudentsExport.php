@@ -28,6 +28,8 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
             $query->visibleTo($this->viewer);
         }
 
+        $query->withListStatus($this->filters['status'] ?? null);
+
         if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];
             $query->where(function ($q) use ($search) {

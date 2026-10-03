@@ -174,8 +174,13 @@ class DrivingController extends Controller
             'end_time' => 'required|date|after:start_time',
         ]);
 
-        if (! User::find($validated['instructor_id'])?->conductsDrivings()) {
+        $instructor = User::find($validated['instructor_id']);
+        if (! $instructor?->conductsDrivings()) {
             return redirect()->back()->withErrors(['instructor_id' => 'Tanlangan xodim instruktor emas.']);
+        }
+
+        if (! $instructor->isActive()) {
+            return redirect()->back()->withErrors(['instructor_id' => 'Tanlangan instruktor nofaol, unga mashg\'ulot biriktirib bo\'lmaydi.']);
         }
 
         if ($request->user()->worksOnOwnRecordsOnly() && (int) $validated['instructor_id'] !== $request->user()->id) {
@@ -193,6 +198,10 @@ class DrivingController extends Controller
         $vehicle = ! empty($validated['vehicle_id'])
             ? Vehicle::find($validated['vehicle_id'])
             : Vehicle::where('instructor_id', $validated['instructor_id'])->where('status', 'active')->first();
+
+        if ($vehicle && $vehicle->status !== 'active') {
+            return redirect()->back()->withErrors(['vehicle_id' => 'Tanlangan mashina ta\'mirda yoki ishdan chiqqan, uni mashg\'ulotga biriktirib bo\'lmaydi.']);
+        }
 
         $conflict = $scheduler->conflictMessage(
             (int) $validated['instructor_id'],
@@ -287,6 +296,13 @@ class DrivingController extends Controller
             );
             if ($conflict) {
                 return redirect()->back()->withErrors(['start_time' => $conflict]);
+            }
+
+            // Moving a lesson must respect the same rules as booking one (contract period,
+            // payment, student status); the lesson being moved does not count against the limit.
+            $restriction = app(DrivingScheduler::class)->studentRestrictionMessage($driving->student, $newStart, $driving->id);
+            if ($restriction) {
+                return redirect()->back()->withErrors(['start_time' => $restriction]);
             }
         }
 

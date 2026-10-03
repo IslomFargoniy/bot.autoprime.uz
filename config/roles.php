@@ -28,7 +28,6 @@ $labels = [
     'roles.manage' => 'Xodimlarga ruxsat berish',
 
     'students.view' => 'O\'quvchilarni ko\'rish',
-    'students.create' => 'O\'quvchi qo\'shish',
     'students.edit' => 'O\'quvchini tahrirlash',
     'students.delete' => 'O\'quvchini o\'chirish',
     'groups.view' => 'Guruhlarni ko\'rish',
@@ -126,7 +125,6 @@ return [
             'users.manage',
             'roles.manage',
             'students.view',
-            'students.create',
             'students.edit',
             'students.delete',
             'groups.view',
@@ -185,7 +183,6 @@ return [
         'reception' => [
             'dashboard.view',
             'students.view',
-            'students.create',
             'students.edit',
             'groups.view',
             'contracts.view',

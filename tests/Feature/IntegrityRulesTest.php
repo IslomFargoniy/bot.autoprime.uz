@@ -111,8 +111,9 @@ test('students cannot be put into an inactive group but may stay in one', functi
     $inactive = Group::create(['name' => 'Nofaol', 'branch_id' => $this->branch->id, 'is_active' => false]);
     $student = Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $inactive->id]);
 
-    $this->actingAs($this->admin)->post('/admin/students', [
-        'full_name' => 'Yangi', 'phone' => '+998901234500', 'group_id' => $inactive->id,
+    $loose = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $this->actingAs($this->admin)->put("/admin/students/{$loose->id}", [
+        'full_name' => $loose->full_name, 'phone' => $loose->phone, 'group_id' => $inactive->id,
     ])->assertSessionHasErrors('group_id');
 
     $this->actingAs($this->admin)->put("/admin/students/{$student->id}", [
@@ -272,10 +273,12 @@ test('the attendance roster warns about students the QR check would refuse', fun
 test('issuing a certificate graduates the student', function () {
     $instructor = User::factory()->create(['role' => 'instructor', 'branch_id' => $this->branch->id]);
     $contract = graduateCandidate($this->branch, $instructor, presentLessons: 8);
+    $contract->student->update(['group_id' => Group::create(['name' => 'Bitiruvchi', 'branch_id' => $this->branch->id])->id]);
 
     $this->actingAs($this->admin)->post('/admin/certificates', ['contract_id' => $contract->id])->assertSessionHasNoErrors();
 
-    expect($contract->student->fresh()->status)->toBe('graduated');
+    expect($contract->student->fresh()->status)->toBe('graduated')
+        ->and($contract->student->fresh()->group_id)->toBeNull();
 
     $this->actingAs($this->admin)->put("/admin/students/{$contract->student_id}", [
         'full_name' => $contract->student->full_name, 'phone' => $contract->student->phone, 'status' => 'dropped',
@@ -364,10 +367,6 @@ test('a group stores its schedule and rejects inconsistent times and dates', fun
 test('a full group takes no more students', function () {
     $group = Group::create(['name' => 'To\'la', 'branch_id' => $this->branch->id, 'max_students' => 1]);
     Student::factory()->create(['branch_id' => $this->branch->id, 'group_id' => $group->id]);
-
-    $this->actingAs($this->admin)->post('/admin/students', [
-        'full_name' => 'Ortiqcha', 'phone' => '+998901234511', 'group_id' => $group->id,
-    ])->assertSessionHasErrors('group_id');
 
     $loose = Student::factory()->create(['branch_id' => $this->branch->id]);
     $this->actingAs($this->admin)->put("/admin/students/{$loose->id}", [

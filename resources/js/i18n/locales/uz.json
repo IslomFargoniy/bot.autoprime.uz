@@ -264,7 +264,12 @@
         "financial_ledger_desc": "Barcha to'lovlar, hisoblangan qarzlar va pul o'tkazmalari tarixi",
         "status": "Holat",
         "status_active": "Faol",
-        "status_dropped": "O'qishni tashlagan"
+        "status_dropped": "O'qishni tashlagan",
+        "status_graduated": "Bitirgan",
+        "status_all": "Hammasi",
+        "without_contract": "Shartnomasiz",
+        "contract": "Shartnoma",
+        "no_contract": "Shartnoma yo'q"
     },
     "staff": {
         "title": "Xodimlar",

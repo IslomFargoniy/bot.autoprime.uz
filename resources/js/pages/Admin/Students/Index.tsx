@@ -1,12 +1,5 @@
 import { Head, useForm, router, Link, usePage } from '@inertiajs/react';
-import {
-    Trash2,
-    Edit2,
-    Plus,
-    Eye,
-    Download,
-    GraduationCap,
-} from 'lucide-react';
+import { Trash2, Edit2, Eye, Download, GraduationCap } from 'lucide-react';
 import { Filter } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,6 +38,7 @@ import {
 } from '@/components/ui/table';
 import { useCan } from '@/hooks/use-can';
 import { formatPhone } from '@/lib/input-masks';
+import { formatMoney } from '@/lib/utils';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface Group {
@@ -64,6 +58,11 @@ interface Student {
     branch_id?: number | null;
     branch?: Branch | null;
     completed_drivings_count?: number;
+    latest_contract?: {
+        contract_number: string;
+        status: string;
+        debt_amount: number | string;
+    } | null;
 }
 
 interface PageProps {
@@ -80,6 +79,8 @@ interface PageProps {
     filters?: {
         search?: string;
         group_id?: string;
+        status?: string;
+        without_contract?: boolean;
         per_page?: string;
     };
 }
@@ -101,29 +102,118 @@ export default function StudentsIndex({
 
     const [search, setSearch] = useState(filters.search || '');
     const [groupId, setGroupId] = useState(filters.group_id || '');
+    const [status, setStatus] = useState(filters.status || 'active');
+    const [withoutContract, setWithoutContract] = useState(
+        !!filters.without_contract,
+    );
     const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const applyFilters = (
-        newSearch: string,
-        newGroup: string,
-        newPerPage: string,
+        overrides: Partial<{
+            search: string;
+            group_id: string;
+            status: string;
+            without_contract: boolean;
+            per_page: string;
+        }> = {},
     ) => {
+        const next = {
+            search,
+            group_id: groupId,
+            status,
+            without_contract: withoutContract,
+            per_page: perPage,
+            ...overrides,
+        };
+
         router.get(
             '/admin/students',
-            { search: newSearch, group_id: newGroup, per_page: newPerPage },
+            {
+                search: next.search,
+                group_id: next.group_id,
+                status: next.status,
+                without_contract: next.without_contract ? 1 : '',
+                per_page: next.per_page,
+            },
             { preserveState: true, replace: true },
         );
     };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        applyFilters(search, groupId, perPage);
+        applyFilters();
+    };
+
+    const statusOptions = [
+        { value: 'active', label: t('students.status_active', 'Faol') },
+        {
+            value: 'graduated',
+            label: t('students.status_graduated', 'Bitirgan'),
+        },
+        {
+            value: 'dropped',
+            label: t('students.status_dropped', "O'qishni tashlagan"),
+        },
+        { value: 'all', label: t('students.status_all', 'Hammasi') },
+    ];
+
+    const statusBadge = (value?: string) => {
+        const styles: Record<string, [string, string]> = {
+            active: [
+                t('students.status_active', 'Faol'),
+                'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+            ],
+            graduated: [
+                t('students.status_graduated', 'Bitirgan'),
+                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+            ],
+            dropped: [
+                t('students.status_dropped', "O'qishni tashlagan"),
+                'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+            ],
+        };
+        const [label, className] = styles[value ?? 'active'] ?? styles.active;
+
+        return (
+            <span
+                className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${className}`}
+            >
+                {label}
+            </span>
+        );
+    };
+
+    // The contract a row shows: its number, and the debt while it is still running.
+    const contractCell = (item: Student) => {
+        const contract = item.latest_contract;
+
+        if (!contract) {
+            return (
+                <span className="text-xs text-amber-600 dark:text-amber-400">
+                    {t('students.no_contract', "Shartnoma yo'q")}
+                </span>
+            );
+        }
+
+        const debt = Number(contract.debt_amount) || 0;
+        const isOpen = ['active', 'frozen'].includes(contract.status);
+
+        return (
+            <div className="text-xs">
+                <div className="font-mono">{contract.contract_number}</div>
+                {isOpen && debt > 0 && (
+                    <div className="text-red-600 dark:text-red-400">
+                        {t('students.debt_remaining', 'Qoldiq qarz')}:{' '}
+                        {formatMoney(debt)}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     const {
         data,
         setData,
-        post,
         put,
         delete: destroy,
         reset,
@@ -145,43 +235,27 @@ export default function StudentsIndex({
             return;
         }
 
-        if (editing) {
-            put('/admin/students/' + editing.id, {
-                onSuccess: () => {
-                    closeForm();
-                    toast.success(
-                        t(
-                            'students.updated_success',
-                            "O'quvchi muvaffaqiyatli yangilandi",
-                        ),
-                    );
-                },
-                onError: (err) => {
-                    toast.error(
-                        (Object.values(err)[0] as string) ||
-                            t('students.error', 'Xatolik yuz berdi'),
-                    );
-                },
-            });
-        } else {
-            post('/admin/students', {
-                onSuccess: () => {
-                    closeForm();
-                    toast.success(
-                        t(
-                            'students.created_success',
-                            "O'quvchi muvaffaqiyatli yaratildi",
-                        ),
-                    );
-                },
-                onError: (err) => {
-                    toast.error(
-                        (Object.values(err)[0] as string) ||
-                            t('students.error', 'Xatolik yuz berdi'),
-                    );
-                },
-            });
+        if (!editing) {
+            return;
         }
+
+        put('/admin/students/' + editing.id, {
+            onSuccess: () => {
+                closeForm();
+                toast.success(
+                    t(
+                        'students.updated_success',
+                        "O'quvchi muvaffaqiyatli yangilandi",
+                    ),
+                );
+            },
+            onError: (err) => {
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('students.error', 'Xatolik yuz berdi'),
+                );
+            },
+        });
     };
 
     const handleEdit = (student: Student) => {
@@ -242,6 +316,8 @@ export default function StudentsIndex({
             params.append('group_id', groupId);
         }
 
+        params.append('status', status);
+
         window.location.href = `/admin/students/export?${params.toString()}`;
     };
 
@@ -264,18 +340,6 @@ export default function StudentsIndex({
                             {t('common.export_excel', 'Excel yuklab olish')}
                         </span>
                     </Button>
-                    {can('students.create') && (
-                        <Button
-                            onClick={() => setShowForm(true)}
-                            variant="brand"
-                            className="shrink-0 gap-1.5 md:w-auto md:px-4 md:py-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden md:inline">
-                                {t('common.add', "Qo'shish")}
-                            </span>
-                        </Button>
-                    )}
                 </div>
             </div>
 
@@ -286,7 +350,7 @@ export default function StudentsIndex({
                         value={groupId}
                         onChange={(val) => {
                             setGroupId(val);
-                            applyFilters(search, val, perPage);
+                            applyFilters({ group_id: val });
                         }}
                         options={[
                             {
@@ -309,6 +373,29 @@ export default function StudentsIndex({
                         triggerClassName="h-10 text-sm"
                         allowClear
                     />
+                    <SearchableSelect
+                        value={status}
+                        onChange={(val) => {
+                            setStatus(String(val));
+                            applyFilters({ status: String(val) });
+                        }}
+                        options={statusOptions}
+                        className="w-44"
+                        triggerClassName="h-10 text-sm"
+                    />
+                    <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={withoutContract}
+                            onChange={(e) => {
+                                setWithoutContract(e.target.checked);
+                                applyFilters({
+                                    without_contract: e.target.checked,
+                                });
+                            }}
+                        />
+                        {t('students.without_contract', 'Shartnomasiz')}
+                    </label>
                 </div>
 
                 <div className="flex w-full items-center gap-2 md:w-auto">
@@ -323,7 +410,7 @@ export default function StudentsIndex({
                         perPage={perPage}
                         onPerPageChange={(val) => {
                             setPerPage(val);
-                            applyFilters(search, groupId, val);
+                            applyFilters({ per_page: val });
                         }}
                     >
                         {/* Mobile Filters Trigger */}
@@ -361,11 +448,9 @@ export default function StudentsIndex({
                                             value={groupId}
                                             onChange={(val) => {
                                                 setGroupId(val);
-                                                applyFilters(
-                                                    search,
-                                                    val,
-                                                    perPage,
-                                                );
+                                                applyFilters({
+                                                    group_id: val,
+                                                });
                                             }}
                                             options={[
                                                 {
@@ -387,6 +472,41 @@ export default function StudentsIndex({
                                             triggerClassName="h-10 text-sm"
                                         />
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label>
+                                            {t('students.status', 'Holat')}
+                                        </Label>
+                                        <SearchableSelect
+                                            value={status}
+                                            onChange={(val) => {
+                                                setStatus(String(val));
+                                                applyFilters({
+                                                    status: String(val),
+                                                });
+                                            }}
+                                            options={statusOptions}
+                                            triggerClassName="h-10 text-sm"
+                                        />
+                                    </div>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={withoutContract}
+                                            onChange={(e) => {
+                                                setWithoutContract(
+                                                    e.target.checked,
+                                                );
+                                                applyFilters({
+                                                    without_contract:
+                                                        e.target.checked,
+                                                });
+                                            }}
+                                        />
+                                        {t(
+                                            'students.without_contract',
+                                            'Shartnomasiz',
+                                        )}
+                                    </label>
                                 </div>
                             </SheetContent>
                         </Sheet>
@@ -403,15 +523,7 @@ export default function StudentsIndex({
                         <DialogTitle className="flex items-center gap-2">
                             <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             <span>
-                                {editing
-                                    ? t(
-                                          'students.edit',
-                                          "O'quvchini tahrirlash",
-                                      )
-                                    : t(
-                                          'students.new',
-                                          "Yangi o'quvchi qo'shish",
-                                      )}
+                                {t('students.edit', "O'quvchini tahrirlash")}
                             </span>
                         </DialogTitle>
                         <DialogDescription>
@@ -623,6 +735,12 @@ export default function StudentsIndex({
                                 {t('students.group', 'Guruh')}
                             </TableHead>
                             <TableHead>
+                                {t('students.status', 'Holat')}
+                            </TableHead>
+                            <TableHead>
+                                {t('students.contract', 'Shartnoma')}
+                            </TableHead>
+                            <TableHead>
                                 {t('common.telegram_id', 'Telegram ID')}
                             </TableHead>
                             <TableHead className="text-center">
@@ -648,7 +766,7 @@ export default function StudentsIndex({
                                     'common.empty_state_desc',
                                     "Qidiruv parametrlarini o'zgartirib ko'ring",
                                 )}
-                                colSpan={8}
+                                colSpan={10}
                             />
                         ) : (
                             students.data.map((item, index) => (
@@ -667,7 +785,9 @@ export default function StudentsIndex({
                                     <TableCell className="text-xs">
                                         {item.branch?.name || '-'}
                                     </TableCell>
-                                    <TableCell>{formatPhone(item.phone)}</TableCell>
+                                    <TableCell>
+                                        {formatPhone(item.phone)}
+                                    </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {item.group?.name ||
                                             t(
@@ -675,6 +795,10 @@ export default function StudentsIndex({
                                                 'Biriktirilmagan',
                                             )}
                                     </TableCell>
+                                    <TableCell>
+                                        {statusBadge(item.status)}
+                                    </TableCell>
+                                    <TableCell>{contractCell(item)}</TableCell>
                                     <TableCell className="font-mono text-muted-foreground">
                                         {item.telegram_id || '-'}
                                     </TableCell>
@@ -758,6 +882,7 @@ export default function StudentsIndex({
                                     {formatPhone(item.phone)}
                                 </div>
                             </div>
+                            {statusBadge(item.status)}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -782,6 +907,12 @@ export default function StudentsIndex({
                                 <div className="font-medium">
                                     {item.telegram_id || '-'}
                                 </div>
+                            </div>
+                            <div className="col-span-2">
+                                <span className="block text-xs text-muted-foreground">
+                                    {t('students.contract', 'Shartnoma')}:
+                                </span>
+                                {contractCell(item)}
                             </div>
                             <div className="col-span-2 mt-1 border-t pt-1">
                                 <div className="flex items-center justify-between">

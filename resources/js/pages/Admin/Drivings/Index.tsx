@@ -59,6 +59,7 @@ import { formatDate, formatTime } from '@/lib/utils';
 interface Instructor {
     id: number;
     name: string;
+    status?: string;
 }
 
 interface Group {
@@ -1196,10 +1197,15 @@ export default function DrivingsIndex({
                                             onChange={(val) =>
                                                 setData('instructor_id', val)
                                             }
-                                            options={instructors.map((i) => ({
-                                                value: i.id,
-                                                label: i.name,
-                                            }))}
+                                            options={instructors
+                                                .filter(
+                                                    (i) =>
+                                                        i.status !== 'inactive',
+                                                )
+                                                .map((i) => ({
+                                                    value: i.id,
+                                                    label: i.name,
+                                                }))}
                                             placeholder={t(
                                                 'drivings.all_instructors',
                                                 'Barcha instruktorlar',

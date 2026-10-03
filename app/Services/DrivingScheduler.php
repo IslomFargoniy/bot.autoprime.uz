@@ -56,7 +56,7 @@ class DrivingScheduler
      * Why the student may not get a driving lesson at the given time
      * (75% payment rule, cancelled or expired contract), or null when allowed.
      */
-    public function studentRestrictionMessage(Student $student, CarbonInterface|string $startTime): ?string
+    public function studentRestrictionMessage(Student $student, CarbonInterface|string $startTime, ?int $movingDrivingId = null): ?string
     {
         if ($student->status !== 'active') {
             return "{$student->full_name} faol o'quvchi emas (holati: {$student->status}).";
@@ -72,7 +72,7 @@ class DrivingScheduler
         }
 
         $limit = (int) $activeContract->required_driving_lessons;
-        if ($limit > 0 && $activeContract->getScheduledOrCompletedDrivingsCount() >= $limit) {
+        if ($limit > 0 && $activeContract->getScheduledOrCompletedDrivingsCount($movingDrivingId) >= $limit) {
             return "{$student->full_name} uchun shartnoma bo'yicha {$limit} ta darsning hammasi rejalashtirilgan.";
         }
 

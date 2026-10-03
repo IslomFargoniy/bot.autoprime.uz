@@ -11,6 +11,7 @@ use App\Models\Student;
 use App\Services\BranchSessionService;
 use App\Services\CertificateEligibilityService;
 use App\Services\DocumentNumberService;
+use App\Services\StudentLifecycleService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -167,6 +168,7 @@ class CertificateController extends Controller
 
             $lockedContract->update(['status' => 'completed']);
             $student->update(['status' => 'graduated']);
+            app(StudentLifecycleService::class)->contractEnded($lockedContract);
 
             return $certNumber;
         });
