@@ -987,7 +987,13 @@
         "material_added": "Материал қўшилди",
         "updated": "Курс янгиланди",
         "edit_course_title": "Курсни таҳрирлаш",
-        "is_active": "Курс фаол"
+        "is_active": "Курс фаол",
+        "delete_topic": "Мавзуни ўчириш",
+        "topic_deleted": "Мавзу ўчирилди",
+        "material_deleted": "Материал ўчирилди",
+        "confirm_delete_topic": "\"{{title}}\" мавзуси ўчирилсинми?",
+        "confirm_delete_topic_with_materials": "\"{{title}}\" мавзуси ва унга бириктирилган {{count}} та материал ўчирилсинми?",
+        "confirm_delete_material": "\"{{title}}\" материали ўчирилсинми?"
     },
     "vehicles": {
         "title": "Автопарк (Машиналар)",

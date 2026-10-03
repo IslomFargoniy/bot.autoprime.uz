@@ -1,5 +1,13 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { Plus, BookOpen, FileText, Play, Pencil, Trash2 } from 'lucide-react';
+import {
+    Plus,
+    BookOpen,
+    FileText,
+    Play,
+    Pencil,
+    Trash2,
+    X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -193,6 +201,64 @@ export default function CoursesIndex({ courses }: PageProps) {
         });
     };
 
+    const handleDeleteTopic = (topic: Topic) => {
+        const materialCount = topic.lesson_materials?.length ?? 0;
+        const question =
+            materialCount > 0
+                ? t(
+                      'courses.confirm_delete_topic_with_materials',
+                      '"{{title}}" mavzusi va unga biriktirilgan {{count}} ta material o\'chirilsinmi?',
+                      { title: topic.title, count: materialCount },
+                  )
+                : t(
+                      'courses.confirm_delete_topic',
+                      '"{{title}}" mavzusi o\'chirilsinmi?',
+                      { title: topic.title },
+                  );
+
+        if (!confirm(question)) {
+            return;
+        }
+
+        router.delete(`/admin/topics/${topic.id}`, {
+            preserveScroll: true,
+            onSuccess: () =>
+                toast.success(t('courses.topic_deleted', "Mavzu o'chirildi")),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        });
+    };
+
+    const handleDeleteMaterial = (material: { id: number; title: string }) => {
+        if (
+            !confirm(
+                t(
+                    'courses.confirm_delete_material',
+                    '"{{title}}" materiali o\'chirilsinmi?',
+                    { title: material.title },
+                ),
+            )
+        ) {
+            return;
+        }
+
+        router.delete(`/admin/materials/${material.id}`, {
+            preserveScroll: true,
+            onSuccess: () =>
+                toast.success(
+                    t('courses.material_deleted', "Material o'chirildi"),
+                ),
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        });
+    };
+
     const handleCreateMaterial = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -356,18 +422,43 @@ export default function CoursesIndex({ courses }: PageProps) {
                                                     <div className="mt-2 flex flex-wrap gap-2">
                                                         {top.lesson_materials.map(
                                                             (m) => (
-                                                                <a
+                                                                <span
                                                                     key={m.id}
-                                                                    href={
-                                                                        m.file_url
-                                                                    }
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
-                                                                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-0.5 text-[11px] text-gray-700 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                                                                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-0.5 text-[11px] text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                                                                 >
-                                                                    <FileText className="h-3 w-3 text-red-500" />
-                                                                    {m.title}
-                                                                </a>
+                                                                    <a
+                                                                        href={
+                                                                            m.file_url
+                                                                        }
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="inline-flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400"
+                                                                    >
+                                                                        <FileText className="h-3 w-3 text-red-500" />
+                                                                        {
+                                                                            m.title
+                                                                        }
+                                                                    </a>
+                                                                    {can(
+                                                                        'lms.manage_materials',
+                                                                    ) && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                handleDeleteMaterial(
+                                                                                    m,
+                                                                                )
+                                                                            }
+                                                                            className="ml-0.5 rounded text-gray-400 hover:text-red-600"
+                                                                            title={t(
+                                                                                'common.delete',
+                                                                                "O'chirish",
+                                                                            )}
+                                                                        >
+                                                                            <X className="h-3 w-3" />
+                                                                        </button>
+                                                                    )}
+                                                                </span>
                                                             ),
                                                         )}
                                                     </div>
@@ -400,6 +491,22 @@ export default function CoursesIndex({ courses }: PageProps) {
                                             >
                                                 <FileText className="mr-1 h-3 w-3" />
                                                 + PDF
+                                            </Button>
+                                        )}
+                                        {can('lms.manage_materials') && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    handleDeleteTopic(top)
+                                                }
+                                                className="h-7 w-7 border-red-200 p-0 text-red-500 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:hover:bg-red-950/30"
+                                                title={t(
+                                                    'courses.delete_topic',
+                                                    "Mavzuni o'chirish",
+                                                )}
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         )}
                                     </div>

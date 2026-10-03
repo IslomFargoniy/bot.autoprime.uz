@@ -987,7 +987,13 @@
         "material_added": "Материал добавлен",
         "updated": "Курс обновлён",
         "edit_course_title": "Редактирование курса",
-        "is_active": "Курс активен"
+        "is_active": "Курс активен",
+        "delete_topic": "Удалить тему",
+        "topic_deleted": "Тема удалена",
+        "material_deleted": "Материал удалён",
+        "confirm_delete_topic": "Удалить тему «{{title}}»?",
+        "confirm_delete_topic_with_materials": "Удалить тему «{{title}}» и прикреплённые к ней материалы ({{count}})?",
+        "confirm_delete_material": "Удалить материал «{{title}}»?"
     },
     "vehicles": {
         "title": "Автопарк",

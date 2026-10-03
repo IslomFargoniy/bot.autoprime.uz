@@ -987,7 +987,13 @@
         "material_added": "Material qo'shildi",
         "updated": "Kurs yangilandi",
         "edit_course_title": "Kursni tahrirlash",
-        "is_active": "Kurs faol"
+        "is_active": "Kurs faol",
+        "delete_topic": "Mavzuni o'chirish",
+        "topic_deleted": "Mavzu o'chirildi",
+        "material_deleted": "Material o'chirildi",
+        "confirm_delete_topic": "\"{{title}}\" mavzusi o'chirilsinmi?",
+        "confirm_delete_topic_with_materials": "\"{{title}}\" mavzusi va unga biriktirilgan {{count}} ta material o'chirilsinmi?",
+        "confirm_delete_material": "\"{{title}}\" materiali o'chirilsinmi?"
     },
     "vehicles": {
         "title": "Avtopark (Mashinalar)",

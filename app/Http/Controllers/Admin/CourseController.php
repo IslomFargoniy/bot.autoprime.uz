@@ -8,6 +8,7 @@ use App\Models\LessonMaterial;
 use App\Models\Topic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -112,5 +113,36 @@ class CourseController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Dars materiali biriktirildi.');
+    }
+
+    /**
+     * Remove a topic with its materials and close the gap in the numbering.
+     */
+    public function destroyTopic(Topic $topic): RedirectResponse
+    {
+        $courseId = $topic->course_id;
+
+        DB::transaction(function () use ($topic, $courseId): void {
+            $topic->delete();
+
+            Topic::where('course_id', $courseId)
+                ->orderBy('order_number')
+                ->orderBy('id')
+                ->get()
+                ->each(function (Topic $remaining, int $index): void {
+                    if ($remaining->order_number !== $index + 1) {
+                        $remaining->update(['order_number' => $index + 1]);
+                    }
+                });
+        });
+
+        return redirect()->back()->with('success', 'Mavzu o\'chirildi.');
+    }
+
+    public function destroyMaterial(LessonMaterial $material): RedirectResponse
+    {
+        $material->delete();
+
+        return redirect()->back()->with('success', 'Material o\'chirildi.');
     }
 }

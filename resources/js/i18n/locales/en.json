@@ -987,7 +987,13 @@
         "material_added": "Material added",
         "updated": "Course updated",
         "edit_course_title": "Edit course",
-        "is_active": "Course is active"
+        "is_active": "Course is active",
+        "delete_topic": "Delete topic",
+        "topic_deleted": "Topic deleted",
+        "material_deleted": "Material deleted",
+        "confirm_delete_topic": "Delete the topic \"{{title}}\"?",
+        "confirm_delete_topic_with_materials": "Delete the topic \"{{title}}\" and its {{count}} attached materials?",
+        "confirm_delete_material": "Delete the material \"{{title}}\"?"
     },
     "vehicles": {
         "title": "Fleet & Vehicles",
