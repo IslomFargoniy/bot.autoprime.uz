@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Certificate;
 use App\Models\Contract;
+use App\Models\Expense;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
 
@@ -56,6 +57,14 @@ class DocumentNumberService
     public static function nextRefundNumber(): string
     {
         return self::next(Payment::class, 'receipt_number', 'REF-'.date('Ymd').'-');
+    }
+
+    /**
+     * Next expense (cash-out order) number: EXP-{Ymd}-{seq}.
+     */
+    public static function nextExpenseNumber(): string
+    {
+        return self::next(Expense::class, 'receipt_number', 'EXP-'.date('Ymd').'-');
     }
 
     /**

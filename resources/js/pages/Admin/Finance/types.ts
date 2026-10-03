@@ -23,6 +23,7 @@ export interface Payment {
 
 export interface Expense {
     id: number;
+    receipt_number?: string;
     amount: number | string;
     description: string;
     spent_at?: string;

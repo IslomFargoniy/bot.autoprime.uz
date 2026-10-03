@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\DocumentNumberService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
+        'receipt_number',
         'branch_id',
         'cash_register_id',
         'expense_category_id',
@@ -28,6 +30,16 @@ class Expense extends Model
     ];
 
     protected $appends = ['expense_date'];
+
+    protected static function booted(): void
+    {
+        // Every cash-out gets its own document number, whichever flow creates it.
+        static::creating(function (Expense $expense): void {
+            if (empty($expense->receipt_number)) {
+                $expense->receipt_number = DocumentNumberService::nextExpenseNumber();
+            }
+        });
+    }
 
     public function getExpenseDateAttribute(): ?string
     {

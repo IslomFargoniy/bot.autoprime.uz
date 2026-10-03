@@ -1,8 +1,12 @@
 <?php
 
 use App\Models\Branch;
+use App\Models\CashRegister;
+use App\Models\CashRegisterType;
 use App\Models\Contract;
 use App\Models\ContractType;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\DocumentNumberService;
@@ -70,4 +74,24 @@ test('creating contracts via the admin endpoint produces unique sequential numbe
 
     expect(Contract::pluck('contract_number')->all())
         ->toBe(['AP-'.date('Y').'-0001', 'AP-'.date('Y').'-0002']);
+});
+
+test('every new expense gets a unique EXP number whichever flow creates it', function () {
+    $branch = Branch::firstOrCreate(['code' => 'exp-num'], ['name' => 'Raqam', 'status' => 'active']);
+    $register = CashRegister::create([
+        'branch_id' => $branch->id,
+        'cash_register_type_id' => CashRegisterType::firstOrCreate(['code' => 'cash'], ['name' => 'Naqd', 'is_active' => true])->id,
+        'name' => 'Kassa', 'balance' => 0, 'is_active' => true,
+    ]);
+    $category = ExpenseCategory::create(['name' => 'Boshqa', 'is_active' => true]);
+    $make = fn () => Expense::create([
+        'branch_id' => $branch->id, 'cash_register_id' => $register->id, 'expense_category_id' => $category->id,
+        'amount' => 1000, 'spent_at' => now(),
+    ]);
+
+    $first = $make();
+    $second = $make();
+
+    expect($first->receipt_number)->toBe('EXP-'.date('Ymd').'-0001')
+        ->and($second->receipt_number)->toBe('EXP-'.date('Ymd').'-0002');
 });
