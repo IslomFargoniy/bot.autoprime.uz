@@ -993,7 +993,10 @@
         "material_deleted": "Material o'chirildi",
         "confirm_delete_topic": "\"{{title}}\" mavzusi o'chirilsinmi?",
         "confirm_delete_topic_with_materials": "\"{{title}}\" mavzusi va unga biriktirilgan {{count}} ta material o'chirilsinmi?",
-        "confirm_delete_material": "\"{{title}}\" materiali o'chirilsinmi?"
+        "confirm_delete_material": "\"{{title}}\" materiali o'chirilsinmi?",
+        "edit_topic": "Mavzuni tahrirlash",
+        "edit_topic_title": "Mavzuni tahrirlash",
+        "topic_updated": "Mavzu yangilandi"
     },
     "vehicles": {
         "title": "Avtopark (Mashinalar)",

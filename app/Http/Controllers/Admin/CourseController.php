@@ -72,29 +72,81 @@ class CourseController extends Controller
         return redirect()->back()->with('success', 'Kurs o\'chirildi.');
     }
 
-    public function storeTopic(Request $request, Course $course): RedirectResponse
+    /**
+     * @return array<string, mixed>
+     */
+    private function topicRules(): array
     {
-        $validated = $request->validate([
+        return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'video_url' => 'nullable|url',
             'duration_minutes' => 'nullable|integer|min:1',
             'order_number' => 'nullable|integer|min:1',
-        ]);
+        ];
+    }
 
-        $order = $validated['order_number'] ?? (Topic::where('course_id', $course->id)->count() + 1);
+    /**
+     * Put the topic at the given place (1-based, clamped) and number the whole course 1..n,
+     * so two topics never share a number. Without a place the topic keeps its turn.
+     */
+    private function placeTopic(Topic $topic, ?int $position): void
+    {
+        $others = Topic::where('course_id', $topic->course_id)
+            ->whereKeyNot($topic->id)
+            ->orderBy('order_number')
+            ->orderBy('id')
+            ->get();
 
-        Topic::create([
-            'course_id' => $course->id,
-            'title_uz' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'video_url' => $validated['video_url'] ?? null,
-            'duration_minutes' => $validated['duration_minutes'] ?? 30,
-            'order_number' => $order,
-            'is_active' => true,
-        ]);
+        $position ??= $topic->order_number ?: $others->count() + 1;
+        $index = max(0, min($position - 1, $others->count()));
+
+        $others->splice($index, 0, [$topic]);
+
+        $others->each(function (Topic $item, int $i): void {
+            if ($item->order_number !== $i + 1) {
+                $item->update(['order_number' => $i + 1]);
+            }
+        });
+    }
+
+    public function storeTopic(Request $request, Course $course): RedirectResponse
+    {
+        $validated = $request->validate($this->topicRules());
+
+        DB::transaction(function () use ($validated, $course): void {
+            $topic = Topic::create([
+                'course_id' => $course->id,
+                'title_uz' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'video_url' => $validated['video_url'] ?? null,
+                'duration_minutes' => $validated['duration_minutes'] ?? 30,
+                'order_number' => 0,
+                'is_active' => true,
+            ]);
+
+            $this->placeTopic($topic, $validated['order_number'] ?? PHP_INT_MAX);
+        });
 
         return redirect()->back()->with('success', 'Yangi mavzu qo\'shildi.');
+    }
+
+    public function updateTopic(Request $request, Topic $topic): RedirectResponse
+    {
+        $validated = $request->validate($this->topicRules());
+
+        DB::transaction(function () use ($validated, $topic): void {
+            $topic->update([
+                'title_uz' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'video_url' => $validated['video_url'] ?? null,
+                'duration_minutes' => $validated['duration_minutes'] ?? $topic->duration_minutes,
+            ]);
+
+            $this->placeTopic($topic, $validated['order_number'] ?? null);
+        });
+
+        return redirect()->back()->with('success', 'Mavzu yangilandi.');
     }
 
     public function storeMaterial(Request $request, Topic $topic): RedirectResponse

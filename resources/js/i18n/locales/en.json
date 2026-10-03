@@ -993,7 +993,10 @@
         "material_deleted": "Material deleted",
         "confirm_delete_topic": "Delete the topic \"{{title}}\"?",
         "confirm_delete_topic_with_materials": "Delete the topic \"{{title}}\" and its {{count}} attached materials?",
-        "confirm_delete_material": "Delete the material \"{{title}}\"?"
+        "confirm_delete_material": "Delete the material \"{{title}}\"?",
+        "edit_topic": "Edit topic",
+        "edit_topic_title": "Edit topic",
+        "topic_updated": "Topic updated"
     },
     "vehicles": {
         "title": "Fleet & Vehicles",

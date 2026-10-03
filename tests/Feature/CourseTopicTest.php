@@ -66,3 +66,38 @@ test('users without the materials permission cannot delete topics', function () 
 
     expect(Topic::find($topic->id))->not->toBeNull();
 });
+
+test('a topic can be edited and moved to another place', function () {
+    $topics = collect(['A', 'B', 'C'])->map(fn ($title, $i) => Topic::create([
+        'course_id' => $this->course->id,
+        'title_uz' => $title,
+        'order_number' => $i + 1,
+        'is_active' => true,
+    ]));
+
+    $this->actingAs($this->admin)
+        ->put("/admin/topics/{$topics[2]->id}", [
+            'title' => 'C yangi',
+            'description' => 'Izoh',
+            'video_url' => 'https://youtube.com/watch?v=1',
+            'duration_minutes' => 45,
+            'order_number' => 1,
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($this->course->topics()->get()->map(fn ($t) => [$t->title, $t->order_number])->all())
+        ->toBe([['C yangi', 1], ['A', 2], ['B', 3]])
+        ->and($topics[2]->fresh()->only(['description', 'video_url', 'duration_minutes']))
+        ->toBe(['description' => 'Izoh', 'video_url' => 'https://youtube.com/watch?v=1', 'duration_minutes' => 45]);
+});
+
+test('a new topic given a taken number pushes the others down', function () {
+    Topic::create(['course_id' => $this->course->id, 'title_uz' => 'A', 'order_number' => 1, 'is_active' => true]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/courses/{$this->course->id}/topics", ['title' => 'Yangi', 'order_number' => 1])
+        ->assertSessionHasNoErrors();
+
+    expect($this->course->topics()->get()->map(fn ($t) => [$t->title, $t->order_number])->all())
+        ->toBe([['Yangi', 1], ['A', 2]]);
+});

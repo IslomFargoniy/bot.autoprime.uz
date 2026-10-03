@@ -993,7 +993,10 @@
         "material_deleted": "Материал ўчирилди",
         "confirm_delete_topic": "\"{{title}}\" мавзуси ўчирилсинми?",
         "confirm_delete_topic_with_materials": "\"{{title}}\" мавзуси ва унга бириктирилган {{count}} та материал ўчирилсинми?",
-        "confirm_delete_material": "\"{{title}}\" материали ўчирилсинми?"
+        "confirm_delete_material": "\"{{title}}\" материали ўчирилсинми?",
+        "edit_topic": "Мавзуни таҳрирлаш",
+        "edit_topic_title": "Мавзуни таҳрирлаш",
+        "topic_updated": "Мавзу янгиланди"
     },
     "vehicles": {
         "title": "Автопарк (Машиналар)",

@@ -68,6 +68,7 @@ export default function CoursesIndex({ courses }: PageProps) {
     const [showCourseModal, setShowCourseModal] = useState(false);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [showTopicModal, setShowTopicModal] = useState(false);
+    const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
     const [selectedTopicForMaterial, setSelectedTopicForMaterial] =
         useState<Topic | null>(null);
 
@@ -180,25 +181,73 @@ export default function CoursesIndex({ courses }: PageProps) {
         });
     };
 
-    const handleCreateTopic = (e: React.FormEvent) => {
+    const closeTopicModal = () => {
+        setShowTopicModal(false);
+        setEditingTopic(null);
+        topicForm.reset();
+        topicForm.clearErrors();
+    };
+
+    const openCreateTopic = () => {
+        setEditingTopic(null);
+        topicForm.clearErrors();
+        topicForm.setData({
+            title: '',
+            description: '',
+            video_url: '',
+            duration_minutes: '30',
+            order_number: String((selectedCourse?.topics?.length || 0) + 1),
+        });
+        setShowTopicModal(true);
+    };
+
+    const openEditTopic = (topic: Topic) => {
+        setEditingTopic(topic);
+        topicForm.clearErrors();
+        topicForm.setData({
+            title: topic.title,
+            description: topic.description ?? '',
+            video_url: topic.video_url ?? '',
+            duration_minutes: String(topic.duration_minutes ?? ''),
+            order_number: String(topic.order_number ?? ''),
+        });
+        setShowTopicModal(true);
+    };
+
+    const handleSaveTopic = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedCourse) {
             return;
         }
 
-        topicForm.post(`/admin/courses/${selectedCourse.id}/topics`, {
+        const options = {
+            preserveScroll: true,
             onSuccess: () => {
-                setShowTopicModal(false);
-                topicForm.reset();
-                toast.success(t('courses.topic_created', "Mavzu qo'shildi"));
+                const wasEditing = !!editingTopic;
+
+                closeTopicModal();
+                toast.success(
+                    wasEditing
+                        ? t('courses.topic_updated', 'Mavzu yangilandi')
+                        : t('courses.topic_created', "Mavzu qo'shildi"),
+                );
             },
-            onError: (err) =>
+            onError: (err: Record<string, string>) =>
                 toast.error(
                     (Object.values(err)[0] as string) ||
                         t('common.error', 'Xatolik yuz berdi'),
                 ),
-        });
+        };
+
+        if (editingTopic) {
+            topicForm.put(`/admin/topics/${editingTopic.id}`, options);
+        } else {
+            topicForm.post(
+                `/admin/courses/${selectedCourse.id}/topics`,
+                options,
+            );
+        }
     };
 
     const handleDeleteTopic = (topic: Topic) => {
@@ -372,14 +421,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                             <Button
                                 size="sm"
                                 variant="brand"
-                                onClick={() => {
-                                    topicForm.setData(
-                                        'order_number',
-                                        (selectedCourse.topics?.length || 0) +
-                                            1,
-                                    );
-                                    setShowTopicModal(true);
-                                }}
+                                onClick={openCreateTopic}
                                 className="text-xs"
                             >
                                 <Plus className="mr-1 h-3.5 w-3.5" />
@@ -491,6 +533,22 @@ export default function CoursesIndex({ courses }: PageProps) {
                                             >
                                                 <FileText className="mr-1 h-3 w-3" />
                                                 + PDF
+                                            </Button>
+                                        )}
+                                        {can('lms.manage_materials') && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    openEditTopic(top)
+                                                }
+                                                className="h-7 w-7 p-0"
+                                                title={t(
+                                                    'courses.edit_topic',
+                                                    'Mavzuni tahrirlash',
+                                                )}
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
                                             </Button>
                                         )}
                                         {can('lms.manage_materials') && (
@@ -642,19 +700,29 @@ export default function CoursesIndex({ courses }: PageProps) {
             </Dialog>
 
             {/* Create Topic Modal */}
-            <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
+            <Dialog
+                open={showTopicModal}
+                onOpenChange={(open) =>
+                    open ? setShowTopicModal(true) : closeTopicModal()
+                }
+            >
                 <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Play className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            {t(
-                                'courses.create_topic_title',
-                                "Yangi Mavzu Qo'shish",
-                            )}
+                            {editingTopic
+                                ? t(
+                                      'courses.edit_topic_title',
+                                      'Mavzuni tahrirlash',
+                                  )
+                                : t(
+                                      'courses.create_topic_title',
+                                      "Yangi Mavzu Qo'shish",
+                                  )}
                         </DialogTitle>
                     </DialogHeader>
                     <form
-                        onSubmit={handleCreateTopic}
+                        onSubmit={handleSaveTopic}
                         className="space-y-4 text-xs"
                     >
                         <div>
@@ -669,6 +737,23 @@ export default function CoursesIndex({ courses }: PageProps) {
                                 }
                                 placeholder="1-Mavzu: Umumiy qoidalar"
                                 required
+                                className="mt-1"
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="top_description">
+                                {t('courses.desc', 'Tavsif')}
+                            </Label>
+                            <Input
+                                id="top_description"
+                                value={topicForm.data.description}
+                                onChange={(e) =>
+                                    topicForm.setData(
+                                        'description',
+                                        e.target.value,
+                                    )
+                                }
                                 className="mt-1"
                             />
                         </div>
@@ -736,7 +821,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => setShowTopicModal(false)}
+                                onClick={closeTopicModal}
                             >
                                 {t('common.cancel', 'Bekor qilish')}
                             </Button>

@@ -222,6 +222,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
         ->middlewareFor(['store', 'update', 'destroy'], 'permission:lms.manage_materials');
     Route::post('admin/courses/{course}/topics', [CourseController::class, 'storeTopic'])->middleware('permission:lms.manage_materials')->name('courses.store-topic');
     Route::post('admin/topics/{topic}/materials', [CourseController::class, 'storeMaterial'])->middleware('permission:lms.manage_materials')->name('topics.store-material');
+    Route::put('admin/topics/{topic}', [CourseController::class, 'updateTopic'])->middleware('permission:lms.manage_materials')->name('topics.update');
     Route::delete('admin/topics/{topic}', [CourseController::class, 'destroyTopic'])->middleware('permission:lms.manage_materials')->name('topics.destroy');
     Route::delete('admin/materials/{material}', [CourseController::class, 'destroyMaterial'])->middleware('permission:lms.manage_materials')->name('materials.destroy');
 
