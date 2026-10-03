@@ -340,3 +340,74 @@ test('the shared auth props tell whether the user is limited to own records', fu
         ->and($props(auditStaff('instructor')))->toBeTrue()
         ->and($props($this->admin))->toBeFalse();
 });
+
+test('payment and expense receipts render with number and amount', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id, 'full_name' => 'Chek Egasi']);
+    $contract = auditContract($student);
+    $register = auditRegister($this->branch->id, 5000000);
+
+    $this->actingAs($this->admin)->post(route('finance.store-payment'), [
+        'contract_id' => $contract->id, 'cash_register_id' => $register->id, 'amount' => 1250000, 'payment_method' => 'cash',
+    ])->assertSessionHasNoErrors();
+    $payment = Payment::firstOrFail();
+
+    $this->actingAs($this->admin)->get(route('finance.payment-receipt', $payment))
+        ->assertOk()
+        ->assertSee($payment->receipt_number)
+        ->assertSee('Chek Egasi')
+        ->assertSee('1 250 000')
+        ->assertSee("TO'LOV CHEKI")
+        ->assertDontSee("addEventListener('load'", false);
+
+    $this->actingAs($this->admin)->get(route('finance.payment-receipt', [$payment, 'autoprint' => 1]))
+        ->assertSee("addEventListener('load'", false);
+
+    $category = ExpenseCategory::create(['name' => 'Kantselyariya', 'is_active' => true]);
+    $this->actingAs($this->admin)->post(route('finance.store-expense'), [
+        'cash_register_id' => $register->id, 'expense_category_id' => $category->id, 'amount' => 300000, 'description' => 'Qog\'oz',
+    ])->assertSessionHasNoErrors();
+    $expense = Expense::firstOrFail();
+
+    $this->actingAs($this->admin)->get(route('finance.expense-receipt', $expense))
+        ->assertOk()
+        ->assertSee($expense->receipt_number)
+        ->assertSee('Kantselyariya')
+        ->assertSee('300 000')
+        ->assertSee('CHIQIM ORDERI');
+});
+
+test('a refund prints as a refund receipt', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = auditContract($student);
+    $register = auditRegister($this->branch->id, 5000000);
+
+    $this->actingAs($this->admin)->post(route('finance.store-payment'), [
+        'contract_id' => $contract->id, 'cash_register_id' => $register->id, 'amount' => 1000000, 'payment_method' => 'cash',
+    ]);
+    $this->actingAs($this->admin)->post(route('contracts.refund', $contract), [
+        'cash_register_id' => $register->id, 'amount' => 200000, 'payment_method' => 'cash',
+    ])->assertSessionHasNoErrors();
+    $refund = Payment::where('payment_type', 'refund')->firstOrFail();
+
+    $this->actingAs($this->admin)->get(route('finance.payment-receipt', $refund))->assertOk()->assertSee('QAYTARISH CHEKI');
+});
+
+test('receipts respect branch and permission limits', function () {
+    $student = Student::factory()->create(['branch_id' => $this->otherBranch->id]);
+    $payment = Payment::create([
+        'branch_id' => $this->otherBranch->id, 'contract_id' => null, 'student_id' => $student->id,
+        'cash_register_id' => auditRegister($this->otherBranch->id)->id, 'amount' => 1000,
+        'payment_type' => 'contract_tuition', 'payment_method' => 'cash', 'receipt_number' => 'REC-X-0001', 'paid_at' => now(),
+    ]);
+    $expense = Expense::create([
+        'branch_id' => $this->otherBranch->id, 'cash_register_id' => auditRegister($this->otherBranch->id)->id,
+        'expense_category_id' => ExpenseCategory::create(['name' => 'X', 'is_active' => true])->id,
+        'amount' => 1000, 'spent_at' => now(),
+    ]);
+
+    $this->actingAs($this->admin)->get(route('finance.payment-receipt', $payment))->assertForbidden();
+    $this->actingAs($this->admin)->get(route('finance.expense-receipt', $expense))->assertForbidden();
+
+    $instructor = auditStaff('instructor');
+    $this->actingAs($instructor)->get(route('finance.expense-receipt', $expense))->assertForbidden();
+});

@@ -19,6 +19,7 @@ use App\Models\VehicleMaintenance;
 use App\Services\BranchSessionService;
 use App\Services\DocumentNumberService;
 use App\Services\TelegramService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -608,6 +609,49 @@ class FinanceController extends Controller
         $formattedSum = number_format($totalSweptAmount, 0, '', ' ');
 
         return redirect()->back()->with('success', "Kassa bo'shatish so'rovi yuborildi! Jami {$formattedSum} UZS Superadmin tasdiqlashi uchun kutish holatiga o'tkazildi.");
+    }
+
+    /**
+     * Printable payment receipt (80 mm thermal layout, also readable on A4).
+     */
+    public function paymentReceipt(Request $request, Payment $payment): View
+    {
+        $this->ensureCanSeeStudent($request, $payment->student);
+
+        $payment->load(['student', 'contract.contractType', 'cashRegister', 'receivedBy', 'branch']);
+
+        return view('receipts.payment', [
+            'payment' => $payment,
+            'branch' => $payment->branch,
+            'number' => $payment->receipt_number,
+            'amount' => $payment->amount,
+            'dateTime' => ($payment->paid_at ?? $payment->created_at)?->format('Y-m-d H:i'),
+            'isRefund' => $payment->payment_type === 'refund',
+            'methodLabel' => match ($payment->payment_method) {
+                'cash' => 'Naqd pul',
+                'card_click' => 'Karta / Click / Payme',
+                'bank_transfer' => 'Bank o\'tkazmasi',
+                default => $payment->payment_method,
+            },
+            'autoprint' => $request->boolean('autoprint'),
+        ]);
+    }
+
+    /**
+     * Printable cash-out order for an expense.
+     */
+    public function expenseReceipt(Request $request, Expense $expense): View
+    {
+        $expense->load(['category', 'cashRegister', 'user', 'branch']);
+
+        return view('receipts.expense', [
+            'expense' => $expense,
+            'branch' => $expense->branch,
+            'number' => $expense->receipt_number,
+            'amount' => $expense->amount,
+            'dateTime' => ($expense->spent_at ?? $expense->created_at)?->format('Y-m-d H:i'),
+            'autoprint' => $request->boolean('autoprint'),
+        ]);
     }
 
     /**

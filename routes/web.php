@@ -177,6 +177,8 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
 
     // Finance & Cash Registers
     Route::get('admin/finance', [FinanceController::class, 'index'])->middleware('permission:finance.view')->name('finance.index');
+    Route::get('admin/finance/payment/{payment}/receipt', [FinanceController::class, 'paymentReceipt'])->middleware('permission:finance.view|payments.create')->name('finance.payment-receipt');
+    Route::get('admin/finance/expense/{expense}/receipt', [FinanceController::class, 'expenseReceipt'])->middleware('permission:finance.view|expenses.create')->name('finance.expense-receipt');
     Route::post('admin/finance/payment', [FinanceController::class, 'storePayment'])->middleware('permission:payments.create')->name('finance.store-payment');
     Route::delete('admin/finance/payment/{payment}', [FinanceController::class, 'destroyPayment'])->middleware('permission:payments.edit')->name('finance.destroy-payment');
     Route::post('admin/finance/expense', [FinanceController::class, 'storeExpense'])->middleware('permission:expenses.create')->name('finance.store-expense');
