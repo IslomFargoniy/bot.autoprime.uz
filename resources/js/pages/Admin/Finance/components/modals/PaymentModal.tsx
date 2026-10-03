@@ -51,7 +51,7 @@ export function PaymentModal({
                         <span>
                             {t(
                                 'finance.accept_payment_title',
-                                "To'lov Qabul Qilish (Rasmiy Chek)",
+                                "To'lov Qabul Qilish",
                             )}
                         </span>
                     </DialogTitle>
@@ -188,7 +188,10 @@ export function PaymentModal({
                             className="bg-emerald-600 text-white hover:bg-emerald-700"
                             disabled={paymentForm.processing}
                         >
-                            {t('finance.confirm_payment', 'Chekni Chiqarish')}
+                            {t(
+                                'finance.confirm_payment',
+                                "To'lovni qabul qilish",
+                            )}
                         </Button>
                     </div>
                 </form>

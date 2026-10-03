@@ -24,6 +24,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -621,14 +622,12 @@ export default function GroupsIndex({
                                         "Maksimal o'quvchi",
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="max_students"
-                                    type="number"
-                                    min={1}
-                                    max={500}
+                                    maxLength={3}
                                     value={data.max_students}
-                                    onChange={(e) =>
-                                        setData('max_students', e.target.value)
+                                    onChange={(val) =>
+                                        setData('max_students', val)
                                     }
                                 />
                                 {errors.max_students && (

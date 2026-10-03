@@ -622,7 +622,9 @@
         "edit": "Edit",
         "edit_title": "Edit lead",
         "updated_success": "Lead updated",
-        "lost_reason_placeholder": "Why was it rejected?"
+        "lost_reason_placeholder": "Why was it rejected?",
+        "pinfl_invalid": "PINFL is invalid: birth date could not be read",
+        "pinfl_birth_mismatch": "PINFL does not match the birth date (PINFL says: {{date}})"
     },
     "contracts": {
         "title": "Contracts",
@@ -754,11 +756,11 @@
         "to_register": "To Register",
         "initiator": "Sender",
         "approve": "Approve",
-        "accept_payment_title": "Accept Payment (Official Receipt)",
+        "accept_payment_title": "Accept Payment",
         "select_contract": "Contract",
         "cash_register": "Register",
         "notes": "Notes",
-        "confirm_payment": "Issue Receipt",
+        "confirm_payment": "Accept payment",
         "add_expense_title": "New Expense",
         "transfer_title": "Cash Transfer",
         "send_transfer": "Transfer",

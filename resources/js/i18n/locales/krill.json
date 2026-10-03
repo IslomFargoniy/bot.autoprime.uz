@@ -622,7 +622,9 @@
         "edit": "Таҳрирлаш",
         "edit_title": "Лидни таҳрирлаш",
         "updated_success": "Лид янгиланди",
-        "lost_reason_placeholder": "Нима учун рад этилди?"
+        "lost_reason_placeholder": "Нима учун рад этилди?",
+        "pinfl_invalid": "ЖШШИР нотўғри: туғилган сана аниқланмади",
+        "pinfl_birth_mismatch": "ЖШШИР туғилган санага мос келмайди (ЖШШИРда: {{date}})"
     },
     "contracts": {
         "title": "Шартномалар",
@@ -754,11 +756,11 @@
         "to_register": "Қабул Қилувчи Касса",
         "initiator": "Юборувчи",
         "approve": "Тасдиқлаш",
-        "accept_payment_title": "Тўлов Қабул Қилиш (Расмий Чек)",
+        "accept_payment_title": "Тўлов Қабул Қилиш",
         "select_contract": "Шартнома",
         "cash_register": "Касса",
         "notes": "Изоҳ",
-        "confirm_payment": "Чекни Чиқариш",
+        "confirm_payment": "Тўловни қабул қилиш",
         "add_expense_title": "Янги Харажат (Чиқим)",
         "transfer_title": "Кассалараро Пул Ўтказмаси",
         "send_transfer": "Ўтказиш",

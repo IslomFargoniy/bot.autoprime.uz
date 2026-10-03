@@ -21,8 +21,10 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Sheet,
@@ -442,13 +444,10 @@ export default function StudentsIndex({
                                 <Label htmlFor="phone" required>
                                     {t('students.phone', 'Telefon')}
                                 </Label>
-                                <Input
+                                <PhoneInput
                                     id="phone"
                                     value={data.phone}
-                                    onChange={(e) =>
-                                        setData('phone', e.target.value)
-                                    }
-                                    placeholder="+998901234567"
+                                    onChange={(val) => setData('phone', val)}
                                     required
                                 />
                                 {errors.phone && (
@@ -464,12 +463,11 @@ export default function StudentsIndex({
                                         'Telegram ID',
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="telegram_id"
                                     value={data.telegram_id}
-                                    onChange={(e) =>
-                                        setData('telegram_id', e.target.value)
-                                    }
+                                    onChange={(val) => setData('telegram_id', val)}
+                                     maxLength={15}
                                     placeholder="12345678"
                                 />
                                 {errors.telegram_id && (

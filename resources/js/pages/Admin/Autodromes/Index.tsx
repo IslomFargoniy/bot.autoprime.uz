@@ -24,6 +24,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -456,16 +457,15 @@ export default function AutodromesIndex({
                                         'Radius (metrda)',
                                     )}
                                 </Label>
-                                <Input
-                                    type="number"
+                                <DigitsInput
                                     id="radius_meters"
+                                    maxLength={5}
                                     value={data.radius_meters}
-                                    onChange={(e) =>
-                                        setData('radius_meters', e.target.value)
+                                    onChange={(val) =>
+                                        setData('radius_meters', val)
                                     }
                                     placeholder="Masalan: 100"
                                     required
-                                    min="10"
                                     className="mt-1"
                                 />
                                 {errors.radius_meters && (

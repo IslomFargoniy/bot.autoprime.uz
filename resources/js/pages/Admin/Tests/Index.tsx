@@ -31,6 +31,7 @@ import {
     DialogFooter,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -2139,13 +2140,11 @@ export default function TestsIndex({
                             <Label required className="text-xs">
                                 {t('tests.ticket_num_label', 'Bilet Raqami')}
                             </Label>
-                            <Input
-                                type="number"
+                            <DigitsInput
                                 required
+                                maxLength={4}
                                 value={ticketNumber}
-                                onChange={(e) =>
-                                    setTicketNumber(e.target.value)
-                                }
+                                onChange={setTicketNumber}
                                 className="mt-1 text-xs"
                             />
                         </div>

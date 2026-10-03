@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
     Table,
@@ -456,13 +457,10 @@ export default function Index({ branches, filters }: Props) {
                                 <Label htmlFor="branch_phone">
                                     {t('branches.phone', 'Telefon')}
                                 </Label>
-                                <Input
+                                <PhoneInput
                                     id="branch_phone"
                                     value={data.phone}
-                                    onChange={(e) =>
-                                        setData('phone', e.target.value)
-                                    }
-                                    placeholder="+998901234567"
+                                    onChange={(val) => setData('phone', val)}
                                 />
                                 {errors.phone && (
                                     <p className="text-xs text-destructive">

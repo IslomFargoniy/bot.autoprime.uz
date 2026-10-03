@@ -6,8 +6,8 @@ import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 
@@ -92,22 +92,13 @@ export default function Login({ status }: Props) {
                                 <Label htmlFor="phone">
                                     {t('auth.phone', 'Telefon raqam')}
                                 </Label>
-                                <Input
+                                <PhoneInput
                                     id="phone"
-                                    type="tel"
                                     name="phone"
                                     required
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="username"
-                                    placeholder="+998911157709"
-                                    onInput={(e) => {
-                                        e.currentTarget.value =
-                                            e.currentTarget.value.replace(
-                                                /[^0-9+]/g,
-                                                '',
-                                            );
-                                    }}
                                 />
                                 <InputError message={errors.phone} />
                             </div>

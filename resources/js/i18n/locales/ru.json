@@ -622,7 +622,9 @@
         "edit": "Редактировать",
         "edit_title": "Редактирование лида",
         "updated_success": "Лид обновлён",
-        "lost_reason_placeholder": "Почему отказано?"
+        "lost_reason_placeholder": "Почему отказано?",
+        "pinfl_invalid": "ПИНФЛ неверный: дата рождения не определена",
+        "pinfl_birth_mismatch": "ПИНФЛ не совпадает с датой рождения (в ПИНФЛ: {{date}})"
     },
     "contracts": {
         "title": "Договоры",
@@ -754,11 +756,11 @@
         "to_register": "В кассу",
         "initiator": "Отправитель",
         "approve": "Подтвердить",
-        "accept_payment_title": "Прием оплаты (Официальный чек)",
+        "accept_payment_title": "Прием оплаты",
         "select_contract": "Договор",
         "cash_register": "Касса",
         "notes": "Примечание",
-        "confirm_payment": "Выдать чек",
+        "confirm_payment": "Принять оплату",
         "add_expense_title": "Новый расход",
         "transfer_title": "Межкассовый трансфер",
         "send_transfer": "Перевести",

@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -83,9 +84,9 @@ export default function ContractTypesIndex({
         has_theory: true,
         has_driving: true,
         has_lms: true,
-        required_driving_lessons: 10,
-        required_theory_lessons: 24,
-        min_theory_payment_percent: 30,
+        required_driving_lessons: '10' as string | number,
+        required_theory_lessons: '24' as string | number,
+        min_theory_payment_percent: '30' as string | number,
         description: '',
         is_active: true,
     });
@@ -105,9 +106,15 @@ export default function ContractTypesIndex({
             has_theory: Boolean(ct.has_theory),
             has_driving: Boolean(ct.has_driving),
             has_lms: Boolean(ct.has_lms),
-            required_driving_lessons: ct.required_driving_lessons,
-            required_theory_lessons: ct.required_theory_lessons,
-            min_theory_payment_percent: ct.min_theory_payment_percent,
+            required_driving_lessons: String(
+                Math.trunc(Number(ct.required_driving_lessons) || 0),
+            ),
+            required_theory_lessons: String(
+                Math.trunc(Number(ct.required_theory_lessons) || 0),
+            ),
+            min_theory_payment_percent: String(
+                Math.trunc(Number(ct.min_theory_payment_percent) || 0),
+            ),
             description: ct.description || '',
             is_active: Boolean(ct.is_active),
         });
@@ -454,18 +461,16 @@ export default function ContractTypesIndex({
                                         "Darsga minimal to'lov (%)",
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="min_pct"
-                                    type="number"
                                     value={form.data.min_theory_payment_percent}
-                                    onChange={(e) =>
+                                    onChange={(val) =>
                                         form.setData(
                                             'min_theory_payment_percent',
-                                            Number(e.target.value),
+                                            val,
                                         )
                                     }
-                                    min={0}
-                                    max={100}
+                                    maxLength={3}
                                     className="mt-1"
                                 />
                             </div>
@@ -479,16 +484,16 @@ export default function ContractTypesIndex({
                                         'Nazariya Darslari Soni',
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="theory_lessons"
-                                    type="number"
                                     value={form.data.required_theory_lessons}
-                                    onChange={(e) =>
+                                    onChange={(val) =>
                                         form.setData(
                                             'required_theory_lessons',
-                                            Number(e.target.value),
+                                            val,
                                         )
                                     }
+                                    maxLength={3}
                                     className="mt-1"
                                 />
                             </div>
@@ -499,16 +504,16 @@ export default function ContractTypesIndex({
                                         'Vajdeniya Darslari Soni',
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="driving_lessons"
-                                    type="number"
                                     value={form.data.required_driving_lessons}
-                                    onChange={(e) =>
+                                    onChange={(val) =>
                                         form.setData(
                                             'required_driving_lessons',
-                                            Number(e.target.value),
+                                            val,
                                         )
                                     }
+                                    maxLength={3}
                                     className="mt-1"
                                 />
                             </div>

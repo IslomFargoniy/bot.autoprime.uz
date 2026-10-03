@@ -177,7 +177,7 @@ export default function LeadsIndex({
         contract_type_id: '',
         group_id: '',
         branch_id: '',
-        discount_amount: 0,
+        discount_amount: '' as string | number,
         start_date: '',
         end_date: '',
         terms: '',
@@ -271,7 +271,7 @@ export default function LeadsIndex({
             contract_type_id: '',
             group_id: '',
             branch_id: String(lead.branch_id || ''),
-            discount_amount: 0,
+            discount_amount: '' as string | number,
             start_date: '',
             end_date: '',
             terms: '',
@@ -1560,7 +1560,7 @@ export default function LeadsIndex({
                                         onChange={(val) =>
                                             convertForm.setData(
                                                 'discount_amount',
-                                                Number(val) || 0,
+                                                val,
                                             )
                                         }
                                         className="mt-1"

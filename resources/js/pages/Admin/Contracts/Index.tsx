@@ -189,7 +189,7 @@ export default function ContractsIndex({
         student_id: '' as string | number,
         contract_type_id: '' as string | number,
         group_id: '',
-        discount_amount: 0,
+        discount_amount: '' as string | number,
         start_date: '',
         end_date: '',
         terms: '',
@@ -1342,7 +1342,7 @@ export default function ContractsIndex({
                                     onChange={(val) =>
                                         form.setData(
                                             'discount_amount',
-                                            Number(val) || 0,
+                                            val,
                                         )
                                     }
                                     className="mt-1"

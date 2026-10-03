@@ -622,7 +622,9 @@
         "edit": "Tahrirlash",
         "edit_title": "Lidni tahrirlash",
         "updated_success": "Lid yangilandi",
-        "lost_reason_placeholder": "Nima uchun rad etildi?"
+        "lost_reason_placeholder": "Nima uchun rad etildi?",
+        "pinfl_invalid": "JSHSHIR noto'g'ri: tug'ilgan sana aniqlanmadi",
+        "pinfl_birth_mismatch": "JSHSHIR tug'ilgan sanaga mos kelmaydi (JSHSHIRda: {{date}})"
     },
     "contracts": {
         "title": "Shartnomalar",
@@ -754,11 +756,11 @@
         "to_register": "Qabul Qiluvchi Kassa",
         "initiator": "Yuboruvchi",
         "approve": "Tasdiqlash",
-        "accept_payment_title": "To'lov Qabul Qilish (Rasmiy Chek)",
+        "accept_payment_title": "To'lov Qabul Qilish",
         "select_contract": "Shartnoma",
         "cash_register": "Kassa",
         "notes": "Izoh",
-        "confirm_payment": "Chekni Chiqarish",
+        "confirm_payment": "To'lovni qabul qilish",
         "add_expense_title": "Yangi Xarajat (Chiqim)",
         "transfer_title": "Kassalararo Pul O'tkazmasi",
         "send_transfer": "O'tkazish",

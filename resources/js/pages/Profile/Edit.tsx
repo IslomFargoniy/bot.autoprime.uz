@@ -3,8 +3,10 @@ import { User, Phone, Send, Lock, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import type { User as UserType } from '@/types';
 
 interface PageProps {
@@ -115,16 +117,10 @@ export default function ProfileEdit({ user }: PageProps) {
                                 <Phone className="h-4 w-4 text-muted-foreground" />
                                 {t('admins.phone', 'Telefon raqami')}
                             </Label>
-                            <Input
+                            <PhoneInput
                                 id="phone"
-                                type="tel"
                                 value={data.phone}
-                                onChange={(e) =>
-                                    setData(
-                                        'phone',
-                                        e.target.value.replace(/[^0-9+]/g, ''),
-                                    )
-                                }
+                                onChange={(val) => setData('phone', val)}
                                 required
                             />
                             {errors.phone && (
@@ -146,12 +142,11 @@ export default function ProfileEdit({ user }: PageProps) {
                                     'Telegram ID (Ixtiyoriy)',
                                 )}
                             </Label>
-                            <Input
+                            <DigitsInput
                                 id="telegram_id"
+                                maxLength={15}
                                 value={data.telegram_id}
-                                onChange={(e) =>
-                                    setData('telegram_id', e.target.value)
-                                }
+                                onChange={(val) => setData('telegram_id', val)}
                                 placeholder="111111111"
                             />
                             {errors.telegram_id && (

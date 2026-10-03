@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -70,8 +71,8 @@ export default function CoursesIndex({ courses }: PageProps) {
         title: '',
         description: '',
         video_url: '',
-        duration_minutes: 30,
-        order_number: 1,
+        duration_minutes: '30' as string | number,
+        order_number: '1' as string | number,
     });
 
     const materialForm = useForm({
@@ -582,14 +583,14 @@ export default function CoursesIndex({ courses }: PageProps) {
                                         'Davomiyligi (daqiqa)',
                                     )}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="top_duration"
-                                    type="number"
+                                    maxLength={4}
                                     value={topicForm.data.duration_minutes}
-                                    onChange={(e) =>
+                                    onChange={(val) =>
                                         topicForm.setData(
                                             'duration_minutes',
-                                            Number(e.target.value),
+                                            val,
                                         )
                                     }
                                     className="mt-1"
@@ -599,15 +600,12 @@ export default function CoursesIndex({ courses }: PageProps) {
                                 <Label htmlFor="top_order">
                                     {t('courses.order', 'Tartib raqami')}
                                 </Label>
-                                <Input
+                                <DigitsInput
                                     id="top_order"
-                                    type="number"
+                                    maxLength={4}
                                     value={topicForm.data.order_number}
-                                    onChange={(e) =>
-                                        topicForm.setData(
-                                            'order_number',
-                                            Number(e.target.value),
-                                        )
+                                    onChange={(val) =>
+                                        topicForm.setData('order_number', val)
                                     }
                                     className="mt-1"
                                 />

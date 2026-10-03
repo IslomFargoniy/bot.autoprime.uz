@@ -1,8 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/date-picker';
+import { DigitsInput } from '@/components/ui/digits-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PassportSeriesInput } from '@/components/ui/passport-series-input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { birthDateFromPinfl, isoToDisplay } from '@/lib/input-masks';
 
 export interface LeadFormData {
     full_name: string;
@@ -32,6 +36,40 @@ interface Props {
 export function LeadFormFields({ data, setData, errors, branches }: Props) {
     const { t } = useTranslation();
     const messages = Object.values(errors).filter(Boolean);
+    const today = new Date().toLocaleDateString('en-CA');
+
+    // The PINFL carries the birth date, so it fills an empty date and flags a clash.
+    const pinflBirthDate = birthDateFromPinfl(data.pinfl);
+    let pinflWarning: string | null = null;
+
+    if (data.pinfl.length === 14 && !pinflBirthDate) {
+        pinflWarning = t(
+            'leads.pinfl_invalid',
+            "JSHSHIR noto'g'ri: tug'ilgan sana aniqlanmadi",
+        );
+    } else if (
+        pinflBirthDate &&
+        data.birth_date &&
+        pinflBirthDate !== data.birth_date
+    ) {
+        pinflWarning = t(
+            'leads.pinfl_birth_mismatch',
+            "JSHSHIR tug'ilgan sanaga mos kelmaydi (JSHSHIRda: {{date}})",
+            {
+                date: isoToDisplay(pinflBirthDate),
+            },
+        );
+    }
+
+    const handlePinflChange = (val: string) => {
+        setData('pinfl', val);
+
+        const derived = birthDateFromPinfl(val);
+
+        if (derived && !data.birth_date) {
+            setData('birth_date', derived);
+        }
+    };
 
     return (
         <>
@@ -53,11 +91,10 @@ export function LeadFormFields({ data, setData, errors, branches }: Props) {
                     <Label required htmlFor="phone">
                         {t('leads.phone', 'Telefon')}
                     </Label>
-                    <Input
+                    <PhoneInput
                         id="phone"
                         value={data.phone}
-                        onChange={(e) => setData('phone', e.target.value)}
-                        placeholder="+998"
+                        onChange={(val) => setData('phone', val)}
                         required
                         className="mt-1 font-mono"
                     />
@@ -171,6 +208,7 @@ export function LeadFormFields({ data, setData, errors, branches }: Props) {
                         id="birth_date"
                         value={data.birth_date}
                         onChange={(val) => setData('birth_date', val)}
+                        max={today}
                         className="mt-1"
                     />
                 </div>
@@ -180,47 +218,45 @@ export function LeadFormFields({ data, setData, errors, branches }: Props) {
                     <Label htmlFor="passport_series">
                         {t('leads.passport_series', 'Seriya')}
                     </Label>
-                    <Input
+                    <PassportSeriesInput
                         id="passport_series"
                         value={data.passport_series}
-                        onChange={(e) =>
-                            setData(
-                                'passport_series',
-                                e.target.value.toUpperCase(),
-                            )
-                        }
+                        onChange={(val) => setData('passport_series', val)}
                         placeholder="AA"
-                        maxLength={10}
-                        className="mt-1 font-mono uppercase"
+                        className="mt-1"
                     />
                 </div>
                 <div>
                     <Label htmlFor="passport_number">
                         {t('leads.passport_number', 'Raqam')}
                     </Label>
-                    <Input
+                    <DigitsInput
                         id="passport_number"
+                        length={7}
                         value={data.passport_number}
-                        onChange={(e) =>
-                            setData('passport_number', e.target.value)
-                        }
+                        onChange={(val) => setData('passport_number', val)}
                         placeholder="1234567"
-                        maxLength={20}
-                        className="mt-1 font-mono"
+                        className="mt-1"
                     />
                 </div>
                 <div>
                     <Label htmlFor="pinfl">{t('leads.pinfl', 'JSHSHIR')}</Label>
-                    <Input
+                    <DigitsInput
                         id="pinfl"
+                        length={14}
+                        showCounter
                         value={data.pinfl}
-                        onChange={(e) => setData('pinfl', e.target.value)}
+                        onChange={handlePinflChange}
                         placeholder="14 xonali"
-                        maxLength={20}
-                        className="mt-1 font-mono"
+                        className="mt-1"
                     />
                 </div>
             </div>
+            {pinflWarning && (
+                <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                    {pinflWarning}
+                </p>
+            )}
             <div>
                 <Label htmlFor="address">
                     {t('leads.address', 'Yashash manzili')}

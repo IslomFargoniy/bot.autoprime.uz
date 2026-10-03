@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
+import { PlateNumberInput } from '@/components/ui/plate-number-input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { useCan } from '@/hooks/use-can';
 import { formatDate, formatNumber, formatMoney } from '@/lib/utils';
@@ -572,18 +573,14 @@ export default function VehiclesIndex({
                                 <Label required htmlFor="v_plate">
                                     {t('vehicles.plate', 'Davlat Raqami')}
                                 </Label>
-                                <Input
+                                <PlateNumberInput
                                     id="v_plate"
                                     value={vehicleForm.data.plate_number}
-                                    onChange={(e) =>
-                                        vehicleForm.setData(
-                                            'plate_number',
-                                            e.target.value.toUpperCase(),
-                                        )
+                                    onChange={(val) =>
+                                        vehicleForm.setData('plate_number', val)
                                     }
-                                    placeholder="01 A 777 AA"
                                     required
-                                    className="mt-1 font-mono uppercase"
+                                    className="mt-1"
                                 />
                             </div>
                             <div>
