@@ -126,7 +126,7 @@ test('staff can edit the details of a lead', function () {
         'source' => 'instagram',
         'passport_series' => 'AB',
         'passport_number' => '1234567',
-        'pinfl' => '12345678901234',
+        'pinfl' => '32005980123456',
         'address' => 'Toshkent',
     ])->assertSessionHasNoErrors();
 
@@ -135,8 +135,8 @@ test('staff can edit the details of a lead', function () {
         ->and($lead->phone)->toBe('+998907770022')
         ->and($lead->source)->toBe('instagram')
         ->and($lead->passport_series)->toBe('AB')
-        ->and($lead->pinfl)->toBe('12345678901234')
-        ->and($lead->pinfl_hash)->toBe(hash_hmac('sha256', '12345678901234', (string) config('app.key')));
+        ->and($lead->pinfl)->toBe('32005980123456')
+        ->and($lead->pinfl_hash)->toBe(hash_hmac('sha256', '32005980123456', (string) config('app.key')));
 });
 
 test('a lead cannot be marked as contract signed by hand', function () {

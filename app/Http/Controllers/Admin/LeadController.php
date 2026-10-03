@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Concerns\BranchScopedValidationRules;
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Contract;
@@ -22,7 +23,7 @@ use Inertia\Response;
 
 class LeadController extends Controller
 {
-    use BranchScopedValidationRules;
+    use BranchScopedValidationRules, PersonalDataRules;
 
     public function index(Request $request): Response
     {
@@ -90,17 +91,17 @@ class LeadController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function leadRules(): array
+    private function leadRules(Request $request, ?Lead $lead = null): array
     {
         return [
             'branch_id' => 'nullable|exists:branches,id',
             'category' => 'nullable|string|in:A,B,C,BC,D,E',
             'preferred_time' => 'nullable|string|max:50',
-            'birth_date' => 'nullable|date',
+            'birth_date' => $this->rulesUnlessUnchanged($this->birthDateRules(), $request, $lead, 'birth_date'),
             'address' => 'nullable|string|max:500',
-            'passport_series' => 'nullable|string|max:10',
-            'passport_number' => 'nullable|string|max:20',
-            'pinfl' => 'nullable|string|max:20',
+            'passport_series' => $this->rulesUnlessUnchanged($this->passportSeriesRules(), $request, $lead, 'passport_series'),
+            'passport_number' => $this->rulesUnlessUnchanged($this->passportNumberRules(), $request, $lead, 'passport_number'),
+            'pinfl' => $this->rulesUnlessUnchanged($this->pinflRules($request->input('birth_date')), $request, $lead, 'pinfl'),
             'notes' => 'nullable|string',
         ];
     }
@@ -115,12 +116,14 @@ class LeadController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
-            ...$this->leadRules(),
+            ...$this->leadRules($request),
             'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:50',
+            'phone' => $this->phoneRules(),
             'source' => 'nullable|string|in:'.self::SOURCES,
-        ]);
+        ], $this->personalDataMessages());
 
         $targetBranchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
 
@@ -159,14 +162,16 @@ class LeadController extends Controller
             return redirect()->back()->with('success', 'Lid yangilandi.');
         }
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
-            ...$this->leadRules(),
+            ...$this->leadRules($request, $lead),
             'full_name' => 'sometimes|required|string|max:255',
-            'phone' => 'sometimes|required|string|max:50',
+            'phone' => array_merge(['sometimes'], $this->rulesUnlessUnchanged($this->phoneRules(), $request, $lead, 'phone')),
             'source' => 'sometimes|required|string|in:'.self::SOURCES,
             'stage' => 'sometimes|required|in:new_lead,form_sent,form_completed,rejected',
             'lost_reason' => 'nullable|string|max:500|required_if:stage,rejected',
-        ]);
+        ], $this->personalDataMessages());
 
         if (isset($validated['stage']) && $validated['stage'] !== 'rejected') {
             $validated['lost_reason'] = null;

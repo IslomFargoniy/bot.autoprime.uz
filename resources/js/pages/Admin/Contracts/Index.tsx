@@ -1340,10 +1340,7 @@ export default function ContractsIndex({
                                     id="discount_amount"
                                     value={form.data.discount_amount}
                                     onChange={(val) =>
-                                        form.setData(
-                                            'discount_amount',
-                                            val,
-                                        )
+                                        form.setData('discount_amount', val)
                                     }
                                     className="mt-1"
                                     placeholder="0"

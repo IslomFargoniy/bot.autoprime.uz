@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Phone;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Branch extends Model
 {
     use HasFactory;
+
+    public function setPhoneAttribute(?string $value): void
+    {
+        $this->attributes['phone'] = Phone::normalize($value);
+    }
 
     /**
      * @return HasMany<User, $this>

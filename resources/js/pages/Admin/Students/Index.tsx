@@ -466,8 +466,10 @@ export default function StudentsIndex({
                                 <DigitsInput
                                     id="telegram_id"
                                     value={data.telegram_id}
-                                    onChange={(val) => setData('telegram_id', val)}
-                                     maxLength={15}
+                                    onChange={(val) =>
+                                        setData('telegram_id', val)
+                                    }
+                                    maxLength={15}
                                     placeholder="12345678"
                                 />
                                 {errors.telegram_id && (

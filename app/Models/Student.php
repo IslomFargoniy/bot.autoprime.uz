@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Phone;
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -126,16 +127,7 @@ class Student extends Model
      */
     public static function normalizePhone(?string $phone): ?string
     {
-        $digits = preg_replace('/\D/', '', (string) $phone);
-        if ($digits === '') {
-            return null;
-        }
-
-        if (strlen($digits) === 9) {
-            $digits = '998'.$digits;
-        }
-
-        return '+'.$digits;
+        return Phone::normalize($phone);
     }
 
     public function setPhoneAttribute(?string $value): void

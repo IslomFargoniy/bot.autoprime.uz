@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Services\BranchSessionService;
@@ -10,6 +11,8 @@ use Inertia\Inertia;
 
 class BranchController extends Controller
 {
+    use PersonalDataRules;
+
     public function selectBranch(Request $request)
     {
         $user = $request->user();
@@ -67,13 +70,15 @@ class BranchController extends Controller
             abort(403, 'Ruxsat berilmagan.');
         }
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:branches,code',
-            'phone' => 'nullable|string|max:20',
+            'phone' => $this->phoneRules(false),
             'address' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive',
-        ]);
+        ], $this->personalDataMessages());
 
         Branch::create($validated);
 
@@ -87,13 +92,15 @@ class BranchController extends Controller
             abort(403, 'Ruxsat berilmagan.');
         }
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:branches,code,'.$branch->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => $this->rulesUnlessUnchanged($this->phoneRules(false), $request, $branch, 'phone'),
             'address' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive',
-        ]);
+        ], $this->personalDataMessages());
 
         $branch->update($validated);
 

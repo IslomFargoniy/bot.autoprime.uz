@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Models\User;
+use App\Support\Phone;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -45,11 +46,14 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
 
         Fortify::authenticateUsing(function (Request $request) {
-            $phoneInput = $request->phone;
+            $phoneInput = (string) $request->phone;
+            $normalized = Phone::normalize($phoneInput);
             $cleanPhone = preg_replace('/[^0-9]/', '', $phoneInput);
 
-            $user = User::where(function ($query) use ($phoneInput, $cleanPhone) {
-                $query->where('phone', $phoneInput)
+            // Typed formats ("90 123 45 67", "+998 (90) 123-45-67") all reach the stored +998XXXXXXXXX.
+            $user = User::where(function ($query) use ($phoneInput, $normalized, $cleanPhone) {
+                $query->where('phone', $normalized)
+                    ->orWhere('phone', $phoneInput)
                     ->orWhereRaw("REPLACE(phone, '+', '') = ?", [$cleanPhone]);
             })->first();
 

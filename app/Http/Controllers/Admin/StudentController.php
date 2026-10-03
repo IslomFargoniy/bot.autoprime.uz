@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Concerns\BranchScopedValidationRules;
+use App\Concerns\PersonalDataRules;
 use App\Exports\StudentsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
@@ -17,7 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
-    use BranchScopedValidationRules;
+    use BranchScopedValidationRules, PersonalDataRules;
 
     /**
      * Instructors and teachers may only put students into their own groups,
@@ -147,15 +148,15 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         // Normalize before the unique check so +998/no-prefix variants are one number.
-        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
+        $this->normalizePersonalInput($request);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:students',
-            'telegram_id' => 'nullable|string|unique:students',
+            'phone' => array_merge($this->phoneRules(), ['unique:students,phone']),
+            'telegram_id' => array_merge($this->telegramIdRules(), ['unique:students,telegram_id']),
             'group_id' => ['nullable', $this->activeGroupInUserBranch($request)],
             'branch_id' => 'nullable|exists:branches,id',
-        ]);
+        ], $this->personalDataMessages());
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);
         $this->ensureGroupHasRoom($validated['group_id'] ?? null);
@@ -176,16 +177,16 @@ class StudentController extends Controller
     {
         abort_unless($request->user()->canSeeStudent($student), 403, 'Siz faqat o\'z o\'quvchilaringizni tahrirlay olasiz.');
 
-        $request->merge(['phone' => Student::normalizePhone($request->input('phone'))]);
+        $this->normalizePersonalInput($request);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:students,phone,'.$student->id,
-            'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
+            'phone' => $this->rulesUnlessUnchanged(array_merge($this->phoneRules(), ['unique:students,phone,'.$student->id]), $request, $student, 'phone'),
+            'telegram_id' => $this->rulesUnlessUnchanged(array_merge($this->telegramIdRules(), ['unique:students,telegram_id,'.$student->id]), $request, $student, 'telegram_id'),
             'group_id' => ['nullable', $this->activeGroupInUserBranch($request, $student->group_id)],
             'branch_id' => 'nullable|exists:branches,id',
             'status' => 'sometimes|in:active,dropped,graduated',
-        ]);
+        ], $this->personalDataMessages());
 
         // The form always sends the current status back, so an unchanged value is fine;
         // `graduated` is only ever set by issuing a certificate and is final.

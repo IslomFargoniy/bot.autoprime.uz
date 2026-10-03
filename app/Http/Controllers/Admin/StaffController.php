@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class StaffController extends Controller
 {
+    use PersonalDataRules;
+
     /**
      * The staff page only manages staff roles (admins live on the superadmin-only
      * admins page), and branch-restricted users only their own branch.
@@ -159,10 +162,12 @@ class StaffController extends Controller
     {
         $currentUser = $request->user();
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users,phone',
-            'telegram_id' => 'nullable|string|max:50|unique:users,telegram_id',
+            'phone' => array_merge($this->phoneRules(), ['unique:users,phone']),
+            'telegram_id' => array_merge($this->telegramIdRules(), ['unique:users,telegram_id']),
             'role' => ['required', 'string', Rule::in(config('roles.staff_roles'))],
             'branch_id' => [Rule::requiredIf(! $currentUser->isBranchRestricted()), 'nullable', 'exists:branches,id'],
             'status' => 'nullable|in:active,inactive',
@@ -172,7 +177,7 @@ class StaffController extends Controller
             'car_name' => 'nullable|string|max:255',
             'photo' => 'nullable|image|max:5120',
             'password' => 'required|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         if ($error = $this->roleAssignmentError($currentUser, $validated['role'])) {
             return redirect()->back()->withErrors($error);
@@ -212,10 +217,12 @@ class StaffController extends Controller
 
         $this->ensureCanAccessStaff($currentUser, $staff);
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users,phone,'.$staff->id,
-            'telegram_id' => 'nullable|string|max:50|unique:users,telegram_id,'.$staff->id,
+            'phone' => $this->rulesUnlessUnchanged(array_merge($this->phoneRules(), ['unique:users,phone,'.$staff->id]), $request, $staff, 'phone'),
+            'telegram_id' => $this->rulesUnlessUnchanged(array_merge($this->telegramIdRules(), ['unique:users,telegram_id,'.$staff->id]), $request, $staff, 'telegram_id'),
             'role' => ['required', 'string', Rule::in(config('roles.staff_roles'))],
             'branch_id' => [Rule::requiredIf(! $currentUser->isBranchRestricted()), 'nullable', 'exists:branches,id'],
             'status' => 'nullable|in:active,inactive',
@@ -225,7 +232,7 @@ class StaffController extends Controller
             'car_name' => 'nullable|string|max:255',
             'photo' => 'nullable|image|max:5120',
             'password' => 'nullable|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         if ($error = $this->roleAssignmentError($currentUser, $validated['role'], $staff->role)) {
             return redirect()->back()->withErrors($error);
@@ -247,6 +254,8 @@ class StaffController extends Controller
         } else {
             unset($validated['password']);
         }
+
+        $validated = $this->emptyAmountsToZero($validated, ['base_salary', 'driving_hourly_rate', 'lesson_rate']);
 
         $staff->update($validated);
 

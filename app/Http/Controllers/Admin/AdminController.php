@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
@@ -13,6 +14,8 @@ use Inertia\Response;
 
 class AdminController extends Controller
 {
+    use PersonalDataRules;
+
     private function authorizeSuperAdmin(Request $request): void
     {
         $user = $request->user();
@@ -60,13 +63,15 @@ class AdminController extends Controller
     {
         $this->authorizeSuperAdmin($request);
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users',
-            'telegram_id' => 'nullable|string|unique:users',
+            'phone' => array_merge($this->phoneRules(), ['unique:users,phone']),
+            'telegram_id' => array_merge($this->telegramIdRules(), ['unique:users,telegram_id']),
             'branch_id' => 'required|exists:branches,id',
             'password' => 'required|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         $validated['role'] = 'admin';
         $validated['password'] = Hash::make($validated['password']);
@@ -80,13 +85,15 @@ class AdminController extends Controller
     {
         $this->authorizeSuperAdmin($request);
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users,phone,'.$admin->id,
-            'telegram_id' => 'nullable|string|unique:users,telegram_id,'.$admin->id,
+            'phone' => $this->rulesUnlessUnchanged(array_merge($this->phoneRules(), ['unique:users,phone,'.$admin->id]), $request, $admin, 'phone'),
+            'telegram_id' => $this->rulesUnlessUnchanged(array_merge($this->telegramIdRules(), ['unique:users,telegram_id,'.$admin->id]), $request, $admin, 'telegram_id'),
             'branch_id' => 'required|exists:branches,id',
             'password' => 'nullable|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);

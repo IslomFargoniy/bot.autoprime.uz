@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Concerns\BranchScopedValidationRules;
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\CashRegister;
@@ -21,7 +22,7 @@ use InvalidArgumentException;
 
 class VehicleController extends Controller
 {
-    use BranchScopedValidationRules;
+    use BranchScopedValidationRules, PersonalDataRules;
 
     public function index(Request $request): Response
     {
@@ -76,16 +77,18 @@ class VehicleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'branch_id' => 'nullable|exists:branches,id',
             'default_instructor_id' => 'nullable|exists:users,id',
-            'plate_number' => 'required|string|max:50|unique:vehicles,plate_number',
+            'plate_number' => array_merge(['required'], $this->plateNumberRules(), ['unique:vehicles,plate_number']),
             'model' => 'required|string|max:100',
             'year' => 'nullable|integer|min:1990|max:'.(date('Y') + 1),
             'fuel_type' => 'required|in:petrol,gas_methane,gas_propane,diesel,electric,methane,propane',
             'status' => 'required|in:active,maintenance,out_of_service,retired',
             'notes' => 'nullable|string',
-        ]);
+        ], $this->personalDataMessages());
 
         $branchId = $validated['branch_id'] ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
 
@@ -112,16 +115,23 @@ class VehicleController extends Controller
 
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
     {
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'branch_id' => 'nullable|exists:branches,id',
             'default_instructor_id' => 'nullable|exists:users,id',
-            'plate_number' => 'required|string|max:50|unique:vehicles,plate_number,'.$vehicle->id,
+            'plate_number' => $this->rulesUnlessUnchanged(
+                array_merge(['required'], $this->plateNumberRules(), ['unique:vehicles,plate_number,'.$vehicle->id]),
+                $request,
+                $vehicle,
+                'plate_number',
+            ),
             'model' => 'required|string|max:100',
             'year' => 'nullable|integer|min:1990|max:'.(date('Y') + 1),
             'fuel_type' => 'required|in:petrol,gas_methane,gas_propane,diesel,electric,methane,propane',
             'status' => 'required|in:active,maintenance,out_of_service,retired',
             'notes' => 'nullable|string',
-        ]);
+        ], $this->personalDataMessages());
 
         $fuelType = $validated['fuel_type'];
         if ($fuelType === 'methane') {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PersonalDataRules;
 use App\Exports\InstructorsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
@@ -19,6 +20,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class InstructorController extends Controller
 {
+    use PersonalDataRules;
+
     public function export(Request $request)
     {
         $filters = $request->all();
@@ -234,15 +237,17 @@ class InstructorController extends Controller
 
     public function store(Request $request)
     {
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users',
-            'telegram_id' => 'nullable|string|unique:users',
+            'phone' => array_merge($this->phoneRules(), ['unique:users,phone']),
+            'telegram_id' => array_merge($this->telegramIdRules(), ['unique:users,telegram_id']),
             'car_name' => 'nullable|string|max:255',
             'branch_id' => 'nullable|exists:branches,id',
             'photo' => 'nullable|image|max:5120',
             'password' => 'required|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         $user = $request->user();
         $branchId = ($user->isBranchRestricted()) ? $user->branch_id : ($validated['branch_id'] ?? $user->branch_id);
@@ -270,15 +275,17 @@ class InstructorController extends Controller
     {
         $this->ensureManageableInstructor($request, $instructor);
 
+        $this->normalizePersonalInput($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users,phone,'.$instructor->id,
-            'telegram_id' => 'nullable|string|unique:users,telegram_id,'.$instructor->id,
+            'phone' => $this->rulesUnlessUnchanged(array_merge($this->phoneRules(), ['unique:users,phone,'.$instructor->id]), $request, $instructor, 'phone'),
+            'telegram_id' => $this->rulesUnlessUnchanged(array_merge($this->telegramIdRules(), ['unique:users,telegram_id,'.$instructor->id]), $request, $instructor, 'telegram_id'),
             'car_name' => 'nullable|string|max:255',
             'branch_id' => 'nullable|exists:branches,id',
             'photo' => 'nullable|image|max:5120',
             'password' => 'nullable|string|min:6',
-        ]);
+        ], $this->personalDataMessages());
 
         if ($request->hasFile('photo')) {
             if ($instructor->photo_path) {

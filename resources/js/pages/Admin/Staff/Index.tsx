@@ -1439,8 +1439,10 @@ export default function StaffIndex({
                                 <DigitsInput
                                     id="staff_telegram"
                                     value={data.telegram_id}
-                                    onChange={(val) => setData('telegram_id', val)}
-                                     maxLength={15}
+                                    onChange={(val) =>
+                                        setData('telegram_id', val)
+                                    }
+                                    maxLength={15}
                                     placeholder="123456789 yoki username"
                                 />
                                 {errors.telegram_id && (

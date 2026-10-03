@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\ContractType;
@@ -13,6 +14,8 @@ use Inertia\Response;
 
 class ContractTypeController extends Controller
 {
+    use PersonalDataRules;
+
     public function index(Request $request): Response
     {
         $targetBranchId = BranchSessionService::getActiveBranchId($request);
@@ -47,12 +50,14 @@ class ContractTypeController extends Controller
             'has_theory' => 'boolean',
             'has_driving' => 'boolean',
             'has_lms' => 'boolean',
-            'required_driving_lessons' => 'integer|min:0',
-            'required_theory_lessons' => 'integer|min:0',
-            'min_theory_payment_percent' => 'numeric|min:0|max:100',
+            'required_driving_lessons' => 'nullable|integer|min:0|max:999',
+            'required_theory_lessons' => 'nullable|integer|min:0|max:999',
+            'min_theory_payment_percent' => 'nullable|numeric|min:0|max:100',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
+
+        $validated = $this->emptyAmountsToZero($validated, ['required_driving_lessons', 'required_theory_lessons', 'min_theory_payment_percent']);
 
         ContractType::create([
             'branch_id' => $validated['branch_id'] ?? null,
@@ -82,12 +87,14 @@ class ContractTypeController extends Controller
             'has_theory' => 'boolean',
             'has_driving' => 'boolean',
             'has_lms' => 'boolean',
-            'required_driving_lessons' => 'integer|min:0',
-            'required_theory_lessons' => 'integer|min:0',
-            'min_theory_payment_percent' => 'numeric|min:0|max:100',
+            'required_driving_lessons' => 'nullable|integer|min:0|max:999',
+            'required_theory_lessons' => 'nullable|integer|min:0|max:999',
+            'min_theory_payment_percent' => 'nullable|numeric|min:0|max:100',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
+
+        $validated = $this->emptyAmountsToZero($validated, ['required_driving_lessons', 'required_theory_lessons', 'min_theory_payment_percent']);
 
         $contractType->update($validated);
 

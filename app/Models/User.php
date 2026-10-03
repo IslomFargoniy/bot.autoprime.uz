@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Phone;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -92,6 +93,11 @@ class User extends Authenticatable implements PasskeyUser
 
             $user->syncRoles($user->role ? [Role::findOrCreate($user->role, 'web')] : []);
         });
+    }
+
+    public function setPhoneAttribute(?string $value): void
+    {
+        $this->attributes['phone'] = Phone::normalize($value);
     }
 
     public function branch(): BelongsTo
