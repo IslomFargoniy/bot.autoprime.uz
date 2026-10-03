@@ -184,11 +184,19 @@ class StudentController extends Controller
             'telegram_id' => 'nullable|string|unique:students,telegram_id,'.$student->id,
             'group_id' => ['nullable', $this->activeGroupInUserBranch($request, $student->group_id)],
             'branch_id' => 'nullable|exists:branches,id',
-            'status' => 'sometimes|in:active,dropped',
+            'status' => 'sometimes|in:active,dropped,graduated',
         ]);
 
-        if (isset($validated['status']) && $student->status === 'graduated') {
-            throw ValidationException::withMessages(['status' => 'Bitirgan o\'quvchining holatini o\'zgartirib bo\'lmaydi.']);
+        // The form always sends the current status back, so an unchanged value is fine;
+        // `graduated` is only ever set by issuing a certificate and is final.
+        if (isset($validated['status']) && $validated['status'] !== $student->status) {
+            if ($student->status === 'graduated') {
+                throw ValidationException::withMessages(['status' => 'Bitirgan o\'quvchining holatini o\'zgartirib bo\'lmaydi.']);
+            }
+
+            if ($validated['status'] === 'graduated') {
+                throw ValidationException::withMessages(['status' => '"Bitirgan" holati guvohnoma berilganda qo\'yiladi.']);
+            }
         }
 
         $this->ensureAssignableGroup($request, $validated['group_id'] ?? null);

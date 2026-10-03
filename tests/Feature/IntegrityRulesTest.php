@@ -282,6 +282,17 @@ test('issuing a certificate graduates the student', function () {
     ])->assertSessionHasErrors('status');
 });
 
+test('a graduated student can still be edited when the form sends the unchanged status', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $student->update(['status' => 'graduated']);
+
+    $this->actingAs($this->admin)->put("/admin/students/{$student->id}", [
+        'full_name' => 'Telefon almashdi', 'phone' => '+998909998877', 'telegram_id' => '', 'group_id' => '', 'branch_id' => '', 'status' => 'graduated',
+    ])->assertSessionHasNoErrors();
+
+    expect($student->fresh()->phone)->toBe('+998909998877')->and($student->fresh()->status)->toBe('graduated');
+});
+
 test('a student can be marked as dropped and then cannot be booked', function () {
     Queue::fake();
     $student = Student::factory()->create(['branch_id' => $this->branch->id]);

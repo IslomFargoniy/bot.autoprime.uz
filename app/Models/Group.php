@@ -99,9 +99,6 @@ class Group extends Model
     }
 
     /**
-     * @return HasMany<Student, $this>
-     */
-    /**
      * The database stores TIME with seconds; the app works with HH:MM.
      */
     public function getStartTimeAttribute(?string $value): ?string
@@ -114,6 +111,9 @@ class Group extends Model
         return $value ? substr($value, 0, 5) : null;
     }
 
+    /**
+     * @return HasMany<Student, $this>
+     */
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
