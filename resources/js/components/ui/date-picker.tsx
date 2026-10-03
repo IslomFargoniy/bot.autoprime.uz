@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { displayToIso, isoToDisplay, maskDateText } from '@/lib/input-masks';
 import { cn } from '@/lib/utils';
 
 interface DatePickerProps {
@@ -15,10 +16,15 @@ interface DatePickerProps {
     max?: string; // 'YYYY-MM-DD'
 }
 
+/**
+ * Date typed by hand as DD.MM.YYYY (dots are added automatically) or picked from the
+ * calendar button. The value going in and out stays 'YYYY-MM-DD'; while the typed date
+ * is incomplete or not a real date, onChange receives ''.
+ */
 export function DatePicker({
     value = '',
     onChange,
-    placeholder = 'YYYY-MM-DD',
+    placeholder = 'KK.OO.YYYY',
     className,
     id,
     required,
@@ -27,73 +33,108 @@ export function DatePicker({
     min,
     max,
 }: DatePickerProps) {
-    const inputRef = useRef<HTMLInputElement>(null);
+    const textRef = useRef<HTMLInputElement>(null);
+    const nativeRef = useRef<HTMLInputElement>(null);
 
-    // Normalize any incoming format (including legacy DD-MM-YYYY) to 'YYYY-MM-DD'
-    const toYmd = (val: string) => {
-        if (!val) return '';
-        if (val.includes('-')) {
-            const parts = val.split('-');
-            if (parts[0].length === 2 && parts[2]?.length === 4) {
-                // DD-MM-YYYY -> YYYY-MM-DD
-                return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-            if (parts[0].length === 4) {
-                return val;
-            }
+    // The box keeps what the user typed; a value changed from outside (form reset, edit
+    // dialog) replaces it. `emitted` remembers what we last reported to tell the two apart.
+    const [text, setText] = useState(() => isoToDisplay(value));
+    const [emitted, setEmitted] = useState(value);
+    const [seen, setSeen] = useState(value);
+
+    if (value !== seen) {
+        setSeen(value);
+
+        if (value !== emitted) {
+            setText(isoToDisplay(value));
+            setEmitted(value);
         }
-        return val;
+    }
+
+    const iso = displayToIso(text);
+    const outOfRange = !!iso && ((!!min && iso < min) || (!!max && iso > max));
+    const problem = text.length > 0 && (!iso || outOfRange);
+
+    useEffect(() => {
+        textRef.current?.setCustomValidity(problem ? "Sana noto'g'ri yoki ruxsat etilgan oraliqdan tashqarida" : '');
+    }, [problem]);
+
+    const commit = (nextText: string) => {
+        const nextIso = displayToIso(nextText);
+        const valid = !!nextIso && !(min && nextIso < min) && !(max && nextIso > max);
+        const next = valid ? (nextIso as string) : '';
+
+        setText(nextText);
+
+        // Typing half a date must not fire a change per keystroke (filters reload on change).
+        if (next !== emitted) {
+            setEmitted(next);
+            onChange(next);
+        }
     };
 
-    const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const isoVal = e.target.value; // Native date input always provides 'YYYY-MM-DD'
-        onChange(isoVal || '');
-    };
+    const openCalendar = () => {
+        const native = nativeRef.current;
 
-    const ymdDate = toYmd(value);
+        if (disabled || !native) {
+            return;
+        }
+
+        try {
+            native.showPicker();
+        } catch {
+            native.focus();
+        }
+    };
 
     return (
         <div
             className={cn(
-                'relative flex items-center justify-between h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer hover:bg-muted/40 transition-colors select-none',
+                'relative flex h-10 w-full items-center rounded-md border border-input bg-background px-3 text-sm ring-offset-background transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
+                problem && 'border-destructive focus-within:ring-destructive/30',
                 disabled && 'cursor-not-allowed opacity-50',
-                className
+                className,
             )}
-            onClick={() => {
-                if (disabled) return;
-                if (inputRef.current?.showPicker) {
-                    try {
-                        inputRef.current.showPicker();
-                    } catch {
-                        inputRef.current.focus();
-                    }
-                } else {
-                    inputRef.current?.focus();
-                }
-            }}
             title={title}
         >
-            {/* Formatted Date Display: YYYY-MM-DD */}
-            <span className={cn('truncate font-medium text-foreground', !ymdDate && 'text-muted-foreground font-normal')}>
-                {ymdDate || placeholder}
-            </span>
-
-            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0 ml-2 pointer-events-none" />
-
-            {/* Invisible Native Input overlaid to trigger OS native datepicker without zoom */}
             <input
-                ref={inputRef}
+                ref={textRef}
                 id={id}
-                type="date"
-                value={ymdDate}
-                onChange={handleNativeChange}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                value={text}
                 disabled={disabled}
                 required={required}
+                placeholder={placeholder}
+                aria-invalid={problem || undefined}
+                onChange={(e) => commit(maskDateText(e.target.value))}
+                className="h-full min-w-0 flex-1 bg-transparent font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground"
+            />
+
+            <button
+                type="button"
+                tabIndex={-1}
+                disabled={disabled}
+                onClick={openCalendar}
+                aria-label="Kalendar"
+                className="ml-2 shrink-0 text-muted-foreground hover:text-foreground"
+            >
+                <CalendarIcon className="h-4 w-4" />
+            </button>
+
+            {/* Hidden native input only used to open the operating system calendar. */}
+            <input
+                ref={nativeRef}
+                type="date"
+                tabIndex={-1}
+                aria-hidden="true"
+                value={iso && !outOfRange ? iso : ''}
                 min={min}
                 max={max}
-                aria-label={placeholder}
-                style={{ fontSize: '16px' }} // Critical: Prevents auto-zoom on iOS Safari and Android
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer pointer-events-auto"
+                disabled={disabled}
+                onChange={(e) => commit(isoToDisplay(e.target.value))}
+                className="pointer-events-none absolute right-0 bottom-0 h-0 w-0 opacity-0"
             />
         </div>
     );

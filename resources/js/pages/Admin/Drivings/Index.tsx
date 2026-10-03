@@ -941,7 +941,6 @@ export default function DrivingsIndex({
                                             {t('common.date_from', 'Sana dan')}
                                         </Label>
                                         <DatePicker
-                                            placeholder="YYYY-MM-DD"
                                             value={fromDate}
                                             onChange={(val) =>
                                                 handleFilterDateChange(
@@ -958,7 +957,6 @@ export default function DrivingsIndex({
                                             {t('common.date_to', 'Sana gacha')}
                                         </Label>
                                         <DatePicker
-                                            placeholder="YYYY-MM-DD"
                                             value={toDate}
                                             onChange={(val) =>
                                                 handleFilterDateChange(
@@ -1159,7 +1157,6 @@ export default function DrivingsIndex({
                                         id="date"
                                         value={data.date}
                                         onChange={(val) => setData('date', val)}
-                                        placeholder="YYYY-MM-DD"
                                         className="w-full"
                                         required
                                     />
@@ -1572,7 +1569,6 @@ export default function DrivingsIndex({
                                                 onChange={(val) =>
                                                     setData('date', val)
                                                 }
-                                                placeholder="YYYY-MM-DD"
                                                 className="w-full"
                                                 required
                                             />

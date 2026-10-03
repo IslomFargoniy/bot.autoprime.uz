@@ -75,13 +75,11 @@ export default function DashboardIndex({
                         className="grid w-full grid-cols-[1fr_1fr_auto] items-center gap-2 sm:flex sm:w-auto"
                     >
                         <DatePicker
-                            placeholder="YYYY-MM-DD"
                             value={from}
                             onChange={(val) => setFrom(val)}
                             className="w-full sm:w-36"
                         />
                         <DatePicker
-                            placeholder="YYYY-MM-DD"
                             value={to}
                             onChange={(val) => setTo(val)}
                             className="w-full sm:w-36"

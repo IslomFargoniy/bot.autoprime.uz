@@ -171,7 +171,6 @@ export function LeadFormFields({ data, setData, errors, branches }: Props) {
                         id="birth_date"
                         value={data.birth_date}
                         onChange={(val) => setData('birth_date', val)}
-                        placeholder="YYYY-MM-DD"
                         className="mt-1"
                     />
                 </div>

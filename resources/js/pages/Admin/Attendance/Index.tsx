@@ -507,7 +507,6 @@ export default function AttendanceIndex({
                         allowClear
                     />
                     <DatePicker
-                        placeholder="YYYY-MM-DD"
                         value={filterDate}
                         onChange={(val) => handleFilterChange('date', val)}
                         className="w-full sm:w-44"

@@ -970,7 +970,6 @@ export default function VehiclesIndex({
                                                 val,
                                             )
                                         }
-                                        placeholder="YYYY-MM-DD"
                                         required
                                         className="mt-1 h-9 text-xs"
                                     />
@@ -993,7 +992,6 @@ export default function VehiclesIndex({
                                                 val,
                                             )
                                         }
-                                        placeholder="YYYY-MM-DD"
                                         className="mt-1 h-9 text-xs"
                                     />
                                 </div>

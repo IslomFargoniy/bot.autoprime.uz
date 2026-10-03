@@ -302,7 +302,6 @@ export default function InstructorsIndex({
             <PageFilterBar className="mb-6">
                 <div className="hidden flex-1 items-center gap-2 md:flex">
                     <DatePicker
-                        placeholder="YYYY-MM-DD"
                         value={from}
                         onChange={(val) => {
                             setFrom(val);
@@ -315,7 +314,6 @@ export default function InstructorsIndex({
                         className="w-36"
                     />
                     <DatePicker
-                        placeholder="YYYY-MM-DD"
                         value={to}
                         onChange={(val) => {
                             setTo(val);
@@ -392,7 +390,6 @@ export default function InstructorsIndex({
                                     <div>
                                         <Label>{t('common.from', 'Dan')}</Label>
                                         <DatePicker
-                                            placeholder="YYYY-MM-DD"
                                             value={from}
                                             onChange={(val) => setFrom(val)}
                                             className="mt-1 w-full"
@@ -401,7 +398,6 @@ export default function InstructorsIndex({
                                     <div>
                                         <Label>{t('common.to', 'Gacha')}</Label>
                                         <DatePicker
-                                            placeholder="YYYY-MM-DD"
                                             value={to}
                                             onChange={(val) => setTo(val)}
                                             className="mt-1 w-full"
