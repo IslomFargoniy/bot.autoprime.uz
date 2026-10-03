@@ -37,7 +37,7 @@
         </div>
         <div class="footer-col">
             <div class="stamp-circle">M.O'. (Muhr)</div>
-            <p style="font-size: 11px; color: #64748b; margin-top: 8px;">Berilgan sana: {{ $certificate->issued_date }}</p>
+            <p style="font-size: 11px; color: #64748b; margin-top: 8px;">Berilgan sana: {{ $certificate->issued_date?->format('Y-m-d') }}</p>
         </div>
         <div class="footer-col">
             <div class="qr-placeholder">

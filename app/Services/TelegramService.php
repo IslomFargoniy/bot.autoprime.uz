@@ -420,7 +420,7 @@ class TelegramService
         }
 
         $amountFormatted = number_format((float) $payment->amount, 0, '.', ' ');
-        $paidAt = $payment->paid_at ? Carbon::parse($payment->paid_at)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s');
+        $paidAt = $payment->paid_at ? Carbon::parse($payment->paid_at)->format('Y-m-d H:i') : now()->format('Y-m-d H:i');
         $methodLabel = match ($payment->payment_method) {
             'cash' => '💵 Naqd pul',
             'card_click' => '💳 Karta / Click / Payme',

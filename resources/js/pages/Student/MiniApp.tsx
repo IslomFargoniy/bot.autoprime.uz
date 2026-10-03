@@ -19,7 +19,12 @@ import { TestQuiz } from '@/components/test-quiz';
 import { telegramInitDataHeaders } from '@/hooks/use-telegram';
 import TMALayout from '@/layouts/tma-layout';
 import { formatPhone } from '@/lib/input-masks';
-import { formatDate, formatDateTime, formatMoney } from '@/lib/utils';
+import {
+    formatDate,
+    formatDateTime,
+    formatMoney,
+    formatTime,
+} from '@/lib/utils';
 
 interface StudentProps {
     student: {
@@ -533,8 +538,13 @@ export default function MiniApp({
                                             {t('groups.time', 'Dars vaqti')}:
                                         </span>
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">
-                                            {group.start_time || '09:00'} -{' '}
-                                            {group.end_time || '11:00'}
+                                            {formatTime(
+                                                group.start_time || '09:00',
+                                            )}{' '}
+                                            -{' '}
+                                            {formatTime(
+                                                group.end_time || '11:00',
+                                            )}
                                         </span>
                                     </div>
                                 </div>
@@ -577,7 +587,9 @@ export default function MiniApp({
                                                     className="mt-0.5 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400"
                                                 >
                                                     <Phone className="h-3 w-3" />{' '}
-                                                    {formatPhone(group.teacher.phone)}
+                                                    {formatPhone(
+                                                        group.teacher.phone,
+                                                    )}
                                                 </a>
                                             )}
                                         </div>

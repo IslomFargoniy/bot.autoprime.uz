@@ -45,7 +45,9 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import { TimeInput } from '@/components/ui/time-input';
 import { useCan } from '@/hooks/use-can';
+import { normalizeTime } from '@/lib/input-masks';
 import type { Branch, SharedData } from '@/types/auth';
 
 interface Instructor {
@@ -238,8 +240,8 @@ export default function GroupsIndex({
             course_id: group.course_id ? String(group.course_id) : '',
             category: group.category || 'B',
             days_of_week: group.days_of_week ?? [],
-            start_time: group.start_time ?? '',
-            end_time: group.end_time ?? '',
+            start_time: normalizeTime(group.start_time),
+            end_time: normalizeTime(group.end_time),
             room: group.room ?? '',
             max_students: String(group.max_students ?? 30),
             start_date: group.start_date ? group.start_date.slice(0, 10) : '',
@@ -681,12 +683,11 @@ export default function GroupsIndex({
                                 <Label htmlFor="start_time">
                                     {t('groups.start_time', 'Boshlanish')}
                                 </Label>
-                                <Input
+                                <TimeInput
                                     id="start_time"
-                                    type="time"
                                     value={data.start_time}
-                                    onChange={(e) =>
-                                        setData('start_time', e.target.value)
+                                    onChange={(val) =>
+                                        setData('start_time', val)
                                     }
                                 />
                                 {errors.start_time && (
@@ -699,13 +700,10 @@ export default function GroupsIndex({
                                 <Label htmlFor="end_time">
                                     {t('groups.end_time', 'Tugash')}
                                 </Label>
-                                <Input
+                                <TimeInput
                                     id="end_time"
-                                    type="time"
                                     value={data.end_time}
-                                    onChange={(e) =>
-                                        setData('end_time', e.target.value)
-                                    }
+                                    onChange={(val) => setData('end_time', val)}
                                 />
                                 {errors.end_time && (
                                     <div className="mt-1 text-sm text-destructive">

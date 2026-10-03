@@ -143,7 +143,7 @@ if (! function_exists('buildDrivingsMessage')) {
                     } else {
                         foreach ($scheduled as $index => $d) {
                             $num = $index + 1;
-                            $date = Carbon::parse($d->start_time)->format('d.m.Y');
+                            $date = Carbon::parse($d->start_time)->format('Y-m-d');
                             $time = Carbon::parse($d->start_time)->format('H:i').' - '.Carbon::parse($d->end_time)->format('H:i');
                             $studentName = $d->student ? $d->student->full_name : 'O\'quvchi';
                             $studentPhone = ($d->student && $d->student->phone) ? " ({$d->student->phone})" : '';
@@ -165,7 +165,7 @@ if (! function_exists('buildDrivingsMessage')) {
                     } else {
                         foreach ($completed as $index => $d) {
                             $num = $index + 1;
-                            $date = Carbon::parse($d->start_time)->format('d.m.Y');
+                            $date = Carbon::parse($d->start_time)->format('Y-m-d');
                             $time = Carbon::parse($d->start_time)->format('H:i');
                             $studentName = $d->student ? $d->student->full_name : 'O\'quvchi';
                             $rating = $d->review ? " ⭐ {$d->review->rating}/5" : '';
@@ -191,7 +191,7 @@ if (! function_exists('buildDrivingsMessage')) {
                     } else {
                         foreach ($scheduled as $index => $d) {
                             $num = $index + 1;
-                            $date = Carbon::parse($d->start_time)->format('d.m.Y H:i');
+                            $date = Carbon::parse($d->start_time)->format('Y-m-d H:i');
                             $instructorName = $d->instructor ? $d->instructor->name : 'Instruktor';
                             $studentName = $d->student ? $d->student->full_name : 'O\'quvchi';
                             $text .= "{$num}. 📅 <b>{$date}</b> | 👨‍🏫 {$instructorName} ➔ 👤 {$studentName}\n";
@@ -211,7 +211,7 @@ if (! function_exists('buildDrivingsMessage')) {
                     } else {
                         foreach ($completed as $index => $d) {
                             $num = $index + 1;
-                            $date = Carbon::parse($d->start_time)->format('d.m.Y H:i');
+                            $date = Carbon::parse($d->start_time)->format('Y-m-d H:i');
                             $instructorName = $d->instructor ? $d->instructor->name : 'Instruktor';
                             $studentName = $d->student ? $d->student->full_name : 'O\'quvchi';
                             $rating = $d->review ? " ⭐ {$d->review->rating}" : '';
@@ -237,7 +237,7 @@ if (! function_exists('buildDrivingsMessage')) {
                 } else {
                     foreach ($scheduled as $index => $d) {
                         $num = $index + 1;
-                        $date = Carbon::parse($d->start_time)->format('d.m.Y');
+                        $date = Carbon::parse($d->start_time)->format('Y-m-d');
                         $time = Carbon::parse($d->start_time)->format('H:i').' - '.Carbon::parse($d->end_time)->format('H:i');
                         $instructorName = $d->instructor ? $d->instructor->name : 'Instruktor';
                         $instructorPhone = ($d->instructor && $d->instructor->phone) ? " (📞 {$d->instructor->phone})" : '';
@@ -259,7 +259,7 @@ if (! function_exists('buildDrivingsMessage')) {
                 } else {
                     foreach ($completed as $index => $d) {
                         $num = $index + 1;
-                        $date = Carbon::parse($d->start_time)->format('d.m.Y');
+                        $date = Carbon::parse($d->start_time)->format('Y-m-d');
                         $time = Carbon::parse($d->start_time)->format('H:i');
                         $instructorName = $d->instructor ? $d->instructor->name : 'Instruktor';
                         $rating = $d->review ? " ⭐ {$d->review->rating}/5" : '';

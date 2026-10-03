@@ -51,8 +51,9 @@ import {
     TableRow,
     TableEmpty,
 } from '@/components/ui/table';
+import { TimeInput } from '@/components/ui/time-input';
 import { useCan } from '@/hooks/use-can';
-import { formatPhone } from '@/lib/input-masks';
+import { formatPhone, normalizeTime } from '@/lib/input-masks';
 import { formatDate, formatTime } from '@/lib/utils';
 
 interface Instructor {
@@ -226,29 +227,16 @@ export default function DrivingsIndex({
         return () => clearTimeout(timer);
     }, [studentSearch, data.group_id, showOtherStudents, showForm]);
 
+    // The date picker and the time boxes hold YYYY-MM-DD and HH:mm; the backend wants one datetime.
     transform((formData) => {
-        let dateForBackend = '';
-
-        if (formData.date && formData.date.includes('-')) {
-            const parts = formData.date.split('-');
-
-            if (parts[0].length === 2 && parts[2]?.length === 4) {
-                dateForBackend = `${parts[2]}-${parts[1]}-${parts[0]}`;
-            } else if (parts[0].length === 4) {
-                dateForBackend = formData.date;
-            }
-        }
+        const from = normalizeTime(formData.time_from);
+        const to = normalizeTime(formData.time_to);
 
         return {
             ...formData,
             start_time:
-                dateForBackend && formData.time_from
-                    ? `${dateForBackend} ${formData.time_from}:00`
-                    : '',
-            end_time:
-                dateForBackend && formData.time_to
-                    ? `${dateForBackend} ${formData.time_to}:00`
-                    : '',
+                formData.date && from ? `${formData.date} ${from}:00` : '',
+            end_time: formData.date && to ? `${formData.date} ${to}:00` : '',
         };
     });
 
@@ -541,28 +529,6 @@ export default function DrivingsIndex({
                 perPage,
             );
         }
-    };
-
-    const handleTimeChange = (field: 'time_from' | 'time_to', val: string) => {
-        let clean = val.replace(/[^\d]/g, '');
-
-        if (clean.length > 4) {
-            clean = clean.substring(0, 4);
-        }
-
-        if (clean.length > 2) {
-            if (parseInt(clean[2]) > 5) {
-                clean = clean.substring(0, 2) + '5' + clean.substring(3);
-            }
-        }
-
-        let formatted = clean;
-
-        if (clean.length > 2) {
-            formatted = clean.substring(0, 2) + ':' + clean.substring(2);
-        }
-
-        setData(field, formatted);
     };
 
     const isNegativeTag = (tag: string) => {
@@ -1105,7 +1071,11 @@ export default function DrivingsIndex({
                                         </span>
                                         {editing.student?.phone && (
                                             <span className="ml-1 font-mono text-xs text-muted-foreground">
-                                                ({formatPhone(editing.student.phone)})
+                                                (
+                                                {formatPhone(
+                                                    editing.student.phone,
+                                                )}
+                                                )
                                             </span>
                                         )}
                                     </div>
@@ -1176,19 +1146,13 @@ export default function DrivingsIndex({
                                                 'Boshlanish vaqti',
                                             )}
                                         </Label>
-                                        <Input
-                                            type="text"
+                                        <TimeInput
                                             id="time_from"
                                             value={data.time_from}
-                                            onChange={(e) =>
-                                                handleTimeChange(
-                                                    'time_from',
-                                                    e.target.value,
-                                                )
+                                            onChange={(val) =>
+                                                setData('time_from', val)
                                             }
                                             placeholder="09:00"
-                                            pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                                            title="09:00"
                                             required
                                         />
                                     </div>
@@ -1199,19 +1163,13 @@ export default function DrivingsIndex({
                                                 'Tugash vaqti',
                                             )}
                                         </Label>
-                                        <Input
-                                            type="text"
+                                        <TimeInput
                                             id="time_to"
                                             value={data.time_to}
-                                            onChange={(e) =>
-                                                handleTimeChange(
-                                                    'time_to',
-                                                    e.target.value,
-                                                )
+                                            onChange={(val) =>
+                                                setData('time_to', val)
                                             }
                                             placeholder="18:30"
-                                            pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                                            title="18:30"
                                             required
                                         />
                                         {errors.end_time && (
@@ -1436,7 +1394,9 @@ export default function DrivingsIndex({
                                                             </div>
                                                             {s.phone && (
                                                                 <span className="font-mono text-[11px] text-muted-foreground">
-                                                                    {formatPhone(s.phone)}
+                                                                    {formatPhone(
+                                                                        s.phone,
+                                                                    )}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -1590,19 +1550,13 @@ export default function DrivingsIndex({
                                                 'Boshlanish vaqti',
                                             )}
                                         </Label>
-                                        <Input
-                                            type="text"
+                                        <TimeInput
                                             id="time_from"
                                             value={data.time_from}
-                                            onChange={(e) =>
-                                                handleTimeChange(
-                                                    'time_from',
-                                                    e.target.value,
-                                                )
+                                            onChange={(val) =>
+                                                setData('time_from', val)
                                             }
                                             placeholder="09:00"
-                                            pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                                            title="09:00"
                                             required
                                         />
                                     </div>
@@ -1613,19 +1567,13 @@ export default function DrivingsIndex({
                                                 'Tugash vaqti',
                                             )}
                                         </Label>
-                                        <Input
-                                            type="text"
+                                        <TimeInput
                                             id="time_to"
                                             value={data.time_to}
-                                            onChange={(e) =>
-                                                handleTimeChange(
-                                                    'time_to',
-                                                    e.target.value,
-                                                )
+                                            onChange={(val) =>
+                                                setData('time_to', val)
                                             }
                                             placeholder="18:30"
-                                            pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                                            title="18:30"
                                             required
                                         />
                                         {errors.end_time && (
@@ -1712,7 +1660,9 @@ export default function DrivingsIndex({
                                                     '-'}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {formatPhone(driving.student?.phone) || ''}
+                                                {formatPhone(
+                                                    driving.student?.phone,
+                                                ) || ''}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-xs">
@@ -1976,7 +1926,9 @@ export default function DrivingsIndex({
                                             {driving.student?.full_name || '-'}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {formatPhone(driving.student?.phone) || ''}
+                                            {formatPhone(
+                                                driving.student?.phone,
+                                            ) || ''}
                                         </div>
                                     </div>
                                     <div>

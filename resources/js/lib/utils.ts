@@ -29,7 +29,7 @@ export function parseDate(value: string | Date): Date {
 }
 
 /**
- * Format datetime to standard format: YYYY-MM-DD HH:mm:ss (e.g. 2026-09-27 10:35:26)
+ * Format datetime to standard format: YYYY-MM-DD HH:mm (e.g. 2026-09-27 10:35)
  */
 export function formatDateTime(dateStr?: string | Date | null): string {
     if (!dateStr) {
@@ -38,9 +38,9 @@ export function formatDateTime(dateStr?: string | Date | null): string {
 
     if (
         typeof dateStr === 'string' &&
-        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateStr)
+        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(dateStr)
     ) {
-        return dateStr;
+        return dateStr.slice(0, 16);
     }
 
     const d = parseDate(dateStr);
@@ -54,9 +54,8 @@ export function formatDateTime(dateStr?: string | Date | null): string {
     const day = String(d.getDate()).padStart(2, '0');
     const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 /**

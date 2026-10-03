@@ -17,14 +17,14 @@ interface DatePickerProps {
 }
 
 /**
- * Date typed by hand as DD.MM.YYYY (dots are added automatically) or picked from the
+ * Date typed by hand as YYYY-MM-DD (dashes are added automatically) or picked from the
  * calendar button. The value going in and out stays 'YYYY-MM-DD'; while the typed date
  * is incomplete or not a real date, onChange receives ''.
  */
 export function DatePicker({
     value = '',
     onChange,
-    placeholder = 'KK.OO.YYYY',
+    placeholder = 'YYYY-MM-DD',
     className,
     id,
     required,

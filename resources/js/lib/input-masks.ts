@@ -78,17 +78,17 @@ export function formatPlateDisplay(clean: string): string {
 }
 
 /**
- * Digits typed into a date box shown as DD.MM.YYYY.
+ * Digits typed into a date box shown as YYYY-MM-DD (dashes are added while typing).
  */
 export function maskDateText(value: string): string {
     const digits = onlyDigits(value).slice(0, 8);
-    const parts = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)];
+    const parts = [digits.slice(0, 4), digits.slice(4, 6), digits.slice(6, 8)];
 
-    return parts.filter(Boolean).join('.');
+    return parts.filter(Boolean).join('-');
 }
 
 /**
- * "2026-10-03" (or the legacy "03-10-2026") as "03.10.2026"; anything else as ''.
+ * "2026-10-03" (or a full datetime / the legacy "03-10-2026") as "2026-10-03"; anything else as ''.
  */
 export function isoToDisplay(value?: string | null): string {
     if (!value) {
@@ -98,27 +98,27 @@ export function isoToDisplay(value?: string | null): string {
     const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
     if (iso) {
-        return `${iso[3]}.${iso[2]}.${iso[1]}`;
+        return `${iso[1]}-${iso[2]}-${iso[3]}`;
     }
 
     const legacy = value.match(/^(\d{2})-(\d{2})-(\d{4})$/);
 
-    return legacy ? `${legacy[1]}.${legacy[2]}.${legacy[3]}` : '';
+    return legacy ? `${legacy[3]}-${legacy[2]}-${legacy[1]}` : '';
 }
 
 /**
- * "03.10.2026" as "2026-10-03", or null when the text is incomplete or not a real date.
+ * "2026-10-03" as the same ISO date, or null when the text is incomplete or not a real date.
  */
 export function displayToIso(text: string): string | null {
-    const match = text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
     if (!match) {
         return null;
     }
 
-    const day = Number(match[1]);
+    const year = Number(match[1]);
     const month = Number(match[2]);
-    const year = Number(match[3]);
+    const day = Number(match[3]);
     const date = new Date(Date.UTC(year, month - 1, day));
 
     const isReal =
@@ -126,7 +126,40 @@ export function displayToIso(text: string): string | null {
         date.getUTCMonth() === month - 1 &&
         date.getUTCDate() === day;
 
-    return isReal ? `${match[3]}-${match[2]}-${match[1]}` : null;
+    return isReal ? text : null;
+}
+
+/**
+ * Digits typed into a time box shown as HH:mm (the colon is added while typing).
+ * The hour is held to 00-23 and the first minute digit to 0-5 as the digits arrive.
+ */
+export function maskTimeText(value: string): string {
+    let digits = onlyDigits(value).slice(0, 4);
+
+    if (digits.length >= 1 && Number(digits[0]) > 2) {
+        digits = `0${digits}`.slice(0, 4);
+    }
+
+    if (digits.length >= 2 && Number(digits.slice(0, 2)) > 23) {
+        digits = `23${digits.slice(2)}`;
+    }
+
+    if (digits.length >= 3 && Number(digits[2]) > 5) {
+        digits = `${digits.slice(0, 2)}5${digits.slice(3)}`;
+    }
+
+    return digits.length > 2
+        ? `${digits.slice(0, 2)}:${digits.slice(2)}`
+        : digits;
+}
+
+/**
+ * "09:00" or "09:00:00" as "09:00"; anything else (an incomplete or impossible time) as ''.
+ */
+export function normalizeTime(value?: string | null): string {
+    const match = (value ?? '').match(/^([01]\d|2[0-3]):([0-5]\d)(:\d{2})?$/);
+
+    return match ? `${match[1]}:${match[2]}` : '';
 }
 
 /**
@@ -145,7 +178,7 @@ export function birthDateFromPinfl(pinfl: string): string | null {
     const month = pinfl.slice(3, 5);
     const year = century + Number(pinfl.slice(5, 7));
 
-    return displayToIso(`${day}.${month}.${year}`);
+    return displayToIso(`${year}-${month}-${day}`);
 }
 
 /**

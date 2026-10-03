@@ -95,7 +95,7 @@
         <div class="footer-col">
             <p><strong>Tinglovchi (O'quvchi):</strong></p>
             <p>Imzo: ___________________</p>
-            <p>Sana: {{ $contract->contract_date ?? now()->format('d.m.Y') }}</p>
+            <p>Sana: {{ ($contract->contract_date ?? now())->format('Y-m-d') }}</p>
         </div>
     </div>
 </body>
