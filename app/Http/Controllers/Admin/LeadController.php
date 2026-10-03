@@ -290,7 +290,14 @@ class LeadController extends Controller
         $branchId = $validated['branch_id'] ?? $lead->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = (float) $contractType->price;
-        $finalAmount = max(0, $totalAmount - $discount);
+
+        if ($discount > $totalAmount) {
+            return redirect()->back()->withErrors([
+                'discount_amount' => 'Chegirma tarif narxidan ('.number_format($totalAmount, 0, '', ' ').' UZS) oshmasligi kerak.',
+            ]);
+        }
+
+        $finalAmount = $totalAmount - $discount;
 
         $student = null;
         $contract = null;

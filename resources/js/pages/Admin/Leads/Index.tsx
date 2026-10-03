@@ -184,6 +184,14 @@ export default function LeadsIndex({
         terms: '',
     });
 
+    // A discount cannot be more than the tariff costs.
+    const convertTariff = contractTypes.find(
+        (ct) => String(ct.id) === String(convertForm.data.contract_type_id),
+    );
+    const convertDiscountTooBig =
+        !!convertTariff &&
+        Number(convertForm.data.discount_amount) > Number(convertTariff.price);
+
     const [perPage, setPerPage] = useState(filters.per_page || '15');
 
     const isLeadConverted = (lead?: Lead | null) => {
@@ -684,7 +692,9 @@ export default function LeadsIndex({
                                             className="flex items-center gap-1 font-mono text-xs font-semibold text-primary hover:underline"
                                         >
                                             <Phone className="h-3 w-3 text-muted-foreground" />
-                                            <span>{formatPhone(lead.phone)}</span>
+                                            <span>
+                                                {formatPhone(lead.phone)}
+                                            </span>
                                         </a>
                                     </div>
                                 </div>
@@ -1568,6 +1578,19 @@ export default function LeadsIndex({
                                         placeholder="0"
                                         suffix="UZS"
                                     />
+                                    {convertDiscountTooBig && convertTariff && (
+                                        <p className="mt-1 text-[11px] font-semibold text-red-600">
+                                            {t(
+                                                'contracts.discount_too_big',
+                                                'Chegirma tarif narxidan ({{price}} UZS) oshmasligi kerak',
+                                                {
+                                                    price: formatMoney(
+                                                        convertTariff.price,
+                                                    ),
+                                                },
+                                            )}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -1654,7 +1677,10 @@ export default function LeadsIndex({
                                 <Button
                                     type="submit"
                                     variant="brand"
-                                    disabled={convertForm.processing}
+                                    disabled={
+                                        convertForm.processing ||
+                                        convertDiscountTooBig
+                                    }
                                 >
                                     {t('common.save', 'Saqlash')}
                                 </Button>

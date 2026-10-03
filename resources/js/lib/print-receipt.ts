@@ -21,19 +21,45 @@ export function setAutoPrintEnabled(enabled: boolean): void {
 }
 
 /**
- * Print a receipt page through a hidden iframe. A new window would be stopped
- * by popup blockers, an iframe is not. The receipt page opens the print dialog
- * itself when it is loaded with ?autoprint=1.
+ * Print a receipt page through an iframe. A new window would be stopped by popup blockers,
+ * an iframe is not. The frame sits off screen but keeps a real size: browsers freeze the
+ * page when asked to print a frame that is hidden or zero-sized, which left the screen
+ * stuck behind the print dialog. The page that owns the frame starts the printing once
+ * the receipt has loaded, and the frame removes itself afterwards.
  */
 export function printReceipt(url: string): void {
     const frame = document.createElement('iframe');
-    const separator = url.includes('?') ? '&' : '?';
+    const remove = () => frame.remove();
 
     frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
     frame.style.cssText =
-        'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
-    frame.src = `${url}${separator}autoprint=1`;
+        'position:fixed;left:-10000px;top:0;width:80mm;height:200mm;border:0;';
+
+    frame.addEventListener('load', () => {
+        try {
+            const receiptWindow = frame.contentWindow;
+
+            receiptWindow?.addEventListener('afterprint', remove);
+            receiptWindow?.focus();
+            receiptWindow?.print();
+        } catch {
+            remove();
+        }
+    });
+
+    frame.src = url;
     document.body.appendChild(frame);
 
-    window.setTimeout(() => frame.remove(), 60_000);
+    window.setTimeout(remove, 120_000);
+}
+
+/**
+ * Open the receipt in its own tab, where it prints itself. The fallback for when printing
+ * through the frame is blocked, and the way to print it again from a notification.
+ */
+export function openReceipt(url: string): void {
+    const separator = url.includes('?') ? '&' : '?';
+
+    window.open(`${url}${separator}autoprint=1`, '_blank');
 }

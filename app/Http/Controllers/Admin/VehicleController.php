@@ -172,12 +172,22 @@ class VehicleController extends Controller
         $validated = $request->validate([
             'maintenance_type' => 'required|string|max:100',
             'cost' => 'required|numeric|min:0|max:9999999999',
-            'performed_date' => 'required|date',
-            'next_due_date' => 'nullable|date',
+            'performed_date' => 'required|date|before_or_equal:today',
+            'next_due_date' => 'nullable|date|after_or_equal:performed_date',
             'odometer' => 'nullable|numeric|min:0',
             'cash_register_id' => ['nullable', $this->cashRegisterInUserBranch($request)],
             'notes' => 'nullable|string',
+        ], [
+            'performed_date.before_or_equal' => 'Xizmat sanasi kelajakda bo\'lishi mumkin emas.',
+            'next_due_date.after_or_equal' => 'Keyingi xizmat sanasi o\'tkazilgan sanadan oldin bo\'lishi mumkin emas.',
         ]);
+
+        // The odometer only goes up: a smaller reading is a typo, and would not be saved as the mileage.
+        if (! empty($validated['odometer']) && (int) $validated['odometer'] < (int) $vehicle->current_mileage) {
+            return redirect()->back()->withErrors([
+                'odometer' => 'Odometr joriy probegdan ('.number_format((int) $vehicle->current_mileage, 0, '', ' ').' km) kam bo\'lishi mumkin emas.',
+            ]);
+        }
 
         if (! empty($validated['cash_register_id']) && (float) $validated['cost'] > 0) {
             $cashRegister = CashRegister::find($validated['cash_register_id']);

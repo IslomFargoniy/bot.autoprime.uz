@@ -147,7 +147,14 @@ class ContractController extends Controller
         $branchId = $validated['branch_id'] ?? $student->branch_id ?? BranchSessionService::getActiveBranchId($request) ?? $request->user()->branch_id ?? Branch::first()->id ?? 1;
         $discount = (float) ($validated['discount_amount'] ?? 0);
         $total = (float) $contractType->price;
-        $final = max(0, $total - $discount);
+
+        if ($discount > $total) {
+            return redirect()->back()->withErrors([
+                'discount_amount' => 'Chegirma tarif narxidan ('.number_format($total, 0, '', ' ').' UZS) oshmasligi kerak.',
+            ]);
+        }
+
+        $final = $total - $discount;
 
         $groupId = $validated['group_id'] ?? null;
 

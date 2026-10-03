@@ -967,6 +967,7 @@ export default function VehiclesIndex({
                                                 val,
                                             )
                                         }
+                                        max={formatDate(new Date())}
                                         required
                                         className="mt-1 h-9 text-xs"
                                     />

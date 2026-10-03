@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useCan } from '@/hooks/use-can';
 import {
     isAutoPrintEnabled,
+    openReceipt,
     printReceipt,
     setAutoPrintEnabled,
 } from '@/lib/print-receipt';
@@ -215,12 +216,29 @@ export default function FinanceIndex({
         );
     };
 
-    // The backend flashes the receipt address of the record that was just saved.
-    const printSavedReceipt = (page: { flash?: { receipt_url?: string } }) => {
+    // The backend flashes the receipt address of the record that was just saved. The toast keeps
+    // a "Chek" button, so the receipt can be printed again (or opened) when automatic printing
+    // is off or the browser blocked it. Printing starts after the dialog has closed.
+    const announceSavedRecord = (
+        page: { flash?: { receipt_url?: string } },
+        message: string,
+    ) => {
         const url = page.flash?.receipt_url;
 
+        toast.success(
+            message,
+            url
+                ? {
+                      action: {
+                          label: t('finance.print_receipt', 'Chek'),
+                          onClick: () => openReceipt(url),
+                      },
+                  }
+                : undefined,
+        );
+
         if (url && autoPrint) {
-            printReceipt(url);
+            window.setTimeout(() => printReceipt(url), 350);
         }
     };
 
@@ -228,10 +246,10 @@ export default function FinanceIndex({
         e.preventDefault();
         paymentForm.post('/admin/finance/payment', {
             onSuccess: (page) => {
-                printSavedReceipt(page);
                 setShowPaymentModal(false);
-                paymentForm.reset('amount', 'notes');
-                toast.success(
+                paymentForm.reset('contract_id', 'amount', 'notes');
+                announceSavedRecord(
+                    page,
                     t('finance.payment_success', "To'lov qabul qilindi"),
                 );
             },
@@ -247,10 +265,10 @@ export default function FinanceIndex({
         e.preventDefault();
         expenseForm.post('/admin/finance/expense', {
             onSuccess: (page) => {
-                printSavedReceipt(page);
                 setShowExpenseModal(false);
                 expenseForm.reset('amount', 'description');
-                toast.success(
+                announceSavedRecord(
+                    page,
                     t('finance.expense_success', 'Xarajat kiritildi'),
                 );
             },

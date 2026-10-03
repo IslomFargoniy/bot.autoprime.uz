@@ -60,7 +60,12 @@
     </div>
 
     @if ($autoprint)
-        <script>window.addEventListener('load', function () { window.print(); });</script>
+        <script>
+            // Opened in its own tab it prints itself; inside the app's print frame the app prints it.
+            if (window.self === window.top) {
+                window.addEventListener('load', function () { window.print(); });
+            }
+        </script>
     @endif
 </body>
 </html>

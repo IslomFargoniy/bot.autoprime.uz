@@ -163,7 +163,9 @@ class FinanceController extends Controller
             ->select(['id', 'full_name', 'phone'])
             ->get();
 
-        $activeContracts = Contract::where('status', 'active')
+        // Only contracts that can still take a payment: open, with a debt left.
+        $activeContracts = Contract::whereIn('status', ['active', 'frozen'])
+            ->where('debt_amount', '>', 0)
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
                 $q->where('branch_id', $targetBranchId);
             })
@@ -250,65 +252,97 @@ class FinanceController extends Controller
             ]);
         }
 
-        $payment = null;
-
-        DB::transaction(function () use ($validated, $cashRegister, &$contract, $request, &$payment) {
-            // Serialize payments per contract so recalculated totals include every committed payment.
-            $contract = Contract::with('student')->whereKey($contract->id)->lockForUpdate()->first();
-            $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
-
-            $receiptNumber = DocumentNumberService::nextReceiptNumber();
-
-            $payment = Payment::create([
-                'branch_id' => $contract->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
-                'contract_id' => $contract->id,
-                'student_id' => $contract->student_id,
-                'cash_register_id' => $lockedRegister->id,
-                'received_by_user_id' => $request->user()->id,
-                'amount' => $validated['amount'],
-                'payment_type' => 'contract_tuition',
-                'payment_method' => $validated['payment_method'],
-                'receipt_number' => $receiptNumber,
-                'paid_at' => now(),
-                'comment' => $validated['notes'] ?? null,
+        if ($contract->status === 'completed') {
+            return redirect()->back()->withErrors([
+                'contract_id' => "Yakunlangan shartnomaga to'lov qabul qilib bo'lmaydi.",
             ]);
-
-            // Deposit into register and record ledger transaction
-            $lockedRegister->deposit(
-                amount: (float) $validated['amount'],
-                category: 'payment',
-                description: "To'lov qabul qilindi: {$contract->student?->full_name} (#{$receiptNumber})",
-                reference: $payment,
-                userId: $request->user()->id
-            );
-
-            // Recalculate contract finances
-            $contract->recalculateFinances();
-
-            // Record financial history for the student
-            if ($contract->student) {
-                FinancialHistory::recordForStudent($contract->student, [
-                    'type' => 'credit',
-                    'category' => 'tuition_payment',
-                    'amount' => (float) $validated['amount'],
-                    'balance_before' => (float) ($contract->debt_amount + (float) $validated['amount']),
-                    'balance_after' => (float) $contract->debt_amount,
-                    'payment_method' => $validated['payment_method'],
-                    'description' => "Shartnoma to'lovi qabul qilindi: #{$contract->contract_number} (Chek #{$receiptNumber})",
-                    'reference' => $payment,
-                    'performed_by_user_id' => $request->user()->id,
-                    'transacted_at' => now(),
-                ]);
-            }
-        });
-
-        if ($payment) {
-            $telegramService->sendPaymentReceiptNotification($payment);
         }
+
+        try {
+            $payment = DB::transaction(fn () => $this->recordTuitionPayment($validated, $cashRegister, $contract->id, $request));
+        } catch (InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['amount' => $e->getMessage()]);
+        }
+
+        $telegramService->sendPaymentReceiptNotification($payment);
 
         Inertia::flash('receipt_url', route('finance.payment-receipt', $payment));
 
-        return redirect()->back()->with('success', "To'lov qabul qilindi. Chek: #{$payment?->receipt_number}");
+        return redirect()->back()->with('success', "To'lov qabul qilindi. Chek: #{$payment->receipt_number}");
+    }
+
+    /**
+     * Take a tuition payment into the register. Runs inside a transaction: the contract is
+     * locked first, so the debt that caps the amount is the one every committed payment left.
+     *
+     * @param  array{cash_register_id: int|string, amount: int|float|string, payment_method: string, notes?: string|null}  $validated
+     *
+     * @throws InvalidArgumentException when the amount does not fit the contract's debt
+     */
+    private function recordTuitionPayment(array $validated, CashRegister $cashRegister, int $contractId, Request $request): Payment
+    {
+        // Serialize payments per contract so recalculated totals include every committed payment.
+        $contract = Contract::with('student')->whereKey($contractId)->lockForUpdate()->firstOrFail();
+        $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
+
+        if (! in_array($contract->status, ['active', 'frozen'], true)) {
+            throw new InvalidArgumentException("Faqat faol yoki muzlatilgan shartnomaga to'lov qabul qilinadi.");
+        }
+
+        $debt = (float) $contract->debt_amount;
+        if ($debt <= 0) {
+            throw new InvalidArgumentException("Shartnoma to'liq to'langan, qoldiq qarz yo'q.");
+        }
+
+        if ((float) $validated['amount'] > $debt + 0.01) {
+            throw new InvalidArgumentException("To'lov summasi qoldiq qarzdan (".number_format($debt, 0, '', ' ').' UZS) oshmasligi kerak.');
+        }
+
+        $receiptNumber = DocumentNumberService::nextReceiptNumber();
+
+        $payment = Payment::create([
+            'branch_id' => $contract->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,
+            'contract_id' => $contract->id,
+            'student_id' => $contract->student_id,
+            'cash_register_id' => $lockedRegister->id,
+            'received_by_user_id' => $request->user()->id,
+            'amount' => $validated['amount'],
+            'payment_type' => 'contract_tuition',
+            'payment_method' => $validated['payment_method'],
+            'receipt_number' => $receiptNumber,
+            'paid_at' => now(),
+            'comment' => $validated['notes'] ?? null,
+        ]);
+
+        // Deposit into register and record ledger transaction
+        $lockedRegister->deposit(
+            amount: (float) $validated['amount'],
+            category: 'payment',
+            description: "To'lov qabul qilindi: {$contract->student?->full_name} (#{$receiptNumber})",
+            reference: $payment,
+            userId: $request->user()->id
+        );
+
+        // Recalculate contract finances
+        $contract->recalculateFinances();
+
+        // Record financial history for the student
+        if ($contract->student) {
+            FinancialHistory::recordForStudent($contract->student, [
+                'type' => 'credit',
+                'category' => 'tuition_payment',
+                'amount' => (float) $validated['amount'],
+                'balance_before' => (float) ($contract->debt_amount + (float) $validated['amount']),
+                'balance_after' => (float) $contract->debt_amount,
+                'payment_method' => $validated['payment_method'],
+                'description' => "Shartnoma to'lovi qabul qilindi: #{$contract->contract_number} (Chek #{$receiptNumber})",
+                'reference' => $payment,
+                'performed_by_user_id' => $request->user()->id,
+                'transacted_at' => now(),
+            ]);
+        }
+
+        return $payment;
     }
 
     /**
@@ -382,9 +416,9 @@ class FinanceController extends Controller
         $fromRegister = CashRegister::findOrFail($validated['from_cash_register_id']);
         $toRegister = CashRegister::findOrFail($validated['to_cash_register_id']);
 
-        if ((float) $fromRegister->balance < (float) $validated['amount']) {
+        if ($fromRegister->availableBalance() < (float) $validated['amount']) {
             return redirect()->back()->withErrors([
-                'amount' => "Chiqim kassasida mablag' yetarli emas (Mavjud: ".number_format((float) $fromRegister->balance, 0, '', ' ').' UZS).',
+                'amount' => "Chiqim kassasida mablag' yetarli emas (Mavjud: ".number_format($fromRegister->availableBalance(), 0, '', ' ').' UZS; tasdiqlanishi kutilayotgan o\'tkazmalar hisobga olingan).',
             ]);
         }
 
@@ -419,15 +453,33 @@ class FinanceController extends Controller
             return redirect()->back()->with('success', 'Kassalararo transfer muvaffaqiyatli amalga oshirildi va avtomatik tasdiqlandi.');
         }
 
-        // Filiallararo (boshqa filial kassasiga) o'tkazma bo'lsa, tasdiqlash uchun kutish holatida yuboriladi
-        CashTransfer::create([
-            'from_cash_register_id' => $validated['from_cash_register_id'],
-            'to_cash_register_id' => $validated['to_cash_register_id'],
-            'sent_by_user_id' => $request->user()->id,
-            'amount' => $validated['amount'],
-            'status' => 'pending',
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        // Filiallararo (boshqa filial kassasiga) o'tkazma bo'lsa, tasdiqlash uchun kutish holatida yuboriladi.
+        // The register is locked while the request is created, so two requests sent at once cannot
+        // both pass the balance check.
+        $created = DB::transaction(function () use ($validated, $request): bool {
+            $locked = CashRegister::whereKey($validated['from_cash_register_id'])->lockForUpdate()->firstOrFail();
+
+            if ($locked->availableBalance() < (float) $validated['amount']) {
+                return false;
+            }
+
+            CashTransfer::create([
+                'from_cash_register_id' => $validated['from_cash_register_id'],
+                'to_cash_register_id' => $validated['to_cash_register_id'],
+                'sent_by_user_id' => $request->user()->id,
+                'amount' => $validated['amount'],
+                'status' => 'pending',
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            return true;
+        });
+
+        if (! $created) {
+            return redirect()->back()->withErrors([
+                'amount' => "Chiqim kassasida mablag' yetarli emas: tasdiqlanishi kutilayotgan o'tkazmalar qoldiqdan ayirildi.",
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Filiallararo transfer so\'rovi yuborildi. Qabul qiluvchi filial tasdiqlashi kutilmoqda.');
     }
@@ -620,10 +672,7 @@ class FinanceController extends Controller
                     continue;
                 }
 
-                $pendingSum = (float) CashTransfer::where('from_cash_register_id', $branchRegister->id)
-                    ->where('status', 'pending')
-                    ->sum('amount');
-                $availableBalance = (float) $branchRegister->balance - $pendingSum;
+                $availableBalance = $branchRegister->availableBalance();
                 if ($availableBalance <= 0) {
                     continue;
                 }
@@ -763,13 +812,19 @@ class FinanceController extends Controller
             DB::transaction(function () use ($payment) {
                 // Lock the contract first (same order as payments/refunds) and re-read the
                 // payment so a double submit cannot reverse it twice.
-                if ($payment->contract_id) {
-                    Contract::whereKey($payment->contract_id)->lockForUpdate()->first();
-                }
+                $contract = $payment->contract_id
+                    ? Contract::whereKey($payment->contract_id)->lockForUpdate()->first()
+                    : null;
 
                 $payment = Payment::whereKey($payment->id)->lockForUpdate()->first();
                 if (! $payment) {
                     return;
+                }
+
+                // A certificate was issued against the paid-up contract: taking a payment away
+                // would leave a graduate with a debt, so it stays (see refund, which refuses too).
+                if ($contract && ($contract->status === 'completed' || $contract->certificate()->exists())) {
+                    throw new InvalidArgumentException("Guvohnoma berilgan shartnoma to'lovini o'chirib bo'lmaydi.");
                 }
 
                 if ($payment->payment_type !== 'refund' && $payment->contract_id) {

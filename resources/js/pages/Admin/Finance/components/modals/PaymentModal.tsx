@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/money-input';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { moneyDigits } from '@/lib/input-masks';
 import { formatMoney } from '@/lib/utils';
 import type { CashRegister } from '../../types';
 
@@ -42,6 +43,16 @@ export function PaymentModal({
 }: Props) {
     const { t } = useTranslation();
 
+    // A payment can never exceed what is still owed on the contract.
+    const selectedContract = (contracts || []).find(
+        (c) => String(c.id) === String(paymentForm.data.contract_id),
+    );
+    const debt = selectedContract
+        ? Math.floor(Number(selectedContract.debt_amount) || 0)
+        : null;
+    const amount = Number(paymentForm.data.amount) || 0;
+    const exceedsDebt = debt !== null && amount > debt;
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto p-4 sm:p-6">
@@ -64,9 +75,20 @@ export function PaymentModal({
                         <SearchableSelect
                             id="pay_contract_id"
                             value={paymentForm.data.contract_id}
-                            onChange={(val) =>
-                                paymentForm.setData('contract_id', val)
-                            }
+                            onChange={(val) => {
+                                const picked = (contracts || []).find(
+                                    (c) => String(c.id) === String(val),
+                                );
+
+                                // The amount starts at the whole debt; the cashier may lower it.
+                                paymentForm.setData({
+                                    ...paymentForm.data,
+                                    contract_id: val,
+                                    amount: picked
+                                        ? moneyDigits(picked.debt_amount)
+                                        : '',
+                                });
+                            }}
                             options={(contracts || []).map((c) => {
                                 const st = (students || []).find(
                                     (s) => s.id === c.student_id,
@@ -159,6 +181,23 @@ export function PaymentModal({
                             required
                             className="mt-1"
                         />
+                        {debt !== null && (
+                            <p
+                                className={`mt-1 text-[11px] ${exceedsDebt ? 'font-semibold text-red-600' : 'text-muted-foreground'}`}
+                            >
+                                {exceedsDebt
+                                    ? t(
+                                          'finance.amount_exceeds_debt',
+                                          'Summa qoldiq qarzdan oshib ketdi: {{debt}} UZS',
+                                          { debt: formatMoney(debt) },
+                                      )
+                                    : t(
+                                          'finance.debt_left',
+                                          'Qoldiq qarz: {{debt}} UZS',
+                                          { debt: formatMoney(debt) },
+                                      )}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -186,7 +225,7 @@ export function PaymentModal({
                         <Button
                             type="submit"
                             className="bg-emerald-600 text-white hover:bg-emerald-700"
-                            disabled={paymentForm.processing}
+                            disabled={paymentForm.processing || exceedsDebt}
                         >
                             {t(
                                 'finance.confirm_payment',

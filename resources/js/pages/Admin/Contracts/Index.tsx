@@ -196,6 +196,14 @@ export default function ContractsIndex({
         terms: '',
     });
 
+    // A discount cannot be more than the tariff costs.
+    const selectedTariff = contractTypes.find(
+        (ct) => String(ct.id) === String(form.data.contract_type_id),
+    );
+    const discountTooBig =
+        !!selectedTariff &&
+        Number(form.data.discount_amount) > Number(selectedTariff.price);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(
@@ -909,7 +917,9 @@ export default function ContractsIndex({
                                             <ExternalLink className="h-3 w-3" />
                                         </Link>
                                         <div className="font-mono text-xs text-muted-foreground">
-                                            {formatPhone(viewingContract.student?.phone)}
+                                            {formatPhone(
+                                                viewingContract.student?.phone,
+                                            )}
                                         </div>
                                     </div>
                                     <div>
@@ -1347,6 +1357,19 @@ export default function ContractsIndex({
                                     placeholder="0"
                                     suffix="UZS"
                                 />
+                                {discountTooBig && selectedTariff && (
+                                    <p className="mt-1 text-[11px] font-semibold text-red-600">
+                                        {t(
+                                            'contracts.discount_too_big',
+                                            'Chegirma tarif narxidan ({{price}} UZS) oshmasligi kerak',
+                                            {
+                                                price: formatMoney(
+                                                    selectedTariff.price,
+                                                ),
+                                            },
+                                        )}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -1427,7 +1450,7 @@ export default function ContractsIndex({
                             <Button
                                 type="submit"
                                 variant="brand"
-                                disabled={form.processing}
+                                disabled={form.processing || discountTooBig}
                             >
                                 {t('common.save', 'Rasmiylashtirish')}
                             </Button>

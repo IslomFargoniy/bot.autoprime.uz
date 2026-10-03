@@ -697,7 +697,8 @@
         "confirm_freeze": "Freeze this contract?",
         "confirm_unfreeze": "Reactivate this contract?",
         "confirm_cancel_contract": "Cancel this contract? This cannot be undone.",
-        "status_updated": "Contract status updated"
+        "status_updated": "Contract status updated",
+        "discount_too_big": "The discount cannot be more than the tariff price ({{price}} UZS)"
     },
     "contract_types": {
         "title": "Contract Tariffs",
@@ -869,7 +870,9 @@
         "category_deleted": "Category deleted",
         "confirm_delete_category": "Delete the category \"{{name}}\"?",
         "category_deactivate": "Switch off",
-        "category_activate": "Switch on"
+        "category_activate": "Switch on",
+        "amount_exceeds_debt": "The amount is more than the remaining debt: {{debt}} UZS",
+        "debt_left": "Remaining debt: {{debt}} UZS"
     },
     "salaries": {
         "title": "Employee Payroll",

@@ -86,6 +86,17 @@ class CashRegister extends Model
     }
 
     /**
+     * What can still be sent out: the balance less the transfers already waiting for approval.
+     * Those are promised money; counting them again would let the same money leave twice.
+     */
+    public function availableBalance(): float
+    {
+        $pending = (float) $this->outgoingTransfers()->where('status', 'pending')->sum('amount');
+
+        return (float) $this->balance - $pending;
+    }
+
+    /**
      * One empty register per active register type, for a branch that has none yet.
      */
     public static function createDefaultsForBranch(Branch $branch): void

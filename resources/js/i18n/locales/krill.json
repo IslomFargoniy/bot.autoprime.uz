@@ -697,7 +697,8 @@
         "confirm_freeze": "Шартномани музлатмоқчимисиз?",
         "confirm_unfreeze": "Шартномани қайта фаоллаштирмоқчимисиз?",
         "confirm_cancel_contract": "Шартномани бекор қилмоқчимисиз? Бу амални қайтариб бўлмайди.",
-        "status_updated": "Шартнома ҳолати янгиланди"
+        "status_updated": "Шартнома ҳолати янгиланди",
+        "discount_too_big": "Чегирма тариф нархидан ({{price}} UZS) ошмаслиги керак"
     },
     "contract_types": {
         "title": "Шартнома Тарифлари",
@@ -869,7 +870,9 @@
         "category_deleted": "Харажат тури ўчирилди",
         "confirm_delete_category": "\"{{name}}\" харажат тури ўчирилсинми?",
         "category_deactivate": "Нофаол қилиш",
-        "category_activate": "Фаоллаштириш"
+        "category_activate": "Фаоллаштириш",
+        "amount_exceeds_debt": "Сумма қолдиқ қарздан ошиб кетди: {{debt}} UZS",
+        "debt_left": "Қолдиқ қарз: {{debt}} UZS"
     },
     "salaries": {
         "title": "Ходимлар Ойлик Ҳисоб-китоби",

@@ -697,7 +697,8 @@
         "confirm_freeze": "Заморозить договор?",
         "confirm_unfreeze": "Активировать договор снова?",
         "confirm_cancel_contract": "Отменить договор? Это действие нельзя отменить.",
-        "status_updated": "Статус договора обновлён"
+        "status_updated": "Статус договора обновлён",
+        "discount_too_big": "Скидка не должна превышать цену тарифа ({{price}} UZS)"
     },
     "contract_types": {
         "title": "Тарифы договоров",
@@ -869,7 +870,9 @@
         "category_deleted": "Вид расхода удалён",
         "confirm_delete_category": "Удалить вид расхода «{{name}}»?",
         "category_deactivate": "Отключить",
-        "category_activate": "Включить"
+        "category_activate": "Включить",
+        "amount_exceeds_debt": "Сумма превышает остаток долга: {{debt}} UZS",
+        "debt_left": "Остаток долга: {{debt}} UZS"
     },
     "salaries": {
         "title": "Зарплатная ведомость",

@@ -697,7 +697,8 @@
         "confirm_freeze": "Shartnomani muzlatmoqchimisiz?",
         "confirm_unfreeze": "Shartnomani qayta faollashtirmoqchimisiz?",
         "confirm_cancel_contract": "Shartnomani bekor qilmoqchimisiz? Bu amalni qaytarib bo'lmaydi.",
-        "status_updated": "Shartnoma holati yangilandi"
+        "status_updated": "Shartnoma holati yangilandi",
+        "discount_too_big": "Chegirma tarif narxidan ({{price}} UZS) oshmasligi kerak"
     },
     "contract_types": {
         "title": "Shartnoma Tariflari",
@@ -869,7 +870,9 @@
         "category_deleted": "Xarajat turi o'chirildi",
         "confirm_delete_category": "\"{{name}}\" xarajat turi o'chirilsinmi?",
         "category_deactivate": "Nofaol qilish",
-        "category_activate": "Faollashtirish"
+        "category_activate": "Faollashtirish",
+        "amount_exceeds_debt": "Summa qoldiq qarzdan oshib ketdi: {{debt}} UZS",
+        "debt_left": "Qoldiq qarz: {{debt}} UZS"
     },
     "salaries": {
         "title": "Xodimlar Oylik Hisob-kitobi",

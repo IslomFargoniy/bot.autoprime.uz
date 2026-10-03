@@ -186,6 +186,18 @@ class GroupController extends Controller
         $validated = $request->validate($this->groupRules($request));
         $this->ensureStaysOwner($request->user(), $validated);
 
+        // The seats cannot be cut below the students who sit in them (graduates and students who
+        // dropped out have left the group and take no seat).
+        if (isset($validated['max_students'])) {
+            $activeStudents = $group->students()->where('status', 'active')->count();
+
+            if ((int) $validated['max_students'] < $activeStudents) {
+                throw ValidationException::withMessages([
+                    'max_students' => "Guruhda {$activeStudents} ta faol o'quvchi bor, sig'im undan kam bo'lishi mumkin emas.",
+                ]);
+            }
+        }
+
         $group->update($this->withStatus($validated));
 
         return redirect()->back();
