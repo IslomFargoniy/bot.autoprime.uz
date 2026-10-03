@@ -841,7 +841,9 @@
         "approver": "Тасдиқлади",
         "approved": "Тасдиқланган",
         "pending": "Кутилмоқда",
-        "rejected": "Рад этилган"
+        "rejected": "Рад этилган",
+        "print_receipt": "Чек",
+        "auto_print_receipt": "Сақлангандан кейин чек чиқариш"
     },
     "salaries": {
         "title": "Ходимлар Ойлик Ҳисоб-китоби",

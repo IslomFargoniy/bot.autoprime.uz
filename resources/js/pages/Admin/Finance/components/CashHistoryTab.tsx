@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { CashRegister, CashTransaction } from '../types';
+import { ReceiptButton } from './ReceiptButton';
 
 interface Props {
     cashRegisters: CashRegister[];
@@ -396,12 +397,15 @@ export function CashHistoryTab({
                                 <TableHead>
                                     {t('finance.user', 'Xodim')}
                                 </TableHead>
+                                <TableHead className="text-right">
+                                    {t('common.actions', 'Amallar')}
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {transactions.data.length === 0 ? (
                                 <TableEmpty
-                                    colSpan={8}
+                                    colSpan={9}
                                     icon={
                                         <History className="h-12 w-12 text-gray-300 dark:text-gray-600" />
                                     }
@@ -458,6 +462,13 @@ export function CashHistoryTab({
                                         </TableCell>
                                         <TableCell className="text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             {tx.user?.name || '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right whitespace-nowrap">
+                                            {tx.receipt_url && (
+                                                <ReceiptButton
+                                                    url={tx.receipt_url}
+                                                />
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -539,6 +550,12 @@ export function CashHistoryTab({
                                     </span>
                                 </div>
                             </div>
+
+                            {tx.receipt_url && (
+                                <div className="flex justify-end">
+                                    <ReceiptButton url={tx.receipt_url} />
+                                </div>
+                            )}
 
                             {(tx.description || tx.user?.name) && (
                                 <div className="flex min-w-0 items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-500 dark:bg-gray-700/40 dark:text-gray-400">

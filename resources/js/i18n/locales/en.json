@@ -841,7 +841,9 @@
         "approver": "Approved by",
         "approved": "Approved",
         "pending": "Pending",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "print_receipt": "Receipt",
+        "auto_print_receipt": "Print receipt after saving"
     },
     "salaries": {
         "title": "Employee Payroll",

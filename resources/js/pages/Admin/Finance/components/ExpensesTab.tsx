@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { ArrowUpRight, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { expenseReceipt } from '@/actions/App/Http/Controllers/Admin/FinanceController';
 import { PageFilterBar } from '@/components/page-filter-bar';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
@@ -17,6 +18,7 @@ import {
 import { useCan } from '@/hooks/use-can';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { Expense } from '../types';
+import { ReceiptButton } from './ReceiptButton';
 
 interface Props {
     expenses: {
@@ -76,6 +78,9 @@ export function ExpensesTab({
                         <TableHeader>
                             <TableRow>
                                 <TableHead>
+                                    {t('finance.receipt', 'Chek №')}
+                                </TableHead>
+                                <TableHead>
                                     {t('finance.category', 'Kategoriya')}
                                 </TableHead>
                                 <TableHead>
@@ -101,7 +106,7 @@ export function ExpensesTab({
                         <TableBody>
                             {expenses.data.length === 0 ? (
                                 <TableEmpty
-                                    colSpan={7}
+                                    colSpan={8}
                                     icon={
                                         <ArrowUpRight className="h-12 w-12 text-gray-300 dark:text-gray-600" />
                                     }
@@ -113,6 +118,9 @@ export function ExpensesTab({
                             ) : (
                                 expenses.data.map((e) => (
                                     <TableRow key={e.id}>
+                                        <TableCell className="font-mono text-xs font-medium whitespace-nowrap">
+                                            {e.receipt_number || '-'}
+                                        </TableCell>
                                         <TableCell className="font-medium whitespace-nowrap">
                                             {e.category?.name || '-'}
                                         </TableCell>
@@ -134,6 +142,9 @@ export function ExpensesTab({
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right whitespace-nowrap">
+                                            <ReceiptButton
+                                                url={expenseReceipt.url(e.id)}
+                                            />
                                             {can('expenses.delete') && (
                                                 <Button
                                                     size="sm"
@@ -179,6 +190,11 @@ export function ExpensesTab({
                                     <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/60 dark:text-rose-300">
                                         {e.category?.name || '-'}
                                     </span>
+                                    {e.receipt_number && (
+                                        <span className="ml-1.5 font-mono text-[10px] text-gray-500 dark:text-gray-400">
+                                            #{e.receipt_number}
+                                        </span>
+                                    )}
                                     <p className="mt-1 text-xs font-medium break-words text-gray-800 dark:text-gray-200">
                                         {e.description}
                                     </p>
@@ -211,6 +227,9 @@ export function ExpensesTab({
                                             e.spent_at || e.expense_date,
                                         )}
                                     </span>
+                                    <ReceiptButton
+                                        url={expenseReceipt.url(e.id)}
+                                    />
                                     {can('expenses.delete') && (
                                         <Button
                                             size="sm"

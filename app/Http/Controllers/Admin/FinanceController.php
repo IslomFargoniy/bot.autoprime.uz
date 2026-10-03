@@ -22,6 +22,7 @@ use App\Services\TelegramService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -135,6 +136,7 @@ class FinanceController extends Controller
         $expenses = $expensesQuery->paginate($perPage, ['*'], 'expenses_page')->withQueryString();
         $transactions = $transactionsQuery->paginate($perPage, ['*'], 'transactions_page')->withQueryString();
         $transfers = $transfersQuery->paginate($perPage, ['*'], 'transfers_page')->withQueryString();
+        $this->attachReceiptUrls($transactions->getCollection());
         $transfers->getCollection()->each(function (CashTransfer $transfer) use ($request): void {
             $transfer->setAttribute('can_review', $transfer->status === 'pending'
                 && $request->user()->can('cash_transfers.approve')
@@ -181,6 +183,35 @@ class FinanceController extends Controller
                 'history_to' => $request->input('history_to'),
             ],
         ]);
+    }
+
+    /**
+     * Ledger rows that came from a payment or an expense get the address of its
+     * receipt. Two queries cover the whole page, and a record deleted since then
+     * simply has no receipt any more.
+     *
+     * @param  Collection<int, CashTransaction>  $transactions
+     */
+    private function attachReceiptUrls(Collection $transactions): void
+    {
+        $idsOf = fn (string $model): array => $transactions
+            ->where('reference_type', $model)
+            ->pluck('reference_id')
+            ->unique()
+            ->all();
+
+        $payments = array_flip(Payment::whereIn('id', $idsOf(Payment::class))->pluck('id')->all());
+        $expenses = array_flip(Expense::whereIn('id', $idsOf(Expense::class))->pluck('id')->all());
+
+        $transactions->each(function (CashTransaction $transaction) use ($payments, $expenses): void {
+            $url = match (true) {
+                $transaction->reference_type === Payment::class && isset($payments[$transaction->reference_id]) => route('finance.payment-receipt', $transaction->reference_id),
+                $transaction->reference_type === Expense::class && isset($expenses[$transaction->reference_id]) => route('finance.expense-receipt', $transaction->reference_id),
+                default => null,
+            };
+
+            $transaction->setAttribute('receipt_url', $url);
+        });
     }
 
     /**
@@ -266,6 +297,8 @@ class FinanceController extends Controller
             $telegramService->sendPaymentReceiptNotification($payment);
         }
 
+        Inertia::flash('receipt_url', route('finance.payment-receipt', $payment));
+
         return redirect()->back()->with('success', "To'lov qabul qilindi. Chek: #{$payment?->receipt_number}");
     }
 
@@ -289,7 +322,9 @@ class FinanceController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($validated, $cashRegister, $request) {
+        $expense = null;
+
+        DB::transaction(function () use ($validated, $cashRegister, $request, &$expense) {
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
 
             $expense = Expense::create([
@@ -313,6 +348,8 @@ class FinanceController extends Controller
                 userId: $request->user()->id
             );
         });
+
+        Inertia::flash('receipt_url', route('finance.expense-receipt', $expense));
 
         return redirect()->back()->with('success', 'Xarajat muvaffaqiyatli saqlandi.');
     }

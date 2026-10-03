@@ -841,7 +841,9 @@
         "approver": "Подтвердил",
         "approved": "Подтверждено",
         "pending": "Ожидает",
-        "rejected": "Отклонено"
+        "rejected": "Отклонено",
+        "print_receipt": "Чек",
+        "auto_print_receipt": "Печатать чек после сохранения"
     },
     "salaries": {
         "title": "Зарплатная ведомость",

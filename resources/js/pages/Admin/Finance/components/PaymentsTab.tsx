@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { ArrowDownRight, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { paymentReceipt } from '@/actions/App/Http/Controllers/Admin/FinanceController';
 import { PageFilterBar } from '@/components/page-filter-bar';
 import Pagination from '@/components/pagination';
 import PerPageSelect from '@/components/per-page-select';
@@ -17,6 +18,7 @@ import {
 import { useCan } from '@/hooks/use-can';
 import { formatDateTime, formatNumber, formatMoney } from '@/lib/utils';
 import type { Payment } from '../types';
+import { ReceiptButton } from './ReceiptButton';
 
 interface Props {
     payments: {
@@ -171,6 +173,9 @@ export function PaymentsTab({
                                             {formatDateTime(p.paid_at)}
                                         </TableCell>
                                         <TableCell className="text-right whitespace-nowrap">
+                                            <ReceiptButton
+                                                url={paymentReceipt.url(p.id)}
+                                            />
                                             {can('payments.edit') && (
                                                 <Button
                                                     size="sm"
@@ -258,6 +263,9 @@ export function PaymentsTab({
                                     <span className="font-mono text-[11px]">
                                         {formatDateTime(p.paid_at)}
                                     </span>
+                                    <ReceiptButton
+                                        url={paymentReceipt.url(p.id)}
+                                    />
                                     {can('payments.edit') && (
                                         <Button
                                             size="sm"

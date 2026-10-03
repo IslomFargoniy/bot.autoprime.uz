@@ -411,3 +411,42 @@ test('receipts respect branch and permission limits', function () {
     $instructor = auditStaff('instructor');
     $this->actingAs($instructor)->get(route('finance.expense-receipt', $expense))->assertForbidden();
 });
+
+test('saving a payment or expense hands the receipt url to the page', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = auditContract($student);
+    $register = auditRegister($this->branch->id, 5000000);
+    $category = ExpenseCategory::create(['name' => 'Chek', 'is_active' => true]);
+
+    $this->actingAs($this->admin)->post(route('finance.store-payment'), [
+        'contract_id' => $contract->id, 'cash_register_id' => $register->id, 'amount' => 100000, 'payment_method' => 'cash',
+    ]);
+    expect(session('inertia.flash_data.receipt_url'))->toBe(route('finance.payment-receipt', Payment::firstOrFail()));
+
+    $this->actingAs($this->admin)->post(route('finance.store-expense'), [
+        'cash_register_id' => $register->id, 'expense_category_id' => $category->id, 'amount' => 50000, 'description' => 'Test',
+    ]);
+    expect(session('inertia.flash_data.receipt_url'))->toBe(route('finance.expense-receipt', Expense::firstOrFail()));
+});
+
+test('cash history rows link to the receipt of their payment or expense', function () {
+    $student = Student::factory()->create(['branch_id' => $this->branch->id]);
+    $contract = auditContract($student);
+    $register = auditRegister($this->branch->id, 5000000);
+    $category = ExpenseCategory::create(['name' => 'Tarix', 'is_active' => true]);
+
+    $this->actingAs($this->admin)->post(route('finance.store-payment'), [
+        'contract_id' => $contract->id, 'cash_register_id' => $register->id, 'amount' => 100000, 'payment_method' => 'cash',
+    ]);
+    $this->actingAs($this->admin)->post(route('finance.store-expense'), [
+        'cash_register_id' => $register->id, 'expense_category_id' => $category->id, 'amount' => 50000, 'description' => 'Tarix',
+    ]);
+    $payment = Payment::firstOrFail();
+    $expense = Expense::firstOrFail();
+
+    $rows = collect($this->actingAs($this->admin)->get('/admin/finance')->inertiaProps('transactions.data'));
+
+    expect($rows->firstWhere('category', 'payment')['receipt_url'])->toBe(route('finance.payment-receipt', $payment))
+        ->and($rows->firstWhere('category', 'expense')['receipt_url'])->toBe(route('finance.expense-receipt', $expense))
+        ->and($rows->firstWhere('category', 'initial')['receipt_url'])->toBeNull();
+});

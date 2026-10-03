@@ -35,6 +35,7 @@ export interface Expense {
 
 export interface CashTransaction {
     id: number;
+    receipt_url?: string | null;
     cash_register_id: number;
     type: 'in' | 'out';
     category:

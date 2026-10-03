@@ -10,6 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useCan } from '@/hooks/use-can';
+import {
+    isAutoPrintEnabled,
+    printReceipt,
+    setAutoPrintEnabled,
+} from '@/lib/print-receipt';
 
 import { CashHistoryTab } from './components/CashHistoryTab';
 import { CashRegistersTab } from './components/CashRegistersTab';
@@ -46,6 +51,8 @@ export default function FinanceIndex({
 
     // The backend decides who may review a transfer (receiving branch, superadmin, never the sender).
     const canReviewTransfer = (transfer: CashTransfer) => !!transfer.can_review;
+
+    const [autoPrint, setAutoPrint] = useState(isAutoPrintEnabled);
 
     const [activeTab, setActiveTab] = useState<
         'registers' | 'history' | 'payments' | 'expenses' | 'transfers'
@@ -193,10 +200,20 @@ export default function FinanceIndex({
         );
     };
 
+    // The backend flashes the receipt address of the record that was just saved.
+    const printSavedReceipt = (page: { flash?: { receipt_url?: string } }) => {
+        const url = page.flash?.receipt_url;
+
+        if (url && autoPrint) {
+            printReceipt(url);
+        }
+    };
+
     const handlePaymentSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         paymentForm.post('/admin/finance/payment', {
-            onSuccess: () => {
+            onSuccess: (page) => {
+                printSavedReceipt(page);
                 setShowPaymentModal(false);
                 paymentForm.reset('amount', 'notes');
                 toast.success(
@@ -214,7 +231,8 @@ export default function FinanceIndex({
     const handleExpenseSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         expenseForm.post('/admin/finance/expense', {
-            onSuccess: () => {
+            onSuccess: (page) => {
+                printSavedReceipt(page);
                 setShowExpenseModal(false);
                 expenseForm.reset('amount', 'description');
                 toast.success(
@@ -352,6 +370,21 @@ export default function FinanceIndex({
                     {t('finance.title', 'Moliya va Kassalar')}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
+                    <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground select-none">
+                        <input
+                            type="checkbox"
+                            checked={autoPrint}
+                            onChange={(e) => {
+                                setAutoPrint(e.target.checked);
+                                setAutoPrintEnabled(e.target.checked);
+                            }}
+                            className="h-3.5 w-3.5 rounded border-input"
+                        />
+                        {t(
+                            'finance.auto_print_receipt',
+                            'Saqlangandan keyin chek chiqarish',
+                        )}
+                    </label>
                     {can('cash_transfers.create') && (
                         <Button
                             type="button"

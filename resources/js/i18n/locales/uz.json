@@ -841,7 +841,9 @@
         "approver": "Tasdiqladi",
         "approved": "Tasdiqlangan",
         "pending": "Kutilmoqda",
-        "rejected": "Rad etilgan"
+        "rejected": "Rad etilgan",
+        "print_receipt": "Chek",
+        "auto_print_receipt": "Saqlangandan keyin chek chiqarish"
     },
     "salaries": {
         "title": "Xodimlar Oylik Hisob-kitobi",
