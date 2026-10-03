@@ -48,9 +48,13 @@ interface PageProps {
 export default function CoursesIndex({ courses }: PageProps) {
     const { t } = useTranslation();
     const can = useCan();
-    const [selectedCourse, setSelectedCourse] = useState<Course | null>(
-        courses[0] || null,
+    // Only the id is kept: the course itself always comes from the latest props, so
+    // topics and materials added on the server show up right after saving.
+    const [selectedCourseId, setSelectedCourseId] = useState<number | null>(
+        courses[0]?.id ?? null,
     );
+    const selectedCourse =
+        courses.find((c) => c.id === selectedCourseId) ?? courses[0] ?? null;
 
     // Modals
     const [showCourseModal, setShowCourseModal] = useState(false);
@@ -110,8 +114,20 @@ export default function CoursesIndex({ courses }: PageProps) {
         e.preventDefault();
 
         const options = {
-            onSuccess: () => {
+            onSuccess: (page: { props: unknown }) => {
                 const wasEditing = !!editingCourse;
+
+                if (!wasEditing) {
+                    const created = (
+                        page.props as PageProps
+                    ).courses.reduce<Course | null>(
+                        (newest, c) =>
+                            !newest || c.id > newest.id ? c : newest,
+                        null,
+                    );
+
+                    setSelectedCourseId(created?.id ?? null);
+                }
 
                 closeCourseModal();
                 toast.success(
@@ -145,10 +161,7 @@ export default function CoursesIndex({ courses }: PageProps) {
 
         router.delete(`/admin/courses/${course.id}`, {
             preserveScroll: true,
-            onSuccess: (page) => {
-                const remaining = (page.props as unknown as PageProps).courses;
-
-                setSelectedCourse(remaining[0] ?? null);
+            onSuccess: () => {
                 toast.success(t('common.deleted', "O'chirildi"));
             },
             onError: (err) =>
@@ -232,7 +245,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                 {courses.map((c) => (
                     <button
                         key={c.id}
-                        onClick={() => setSelectedCourse(c)}
+                        onClick={() => setSelectedCourseId(c.id)}
                         className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition-all ${
                             selectedCourse?.id === c.id
                                 ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
