@@ -4,12 +4,14 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AutodromeController;
 use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\CashRegisterController;
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Admin\ContractController;
 use App\Http\Controllers\Admin\ContractTypeController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DrivingController;
+use App\Http\Controllers\Admin\ExpenseCategoryController;
 use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
@@ -187,12 +189,19 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::post('admin/finance/transfer/{transfer}/approve', [FinanceController::class, 'approveTransfer'])->middleware('permission:cash_transfers.approve')->name('finance.approve-transfer');
     Route::post('admin/finance/transfer/{transfer}/reject', [FinanceController::class, 'rejectTransfer'])->middleware('permission:cash_transfers.approve')->name('finance.reject-transfer');
     Route::post('admin/finance/sweep', [FinanceController::class, 'sweepRegisters'])->middleware('permission:cash_transfers.create')->name('finance.sweep');
+    Route::post('admin/expense-categories', [ExpenseCategoryController::class, 'store'])->middleware('permission:expense_categories.manage')->name('expense-categories.store');
+    Route::put('admin/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'update'])->middleware('permission:expense_categories.manage')->name('expense-categories.update');
+    Route::delete('admin/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'destroy'])->middleware('permission:expense_categories.manage')->name('expense-categories.destroy');
+    Route::post('admin/cash-registers', [CashRegisterController::class, 'store'])->middleware('permission:cash_registers.manage')->name('cash-registers.store');
+    Route::put('admin/cash-registers/{cashRegister}', [CashRegisterController::class, 'update'])->middleware('permission:cash_registers.manage')->name('cash-registers.update');
+    Route::delete('admin/cash-registers/{cashRegister}', [CashRegisterController::class, 'destroy'])->middleware('permission:cash_registers.manage')->name('cash-registers.destroy');
 
     // Payroll & Salaries
     Route::get('admin/salaries', [SalaryController::class, 'index'])->middleware('permission:salaries.view')->name('salaries.index');
     Route::post('admin/salaries/generate', [SalaryController::class, 'generateMonthlyPayroll'])->middleware('permission:salaries.accrue')->name('salaries.generate');
     Route::post('admin/salaries/adjustment', [SalaryController::class, 'storeCustomAdjustment'])->middleware('permission:salaries.accrue')->name('salaries.store-adjustment');
     Route::post('admin/salaries/{salary}/pay', [SalaryController::class, 'pay'])->middleware('permission:salaries.pay')->name('salaries.pay');
+    Route::delete('admin/salaries/{salary}', [SalaryController::class, 'destroyAdjustment'])->middleware('permission:salaries.accrue')->name('salaries.destroy-adjustment');
 
     // Attendance & Dynamic QR
     Route::middleware('permission:attendance.view')->group(function () {
@@ -224,6 +233,7 @@ Route::middleware(['auth.telegram', 'branch.access'])->group(function () {
     Route::post('admin/topics/{topic}/materials', [CourseController::class, 'storeMaterial'])->middleware('permission:lms.manage_materials')->name('topics.store-material');
     Route::put('admin/topics/{topic}', [CourseController::class, 'updateTopic'])->middleware('permission:lms.manage_materials')->name('topics.update');
     Route::delete('admin/topics/{topic}', [CourseController::class, 'destroyTopic'])->middleware('permission:lms.manage_materials')->name('topics.destroy');
+    Route::put('admin/materials/{material}', [CourseController::class, 'updateMaterial'])->middleware('permission:lms.manage_materials')->name('materials.update');
     Route::delete('admin/materials/{material}', [CourseController::class, 'destroyMaterial'])->middleware('permission:lms.manage_materials')->name('materials.destroy');
 
     // Tests & Questions Management

@@ -19,6 +19,14 @@ class Branch extends Model
     }
 
     /**
+     * @return HasMany<CashRegister, $this>
+     */
+    public function cashRegisters(): HasMany
+    {
+        return $this->hasMany(CashRegister::class);
+    }
+
+    /**
      * @return HasMany<User, $this>
      */
     public function users(): HasMany
@@ -61,6 +69,8 @@ class Branch extends Model
     /**
      * Whether the branch still owns people, lessons or money records; deleting it
      * would cascade-delete them, so such branches must be deactivated instead.
+     * Registers only count when they hold money or have a history: the empty ones
+     * created automatically go away together with the branch.
      */
     public function hasDependentRecords(): bool
     {
@@ -69,6 +79,8 @@ class Branch extends Model
             || $this->groups()->exists()
             || Contract::where('branch_id', $this->id)->exists()
             || Payment::where('branch_id', $this->id)->exists()
-            || CashRegister::where('branch_id', $this->id)->exists();
+            || $this->cashRegisters()->get()->contains(
+                fn (CashRegister $register) => (float) $register->balance !== 0.0 || $register->hasHistory()
+            );
     }
 }

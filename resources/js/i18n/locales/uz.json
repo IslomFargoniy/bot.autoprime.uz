@@ -845,7 +845,26 @@
         "pending": "Kutilmoqda",
         "rejected": "Rad etilgan",
         "print_receipt": "Chek",
-        "auto_print_receipt": "Saqlangandan keyin chek chiqarish"
+        "auto_print_receipt": "Saqlangandan keyin chek chiqarish",
+        "add_register": "Kassa qo'shish",
+        "edit_register": "Kassani tahrirlash",
+        "register_created": "Kassa yaratildi",
+        "register_updated": "Kassa yangilandi",
+        "register_deleted": "Kassa o'chirildi",
+        "confirm_delete_register": "\"{{name}}\" kassasi o'chirilsinmi?",
+        "register_active": "Kassa faol",
+        "register_inactive": "Nofaol",
+        "expense_categories": "Xarajat turlari",
+        "category_name": "Yangi xarajat turi nomi",
+        "category_shared": "Umumiy (barcha filiallar)",
+        "category_shared_short": "Umumiy",
+        "category_system": "Tizim",
+        "category_created": "Xarajat turi qo'shildi",
+        "category_updated": "Xarajat turi yangilandi",
+        "category_deleted": "Xarajat turi o'chirildi",
+        "confirm_delete_category": "\"{{name}}\" xarajat turi o'chirilsinmi?",
+        "category_deactivate": "Nofaol qilish",
+        "category_activate": "Faollashtirish"
     },
     "salaries": {
         "title": "Xodimlar Oylik Hisob-kitobi",
@@ -890,7 +909,10 @@
         "due_amount": "To'lanishi kerak",
         "set_full_amount": "To'liq summani kiritish",
         "notes_optional": "Izoh (Ixtiyoriy)",
-        "notes_placeholder": "To'lov tafsilotlari yoki chek raqami..."
+        "notes_placeholder": "To'lov tafsilotlari yoki chek raqami...",
+        "cancel_adjustment": "Bekor qilish",
+        "confirm_cancel_adjustment": "Bu yozuv bekor qilinsinmi? Xodim balansi qaytariladi.",
+        "adjustment_cancelled": "Yozuv bekor qilindi"
     },
     "attendance": {
         "title": "Davomat Jurnali",
@@ -996,7 +1018,10 @@
         "confirm_delete_material": "\"{{title}}\" materiali o'chirilsinmi?",
         "edit_topic": "Mavzuni tahrirlash",
         "edit_topic_title": "Mavzuni tahrirlash",
-        "topic_updated": "Mavzu yangilandi"
+        "topic_updated": "Mavzu yangilandi",
+        "edit_material": "Materialni tahrirlash",
+        "edit_material_title": "Materialni tahrirlash",
+        "material_updated": "Material yangilandi"
     },
     "vehicles": {
         "title": "Avtopark (Mashinalar)",

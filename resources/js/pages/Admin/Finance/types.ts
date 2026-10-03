@@ -9,6 +9,16 @@ export interface CashRegister {
     is_active: boolean;
 }
 
+export interface ManageableExpenseCategory {
+    id: number;
+    name: string;
+    code: string | null;
+    branch_id: number | null;
+    branch?: { id: number; name: string } | null;
+    is_active: boolean;
+    can_edit: boolean;
+}
+
 export interface Payment {
     id: number;
     receipt_number: string;
@@ -129,6 +139,7 @@ export interface PageProps {
     };
     branches: Array<{ id: number; name: string }>;
     expenseCategories: Array<{ id: number; name: string }>;
+    manageableExpenseCategories?: ManageableExpenseCategory[];
     registerTypes: Array<{ id: number; code: string; name: string }>;
     students: Array<{ id: number; full_name: string; phone: string }>;
     contracts: Array<{

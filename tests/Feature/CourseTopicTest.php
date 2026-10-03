@@ -101,3 +101,19 @@ test('a new topic given a taken number pushes the others down', function () {
     expect($this->course->topics()->get()->map(fn ($t) => [$t->title, $t->order_number])->all())
         ->toBe([['Yangi', 1], ['A', 2]]);
 });
+
+test('a lesson material can be edited', function () {
+    $topic = Topic::create(['course_id' => $this->course->id, 'title_uz' => '1 mavzu', 'order_number' => 1, 'is_active' => true]);
+    $material = LessonMaterial::create(['topic_id' => $topic->id, 'title' => 'Eski', 'file_url' => 'https://example.com/a.pdf', 'file_type' => 'pdf']);
+
+    $this->actingAs($this->admin)
+        ->put("/admin/materials/{$material->id}", ['title' => 'Yangi', 'file_url' => 'https://example.com/b.pdf', 'file_type' => 'video'])
+        ->assertSessionHasNoErrors();
+
+    expect($material->fresh()->only(['title', 'file_url', 'file_type']))
+        ->toBe(['title' => 'Yangi', 'file_url' => 'https://example.com/b.pdf', 'file_type' => 'video']);
+
+    $this->actingAs($this->admin)
+        ->put("/admin/materials/{$material->id}", ['title' => '', 'file_url' => 'not-a-url'])
+        ->assertSessionHasErrors(['title', 'file_url']);
+});

@@ -71,6 +71,10 @@ export default function CoursesIndex({ courses }: PageProps) {
     const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
     const [selectedTopicForMaterial, setSelectedTopicForMaterial] =
         useState<Topic | null>(null);
+    const [editingMaterial, setEditingMaterial] = useState<{
+        id: number;
+        file_type: string;
+    } | null>(null);
 
     // Forms
     const courseForm = useForm({
@@ -308,30 +312,68 @@ export default function CoursesIndex({ courses }: PageProps) {
         });
     };
 
-    const handleCreateMaterial = (e: React.FormEvent) => {
+    const closeMaterialModal = () => {
+        setSelectedTopicForMaterial(null);
+        setEditingMaterial(null);
+        materialForm.reset();
+        materialForm.clearErrors();
+    };
+
+    const openCreateMaterial = (topic: Topic) => {
+        setEditingMaterial(null);
+        materialForm.reset();
+        materialForm.clearErrors();
+        setSelectedTopicForMaterial(topic);
+    };
+
+    const openEditMaterial = (
+        topic: Topic,
+        material: NonNullable<Topic['lesson_materials']>[number],
+    ) => {
+        materialForm.clearErrors();
+        materialForm.setData({
+            title: material.title,
+            file_url: material.file_url,
+            file_type: material.file_type,
+        });
+        setEditingMaterial(material);
+        setSelectedTopicForMaterial(topic);
+    };
+
+    const handleSaveMaterial = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedTopicForMaterial) {
             return;
         }
 
-        materialForm.post(
-            `/admin/topics/${selectedTopicForMaterial.id}/materials`,
-            {
-                onSuccess: () => {
-                    setSelectedTopicForMaterial(null);
-                    materialForm.reset();
-                    toast.success(
-                        t('courses.material_added', "Material qo'shildi"),
-                    );
-                },
-                onError: (err) =>
-                    toast.error(
-                        (Object.values(err)[0] as string) ||
-                            t('common.error', 'Xatolik yuz berdi'),
-                    ),
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                const wasEditing = !!editingMaterial;
+
+                closeMaterialModal();
+                toast.success(
+                    wasEditing
+                        ? t('courses.material_updated', 'Material yangilandi')
+                        : t('courses.material_added', "Material qo'shildi"),
+                );
             },
-        );
+            onError: (err: Record<string, string>) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        };
+
+        if (editingMaterial) {
+            materialForm.put(`/admin/materials/${editingMaterial.id}`, options);
+        } else {
+            materialForm.post(
+                `/admin/topics/${selectedTopicForMaterial.id}/materials`,
+                options,
+            );
+        }
     };
 
     return (
@@ -487,6 +529,26 @@ export default function CoursesIndex({ courses }: PageProps) {
                                                                         <button
                                                                             type="button"
                                                                             onClick={() =>
+                                                                                openEditMaterial(
+                                                                                    top,
+                                                                                    m,
+                                                                                )
+                                                                            }
+                                                                            className="ml-0.5 rounded text-gray-400 hover:text-blue-600"
+                                                                            title={t(
+                                                                                'courses.edit_material',
+                                                                                'Materialni tahrirlash',
+                                                                            )}
+                                                                        >
+                                                                            <Pencil className="h-3 w-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    {can(
+                                                                        'lms.manage_materials',
+                                                                    ) && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
                                                                                 handleDeleteMaterial(
                                                                                     m,
                                                                                 )
@@ -525,9 +587,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={() =>
-                                                    setSelectedTopicForMaterial(
-                                                        top,
-                                                    )
+                                                    openCreateMaterial(top)
                                                 }
                                                 className="h-7 text-xs"
                                             >
@@ -840,23 +900,26 @@ export default function CoursesIndex({ courses }: PageProps) {
             {/* Add PDF Material Modal */}
             <Dialog
                 open={!!selectedTopicForMaterial}
-                onOpenChange={(open) =>
-                    !open && setSelectedTopicForMaterial(null)
-                }
+                onOpenChange={(open) => !open && closeMaterialModal()}
             >
                 <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-red-500" />
-                            {t(
-                                'courses.add_material_title',
-                                'PDF Material Biriktirish',
-                            )}
+                            {editingMaterial
+                                ? t(
+                                      'courses.edit_material_title',
+                                      'Materialni tahrirlash',
+                                  )
+                                : t(
+                                      'courses.add_material_title',
+                                      'PDF Material Biriktirish',
+                                  )}
                         </DialogTitle>
                     </DialogHeader>
                     {selectedTopicForMaterial && (
                         <form
-                            onSubmit={handleCreateMaterial}
+                            onSubmit={handleSaveMaterial}
                             className="space-y-4 text-xs"
                         >
                             <div>
@@ -908,9 +971,7 @@ export default function CoursesIndex({ courses }: PageProps) {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() =>
-                                        setSelectedTopicForMaterial(null)
-                                    }
+                                    onClick={closeMaterialModal}
                                 >
                                     {t('common.cancel', 'Bekor qilish')}
                                 </Button>

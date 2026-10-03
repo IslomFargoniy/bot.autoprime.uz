@@ -845,7 +845,26 @@
         "pending": "Pending",
         "rejected": "Rejected",
         "print_receipt": "Receipt",
-        "auto_print_receipt": "Print receipt after saving"
+        "auto_print_receipt": "Print receipt after saving",
+        "add_register": "Add register",
+        "edit_register": "Edit register",
+        "register_created": "Register created",
+        "register_updated": "Register updated",
+        "register_deleted": "Register deleted",
+        "confirm_delete_register": "Delete the register \"{{name}}\"?",
+        "register_active": "Register is active",
+        "register_inactive": "Inactive",
+        "expense_categories": "Expense categories",
+        "category_name": "New category name",
+        "category_shared": "Shared (all branches)",
+        "category_shared_short": "Shared",
+        "category_system": "System",
+        "category_created": "Category added",
+        "category_updated": "Category updated",
+        "category_deleted": "Category deleted",
+        "confirm_delete_category": "Delete the category \"{{name}}\"?",
+        "category_deactivate": "Switch off",
+        "category_activate": "Switch on"
     },
     "salaries": {
         "title": "Employee Payroll",
@@ -890,7 +909,10 @@
         "due_amount": "Due Amount",
         "set_full_amount": "Fill full amount",
         "notes_optional": "Note (Optional)",
-        "notes_placeholder": "Payment details or receipt number..."
+        "notes_placeholder": "Payment details or receipt number...",
+        "cancel_adjustment": "Cancel",
+        "confirm_cancel_adjustment": "Cancel this entry? The employee's balance will be restored.",
+        "adjustment_cancelled": "Entry cancelled"
     },
     "attendance": {
         "title": "Attendance Log",
@@ -996,7 +1018,10 @@
         "confirm_delete_material": "Delete the material \"{{title}}\"?",
         "edit_topic": "Edit topic",
         "edit_topic_title": "Edit topic",
-        "topic_updated": "Topic updated"
+        "topic_updated": "Topic updated",
+        "edit_material": "Edit material",
+        "edit_material_title": "Edit material",
+        "material_updated": "Material updated"
     },
     "vehicles": {
         "title": "Fleet & Vehicles",

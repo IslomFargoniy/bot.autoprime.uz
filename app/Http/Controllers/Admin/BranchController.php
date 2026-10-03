@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Concerns\PersonalDataRules;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
+use App\Models\CashRegister;
 use App\Services\BranchSessionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BranchController extends Controller
@@ -80,7 +82,11 @@ class BranchController extends Controller
             'status' => 'required|in:active,inactive',
         ], $this->personalDataMessages());
 
-        Branch::create($validated);
+        DB::transaction(function () use ($validated): void {
+            $branch = Branch::create($validated);
+
+            CashRegister::createDefaultsForBranch($branch);
+        });
 
         return redirect()->back()->with('success', 'Filial muvaffaqiyatli yaratildi.');
     }
@@ -124,7 +130,12 @@ class BranchController extends Controller
             ]);
         }
 
-        $branch->delete();
+        // The branch has no dependants, so its registers are empty and unused: they must go
+        // with it, otherwise they would turn into central (branch-less) registers.
+        DB::transaction(function () use ($branch): void {
+            $branch->cashRegisters()->delete();
+            $branch->delete();
+        });
 
         return redirect()->back()->with('success', 'Filial o\'chirildi.');
     }

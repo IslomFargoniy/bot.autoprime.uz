@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { ArrowUpRight, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Tags, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { expenseReceipt } from '@/actions/App/Http/Controllers/Admin/FinanceController';
 import { PageFilterBar } from '@/components/page-filter-bar';
@@ -31,6 +31,7 @@ interface Props {
         to?: number;
     };
     onDeleteExpense: (expense: Expense) => void;
+    onManageCategories?: () => void;
     filters?: {
         branch_id?: string | number;
         per_page?: string;
@@ -41,6 +42,7 @@ interface Props {
 export function ExpensesTab({
     expenses,
     onDeleteExpense,
+    onManageCategories,
     filters = {},
 }: Props) {
     const { t } = useTranslation();
@@ -65,6 +67,17 @@ export function ExpensesTab({
             {/* Top Toolbar */}
             <PageFilterBar>
                 <div className="flex-1" />
+                {onManageCategories && can('expense_categories.manage') && (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={onManageCategories}
+                        className="gap-1 text-xs"
+                    >
+                        <Tags className="h-3.5 w-3.5" />
+                        {t('finance.expense_categories', 'Xarajat turlari')}
+                    </Button>
+                )}
                 <PerPageSelect
                     value={filters?.per_page || '15'}
                     onChange={handlePerPageChange}

@@ -73,12 +73,13 @@ trait BranchScopedValidationRules
 
     /**
      * An `exists` rule for a cash register that money is moved out of or paid
-     * into by the actor. Unlike other records, the central (branch-less) registers
-     * belong to the superadmin, so branch-restricted users get their own branch only.
+     * into by the actor. Switched-off registers are refused. Unlike other records, the
+     * central (branch-less) registers belong to the superadmin, so branch-restricted
+     * users get their own branch only.
      */
     protected function cashRegisterInUserBranch(Request $request): Exists
     {
-        $rule = Rule::exists('cash_registers', 'id');
+        $rule = Rule::exists('cash_registers', 'id')->where('is_active', true);
         $user = $request->user();
 
         if ($user?->isBranchRestricted()) {

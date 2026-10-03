@@ -845,7 +845,26 @@
         "pending": "Ожидает",
         "rejected": "Отклонено",
         "print_receipt": "Чек",
-        "auto_print_receipt": "Печатать чек после сохранения"
+        "auto_print_receipt": "Печатать чек после сохранения",
+        "add_register": "Добавить кассу",
+        "edit_register": "Редактировать кассу",
+        "register_created": "Касса создана",
+        "register_updated": "Касса обновлена",
+        "register_deleted": "Касса удалена",
+        "confirm_delete_register": "Удалить кассу «{{name}}»?",
+        "register_active": "Касса активна",
+        "register_inactive": "Неактивна",
+        "expense_categories": "Виды расходов",
+        "category_name": "Название нового вида расхода",
+        "category_shared": "Общий (все филиалы)",
+        "category_shared_short": "Общий",
+        "category_system": "Системный",
+        "category_created": "Вид расхода добавлен",
+        "category_updated": "Вид расхода обновлён",
+        "category_deleted": "Вид расхода удалён",
+        "confirm_delete_category": "Удалить вид расхода «{{name}}»?",
+        "category_deactivate": "Отключить",
+        "category_activate": "Включить"
     },
     "salaries": {
         "title": "Зарплатная ведомость",
@@ -890,7 +909,10 @@
         "due_amount": "К выплате",
         "set_full_amount": "Ввести всю сумму",
         "notes_optional": "Примечание (Необязательно)",
-        "notes_placeholder": "Детали платежа или номер чека..."
+        "notes_placeholder": "Детали платежа или номер чека...",
+        "cancel_adjustment": "Отменить",
+        "confirm_cancel_adjustment": "Отменить эту запись? Баланс сотрудника будет восстановлен.",
+        "adjustment_cancelled": "Запись отменена"
     },
     "attendance": {
         "title": "Журнал посещаемости",
@@ -996,7 +1018,10 @@
         "confirm_delete_material": "Удалить материал «{{title}}»?",
         "edit_topic": "Редактировать тему",
         "edit_topic_title": "Редактирование темы",
-        "topic_updated": "Тема обновлена"
+        "topic_updated": "Тема обновлена",
+        "edit_material": "Редактировать материал",
+        "edit_material_title": "Редактирование материала",
+        "material_updated": "Материал обновлён"
     },
     "vehicles": {
         "title": "Автопарк",

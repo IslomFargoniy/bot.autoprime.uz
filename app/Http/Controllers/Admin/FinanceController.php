@@ -24,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
@@ -146,7 +147,14 @@ class FinanceController extends Controller
 
         // Select lists
         $branches = Branch::where('status', 'active')->get();
-        $expenseCategories = ExpenseCategory::where('is_active', true)->get();
+        $expenseCategories = ExpenseCategory::where('is_active', true)->visibleInBranch($targetBranchId)->orderBy('name')->get();
+        $manageableExpenseCategories = $request->user()->can('expense_categories.manage')
+            ? ExpenseCategory::with('branch:id,name')
+                ->visibleInBranch($targetBranchId)
+                ->orderBy('name')
+                ->get()
+                ->each(fn (ExpenseCategory $category) => $category->setAttribute('can_edit', $category->isEditableBy($request->user())))
+            : [];
 
         $students = Student::orderBy('full_name')
             ->when($targetBranchId, function ($q) use ($targetBranchId) {
@@ -171,6 +179,7 @@ class FinanceController extends Controller
             'transfers' => $transfers,
             'branches' => $branches,
             'expenseCategories' => $expenseCategories,
+            'manageableExpenseCategories' => $manageableExpenseCategories,
             'registerTypes' => $registerTypes,
             'students' => $students,
             'contracts' => $activeContracts,
@@ -309,12 +318,17 @@ class FinanceController extends Controller
     {
         $validated = $request->validate([
             'cash_register_id' => ['required', $this->cashRegisterInUserBranch($request)],
-            'expense_category_id' => 'required|exists:expense_categories,id',
+            'expense_category_id' => ['required', Rule::exists('expense_categories', 'id')->where('is_active', true)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'description' => 'required|string|max:500',
         ]);
 
         $cashRegister = CashRegister::findOrFail($validated['cash_register_id']);
+        $category = ExpenseCategory::findOrFail($validated['expense_category_id']);
+
+        if ($category->branch_id !== null && $cashRegister->branch_id !== null && $category->branch_id !== $cashRegister->branch_id) {
+            return redirect()->back()->withErrors(['expense_category_id' => 'Bu xarajat turi boshqa filialga tegishli.']);
+        }
 
         if ((float) $cashRegister->balance < (float) $validated['amount']) {
             return redirect()->back()->withErrors([
@@ -324,7 +338,7 @@ class FinanceController extends Controller
 
         $expense = null;
 
-        DB::transaction(function () use ($validated, $cashRegister, $request, &$expense) {
+        DB::transaction(function () use ($validated, $cashRegister, $category, $request, &$expense) {
             $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
 
             $expense = Expense::create([
@@ -337,8 +351,7 @@ class FinanceController extends Controller
                 'spent_at' => now(),
             ]);
 
-            $cat = ExpenseCategory::find($validated['expense_category_id']);
-            $catName = $cat ? $cat->name : 'Xarajat';
+            $catName = $category->name;
 
             $lockedRegister->withdraw(
                 amount: (float) $validated['amount'],
@@ -361,7 +374,7 @@ class FinanceController extends Controller
     {
         $validated = $request->validate([
             'from_cash_register_id' => ['required', $this->cashRegisterInUserBranch($request), 'different:to_cash_register_id'],
-            'to_cash_register_id' => 'required|exists:cash_registers,id',
+            'to_cash_register_id' => ['required', Rule::exists('cash_registers', 'id')->where('is_active', true)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'notes' => 'nullable|string',
         ]);

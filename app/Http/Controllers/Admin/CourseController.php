@@ -149,13 +149,21 @@ class CourseController extends Controller
         return redirect()->back()->with('success', 'Mavzu yangilandi.');
     }
 
-    public function storeMaterial(Request $request, Topic $topic): RedirectResponse
+    /**
+     * @return array<string, string>
+     */
+    private function materialRules(): array
     {
-        $validated = $request->validate([
+        return [
             'title' => 'required|string|max:255',
             'file_url' => 'required|url',
             'file_type' => 'nullable|string|max:50',
-        ]);
+        ];
+    }
+
+    public function storeMaterial(Request $request, Topic $topic): RedirectResponse
+    {
+        $validated = $request->validate($this->materialRules());
 
         LessonMaterial::create([
             'topic_id' => $topic->id,
@@ -189,6 +197,19 @@ class CourseController extends Controller
         });
 
         return redirect()->back()->with('success', 'Mavzu o\'chirildi.');
+    }
+
+    public function updateMaterial(Request $request, LessonMaterial $material): RedirectResponse
+    {
+        $validated = $request->validate($this->materialRules());
+
+        $material->update([
+            'title' => $validated['title'],
+            'file_url' => $validated['file_url'],
+            'file_type' => $validated['file_type'] ?? $material->file_type,
+        ]);
+
+        return redirect()->back()->with('success', 'Material yangilandi.');
     }
 
     public function destroyMaterial(LessonMaterial $material): RedirectResponse

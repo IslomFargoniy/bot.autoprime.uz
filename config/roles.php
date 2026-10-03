@@ -50,6 +50,8 @@ $labels = [
     'expenses.delete' => 'Xarajatni o\'chirish',
     'cash_transfers.create' => 'Kassalar orasida o\'tkazma',
     'cash_transfers.approve' => 'O\'tkazmani tasdiqlash',
+    'cash_registers.manage' => 'Kassalarni boshqarish',
+    'expense_categories.manage' => 'Xarajat turlarini boshqarish',
 
     'salaries.view' => 'Oyliklarni ko\'rish',
     'salaries.accrue' => 'Oylik / bonus / jarima hisoblash',
@@ -144,6 +146,8 @@ return [
             'expenses.delete',
             'cash_transfers.create',
             'cash_transfers.approve',
+            'cash_registers.manage',
+            'expense_categories.manage',
             'salaries.view',
             'salaries.accrue',
             'salaries.pay',

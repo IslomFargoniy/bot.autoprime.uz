@@ -845,7 +845,26 @@
         "pending": "Кутилмоқда",
         "rejected": "Рад этилган",
         "print_receipt": "Чек",
-        "auto_print_receipt": "Сақлангандан кейин чек чиқариш"
+        "auto_print_receipt": "Сақлангандан кейин чек чиқариш",
+        "add_register": "Касса қўшиш",
+        "edit_register": "Кассани таҳрирлаш",
+        "register_created": "Касса яратилди",
+        "register_updated": "Касса янгиланди",
+        "register_deleted": "Касса ўчирилди",
+        "confirm_delete_register": "\"{{name}}\" кассаси ўчирилсинми?",
+        "register_active": "Касса фаол",
+        "register_inactive": "Нофаол",
+        "expense_categories": "Харажат турлари",
+        "category_name": "Янги харажат тури номи",
+        "category_shared": "Умумий (барча филиаллар)",
+        "category_shared_short": "Умумий",
+        "category_system": "Тизим",
+        "category_created": "Харажат тури қўшилди",
+        "category_updated": "Харажат тури янгиланди",
+        "category_deleted": "Харажат тури ўчирилди",
+        "confirm_delete_category": "\"{{name}}\" харажат тури ўчирилсинми?",
+        "category_deactivate": "Нофаол қилиш",
+        "category_activate": "Фаоллаштириш"
     },
     "salaries": {
         "title": "Ходимлар Ойлик Ҳисоб-китоби",
@@ -890,7 +909,10 @@
         "due_amount": "Тўланиши керак",
         "set_full_amount": "Тўлиқ суммани киритиш",
         "notes_optional": "Изоҳ (Ихтиёрий)",
-        "notes_placeholder": "Тўлов тафсилотлари ёки чек рақами..."
+        "notes_placeholder": "Тўлов тафсилотлари ёки чек рақами...",
+        "cancel_adjustment": "Бекор қилиш",
+        "confirm_cancel_adjustment": "Бу ёзув бекор қилинсинми? Ходим баланси қайтарилади.",
+        "adjustment_cancelled": "Ёзув бекор қилинди"
     },
     "attendance": {
         "title": "Давомат Журнали",
@@ -996,7 +1018,10 @@
         "confirm_delete_material": "\"{{title}}\" материали ўчирилсинми?",
         "edit_topic": "Мавзуни таҳрирлаш",
         "edit_topic_title": "Мавзуни таҳрирлаш",
-        "topic_updated": "Мавзу янгиланди"
+        "topic_updated": "Мавзу янгиланди",
+        "edit_material": "Материални таҳрирлаш",
+        "edit_material_title": "Материални таҳрирлаш",
+        "material_updated": "Материал янгиланди"
     },
     "vehicles": {
         "title": "Автопарк (Машиналар)",

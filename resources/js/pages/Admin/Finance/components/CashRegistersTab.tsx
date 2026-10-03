@@ -4,6 +4,8 @@ import {
     Building2,
     History,
     ArrowDownToLine,
+    Pencil,
+    Plus,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -24,18 +26,56 @@ interface Props {
     cashRegisters: CashRegister[];
     onSelectHistory: (registerId: number) => void;
     onOpenSweep: (registerId?: number) => void;
+    onCreateRegister: () => void;
+    onEditRegister: (register: CashRegister) => void;
 }
 
 export function CashRegistersTab({
     cashRegisters,
     onSelectHistory,
     onOpenSweep,
+    onCreateRegister,
+    onEditRegister,
 }: Props) {
     const { t } = useTranslation();
     const can = useCan();
+    const canManage = can('cash_registers.manage');
+
+    const inactiveBadge = (reg: CashRegister) =>
+        reg.is_active === false && (
+            <span className="ml-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                {t('finance.register_inactive', 'Nofaol')}
+            </span>
+        );
+
+    const editButton = (reg: CashRegister) =>
+        canManage && (
+            <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onEditRegister(reg)}
+                className="h-8 w-8 p-0"
+                title={t('finance.edit_register', 'Kassani tahrirlash')}
+            >
+                <Pencil className="h-3.5 w-3.5" />
+            </Button>
+        );
 
     return (
         <div className="w-full max-w-full min-w-0 space-y-4">
+            {canManage && (
+                <div className="flex justify-end">
+                    <Button
+                        size="sm"
+                        variant="brand"
+                        onClick={onCreateRegister}
+                        className="gap-1 text-xs"
+                    >
+                        <Plus className="h-3.5 w-3.5" />
+                        {t('finance.add_register', "Kassa qo'shish")}
+                    </Button>
+                </div>
+            )}
             {/* Desktop Table with dedicated Horizontal Scrollbar */}
             <div className="hidden w-full max-w-full overflow-hidden md:block">
                 <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-800">
@@ -85,6 +125,7 @@ export function CashRegistersTab({
                                             <TableCell className="flex items-center gap-2 font-semibold whitespace-nowrap text-gray-900 dark:text-white">
                                                 <Wallet className="h-4 w-4 shrink-0 text-emerald-600" />
                                                 <span>{reg.name}</span>
+                                                {inactiveBadge(reg)}
                                             </TableCell>
                                             <TableCell className="whitespace-nowrap">
                                                 <span className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-300">
@@ -108,6 +149,7 @@ export function CashRegistersTab({
                                                 {formatMoney(reg.balance)}
                                             </TableCell>
                                             <TableCell className="space-x-2 text-right whitespace-nowrap">
+                                                {editButton(reg)}
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
@@ -205,6 +247,7 @@ export function CashRegistersTab({
                                             <span className="truncate">
                                                 {reg.name}
                                             </span>
+                                            {inactiveBadge(reg)}
                                         </h4>
                                     </div>
                                     <div className="shrink-0 text-right">
@@ -217,9 +260,8 @@ export function CashRegistersTab({
                                     </div>
                                 </div>
 
-                                <div
-                                    className={`border-t border-gray-100 pt-2.5 dark:border-gray-700/50 ${canSweep && can('cash_transfers.create') ? 'grid grid-cols-2 gap-2' : 'flex justify-end'}`}
-                                >
+                                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-2.5 dark:border-gray-700/50">
+                                    {editButton(reg)}
                                     <Button
                                         size="sm"
                                         variant="outline"

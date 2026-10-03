@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -82,6 +83,35 @@ class CashRegister extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(CashTransaction::class)->orderBy('transacted_at', 'desc');
+    }
+
+    /**
+     * One empty register per active register type, for a branch that has none yet.
+     */
+    public static function createDefaultsForBranch(Branch $branch): void
+    {
+        foreach (CashRegisterType::where('is_active', true)->orderBy('id')->get() as $type) {
+            self::firstOrCreate(
+                ['branch_id' => $branch->id, 'cash_register_type_id' => $type->id],
+                ['name' => Str::limit("{$branch->name} — {$type->name}", 100, ''), 'balance' => 0, 'is_active' => true],
+            );
+        }
+    }
+
+    /**
+     * Whether any money, shift or transfer ever touched this register. Such a register
+     * keeps its ledger and can only be switched off, never deleted.
+     */
+    public function hasHistory(): bool
+    {
+        return $this->transactions()->exists()
+            || $this->payments()->exists()
+            || $this->expenses()->exists()
+            || $this->shifts()->exists()
+            || $this->outgoingTransfers()->exists()
+            || $this->incomingTransfers()->exists()
+            || SalaryPayment::where('cash_register_id', $this->id)->exists()
+            || VehicleMaintenance::where('cash_register_id', $this->id)->exists();
     }
 
     /**

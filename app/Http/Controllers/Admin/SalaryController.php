@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
@@ -26,6 +27,11 @@ use InvalidArgumentException;
 class SalaryController extends Controller
 {
     use BranchScopedValidationRules;
+
+    /**
+     * Manual entries that can be taken back; regular salary accruals cannot.
+     */
+    private const ADJUSTMENT_TYPES = ['bonus', 'kpi', 'fine', 'advance'];
 
     public function index(Request $request): Response
     {
@@ -242,7 +248,7 @@ class SalaryController extends Controller
         $validated = $request->validate([
             'user_id' => ['required', $this->existsInUserBranch($request, 'users')],
             'period' => 'required|date_format:Y-m',
-            'type' => 'required|in:bonus,kpi,fine,advance',
+            'type' => ['required', Rule::in(self::ADJUSTMENT_TYPES)],
             'amount' => 'required|numeric|min:1|max:9999999999',
             'description' => 'required|string|max:500',
         ]);
@@ -292,6 +298,66 @@ class SalaryController extends Controller
         });
 
         return redirect()->back()->with('success', 'Amal saqlandi va xodim balansi yangilandi.');
+    }
+
+    /**
+     * Take back a bonus, KPI, fine or advance entered by mistake. The employee balance
+     * is restored and the ledger keeps a reversing entry; entries that were already
+     * (partly) paid out and regular monthly salaries cannot be taken back.
+     */
+    public function destroyAdjustment(Request $request, Salary $salary): RedirectResponse
+    {
+        $user = $request->user();
+        $employee = $salary->user;
+
+        abort_if($user->isBranchRestricted() && $employee?->branch_id !== $user->branch_id, 403, 'Bu xodim boshqa filialga tegishli.');
+
+        if (! in_array($salary->salary_type, self::ADJUSTMENT_TYPES, true)) {
+            return redirect()->back()->withErrors(['delete' => 'Faqat bonus, KPI, jarima va avans yozuvlarini bekor qilish mumkin.']);
+        }
+
+        if ($error = $this->payrollRestriction($user, $employee)) {
+            return redirect()->back()->withErrors(['delete' => $error]);
+        }
+
+        $error = DB::transaction(function () use ($salary, $request): ?string {
+            $lockedSalary = Salary::whereKey($salary->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedSalary->payments()->exists()) {
+                return 'Bu yozuv bo\'yicha to\'lov qilingan, bekor qilib bo\'lmaydi.';
+            }
+
+            $lockedEmployee = User::whereKey($lockedSalary->user_id)->lockForUpdate()->firstOrFail();
+            $amount = (float) $lockedSalary->amount;
+            $balBefore = (float) $lockedEmployee->salary_balance;
+
+            if ($lockedSalary->is_deduction) {
+                $lockedEmployee->increment('salary_balance', $amount);
+            } else {
+                $lockedEmployee->decrement('salary_balance', $amount);
+            }
+
+            FinancialHistory::recordForUser($lockedEmployee, [
+                'type' => $lockedSalary->is_deduction ? 'credit' : 'debit',
+                'category' => 'adjustment_reversal',
+                'amount' => $amount,
+                'balance_before' => $balBefore,
+                'balance_after' => (float) $lockedEmployee->fresh()->salary_balance,
+                'description' => "Bekor qilindi: {$lockedSalary->notes} ({$lockedSalary->period})",
+                'performed_by_user_id' => $request->user()->id,
+                'transacted_at' => now(),
+            ]);
+
+            $lockedSalary->delete();
+
+            return null;
+        });
+
+        if ($error) {
+            return redirect()->back()->withErrors(['delete' => $error]);
+        }
+
+        return redirect()->back()->with('success', 'Yozuv bekor qilindi va xodim balansi qaytarildi.');
     }
 
     /**
@@ -349,10 +415,7 @@ class SalaryController extends Controller
         $lockedRegister = CashRegister::where('id', $cashRegister->id)->lockForUpdate()->first();
         $employee = User::where('id', $salary->user_id)->lockForUpdate()->first();
 
-        $category = ExpenseCategory::firstOrCreate(
-            ['name' => 'Xodimlar oylik maoshi'],
-            ['is_active' => true]
-        );
+        $category = ExpenseCategory::system(ExpenseCategory::SALARY);
 
         $expense = Expense::create([
             'branch_id' => $employee->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,

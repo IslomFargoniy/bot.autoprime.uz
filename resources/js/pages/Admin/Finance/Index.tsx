@@ -18,7 +18,9 @@ import {
 
 import { CashHistoryTab } from './components/CashHistoryTab';
 import { CashRegistersTab } from './components/CashRegistersTab';
+import { ExpenseCategoriesDialog } from './components/ExpenseCategoriesDialog';
 import { ExpensesTab } from './components/ExpensesTab';
+import { CashRegisterModal } from './components/modals/CashRegisterModal';
 import { ExpenseModal } from './components/modals/ExpenseModal';
 import { PaymentModal } from './components/modals/PaymentModal';
 import { SweepModal } from './components/modals/SweepModal';
@@ -30,6 +32,7 @@ import type {
     PageProps,
     Payment,
     Expense,
+    CashRegister,
     CashTransfer,
     SweepItem,
 } from './types';
@@ -41,7 +44,10 @@ export default function FinanceIndex({
     expenses,
     transactions,
     transfers,
+    branches = [],
+    registerTypes = [],
     expenseCategories,
+    manageableExpenseCategories = [],
     contracts,
     students = [],
     filters = {},
@@ -57,6 +63,15 @@ export default function FinanceIndex({
     const [activeTab, setActiveTab] = useState<
         'registers' | 'history' | 'payments' | 'expenses' | 'transfers'
     >('registers');
+
+    // Switched-off registers stay in the lists, but money can no longer move through them.
+    const activeRegisters = cashRegisters.filter((r) => r.is_active !== false);
+
+    // `false` closed, `null` creating, a register when editing it.
+    const [registerModal, setRegisterModal] = useState<
+        CashRegister | null | false
+    >(false);
+    const [showCategoriesDialog, setShowCategoriesDialog] = useState(false);
 
     // Modals visibility
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -95,7 +110,7 @@ export default function FinanceIndex({
     });
 
     const openSweepModal = (specificRegId?: number) => {
-        const branchRegs = cashRegisters.filter(
+        const branchRegs = activeRegisters.filter(
             (r) => r.branch_id !== null && r.branch_id !== undefined,
         );
         const mapped = branchRegs.map((reg) => {
@@ -445,7 +460,7 @@ export default function FinanceIndex({
 
             {/* Cash Registers Summary Cards */}
             <RegisterCardsGrid
-                cashRegisters={cashRegisters}
+                cashRegisters={activeRegisters}
                 onSelectHistory={handleSelectRegisterHistory}
                 onOpenSweep={openSweepModal}
             />
@@ -517,6 +532,8 @@ export default function FinanceIndex({
                     cashRegisters={cashRegisters}
                     onSelectHistory={handleSelectRegisterHistory}
                     onOpenSweep={openSweepModal}
+                    onCreateRegister={() => setRegisterModal(null)}
+                    onEditRegister={(register) => setRegisterModal(register)}
                 />
             )}
 
@@ -540,6 +557,7 @@ export default function FinanceIndex({
                 <ExpensesTab
                     expenses={expenses}
                     onDeleteExpense={handleDeleteExpense}
+                    onManageCategories={() => setShowCategoriesDialog(true)}
                     filters={filters}
                 />
             )}
@@ -570,7 +588,7 @@ export default function FinanceIndex({
                 open={showPaymentModal}
                 onOpenChange={setShowPaymentModal}
                 paymentForm={paymentForm}
-                cashRegisters={cashRegisters}
+                cashRegisters={activeRegisters}
                 contracts={contracts}
                 students={students}
                 onSubmit={handlePaymentSubmit}
@@ -580,16 +598,33 @@ export default function FinanceIndex({
                 open={showExpenseModal}
                 onOpenChange={setShowExpenseModal}
                 expenseForm={expenseForm}
-                cashRegisters={cashRegisters}
+                cashRegisters={activeRegisters}
                 expenseCategories={expenseCategories}
                 onSubmit={handleExpenseSubmit}
+            />
+
+            {registerModal !== false && (
+                <CashRegisterModal
+                    key={registerModal?.id ?? 'new'}
+                    register={registerModal}
+                    branches={branches}
+                    registerTypes={registerTypes}
+                    onClose={() => setRegisterModal(false)}
+                />
+            )}
+
+            <ExpenseCategoriesDialog
+                open={showCategoriesDialog}
+                onOpenChange={setShowCategoriesDialog}
+                categories={manageableExpenseCategories}
+                branches={branches}
             />
 
             <TransferModal
                 open={showTransferModal}
                 onOpenChange={setShowTransferModal}
                 transferForm={transferForm}
-                cashRegisters={cashRegisters}
+                cashRegisters={activeRegisters}
                 onSubmit={handleTransferSubmit}
             />
         </div>

@@ -212,10 +212,7 @@ class VehicleController extends Controller
         if (! empty($validated['cash_register_id']) && (float) $validated['cost'] > 0) {
             $lockedRegister = CashRegister::where('id', $validated['cash_register_id'])->lockForUpdate()->first();
             if ($lockedRegister) {
-                $category = ExpenseCategory::firstOrCreate(
-                    ['name' => "Avtomobil ta'miri va ehtiyot qismlar"],
-                    ['is_active' => true]
-                );
+                $category = ExpenseCategory::system(ExpenseCategory::VEHICLE_MAINTENANCE);
 
                 $expense = Expense::create([
                     'branch_id' => $vehicle->branch_id ?? $lockedRegister->branch_id ?? Branch::first()->id ?? 1,

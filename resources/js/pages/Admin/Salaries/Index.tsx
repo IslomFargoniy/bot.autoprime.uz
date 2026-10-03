@@ -1,5 +1,12 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { Plus, Calculator, AlertCircle, Coins, Wallet } from 'lucide-react';
+import {
+    Plus,
+    Calculator,
+    AlertCircle,
+    Coins,
+    Undo2,
+    Wallet,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -184,6 +191,38 @@ export default function SalariesIndex({
                     t('salaries.adjust_success', "Qo'shimcha hisob saqlandi"),
                 );
             },
+            onError: (err) =>
+                toast.error(
+                    (Object.values(err)[0] as string) ||
+                        t('common.error', 'Xatolik yuz berdi'),
+                ),
+        });
+    };
+
+    // Manual entries can be taken back until something was paid out against them.
+    const canCancelAdjustment = (sal: Salary) =>
+        can('salaries.accrue') &&
+        ['bonus', 'kpi', 'fine', 'advance'].includes(sal.type) &&
+        (sal.salary_payments?.length ?? 0) === 0;
+
+    const handleCancelAdjustment = (sal: Salary) => {
+        if (
+            !confirm(
+                t(
+                    'salaries.confirm_cancel_adjustment',
+                    'Bu yozuv bekor qilinsinmi? Xodim balansi qaytariladi.',
+                ),
+            )
+        ) {
+            return;
+        }
+
+        router.delete(`/admin/salaries/${sal.id}`, {
+            preserveScroll: true,
+            onSuccess: () =>
+                toast.success(
+                    t('salaries.adjustment_cancelled', 'Yozuv bekor qilindi'),
+                ),
             onError: (err) =>
                 toast.error(
                     (Object.values(err)[0] as string) ||
@@ -413,7 +452,25 @@ export default function SalariesIndex({
                                         <TableCell className="max-w-xs truncate text-gray-500 dark:text-gray-400">
                                             {sal.description || '-'}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="space-x-2 text-right whitespace-nowrap">
+                                            {canCancelAdjustment(sal) && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        handleCancelAdjustment(
+                                                            sal,
+                                                        )
+                                                    }
+                                                    className="h-7 gap-1 text-xs"
+                                                >
+                                                    <Undo2 className="h-3.5 w-3.5" />
+                                                    {t(
+                                                        'salaries.cancel_adjustment',
+                                                        'Bekor qilish',
+                                                    )}
+                                                </Button>
+                                            )}
                                             {sal.status !== 'paid' &&
                                                 !sal.is_deduction &&
                                                 (can('salaries.pay') ? (
@@ -525,27 +582,46 @@ export default function SalariesIndex({
                             </div>
 
                             {/* Actions Footer */}
-                            {sal.status !== 'paid' && !sal.is_deduction && (
-                                <div className="flex justify-end border-t pt-2">
-                                    {can('salaries.pay') && (
+                            {((sal.status !== 'paid' && !sal.is_deduction) ||
+                                canCancelAdjustment(sal)) && (
+                                <div className="flex flex-wrap justify-end gap-2 border-t pt-2">
+                                    {canCancelAdjustment(sal) && (
                                         <Button
                                             size="sm"
-                                            onClick={() => {
-                                                setPayingSalary(sal);
-                                                payForm.setData(
-                                                    'amount',
-                                                    String(sal.amount),
-                                                );
-                                            }}
-                                            className="h-8 w-full gap-1 bg-emerald-600 text-xs text-white hover:bg-emerald-700 sm:w-auto"
+                                            variant="outline"
+                                            onClick={() =>
+                                                handleCancelAdjustment(sal)
+                                            }
+                                            className="h-8 gap-1 text-xs"
                                         >
-                                            <Coins className="h-3.5 w-3.5" />
+                                            <Undo2 className="h-3.5 w-3.5" />
                                             {t(
-                                                'salaries.pay_button',
-                                                "To'lash",
+                                                'salaries.cancel_adjustment',
+                                                'Bekor qilish',
                                             )}
                                         </Button>
                                     )}
+                                    {sal.status !== 'paid' &&
+                                        !sal.is_deduction &&
+                                        can('salaries.pay') && (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setPayingSalary(sal);
+                                                    payForm.setData(
+                                                        'amount',
+                                                        String(sal.amount),
+                                                    );
+                                                }}
+                                                className="h-8 w-full gap-1 bg-emerald-600 text-xs text-white hover:bg-emerald-700 sm:w-auto"
+                                            >
+                                                <Coins className="h-3.5 w-3.5" />
+                                                {t(
+                                                    'salaries.pay_button',
+                                                    "To'lash",
+                                                )}
+                                            </Button>
+                                        )}
                                 </div>
                             )}
                         </div>

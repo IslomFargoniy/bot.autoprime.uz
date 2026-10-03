@@ -362,10 +362,7 @@ class ContractController extends Controller
         ]);
 
         // 2. Create expense record in Finance
-        $category = ExpenseCategory::firstOrCreate(
-            ['name' => "Talaba to'lovini qaytarish (Refund)"],
-            ['is_active' => true]
-        );
+        $category = ExpenseCategory::system(ExpenseCategory::REFUND);
 
         $expense = Expense::create([
             'branch_id' => $lockedContract->branch_id ?? $lockedRegister->branch_id ?? 1,
